@@ -1,0 +1,193 @@
+package com.couplewebsite.controller;
+
+import com.couplewebsite.entity.Category;
+import com.couplewebsite.service.CategoryService;
+import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/categories")
+@CrossOrigin(origins = "*", maxAge = 3600)
+public class CategoryController {
+    
+    private static final Logger logger = LoggerFactory.getLogger(CategoryController.class);
+    
+    @Autowired
+    private CategoryService categoryService;
+    
+    /**
+     * Create a new category
+     */
+    @PostMapping
+    public ResponseEntity<?> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
+        try {
+            Category category = categoryService.createCategory(
+                    request.getName(),
+                    request.getDescription(),
+                    request.getColor()
+            );
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Category created successfully");
+            response.put("category", createCategoryResponse(category));
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(400).body(error);
+        } catch (Exception e) {
+            logger.error("Error creating category", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Failed to create category");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Get all categories
+     */
+    @GetMapping
+    public ResponseEntity<?> getAllCategories() {
+        try {
+            List<Category> categories = categoryService.getAllCategoriesWithPhotoCounts();
+            
+            List<Map<String, Object>> categoryResponses = categories.stream()
+                    .map(this::createCategoryResponseWithCount)
+                    .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(categoryResponses);
+            
+        } catch (Exception e) {
+            logger.error("Error fetching categories", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Get category by ID
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCategoryById(@PathVariable Long id) {
+        try {
+            Optional<Category> categoryOpt = categoryService.getCategoryById(id);
+            
+            if (categoryOpt.isPresent()) {
+                return ResponseEntity.ok(createCategoryResponse(categoryOpt.get()));
+            } else {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Category not found");
+                return ResponseEntity.status(404).body(error);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error fetching category by ID: {}", id, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Update category
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateCategory(@PathVariable Long id, @Valid @RequestBody CreateCategoryRequest request) {
+        try {
+            Category category = categoryService.updateCategory(
+                    id,
+                    request.getName(),
+                    request.getDescription(),
+                    request.getColor()
+            );
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Category updated successfully");
+            response.put("category", createCategoryResponse(category));
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(404).body(error);
+        } catch (Exception e) {
+            logger.error("Error updating category with ID: {}", id, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Delete category
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
+        try {
+            boolean deleted = categoryService.deleteCategory(id);
+            
+            if (deleted) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Category deleted successfully");
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Category not found");
+                return ResponseEntity.status(404).body(error);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error deleting category with ID: {}", id, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    // Helper methods
+    private Map<String, Object> createCategoryResponse(Category category) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", category.getId());
+        response.put("name", category.getName());
+        response.put("description", category.getDescription());
+        response.put("color", category.getColor());
+        response.put("createdAt", category.getCreatedAt());
+        response.put("updatedAt", category.getUpdatedAt());
+        return response;
+    }
+    
+    private Map<String, Object> createCategoryResponseWithCount(Category category) {
+        Map<String, Object> response = createCategoryResponse(category);
+        response.put("photoCount", category.getPhotoCount() != null ? category.getPhotoCount() : 0);
+        return response;
+    }
+    
+    // Request DTO
+    public static class CreateCategoryRequest {
+        private String name;
+        private String description;
+        private String color = "#3B82F6"; // Default blue color
+        
+        // Getters and setters
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+        public String getColor() { return color; }
+        public void setColor(String color) { this.color = color; }
+    }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "couple-website",
+  "version": "1.0.0",
+  "description": "A private website for couples to share memories",
+  "main": "spring-backend/src/main/java/com/couplewebsite/CoupleWebsiteApplication.java",
+  "scripts": {
+    "dev": "concurrently \"npm run client:dev\" \"npm run server:dev\"",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd spring-backend && mvn spring-boot:run",
+    "build": "cd client && npm run build",
+    "build:server": "cd spring-backend && mvn clean package",
+    "start": "cd spring-backend && mvn spring-boot:run",
+    "start:prod": "cd spring-backend && mvn spring-boot:run -Dspring-boot.run.profiles=production",
+    "install:all": "npm install && cd client && npm install",
+    "client:dev": "cd client && npm run dev",
+    "server:dev": "cd spring-backend && mvn spring-boot:run",
+    "test:server": "cd spring-backend && mvn test"
+  },
+  "keywords": [
+    "couple",
+    "website",
+    "photos",
+    "memories"
+  ],
+  "author": "Ana & Zoe",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  },
+  "dependencies": {}
+}

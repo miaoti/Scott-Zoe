@@ -1,0 +1,43 @@
+package com.couplewebsite.repository;
+
+import com.couplewebsite.entity.Category;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface CategoryRepository extends JpaRepository<Category, Long> {
+    
+    /**
+     * Find all categories ordered by name
+     */
+    List<Category> findAllByOrderByNameAsc();
+    
+    /**
+     * Find category by name (case-insensitive)
+     */
+    @Query("SELECT c FROM Category c WHERE LOWER(c.name) = LOWER(:name)")
+    Optional<Category> findByNameIgnoreCase(@Param("name") String name);
+    
+    /**
+     * Check if category name exists (case-insensitive)
+     */
+    @Query("SELECT COUNT(c) > 0 FROM Category c WHERE LOWER(c.name) = LOWER(:name)")
+    boolean existsByNameIgnoreCase(@Param("name") String name);
+    
+    /**
+     * Find category by ID with photos
+     */
+    @Query("SELECT c FROM Category c LEFT JOIN FETCH c.photos p LEFT JOIN FETCH p.uploader WHERE c.id = :id")
+    Optional<Category> findByIdWithPhotos(@Param("id") Long id);
+    
+    /**
+     * Find categories with photo counts
+     */
+    @Query("SELECT c, COUNT(p) as photoCount FROM Category c LEFT JOIN c.photos p GROUP BY c ORDER BY c.name ASC")
+    List<Object[]> findAllWithPhotoCounts();
+}

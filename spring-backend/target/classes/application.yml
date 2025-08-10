@@ -1,0 +1,101 @@
+server:
+  port: 3001
+  servlet:
+    context-path: /
+  max-http-header-size: 8KB
+
+spring:
+  profiles:
+    active: development
+  
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      enabled: true
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:your-secret-key-change-in-production}
+  expiration: 604800000 # 7 days in milliseconds
+
+# File Upload Configuration
+file:
+  upload:
+    dir: ${UPLOAD_DIR:uploads}
+    max-size: 10MB
+
+# CORS Configuration
+cors:
+  allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:3000}
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: "*"
+  allow-credentials: true
+
+# Logging Configuration
+logging:
+  level:
+    com.couplewebsite: INFO
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: development
+  
+  datasource:
+    url: jdbc:sqlite:database.sqlite
+    driver-class-name: org.sqlite.JDBC
+    username: 
+    password: 
+  
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: production
+  
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:couple_website}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 0
+      connection-timeout: 30000
+      idle-timeout: 10000
+      max-lifetime: 1800000
+  
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+logging:
+  level:
+    com.couplewebsite: INFO
+    org.springframework.security: WARN
+    org.hibernate: WARN
