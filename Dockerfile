@@ -25,10 +25,10 @@ RUN ./mvnw dependency:go-offline -B
 # Copy source code
 COPY spring-backend/src ./src
 
-# Copy React build from previous stage
-COPY --from=frontend-build /app/client/dist ./src/main/resources/static
+# Copy React build from previous stage to the location Maven expects
+COPY --from=frontend-build /app/client/dist ../client/dist
 
-# Build Spring Boot application
+# Build Spring Boot application (Maven will copy React files to static resources)
 RUN ./mvnw clean package -DskipTests
 
 # Final runtime stage

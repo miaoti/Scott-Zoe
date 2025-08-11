@@ -74,12 +74,16 @@ public class SecurityConfig {
                 // Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/health", "/api/health").permitAll()
+                .requestMatchers("/api/debug/**").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
-                // Static resources (React frontend)
-                .requestMatchers("/", "/static/**", "/assets/**", "/*.js", "/*.css", "/*.html", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.gif", "/*.svg").permitAll()
-                // Protected endpoints
-                .requestMatchers("/api/**").authenticated()
-                // Allow all other requests (for React routing)
+                // Static resources (React frontend) - be very specific
+                .requestMatchers("/", "/index.html").permitAll()
+                .requestMatchers("/assets/**").permitAll()
+                .requestMatchers("/static/**").permitAll()
+                .requestMatchers("/**/*.js", "/**/*.css", "/**/*.html", "/**/*.ico", "/**/*.png", "/**/*.jpg", "/**/*.jpeg", "/**/*.gif", "/**/*.svg", "/**/*.woff", "/**/*.woff2", "/**/*.ttf").permitAll()
+                // Protected endpoints (only actual API endpoints)
+                .requestMatchers("/api/photos/**", "/api/memories/**", "/api/categories/**", "/api/wheel/**", "/api/earnings/**", "/api/settings/**", "/api/love/**", "/api/notes/**").authenticated()
+                // Allow all other requests (for React routing and static files)
                 .anyRequest().permitAll()
             )
             .authenticationProvider(authenticationProvider())
