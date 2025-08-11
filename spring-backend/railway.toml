@@ -3,7 +3,7 @@ builder = "nixpacks"
 buildCommand = "./mvnw clean package -DskipTests"
 
 [deploy]
-startCommand = "java -jar target/*.jar"
+startCommand = "java -Xmx512m -Dserver.port=$PORT -jar target/*.jar"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
 
@@ -13,6 +13,7 @@ SERVER_PORT = "$PORT"
 DATABASE_URL = "${{Postgres.DATABASE_URL}}"
 JWT_SECRET = "${{JWT_SECRET}}"
 CORS_ORIGINS = "${{client.RAILWAY_PUBLIC_DOMAIN}}"
+JAVA_OPTS = "-Xmx512m -XX:+UseContainerSupport"
 
 [environments.production.deploy]
 healthcheckPath = "/api/health"

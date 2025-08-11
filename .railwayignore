@@ -1,0 +1,12 @@
+# This is a monorepo - individual services should be deployed separately
+# Ignore root level files that shouldn't be deployed
+node_modules/
+.git/
+.gitignore
+README.md
+RAILWAY_DEPLOYMENT.md
+
+# Each service has its own railway.toml configuration
+# Railway should detect and deploy:
+# - client/ as a React/Vite service
+# - spring-backend/ as a Java/Maven service
