@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "description": "A private website for couples to share memories",
   "private": true,
+  "workspaces": [
+    "client"
+  ],
   "scripts": {
     "dev": "concurrently \"npm run client:dev\" \"npm run server:dev\"",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd spring-backend && ./mvnw spring-boot:run",
-    "build": "echo 'This is a monorepo. Build individual services separately.'",
     "build:client": "cd client && npm ci && npm run build",
     "build:server": "cd spring-backend && ./mvnw clean package -DskipTests",
-    "start": "echo 'This is a monorepo. Start individual services separately.'",
     "start:client": "cd client && npm run preview",
     "start:server": "cd spring-backend && ./mvnw spring-boot:run",
     "start:prod": "cd spring-backend && ./mvnw spring-boot:run -Dspring-boot.run.profiles=production",

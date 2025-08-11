@@ -82,24 +82,34 @@ This project is configured for deployment on Railway as a monorepo with separate
 - ✅ **Fixed**: Frontend URL now uses `https://` prefix for proper CORS configuration
 - Backend automatically allows requests from the frontend domain
 
-## Manual Deployment Steps (if needed)
+## IMPORTANT: Manual Deployment Required
 
-If Railway doesn't auto-detect the services:
+Railway is detecting the root directory instead of individual services. Follow these steps:
 
-1. **Create Backend Service**
-   - In Railway dashboard, click "New Service"
-   - Select "Deploy from GitHub repo"
-   - Set root directory to `spring-backend`
-   - Railway will use the `spring-backend/railway.toml` configuration
+### Step 1: Create Backend Service
+1. In Railway dashboard, click "**New Service**"
+2. Select "**Deploy from GitHub repo**"
+3. Choose your repository
+4. **IMPORTANT**: Set "**Root Directory**" to `spring-backend`
+5. Click "Deploy"
+6. Railway will use the `spring-backend/railway.toml` configuration
 
-2. **Create Frontend Service**
-   - Create another service in the same project
-   - Set root directory to `client`
-   - Railway will use the `client/railway.toml` configuration
+### Step 2: Create Frontend Service
+1. In the same Railway project, click "**New Service**" again
+2. Select "**Deploy from GitHub repo**"
+3. Choose the same repository
+4. **IMPORTANT**: Set "**Root Directory**" to `client`
+5. Click "Deploy"
+6. Railway will use the `client/railway.toml` configuration
 
-3. **Add Database**
-   - Click "New Service" → "Database" → "PostgreSQL"
-   - Railway will automatically inject `DATABASE_URL` into backend service
+### Step 3: Add Database
+1. Click "**New Service**" → "**Database**" → "**PostgreSQL**"
+2. Railway will automatically inject `DATABASE_URL` into backend service
+
+### Step 4: Set Environment Variables
+1. Go to backend service → "**Variables**" tab
+2. Add: `JWT_SECRET` = `your-secure-random-string-here`
+3. Frontend variables are automatically configured
 
 ## Features
 - ✅ Monorepo deployment with separate services
