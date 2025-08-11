@@ -15,5 +15,5 @@ JWT_SECRET = "${{JWT_SECRET}}"
 CORS_ORIGINS = "https://${{RAILWAY_PUBLIC_DOMAIN}}"
 
 [environments.production.deploy]
-healthcheckPath = "/api/health"
+healthcheckPath = "/health"
 healthcheckTimeout = 300

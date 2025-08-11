@@ -46,9 +46,9 @@ cors:
 logging:
   level:
     com.couplewebsite: INFO
-    org.springframework.security: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.security: INFO
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: INFO
 
 ---
 # Development Profile
@@ -109,3 +109,5 @@ logging:
     com.couplewebsite: INFO
     org.springframework.security: WARN
     org.hibernate: WARN
+    org.springframework.web: WARN
+    org.springframework.boot: WARN

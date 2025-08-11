@@ -73,11 +73,14 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 // Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/health").permitAll()
+                .requestMatchers("/health", "/api/health").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
+                // Static resources (React frontend)
+                .requestMatchers("/", "/static/**", "/assets/**", "/*.js", "/*.css", "/*.html", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.gif", "/*.svg").permitAll()
                 // Protected endpoints
                 .requestMatchers("/api/**").authenticated()
-                .anyRequest().authenticated()
+                // Allow all other requests (for React routing)
+                .anyRequest().permitAll()
             )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
