@@ -7,7 +7,7 @@
     "dev": "concurrently \"npm run client:dev\" \"npm run server:dev\"",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd spring-backend && mvn spring-boot:run",
-    "build": "cd client && npm run build",
+    "build": "cd client && npm ci && npm run build",
     "build:server": "cd spring-backend && mvn clean package",
     "start": "cd spring-backend && mvn spring-boot:run",
     "start:prod": "cd spring-backend && mvn spring-boot:run -Dspring-boot.run.profiles=production",

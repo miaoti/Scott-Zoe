@@ -1,5 +1,5 @@
 # TODO:
 
-- [x] 22: Fix Railway deployment build error - add TypeScript as dependency in client/package.json (priority: High)
-- [x] 23: Update railway.toml configurations to ensure proper dependency installation (priority: High)
-- [ ] 24: Test Railway build process after fixing TypeScript dependency (**IN PROGRESS**) (priority: Medium)
+- [x] 25: Fix root package.json build script to install client dependencies before building (priority: High)
+- [x] 26: Update Railway configuration to properly handle monorepo structure (priority: High)
+- [ ] 27: Test Railway build process after fixing dependency installation (**IN PROGRESS**) (priority: Medium)
