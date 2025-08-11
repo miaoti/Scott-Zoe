@@ -10,10 +10,13 @@
     "dev": "concurrently \"npm run client:dev\" \"npm run server:dev\"",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd spring-backend && ./mvnw spring-boot:run",
+    "build": "cd client && npm ci && npm run build && cd ../spring-backend && mvnw.cmd clean package -DskipTests",
     "build:client": "cd client && npm ci && npm run build",
     "build:server": "cd spring-backend && ./mvnw clean package -DskipTests",
+    "start": "cd spring-backend && java -jar target/*.jar",
     "start:client": "cd client && npm run preview",
     "start:server": "cd spring-backend && ./mvnw spring-boot:run",
+    "start:dev": "cd spring-backend && ./mvnw spring-boot:run",
     "start:prod": "cd spring-backend && ./mvnw spring-boot:run -Dspring-boot.run.profiles=production",
     "install:all": "npm install && cd client && npm install",
     "client:dev": "cd client && npm run dev",
@@ -31,5 +34,7 @@
   "devDependencies": {
     "concurrently": "^9.2.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "serve": "^14.2.1"
+  }
 }

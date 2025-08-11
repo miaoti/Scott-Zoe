@@ -1,8 +1,7 @@
 # TODO:
 
-- [x] 32: Add frontend-maven-plugin to pom.xml to build React during Maven build (priority: High)
-- [x] 33: Configure Spring Boot to serve static files from React build directory (priority: High)
-- [x] 34: Update Spring Boot WebMvcConfigurer for React Router support (priority: High)
-- [x] 35: Create unified railway.toml at project root for single service deployment (priority: High)
-- [x] 36: Update CORS configuration in Spring Boot for unified deployment (priority: Medium)
-- [ ] 37: Test unified build process locally before Railway deployment (**IN PROGRESS**) (priority: Medium)
+- [x] 32: Create unified railway.toml in root for single-service deployment (priority: High)
+- [x] 33: Configure Spring Boot to serve React static files from src/main/resources/static (priority: High)
+- [x] 34: Update build process to compile React and copy dist files to Spring Boot resources (priority: High)
+- [x] 35: Remove separate railway.toml files from client and spring-backend directories (priority: Medium)
+- [ ] 36: Test unified deployment locally to ensure both frontend and backend work (**IN PROGRESS**) (priority: Medium)

@@ -1,9 +1,9 @@
 [build]
 builder = "nixpacks"
-buildCommand = "./mvnw clean package -DskipTests"
+buildCommand = "cd client && npm ci && npm run build && cd ../spring-backend && mvnw.cmd clean package -DskipTests"
 
 [deploy]
-startCommand = "java -Xmx512m -Dserver.port=$PORT -jar target/*.jar"
+startCommand = "cd spring-backend && java -jar target/*.jar"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
 
@@ -12,8 +12,7 @@ SPRING_PROFILES_ACTIVE = "production"
 SERVER_PORT = "$PORT"
 DATABASE_URL = "${{Postgres.DATABASE_URL}}"
 JWT_SECRET = "${{JWT_SECRET}}"
-CORS_ORIGINS = "${{client.RAILWAY_PUBLIC_DOMAIN}}"
-JAVA_OPTS = "-Xmx512m -XX:+UseContainerSupport"
+NODE_ENV = "production"
 
 [environments.production.deploy]
 healthcheckPath = "/api/health"
