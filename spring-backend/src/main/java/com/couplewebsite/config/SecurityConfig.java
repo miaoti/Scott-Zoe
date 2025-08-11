@@ -71,24 +71,14 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                // Public endpoints
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/health", "/api/health").permitAll()
-                .requestMatchers("/api/debug/**").permitAll()
-                .requestMatchers("/uploads/**").permitAll()
-                // Static resources (React frontend) - be very specific
-                .requestMatchers("/", "/index.html").permitAll()
-                .requestMatchers("/assets/**").permitAll()
-                .requestMatchers("/static/**").permitAll()
-                .requestMatchers("/**/*.js", "/**/*.css", "/**/*.html", "/**/*.ico", "/**/*.png", "/**/*.jpg", "/**/*.jpeg", "/**/*.gif", "/**/*.svg", "/**/*.woff", "/**/*.woff2", "/**/*.ttf").permitAll()
-                // Protected endpoints (only actual API endpoints)
+                // Only protect specific API endpoints that need authentication
                 .requestMatchers("/api/photos/**", "/api/memories/**", "/api/categories/**", "/api/wheel/**", "/api/earnings/**", "/api/settings/**", "/api/love/**", "/api/notes/**").authenticated()
-                // Allow all other requests (for React routing and static files)
+                // Everything else is public (including static files, auth endpoints, health checks)
                 .anyRequest().permitAll()
             )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        
+
         return http.build();
     }
     

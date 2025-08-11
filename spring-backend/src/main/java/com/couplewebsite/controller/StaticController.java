@@ -58,7 +58,7 @@ public class StaticController {
     @GetMapping("/assets/{filename:.+\\.js}")
     public ResponseEntity<Resource> serveJs(@PathVariable String filename) throws IOException {
         ClassPathResource resource = new ClassPathResource("/static/assets/" + filename);
-        
+
         if (resource.exists()) {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.valueOf("application/javascript"));
@@ -67,7 +67,25 @@ public class StaticController {
                     .headers(headers)
                     .body(resource);
         }
-        
+
+        return ResponseEntity.notFound().build();
+    }
+
+    /**
+     * Catch-all for React routing - serve index.html for any non-API route
+     */
+    @GetMapping(value = {"/login", "/gallery", "/memories", "/wheel", "/settings", "/{path:^(?!api|uploads|health|assets).*}"})
+    public ResponseEntity<Resource> reactRouting() throws IOException {
+        ClassPathResource resource = new ClassPathResource("/static/index.html");
+
+        if (resource.exists()) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.TEXT_HTML);
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(resource);
+        }
+
         return ResponseEntity.notFound().build();
     }
 }

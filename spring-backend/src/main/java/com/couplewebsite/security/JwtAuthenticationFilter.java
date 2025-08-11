@@ -29,30 +29,65 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private CustomUserDetailsService userDetailsService;
     
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, 
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                   FilterChain filterChain) throws ServletException, IOException {
-        
+
+        String requestPath = request.getRequestURI();
+
+        // Skip JWT processing for static files and public endpoints
+        if (isPublicPath(requestPath)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
             String jwt = getJwtFromRequest(request);
-            
+
             if (StringUtils.hasText(jwt) && jwtUtil.validateToken(jwt)) {
                 String username = jwtUtil.extractUsername(jwt);
-                
+
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                
+
                 if (jwtUtil.validateToken(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authentication = 
+                    UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    
+
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
         } catch (Exception ex) {
             logger.error("Could not set user authentication in security context", ex);
         }
-        
+
         filterChain.doFilter(request, response);
+    }
+
+    /**
+     * Check if the request path is public and doesn't need JWT processing
+     */
+    private boolean isPublicPath(String path) {
+        return path.equals("/") ||
+               path.equals("/index.html") ||
+               path.startsWith("/assets/") ||
+               path.startsWith("/static/") ||
+               path.startsWith("/uploads/") ||
+               path.startsWith("/api/auth/") ||
+               path.equals("/health") ||
+               path.startsWith("/api/health") ||
+               path.startsWith("/api/debug/") ||
+               path.endsWith(".css") ||
+               path.endsWith(".js") ||
+               path.endsWith(".html") ||
+               path.endsWith(".ico") ||
+               path.endsWith(".png") ||
+               path.endsWith(".jpg") ||
+               path.endsWith(".jpeg") ||
+               path.endsWith(".gif") ||
+               path.endsWith(".svg") ||
+               path.endsWith(".woff") ||
+               path.endsWith(".woff2") ||
+               path.endsWith(".ttf");
     }
     
     /**
