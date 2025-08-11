@@ -75,19 +75,21 @@ spring:
   config:
     activate:
       on-profile: production
-  
+
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/couple_website}
-    driver-class-name: org.postgresql.Driver
+    # Use PostgreSQL if DATABASE_URL is provided, otherwise fall back to SQLite
+    url: ${DATABASE_URL:jdbc:sqlite:database.sqlite}
+    driver-class-name: ${DATABASE_DRIVER:org.sqlite.JDBC}
     hikari:
       maximum-pool-size: 5
       minimum-idle: 0
       connection-timeout: 30000
       idle-timeout: 10000
       max-lifetime: 1800000
-  
+
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    # Use PostgreSQL dialect if DATABASE_URL contains postgresql, otherwise SQLite
+    database-platform: ${DATABASE_PLATFORM:org.hibernate.community.dialect.SQLiteDialect}
     hibernate:
       ddl-auto: update
     show-sql: false
@@ -97,7 +99,7 @@ server:
 
 # Production CORS Configuration
 cors:
-  allowed-origins: ${CORS_ORIGINS:https://*.vercel.app}
+  allowed-origins: ${CORS_ORIGINS:https://*.railway.app}
   allowed-methods: GET,POST,PUT,DELETE,OPTIONS
   allowed-headers: "*"
   allow-credentials: true

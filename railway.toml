@@ -7,7 +7,10 @@ restartPolicyMaxRetries = 10
 
 [environments.production.variables]
 SPRING_PROFILES_ACTIVE = "production"
+# Database configuration - will use SQLite by default, PostgreSQL if DATABASE_URL is provided
 DATABASE_URL = "${{Postgres.DATABASE_URL}}"
+DATABASE_DRIVER = "org.postgresql.Driver"
+DATABASE_PLATFORM = "org.hibernate.dialect.PostgreSQLDialect"
 JWT_SECRET = "${{JWT_SECRET}}"
 CORS_ORIGINS = "https://${{RAILWAY_PUBLIC_DOMAIN}}"
 

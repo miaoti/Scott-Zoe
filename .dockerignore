@@ -1,0 +1,49 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+RAILWAY_DEPLOYMENT.md
+RAILWAY_SETUP.md
+*.md
+
+# Node modules (will be installed in container)
+node_modules
+client/node_modules
+
+# Build artifacts (will be built in container)
+client/dist
+spring-backend/target
+
+# Development files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs
+
+# Database files (will be created in container)
+*.sqlite
+*.db
+
+# Uploads (will be created in container)
+uploads
+
+# Deployment scripts
+deploy.sh
+deploy.cmd
