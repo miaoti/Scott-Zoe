@@ -152,11 +152,6 @@
                         <configuration>
                             <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
                             <resources>
-                                <!-- Fallback copied first -->
-                                <resource>
-                                    <directory>src/main/resources/static</directory>
-                                    <filtering>false</filtering>
-                                </resource>
                                 <!-- Docker build context (pom at /app): copy ./client/dist if present -->
                                 <resource>
                                     <directory>client/dist</directory>
