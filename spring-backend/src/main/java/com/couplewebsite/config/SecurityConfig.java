@@ -70,7 +70,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/auth/**", "/health", "/api/photos/image/**", "/api/photos/test", "/api/photos", "/api/categories").permitAll()
+                .requestMatchers("/api/auth/**", "/health", "/actuator/health", "/api/photos/image/**", "/api/photos/test", "/api/photos", "/api/categories").permitAll()
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
