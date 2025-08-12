@@ -82,10 +82,10 @@ function CategoryPhotos() {
         const response = await api.get(`/api/categories/${categoryId}`);
         setCategory(response.data);
       }
-    } catch (error) {
-      console.error('Error fetching category info:', error);
+    } catch (err: any) {
+      console.error('Error fetching category info:', err);
       // Check if it's an authentication error
-      if (error.response?.status === 401 || error.response?.status === 403) {
+      if (err.response?.status === 401 || err.response?.status === 403) {
         console.error('Authentication required. Please log in.');
       }
       setCategory(null);
