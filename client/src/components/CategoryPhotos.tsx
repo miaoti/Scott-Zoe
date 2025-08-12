@@ -29,6 +29,7 @@ function CategoryPhotos() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [imageSize, setImageSize] = useState<ImageSize>('medium');
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(new Set());
@@ -45,6 +46,7 @@ function CategoryPhotos() {
   const fetchCategoryPhotos = async () => {
     try {
       setLoading(true);
+      setError(null);
       if (categoryId === '-1') {
         // Fetch favorite photos
         const response = await api.get('/api/photos/favorites');
@@ -54,8 +56,14 @@ function CategoryPhotos() {
         const response = await api.get(`/api/categories/${categoryId}/photos`);
         setPhotos(response.data);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching category photos:', error);
+      // Check if it's an authentication error
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        setError('Authentication required. Please log in.');
+      } else {
+        setError('Failed to load photos. Please try again.');
+      }
       setPhotos([]);
     } finally {
       setLoading(false);
@@ -67,7 +75,7 @@ function CategoryPhotos() {
       if (categoryId === '-1') {
         setCategory({
           id: -1,
-          name: 'Favorite',
+          name: 'Favorites',
           color: '#ef4444'
         });
       } else {
@@ -76,6 +84,10 @@ function CategoryPhotos() {
       }
     } catch (error) {
       console.error('Error fetching category info:', error);
+      // Check if it's an authentication error
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.error('Authentication required. Please log in.');
+      }
       setCategory(null);
     }
   };
@@ -173,6 +185,30 @@ function CategoryPhotos() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
+        <div className="text-red-500 text-lg font-medium">{error}</div>
+        <button 
+          onClick={() => {
+            setError(null);
+            fetchCategoryPhotos();
+            fetchCategoryInfo();
+          }}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          Try Again
+        </button>
+        <Link 
+          to="/photos" 
+          className="text-blue-500 hover:text-blue-600 underline"
+        >
+          Back to Photos
+        </Link>
       </div>
     );
   }
