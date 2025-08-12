@@ -152,12 +152,17 @@
                         <configuration>
                             <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
                             <resources>
-                                <!-- Fallback to local static files if client/dist doesn't exist (copied first) -->
+                                <!-- Fallback copied first -->
                                 <resource>
                                     <directory>src/main/resources/static</directory>
                                     <filtering>false</filtering>
                                 </resource>
-                                <!-- Copy built frontend last so it overwrites any fallback files -->
+                                <!-- Docker build context (pom at /app): copy ./client/dist if present -->
+                                <resource>
+                                    <directory>client/dist</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                                <!-- Local dev context (pom in spring-backend): copy ../client/dist if present -->
                                 <resource>
                                     <directory>../client/dist</directory>
                                     <filtering>false</filtering>
