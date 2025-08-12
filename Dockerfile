@@ -7,9 +7,11 @@ COPY client/package*.json ./
 RUN npm ci --cache /tmp/.npm
 COPY client/ ./
 
-# Set build-time environment variables for Vite
-ARG VITE_API_URL
-ENV VITE_API_URL=$VITE_API_URL
+# Use environment variable from Railway's build.env
+ENV VITE_API_URL=${VITE_API_URL}
+
+# Debug: Show the VITE_API_URL value
+RUN echo "VITE_API_URL is set to: $VITE_API_URL"
 
 RUN npm run build
 

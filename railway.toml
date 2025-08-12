@@ -2,11 +2,13 @@
 # Use Dockerfile for multi-stage build (React + Spring Boot)
 builder = "dockerfile"
 
-# Build arguments for Docker
-[build.args]
+# Build-time environment variables for Vite
+[build.env]
 VITE_API_URL = "https://${{RAILWAY_PUBLIC_DOMAIN}}"
 
+# Runtime configuration
 [deploy]
+startCommand = "java $JAVA_OPTS -Dserver.port=$PORT -jar /app/app.jar"
 # Dockerfile handles the complete build and startup
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
