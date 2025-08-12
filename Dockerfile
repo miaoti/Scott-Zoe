@@ -17,7 +17,9 @@ WORKDIR /app
 COPY spring-backend/mvnw spring-backend/mvnw.cmd ./
 COPY spring-backend/.mvn ./.mvn
 COPY spring-backend/pom.xml ./
-RUN chmod +x mvnw
+
+# Fix line endings and make executable
+RUN sed -i 's/\r$//' mvnw && chmod +x mvnw
 
 # Download dependencies (for better caching)
 RUN ./mvnw dependency:go-offline -B
@@ -26,7 +28,7 @@ RUN ./mvnw dependency:go-offline -B
 COPY spring-backend/src ./src
 
 # Copy React build from previous stage to the location Maven expects
-COPY --from=frontend-build /app/client/dist ../client/dist
+COPY --from=frontend-build /app/client/dist ./client/dist
 
 # Build Spring Boot application (Maven will copy React files to static resources)
 RUN ./mvnw clean package -DskipTests
@@ -49,6 +51,11 @@ USER appuser
 
 # Expose port
 EXPOSE $PORT
+
+# Install curl for health checks
+USER root
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+USER appuser
 
 # Set memory limits and run
 ENV JAVA_OPTS="-Xmx512m -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"

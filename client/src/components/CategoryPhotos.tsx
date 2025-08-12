@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Tag, Plus, X } from 'lucide-react';
+import { ArrowLeft, Settings, Trash2, Check, Heart } from 'lucide-react';
 import api from '../utils/api';
+import PhotoDetailModal from './PhotoDetailModal';
 
 interface Photo {
   id: number;
@@ -11,108 +12,167 @@ interface Photo {
   createdAt: string;
   uploader: { name: string };
   categories: Category[];
+  noteCount: number;
+  isFavorite?: boolean;
 }
 
 interface Category {
   id: number;
   name: string;
-  description?: string;
   color: string;
-  photos: Photo[];
 }
+
+type ImageSize = 'small' | 'medium' | 'large';
 
 function CategoryPhotos() {
   const { categoryId } = useParams<{ categoryId: string }>();
+  const [photos, setPhotos] = useState<Photo[]>([]);
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
-  const [allPhotos, setAllPhotos] = useState<Photo[]>([]);
-  const [showAddPhotos, setShowAddPhotos] = useState(false);
-  const [selectedPhotos, setSelectedPhotos] = useState<number[]>([]);
+  const [imageSize, setImageSize] = useState<ImageSize>('medium');
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(new Set());
+  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const [showPhotoDetail, setShowPhotoDetail] = useState(false);
 
   useEffect(() => {
     if (categoryId) {
       fetchCategoryPhotos();
-      fetchAllPhotos();
+      fetchCategoryInfo();
     }
   }, [categoryId]);
 
   const fetchCategoryPhotos = async () => {
     try {
-      const response = await api.get(`/categories/${categoryId}`);
-      setCategory(response.data);
+      setLoading(true);
+      if (categoryId === '-1') {
+        // Fetch favorite photos
+        const response = await api.get('/api/photos/favorites');
+        setPhotos(response.data);
+      } else {
+        // Fetch photos by category
+        const response = await api.get(`/api/categories/${categoryId}/photos`);
+        setPhotos(response.data);
+      }
     } catch (error) {
       console.error('Error fetching category photos:', error);
+      setPhotos([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchAllPhotos = async () => {
+  const fetchCategoryInfo = async () => {
     try {
-      const response = await api.get('/api/photos');
-      setAllPhotos(response.data);
-    } catch (error) {
-      console.error('Error fetching all photos:', error);
-    }
-  };
-
-  const handleAddPhotos = async () => {
-    try {
-      for (const photoId of selectedPhotos) {
-        await api.post(`/categories/${categoryId}/photos/${photoId}`);
+      if (categoryId === '-1') {
+        setCategory({
+          id: -1,
+          name: 'Favorites',
+          color: '#ef4444'
+        });
+      } else {
+        const response = await api.get(`/api/categories/${categoryId}`);
+        setCategory(response.data);
       }
-      await fetchCategoryPhotos();
-      setSelectedPhotos([]);
-      setShowAddPhotos(false);
-    } catch (error: any) {
-      console.error('Error adding photos to category:', error);
-      alert(error.response?.data?.message || 'Error adding photos to category');
+    } catch (error) {
+      console.error('Error fetching category info:', error);
+      setCategory(null);
     }
   };
 
-  const handleRemovePhoto = async (photoId: number) => {
-    if (!confirm('Remove this photo from the category?')) return;
-
+  const toggleFavorite = async (photoId: number) => {
     try {
-      await api.delete(`/categories/${categoryId}/photos/${photoId}`);
-      await fetchCategoryPhotos();
+      const photo = photos.find(p => p.id === photoId);
+      const newFavoriteStatus = !photo?.isFavorite;
+      
+      await api.post(`/api/photos/${photoId}/favorite`, {
+        favorite: newFavoriteStatus
+      });
+      
+      setPhotos(prev => prev.map(p => 
+        p.id === photoId ? { ...p, isFavorite: newFavoriteStatus } : p
+      ));
+      
+      // If we're viewing favorites and photo is unfavorited, remove it
+      if (categoryId === '-1' && !newFavoriteStatus) {
+        setPhotos(prev => prev.filter(p => p.id !== photoId));
+      }
     } catch (error) {
-      console.error('Error removing photo from category:', error);
-      alert('Error removing photo from category');
+      console.error('Error toggling favorite:', error);
     }
   };
 
   const togglePhotoSelection = (photoId: number) => {
-    setSelectedPhotos(prev => 
-      prev.includes(photoId) 
-        ? prev.filter(id => id !== photoId)
-        : [...prev, photoId]
-    );
+    setSelectedPhotos(prev => {
+      const newSelection = new Set(prev);
+      if (newSelection.has(photoId)) {
+        newSelection.delete(photoId);
+      } else {
+        newSelection.add(photoId);
+      }
+      return newSelection;
+    });
   };
 
-  // Get photos that are not already in this category
-  const availablePhotos = allPhotos.filter(photo => 
-    !category?.photos.some(categoryPhoto => categoryPhoto.id === photo.id)
-  );
+  const handleDeleteSelected = async () => {
+    if (selectedPhotos.size === 0) return;
+    
+    if (!confirm(`Are you sure you want to delete ${selectedPhotos.size} photo(s)?`)) {
+      return;
+    }
+
+    try {
+      await api.delete('/api/photos/bulk', {
+        data: { photoIds: Array.from(selectedPhotos) }
+      });
+      
+      setSelectedPhotos(new Set());
+      setSelectionMode(false);
+      await fetchCategoryPhotos();
+    } catch (error) {
+      console.error('Error deleting photos:', error);
+      alert('Error deleting photos. Please try again.');
+    }
+  };
+
+  const openPhotoDetail = (photo: Photo) => {
+    setSelectedPhoto(photo);
+    setShowPhotoDetail(true);
+  };
+
+  const handlePhotoUpdate = (updatedPhoto: Photo) => {
+    setPhotos(prev => prev.map(p => p.id === updatedPhoto.id ? updatedPhoto : p));
+    setSelectedPhoto(updatedPhoto);
+  };
+
+  const handlePhotoDelete = (photoId: number) => {
+    setPhotos(prev => prev.filter(p => p.id !== photoId));
+    setShowPhotoDetail(false);
+    setSelectedPhoto(null);
+  };
+
+  const getImageSizeClass = () => {
+    switch (imageSize) {
+      case 'small': return 'w-32 h-32';
+      case 'medium': return 'w-48 h-48';
+      case 'large': return 'w-64 h-64';
+      default: return 'w-48 h-48';
+    }
+  };
+
+  const getGridCols = () => {
+    switch (imageSize) {
+      case 'small': return 'grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8';
+      case 'medium': return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
+      case 'large': return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3';
+      default: return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
+    }
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
-      </div>
-    );
-  }
-
-  if (!category) {
-    return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-gray-600 mb-4">Category not found</h2>
-        <Link
-          to="/categories"
-          className="text-pink-600 hover:text-pink-700 font-medium"
-        >
-          Back to Categories
-        </Link>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400"></div>
       </div>
     );
   }
@@ -120,175 +180,160 @@ function CategoryPhotos() {
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center space-x-4">
-          <Link
-            to="/categories"
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
+          <Link 
+            to="/photos" 
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <ArrowLeft className="h-5 w-5" />
-            <span>Back to Categories</span>
+            <ArrowLeft className="h-5 w-5 text-gray-600" />
           </Link>
-        </div>
-        
-        <button
-          onClick={() => setShowAddPhotos(true)}
-          className="flex items-center space-x-2 romantic-gradient text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity font-medium"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Add Photos</span>
-        </button>
-      </div>
-
-      {/* Category Info */}
-      <div className="glass-effect rounded-xl p-6 love-shadow">
-        <div className="flex items-center space-x-3 mb-4">
-          <div
-            className="w-6 h-6 rounded-full"
-            style={{ backgroundColor: category.color }}
-          ></div>
-          <h1 className="text-3xl font-bold text-gray-800">{category.name}</h1>
-        </div>
-        
-        {category.description && (
-          <p className="text-gray-600 mb-4">{category.description}</p>
-        )}
-        
-        <div className="flex items-center space-x-2 text-sm text-gray-500">
-          <Tag className="h-4 w-4" />
-          <span>{category.photos.length} photos in this category</span>
-        </div>
-      </div>
-
-      {/* Add Photos Modal */}
-      {showAddPhotos && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b">
-              <h3 className="text-xl font-semibold text-gray-800">Add Photos to Category</h3>
-              <button
-                onClick={() => setShowAddPhotos(false)}
-                className="text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
-              {availablePhotos.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {availablePhotos.map((photo) => (
-                    <div
-                      key={photo.id}
-                      className={`relative cursor-pointer rounded-lg overflow-hidden transition-all ${
-                        selectedPhotos.includes(photo.id)
-                          ? 'ring-4 ring-pink-500 scale-95'
-                          : 'hover:scale-105'
-                      }`}
-                      onClick={() => togglePhotoSelection(photo.id)}
-                    >
-                      <div className="aspect-square">
-                        <img
-                          src={`http://localhost:3001/photos/uploads/${photo.filename}`}
-                          alt={photo.originalName}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      {selectedPhotos.includes(photo.id) && (
-                        <div className="absolute inset-0 bg-pink-500 bg-opacity-30 flex items-center justify-center">
-                          <div className="bg-pink-500 text-white rounded-full p-1">
-                            <Plus className="h-4 w-4" />
-                          </div>
-                        </div>
-                      )}
-                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                        <p className="text-xs truncate">{photo.caption || photo.originalName}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-gray-500">All photos are already in this category!</p>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex justify-between items-center p-6 border-t bg-gray-50">
-              <p className="text-sm text-gray-600">
-                {selectedPhotos.length} photos selected
-              </p>
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => setShowAddPhotos(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAddPhotos}
-                  disabled={selectedPhotos.length === 0}
-                  className="px-4 py-2 romantic-gradient text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Add Selected Photos
-                </button>
-              </div>
+          <div className="flex items-center space-x-3">
+            {category && (
+              <div 
+                className="w-6 h-6 rounded-full"
+                style={{ backgroundColor: category.color }}
+              />
+            )}
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">
+                {category?.name || 'Category'}
+              </h1>
+              <p className="text-gray-600">{photos.length} photos</p>
             </div>
           </div>
         </div>
-      )}
+      </div>
+
+      {/* Controls */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="flex items-center space-x-4">
+          {/* Size selector */}
+          <div className="flex items-center space-x-2">
+            <Settings className="h-4 w-4 text-gray-600" />
+            <select
+              value={imageSize}
+              onChange={(e) => setImageSize(e.target.value as ImageSize)}
+              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+            </select>
+          </div>
+          
+          {/* Selection mode toggle */}
+          <button
+            onClick={() => {
+              setSelectionMode(!selectionMode);
+              setSelectedPhotos(new Set());
+            }}
+            className={`px-3 py-1 rounded-md text-sm transition-colors ${
+              selectionMode 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            {selectionMode ? 'Cancel Selection' : 'Select Photos'}
+          </button>
+        </div>
+        
+        {/* Delete selected button */}
+        {selectionMode && selectedPhotos.size > 0 && (
+          <button
+            onClick={handleDeleteSelected}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>Delete Selected ({selectedPhotos.size})</span>
+          </button>
+        )}
+      </div>
 
       {/* Photos Grid */}
-      {category.photos.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {category.photos.map((photo) => (
-            <div key={photo.id} className="group relative">
-              <Link to={`/photo/${photo.id}`} className="block">
-                <div className="glass-effect rounded-xl overflow-hidden love-shadow group-hover:scale-105 transition-transform">
-                  <div className="aspect-square overflow-hidden">
-                    <img
-                      src={`http://localhost:3001/photos/uploads/${photo.filename}`}
-                      alt={photo.originalName}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-medium text-gray-800 truncate">
-                      {photo.caption || photo.originalName}
-                    </h3>
-                    <div className="flex items-center justify-between mt-2 text-sm text-gray-500">
-                      <span>by {photo.uploader.name}</span>
-                      <span>{new Date(photo.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-              
-              <button
-                onClick={() => handleRemovePhoto(photo.id)}
-                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                title="Remove from category"
+      {photos.length > 0 ? (
+        <div className={`grid ${getGridCols()} gap-4`}>
+          {photos.map((photo) => (
+            <div key={photo.id} className="relative group">
+              <div 
+                className={`${getImageSizeClass()} relative overflow-hidden rounded-lg cursor-pointer transition-transform hover:scale-105 ${
+                  selectionMode && selectedPhotos.has(photo.id) ? 'ring-4 ring-blue-500' : ''
+                }`}
+                onClick={() => selectionMode ? togglePhotoSelection(photo.id) : openPhotoDetail(photo)}
               >
-                <X className="h-4 w-4" />
-              </button>
+                <img
+                  src={`/api/photos/image/${photo.filename}`}
+                  alt={photo.originalName}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                
+                {/* Selection overlay */}
+                {selectionMode && (
+                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                    {selectedPhotos.has(photo.id) && (
+                      <div className="bg-blue-500 text-white rounded-full p-1">
+                        <Check className="h-4 w-4" />
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Favorite button */}
+                {!selectionMode && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(photo.id);
+                    }}
+                    className="absolute top-2 right-2 p-1 bg-white/80 rounded-full hover:bg-white transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <Heart
+                      className={`h-4 w-4 ${photo.isFavorite ? 'text-red-500 fill-current' : 'text-gray-600'}`}
+                    />
+                  </button>
+                )}
+              </div>
+              
+              {/* Photo info - only show caption if available */}
+              {photo.caption && (
+                <div className="mt-2">
+                  <p className="text-xs text-gray-600 truncate">{photo.caption}</p>
+                </div>
+              )}
             </div>
           ))}
         </div>
       ) : (
         <div className="text-center py-12">
-          <Tag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+          <div className="text-gray-400 mb-4">
+            {category && (
+              <div 
+                className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold"
+                style={{ backgroundColor: category.color }}
+              >
+                {category.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
           <h3 className="text-xl font-semibold text-gray-600 mb-2">No photos in this category</h3>
-          <p className="text-gray-500 mb-6">
-            Add some photos to start building this collection!
+          <p className="text-gray-500">
+            Photos assigned to this category will appear here.
           </p>
-          <button
-            onClick={() => setShowAddPhotos(true)}
-            className="inline-flex items-center px-6 py-3 romantic-gradient text-white rounded-lg hover:opacity-90 transition-opacity"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            Add First Photos
-          </button>
         </div>
+      )}
+
+      {/* Photo Detail Modal */}
+      {showPhotoDetail && selectedPhoto && (
+        <PhotoDetailModal
+          photo={selectedPhoto}
+          onClose={() => {
+            setShowPhotoDetail(false);
+            setSelectedPhoto(null);
+          }}
+          onPhotoUpdate={handlePhotoUpdate}
+          onPhotoDelete={handlePhotoDelete}
+        />
       )}
     </div>
   );

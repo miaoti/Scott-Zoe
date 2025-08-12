@@ -24,6 +24,7 @@ com\couplewebsite\repository\EarningsRepository.class
 com\couplewebsite\service\UserService.class
 com\couplewebsite\repository\WheelUsageRepository.class
 com\couplewebsite\controller\CategoryController$CreateCategoryRequest.class
+com\couplewebsite\config\WebConfig.class
 com\couplewebsite\repository\MemoryRepository.class
 com\couplewebsite\entity\Memory.class
 com\couplewebsite\security\JwtUtil.class
@@ -49,6 +50,7 @@ com\couplewebsite\controller\EarningsController.class
 com\couplewebsite\controller\WheelUsageController.class
 com\couplewebsite\controller\SettingsController.class
 com\couplewebsite\controller\SettingsController$UpdateSettingRequest.class
+com\couplewebsite\controller\StaticController.class
 com\couplewebsite\exception\GlobalExceptionHandler.class
 com\couplewebsite\controller\PhotoController.class
 com\couplewebsite\service\LoveService.class

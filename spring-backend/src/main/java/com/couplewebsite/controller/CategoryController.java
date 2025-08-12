@@ -1,7 +1,9 @@
 package com.couplewebsite.controller;
 
 import com.couplewebsite.entity.Category;
+import com.couplewebsite.entity.Photo;
 import com.couplewebsite.service.CategoryService;
+import com.couplewebsite.service.PhotoService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,9 @@ public class CategoryController {
     
     @Autowired
     private CategoryService categoryService;
+    
+    @Autowired
+    private PhotoService photoService;
     
     /**
      * Create a new category
@@ -158,6 +163,35 @@ public class CategoryController {
         }
     }
     
+    /**
+     * Get photos by category
+     */
+    @GetMapping("/{id}/photos")
+    public ResponseEntity<?> getPhotosByCategory(@PathVariable Long id) {
+        try {
+            Optional<Category> categoryOpt = categoryService.getCategoryByIdWithPhotos(id);
+            
+            if (categoryOpt.isPresent()) {
+                Category category = categoryOpt.get();
+                List<Map<String, Object>> photoResponses = category.getPhotos().stream()
+                        .map(this::createPhotoResponseWithStats)
+                        .collect(Collectors.toList());
+                
+                return ResponseEntity.ok(photoResponses);
+            } else {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Category not found");
+                return ResponseEntity.status(404).body(error);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error fetching photos for category ID: {}", id, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
     // Helper methods
     private Map<String, Object> createCategoryResponse(Category category) {
         Map<String, Object> response = new HashMap<>();
@@ -173,6 +207,23 @@ public class CategoryController {
     private Map<String, Object> createCategoryResponseWithCount(Category category) {
         Map<String, Object> response = createCategoryResponse(category);
         response.put("photoCount", category.getPhotoCount() != null ? category.getPhotoCount() : 0);
+        return response;
+    }
+    
+    private Map<String, Object> createPhotoResponseWithStats(Photo photo) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", photo.getId());
+        response.put("filename", photo.getFilename());
+        response.put("originalName", photo.getOriginalName());
+        response.put("caption", photo.getCaption());
+        response.put("createdAt", photo.getCreatedAt());
+        response.put("uploader", photo.getUploader() != null ? 
+                Map.of("name", photo.getUploader().getName()) : null);
+        response.put("categories", photo.getCategories().stream()
+                .map(cat -> Map.of("id", cat.getId(), "name", cat.getName(), "color", cat.getColor()))
+                .collect(Collectors.toList()));
+        response.put("noteCount", photo.getNotes().size());
+        response.put("isFavorite", photo.getIsFavorite() != null ? photo.getIsFavorite() : false);
         return response;
     }
     

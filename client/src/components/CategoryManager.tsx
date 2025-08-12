@@ -11,12 +11,12 @@ interface Category {
 }
 
 interface CategoryManagerProps {
-  category: Category | null;
-  onClose: () => void;
-  onCategoryUpdated: () => void;
+  category?: Category | null;
+  onClose?: () => void;
+  onCategoryUpdated?: () => void;
 }
 
-function CategoryManager({ category, onClose, onCategoryUpdated }: CategoryManagerProps) {
+function CategoryManager({ category, onClose, onCategoryUpdated }: CategoryManagerProps = {}) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -71,7 +71,7 @@ function CategoryManager({ category, onClose, onCategoryUpdated }: CategoryManag
       }
       
       await fetchCategories();
-      onCategoryUpdated();
+      onCategoryUpdated?.();
       resetForm();
     } catch (error: any) {
       console.error('Error saving category:', error);
@@ -107,7 +107,7 @@ function CategoryManager({ category, onClose, onCategoryUpdated }: CategoryManag
     setFormData({ name: '', description: '', color: '#3B82F6' });
     setEditingCategory(null);
     setShowCreateForm(false);
-    onClose();
+    onClose?.();
   };
 
   if (loading) {

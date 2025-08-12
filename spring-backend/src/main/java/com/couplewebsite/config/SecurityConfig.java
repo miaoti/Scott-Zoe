@@ -26,7 +26,6 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 public class SecurityConfig {
     
     @Autowired
@@ -71,10 +70,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                // Only protect specific API endpoints that need authentication
-                .requestMatchers("/api/photos/**", "/api/memories/**", "/api/categories/**", "/api/wheel/**", "/api/earnings/**", "/api/settings/**", "/api/love/**", "/api/notes/**").authenticated()
-                // Everything else is public (including static files, auth endpoints, health checks)
-                .anyRequest().permitAll()
+                .requestMatchers("/api/auth/**", "/health", "/api/photos/image/**", "/api/photos/test", "/api/photos", "/api/categories").permitAll()
+                .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -45,9 +45,16 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
     fetchWheelUsageStatus();
   }, []);
 
-  const loadSavedOpportunities = () => {
-    const opportunities = parseInt(localStorage.getItem('wheelOpportunities') || '0');
-    setSavedOpportunities(opportunities);
+  const loadSavedOpportunities = async () => {
+    try {
+      const response = await api.get('/api/opportunities/stats');
+      setSavedOpportunities(response.data.unused || 0);
+    } catch (error) {
+      console.error('Error loading saved opportunities from backend:', error);
+      // Fallback to localStorage
+      const opportunities = parseInt(localStorage.getItem('wheelOpportunities') || '0');
+      setSavedOpportunities(opportunities);
+    }
   };
 
   const fetchWheelUsageStatus = async () => {
@@ -164,9 +171,127 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
     }
   };
 
-  const handleLoveClick = async () => {
-    // Allow rapid clicking - don't prevent if already animating
+  const [clickQueue, setClickQueue] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
 
+  // Process queued clicks with debouncing
+  useEffect(() => {
+    if (clickQueue > 0 && !isProcessing) {
+      setIsProcessing(true);
+      const clicksToProcess = clickQueue;
+      setClickQueue(0);
+      
+      processLoveClicks(clicksToProcess);
+    }
+  }, [clickQueue, isProcessing]);
+
+  const processLoveClicks = async (clickCount: number) => {
+    try {
+      // Process multiple clicks in a single request
+      const promises = [];
+      for (let i = 0; i < clickCount; i++) {
+        promises.push(api.post('/api/love/increment'));
+      }
+      
+      const responses = await Promise.allSettled(promises);
+      const successfulResponses = responses
+        .filter(result => result.status === 'fulfilled')
+        .map(result => (result as PromiseFulfilledResult<any>).value);
+      
+      if (successfulResponses.length > 0) {
+        // Use the last successful response for UI update
+        const lastResponse = successfulResponses[successfulResponses.length - 1];
+        const newStats = lastResponse.data;
+
+        // Update local state
+        setLoveStats({
+          count: newStats.count,
+          totalCount: newStats.totalCount,
+          nextMilestone: newStats.nextMilestone,
+          remainingToMilestone: newStats.remainingToMilestone,
+          currentLevel: newStats.currentLevel,
+          progressPercent: newStats.progressPercent,
+          isMilestoneReached: newStats.isMilestoneReached
+        });
+
+        // Show love success toast occasionally
+        if (Math.random() < 0.2) {
+          showLoveSuccess();
+        }
+
+        // Check if we've reached a milestone
+        if (newStats.justReachedMilestone) {
+          await handleMilestoneReached();
+        }
+      }
+    } catch (error) {
+      console.error('Error processing love clicks:', error);
+      showToast('Failed to share love. Please try again.', 'general');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleMilestoneReached = async () => {
+    try {
+      // Check wheel usage status from backend
+      const wheelResponse = await api.get('/api/wheel/stats');
+      const wheelStats = wheelResponse.data;
+
+      if (!wheelStats.canUseThisWeek) {
+        // Already used this week, save opportunity for next week in backend
+        try {
+          await api.post('/api/opportunities/create', {
+            source: 'milestone_520'
+          });
+          await loadSavedOpportunities();
+          showToast('🎉 You reached 520 love! Opportunity saved for next week!', 'general');
+        } catch (opportunityError) {
+          console.error('Error saving opportunity to backend:', opportunityError);
+          // Fallback to localStorage
+          const currentOpportunities = parseInt(localStorage.getItem('wheelOpportunities') || '0');
+          localStorage.setItem('wheelOpportunities', (currentOpportunities + 1).toString());
+          await loadSavedOpportunities();
+          showToast('🎉 You reached 520 love! Opportunity saved for next week!', 'general');
+        }
+      } else {
+        // Can use immediately
+        setTimeout(() => {
+          setShowWheel(true);
+        }, 500);
+      }
+    } catch (error) {
+      console.error('Error checking wheel usage status for milestone:', error);
+      // Fallback to localStorage logic
+      const today = new Date();
+      const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+      const weekKey = startOfWeek.toDateString();
+      const lastUsedWeek = localStorage.getItem('wheelLastUsedWeek');
+
+      if (lastUsedWeek === weekKey) {
+        try {
+          await api.post('/api/opportunities/create', {
+            source: 'milestone_520'
+          });
+          await loadSavedOpportunities();
+          showToast('🎉 You reached 520 love! Opportunity saved for next week!', 'general');
+        } catch (opportunityError) {
+          console.error('Error saving opportunity to backend:', opportunityError);
+          // Final fallback to localStorage
+          const currentOpportunities = parseInt(localStorage.getItem('wheelOpportunities') || '0');
+          localStorage.setItem('wheelOpportunities', (currentOpportunities + 1).toString());
+          await loadSavedOpportunities();
+          showToast('🎉 You reached 520 love! Opportunity saved for next week!', 'general');
+        }
+      } else {
+        setTimeout(() => {
+          setShowWheel(true);
+        }, 500);
+      }
+    }
+  };
+
+  const handleLoveClick = async () => {
     // Trigger visual feedback immediately
     setIsAnimating(true);
     setShowHearts(true);
@@ -175,73 +300,10 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
     setTimeout(() => {
       setIsAnimating(false);
       setShowHearts(false);
-    }, 300); // Reduced from 1000ms to 300ms
+    }, 300);
 
-    try {
-      // Increment love count on backend
-      const response = await api.post('/api/love/increment');
-      const newStats = response.data;
-
-      // Update local state
-      setLoveStats({
-        count: newStats.count,
-        totalCount: newStats.totalCount,
-        nextMilestone: newStats.nextMilestone,
-        remainingToMilestone: newStats.remainingToMilestone,
-        currentLevel: newStats.currentLevel,
-        progressPercent: newStats.progressPercent,
-        isMilestoneReached: newStats.isMilestoneReached
-      });
-
-      // Show love success toast (but not too frequently)
-      if (Math.random() < 0.3) { // Only show toast 30% of the time for rapid clicking
-        showLoveSuccess();
-      }
-
-      // Check if we've reached a milestone
-      if (newStats.justReachedMilestone) {
-        try {
-          // Check wheel usage status from backend
-          const wheelResponse = await api.get('/api/wheel/stats');
-          const wheelStats = wheelResponse.data;
-
-          if (!wheelStats.canUseThisWeek) {
-            // Already used this week, save opportunity for next week
-            const currentOpportunities = parseInt(localStorage.getItem('wheelOpportunities') || '0');
-            localStorage.setItem('wheelOpportunities', (currentOpportunities + 1).toString());
-            loadSavedOpportunities(); // Refresh the count in UI
-            alert('🎉 You reached 520 love! Since you already used the wheel this week, this opportunity has been saved for next week!');
-          } else {
-            // Can use immediately
-            setTimeout(() => {
-              setShowWheel(true);
-            }, 500);
-          }
-        } catch (error) {
-          console.error('Error checking wheel usage status for milestone:', error);
-          // Fallback to localStorage logic
-          const today = new Date();
-          const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-          const weekKey = startOfWeek.toDateString();
-          const lastUsedWeek = localStorage.getItem('wheelLastUsedWeek');
-
-          if (lastUsedWeek === weekKey) {
-            const currentOpportunities = parseInt(localStorage.getItem('wheelOpportunities') || '0');
-            localStorage.setItem('wheelOpportunities', (currentOpportunities + 1).toString());
-            loadSavedOpportunities();
-            alert('🎉 You reached 520 love! Since you already used the wheel this week, this opportunity has been saved for next week!');
-          } else {
-            setTimeout(() => {
-              setShowWheel(true);
-            }, 500);
-          }
-        }
-      }
-
-    } catch (error) {
-      console.error('Error incrementing love count:', error);
-      // Don't show alert for rapid clicking - just log the error
-    }
+    // Queue the click for processing
+    setClickQueue(prev => prev + 1);
 
     onLoveClick?.();
   };

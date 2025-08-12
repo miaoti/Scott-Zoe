@@ -16,6 +16,9 @@ dist/
 .env.test.local
 .env.production.local
 
+# Allow production environment file for Railway deployment
+!.env.production
+
 # Database files
 database.sqlite
 *.db

@@ -2,14 +2,24 @@ package com.couplewebsite.controller;
 
 import com.couplewebsite.entity.Photo;
 import com.couplewebsite.service.PhotoService;
+import com.couplewebsite.service.FileStorageService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +38,9 @@ public class PhotoController {
     
     @Autowired
     private PhotoService photoService;
+    
+    @Autowired
+    private FileStorageService fileStorageService;
     
     /**
      * Upload single photo
@@ -59,10 +72,16 @@ public class PhotoController {
      */
     @PostMapping({"/upload", "/upload-multiple"})
     public ResponseEntity<?> uploadMultiplePhotos(
+            HttpServletRequest request,
             @RequestParam("photos") List<MultipartFile> files,
             @RequestParam(value = "uploadedBy", required = false) String uploadedBy) {
         
         try {
+            // Debug logging for multipart request
+            logger.info("Content-Type: {}", request.getContentType());
+            logger.info("Content-Length: {}", request.getContentLength());
+            logger.info("Is multipart: {}", request.getContentType() != null && request.getContentType().startsWith("multipart/"));
+            
             if (files == null || files.isEmpty()) {
                 Map<String, String> error = new HashMap<>();
                 error.put("message", "No files uploaded");
@@ -102,7 +121,9 @@ public class PhotoController {
             @RequestParam(defaultValue = "20") int limit) {
         
         try {
+            logger.info("Fetching photos with page={}, limit={}", page, limit);
             Page<Photo> photoPage = photoService.getAllPhotos(page, limit);
+            logger.info("Found {} photos, total elements: {}", photoPage.getContent().size(), photoPage.getTotalElements());
             
             Map<String, Object> response = new HashMap<>();
             response.put("photos", photoPage.getContent().stream()
@@ -116,6 +137,7 @@ public class PhotoController {
             pagination.put("totalPages", photoPage.getTotalPages());
             response.put("pagination", pagination);
             
+            logger.info("Returning response with {} photos", photoPage.getContent().size());
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
@@ -315,6 +337,52 @@ public class PhotoController {
     }
 
     /**
+     * Test endpoint for debugging
+     */
+    @GetMapping("/test")
+    public ResponseEntity<String> testEndpoint() {
+        return ResponseEntity.ok("Photo controller is working!");
+    }
+    
+    /**
+     * Serve photo images
+     */
+    @GetMapping("/image/{fileName:.+}")
+    public ResponseEntity<Resource> getPhotoImage(@PathVariable String fileName) {
+        try {
+            // Load file as Resource
+            Path filePath = fileStorageService.getFilePath(fileName);
+            Resource resource = new UrlResource(filePath.toUri());
+            
+            if (resource.exists() && resource.isReadable()) {
+                // Try to determine file's content type
+                String contentType = null;
+                try {
+                    contentType = java.nio.file.Files.probeContentType(filePath);
+                } catch (IOException ex) {
+                    logger.info("Could not determine file type for: {}", fileName);
+                }
+                
+                // Fallback to the default content type if type could not be determined
+                if (contentType == null) {
+                    contentType = "application/octet-stream";
+                }
+                
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                        .body(resource);
+            } else {
+                logger.warn("Photo file not found or not readable: {}", fileName);
+                return ResponseEntity.notFound().build();
+            }
+        } catch (MalformedURLException ex) {
+            logger.error("Photo file not found: {}", fileName, ex);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
      * Get user's favorite photos
      */
     @GetMapping("/favorites")
@@ -329,6 +397,106 @@ public class PhotoController {
         } catch (Exception e) {
             logger.error("Error getting favorite photos: ", e);
             return ResponseEntity.ok(new ArrayList<>());
+        }
+    }
+
+    /**
+     * Bulk delete photos
+     */
+    @DeleteMapping("/bulk")
+    public ResponseEntity<?> bulkDeletePhotos(@RequestBody Map<String, Object> request) {
+        try {
+            @SuppressWarnings("unchecked")
+            List<Object> photoIdsRaw = (List<Object>) request.get("photoIds");
+            
+            if (photoIdsRaw == null || photoIdsRaw.isEmpty()) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "No photo IDs provided");
+                return ResponseEntity.badRequest().body(error);
+            }
+
+            // Convert to Long list
+            List<Long> photoIds = photoIdsRaw.stream()
+                .map(obj -> {
+                    if (obj instanceof Integer) {
+                        return ((Integer) obj).longValue();
+                    } else if (obj instanceof Long) {
+                        return (Long) obj;
+                    } else {
+                        return Long.valueOf(obj.toString());
+                    }
+                })
+                .collect(Collectors.toList());
+
+            int deletedCount = photoService.bulkDeletePhotos(photoIds);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", deletedCount + " photo(s) deleted successfully");
+            response.put("deletedCount", deletedCount);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error bulk deleting photos", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error during bulk delete");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+
+    /**
+     * Bulk update photo categories
+     */
+    @PutMapping("/bulk/categories")
+    public ResponseEntity<?> bulkUpdatePhotoCategories(@RequestBody Map<String, Object> request) {
+        try {
+            @SuppressWarnings("unchecked")
+            List<Object> photoIdsRaw = (List<Object>) request.get("photoIds");
+            @SuppressWarnings("unchecked")
+            List<Object> categoryIdsRaw = (List<Object>) request.get("categoryIds");
+            
+            if (photoIdsRaw == null || photoIdsRaw.isEmpty()) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "No photo IDs provided");
+                return ResponseEntity.badRequest().body(error);
+            }
+
+            // Convert to Long lists
+            List<Long> photoIds = photoIdsRaw.stream()
+                .map(obj -> {
+                    if (obj instanceof Integer) {
+                        return ((Integer) obj).longValue();
+                    } else if (obj instanceof Long) {
+                        return (Long) obj;
+                    } else {
+                        return Long.valueOf(obj.toString());
+                    }
+                })
+                .collect(Collectors.toList());
+
+            List<Long> categoryIds = categoryIdsRaw != null ? categoryIdsRaw.stream()
+                .map(obj -> {
+                    if (obj instanceof Integer) {
+                        return ((Integer) obj).longValue();
+                    } else if (obj instanceof Long) {
+                        return (Long) obj;
+                    } else {
+                        return Long.valueOf(obj.toString());
+                    }
+                })
+                .collect(Collectors.toList()) : new ArrayList<>();
+
+            int updatedCount = photoService.bulkUpdatePhotoCategories(photoIds, categoryIds);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", updatedCount + " photo(s) updated successfully");
+            response.put("updatedCount", updatedCount);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error bulk updating photo categories", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error during bulk update");
+            return ResponseEntity.status(500).body(error);
         }
     }
 }

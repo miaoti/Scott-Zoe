@@ -9,7 +9,9 @@ interface Photo {
   caption?: string;
   createdAt: string;
   uploader: { name: string };
-  categories?: { id: number; name: string; color: string }[];
+  categories: { id: number; name: string; color: string }[];
+  noteCount: number;
+  isFavorite?: boolean;
 }
 
 interface Category {
@@ -38,7 +40,6 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
   );
   const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
 
   console.log('PhotoDetailModal rendered with photo:', photo);
 
@@ -107,11 +108,27 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
     }
   };
 
+  const handleToggleFavorite = async () => {
+    try {
+      const newFavoriteStatus = !photo.isFavorite;
+      
+      await api.post(`/api/photos/${photo.id}/favorite`, {
+        favorite: newFavoriteStatus
+      });
+      
+      const updatedPhoto = { ...photo, isFavorite: newFavoriteStatus };
+      onPhotoUpdate(updatedPhoto);
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      alert('Failed to update favorite status. Please try again.');
+    }
+  };
+
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this photo? This action cannot be undone.')) {
       try {
         setLoading(true);
-        // TODO: Implement backend delete endpoint
+        await api.delete(`/api/photos/${photo.id}`);
         onPhotoDelete(photo.id);
         onClose();
         alert('Photo deleted successfully!');
@@ -171,7 +188,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
           {/* Image Section */}
           <div className="flex-1 bg-black flex items-center justify-center">
             <img
-              src={`http://localhost:3001/uploads/${photo.filename}`}
+              src={`/api/photos/image/${photo.filename}`}
               alt={photo.originalName}
               className="max-w-full max-h-full object-contain"
             />
@@ -298,11 +315,11 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
               ) : (
                 <div className="flex space-x-3">
                   <button
-                    onClick={() => setIsFavorite(!isFavorite)}
+                    onClick={handleToggleFavorite}
                     className="flex-1 px-4 py-3 bg-apple-gray-6/10 hover:bg-apple-gray-6/20 text-apple-label rounded-xl font-medium flex items-center justify-center gap-2 transition-colors"
                   >
-                    <Heart className={`w-4 h-4 ${isFavorite ? 'text-red-500 fill-current' : ''}`} />
-                    {isFavorite ? 'Favorited' : 'Add to Favorites'}
+                    <Heart className={`w-4 h-4 ${photo.isFavorite ? 'text-red-500 fill-current' : ''}`} />
+                    {photo.isFavorite ? 'Favorited' : 'Add to Favorites'}
                   </button>
                   <button
                     onClick={handleDelete}

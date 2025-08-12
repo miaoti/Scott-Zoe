@@ -5,6 +5,9 @@ import PhotoGallery from './components/PhotoGallery';
 import PhotoDetail from './components/PhotoDetail';
 import Memories from './components/Memories';
 import Settings from './components/Settings';
+import CategoryManager from './components/CategoryManager';
+import CategoryPhotos from './components/CategoryPhotos';
+import AllPhotos from './components/AllPhotos';
 import Header from './components/Header';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -35,8 +38,11 @@ function AppContent() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/gallery" element={<PhotoGallery />} />
+          <Route path="/photos" element={<AllPhotos />} />
+          <Route path="/category/:id" element={<CategoryPhotos />} />
           <Route path="/photo/:id" element={<PhotoDetail />} />
           <Route path="/memories" element={<Memories />} />
+          <Route path="/categories" element={<CategoryManager category={null} onClose={() => {}} onCategoryUpdated={() => {}} />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

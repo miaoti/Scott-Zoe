@@ -22,6 +22,12 @@ export default {
           5: '#E5E5EA',
           6: '#F2F2F7',
         },
+        'apple-label': '#000000',
+        'apple-secondary-label': 'rgba(60, 60, 67, 0.6)',
+        'apple-tertiary-label': 'rgba(60, 60, 67, 0.3)',
+        'apple-separator': 'rgba(60, 60, 67, 0.29)',
+        'apple-system-background': '#FFFFFF',
+        'apple-secondary-background': '#F2F2F7',
       },
       backdropBlur: {
         'xl': '24px',

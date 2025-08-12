@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database with persistent volume
+  db:
+    image: postgres:15-alpine
+    container_name: couple-website-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-couple_website}
+      POSTGRES_USER: ${POSTGRES_USER:-couple_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-couple_password}
+    volumes:
+      # Use named volume for data persistence
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - couple-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-couple_user} -d ${POSTGRES_DB:-couple_website}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Spring Boot Backend with React Frontend
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: couple-website-app
+    environment:
+      - SPRING_PROFILES_ACTIVE=production
+      - DATABASE_URL=jdbc:postgresql://db:5432/${POSTGRES_DB:-couple_website}?user=${POSTGRES_USER:-couple_user}&password=${POSTGRES_PASSWORD:-couple_password}
+      - DATABASE_DRIVER=org.postgresql.Driver
+      - DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${POSTGRES_DB:-couple_website}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-couple_user}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-couple_password}
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+      - UPLOAD_DIR=/app/uploads
+      - PORT=${PORT:-8080}
+    ports:
+      - "${PORT:-8080}:${PORT:-8080}"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Persistent volume for uploads
+      - uploads_data:/app/uploads
+    networks:
+      - couple-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-8080}/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  # Named volumes for data persistence
+  postgres_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+networks:
+  couple-network:
+    driver: bridge

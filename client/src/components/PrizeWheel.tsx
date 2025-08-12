@@ -24,29 +24,45 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
   const [savedOpportunities, setSavedOpportunities] = useState(0);
   const wheelRef = useRef<HTMLDivElement>(null);
 
-  // Check if user has used wheel this week
+  // Check if user has used wheel this week and load saved opportunities
   useEffect(() => {
-    const today = new Date();
-    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay())); // Sunday
-    const weekKey = startOfWeek.toDateString();
-
-    const lastUsedWeek = localStorage.getItem('wheelLastUsedWeek');
-    const opportunities = parseInt(localStorage.getItem('wheelOpportunities') || '0');
-
-    if (lastUsedWeek === weekKey) {
-      setHasUsedToday(true); // Reusing state name but now means "used this week"
-    }
-
-    setSavedOpportunities(opportunities);
+    const loadWheelStatus = async () => {
+      try {
+        // Check wheel usage status from backend
+        const wheelResponse = await api.get('/api/wheel/stats');
+        setHasUsedToday(!wheelResponse.data.canUseThisWeek);
+        
+        // Load saved opportunities from backend
+        const opportunitiesResponse = await api.get('/api/opportunities/stats');
+        setSavedOpportunities(opportunitiesResponse.data.unused || 0);
+      } catch (error) {
+        console.error('Error loading wheel status from backend:', error);
+        // Fallback to localStorage
+        const today = new Date();
+        const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+        const weekKey = startOfWeek.toDateString();
+        const lastUsedWeek = localStorage.getItem('wheelLastUsedWeek');
+        const opportunities = parseInt(localStorage.getItem('wheelOpportunities') || '0');
+        
+        if (lastUsedWeek === weekKey) {
+          setHasUsedToday(true);
+        }
+        setSavedOpportunities(opportunities);
+      }
+    };
+    
+    loadWheelStatus();
   }, []);
 
   const prizes: Prize[] = [
-    { id: 1, amount: 5, color: '#E5E7EB', probability: 40, icon: <DollarSign className="w-4 h-4 text-gray-600" /> },
-    { id: 2, amount: 10, color: '#D1D5DB', probability: 30, icon: <DollarSign className="w-4 h-4 text-gray-700" /> },
-    { id: 3, amount: 30, color: '#9CA3AF', probability: 22.5, icon: <DollarSign className="w-4 h-4 text-gray-800" /> },
-    { id: 4, amount: 77, color: '#6B7280', probability: 5, icon: <Star className="w-4 h-4 text-white" /> },
-    { id: 5, amount: 100, color: '#4B5563', probability: 2, icon: <Star className="w-4 h-4 text-white" /> },
-    { id: 6, amount: 500, color: '#374151', probability: 0.5, icon: <Sparkles className="w-4 h-4 text-white" /> },
+    { id: 1, amount: 1, color: '#F3F4F6', probability: 45, icon: <DollarSign className="w-4 h-4 text-gray-600" /> },
+    { id: 2, amount: 5, color: '#E5E7EB', probability: 25, icon: <DollarSign className="w-4 h-4 text-gray-700" /> },
+    { id: 3, amount: 10, color: '#D1D5DB', probability: 15, icon: <DollarSign className="w-4 h-4 text-gray-800" /> },
+    { id: 4, amount: 25, color: '#9CA3AF', probability: 10, icon: <DollarSign className="w-4 h-4 text-white" /> },
+    { id: 5, amount: 77, color: '#6B7280', probability: 2.5, icon: <Star className="w-4 h-4 text-white" /> },
+    { id: 6, amount: 100, color: '#4B5563', probability: 1.5, icon: <Star className="w-4 h-4 text-white" /> },
+    { id: 7, amount: 500, color: '#374151', probability: 0.5, icon: <Sparkles className="w-4 h-4 text-white" /> },
+    { id: 8, amount: 1000, color: '#1F2937', probability: 0.5, icon: <Sparkles className="w-4 h-4 text-yellow-400" /> },
   ];
 
   const selectPrize = (): Prize => {
@@ -82,8 +98,8 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
 
     // More spins for dramatic effect with random variation
     const baseSpins = 5;
-    const extraSpins = Math.floor(Math.random() * 3) + 2; // 2-4 extra spins
-    const totalSpins = baseSpins + extraSpins;
+    const extraSpins = Math.floor(Math.random() * 496) + 0; // 0-495 extra spins
+    const totalSpins = baseSpins + extraSpins; // Total: 5-500 spins
 
     // Add some randomness to make it feel more natural
     const randomOffset = (Math.random() - 0.5) * 20; // ±10 degrees
@@ -127,11 +143,20 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
 
       // Use up one opportunity if available
       if (savedOpportunities > 0) {
-        const newOpportunities = savedOpportunities - 1;
-        localStorage.setItem('wheelOpportunities', newOpportunities.toString());
-        setSavedOpportunities(newOpportunities);
+        try {
+          await api.post('/api/opportunities/use');
+          // Reload opportunities from backend
+          const opportunitiesResponse = await api.get('/api/opportunities/stats');
+          setSavedOpportunities(opportunitiesResponse.data.unused || 0);
+        } catch (error) {
+          console.error('Error using saved opportunity in backend:', error);
+          // Fallback to localStorage
+          const newOpportunities = savedOpportunities - 1;
+          localStorage.setItem('wheelOpportunities', newOpportunities.toString());
+          setSavedOpportunities(newOpportunities);
+        }
       }
-    }, 4500); // Match the CSS animation duration + small buffer
+    }, 6500); // Match the CSS animation duration + small buffer (6 seconds + buffer)
   };
 
   const handleClaimPrize = async () => {
@@ -154,13 +179,15 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
 
   const getPrizeColor = (amount: number) => {
     switch (amount) {
-      case 5: return '#E5E7EB';   // Light gray
-      case 10: return '#D1D5DB';  // Gray
-      case 30: return '#9CA3AF';  // Medium gray
-      case 77: return '#6B7280';  // Dark gray
-      case 100: return '#4B5563'; // Darker gray
-      case 500: return '#374151'; // Darkest gray
-      default: return '#F3F4F6';  // Very light gray
+      case 1: return '#F3F4F6';    // Very light gray
+      case 5: return '#E5E7EB';    // Light gray
+      case 10: return '#D1D5DB';   // Gray
+      case 25: return '#9CA3AF';   // Medium gray
+      case 77: return '#6B7280';   // Dark gray
+      case 100: return '#4B5563';  // Darker gray
+      case 500: return '#374151';  // Darkest gray
+      case 1000: return '#1F2937'; // Almost black
+      default: return '#F3F4F6';   // Very light gray
     }
   };
 
@@ -215,7 +242,7 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
             {/* Wheel */}
             <div
               ref={wheelRef}
-              className={`w-full h-full rounded-full border-4 border-white apple-shadow-lg transition-transform duration-[4000ms] ${
+              className={`w-full h-full rounded-full border-4 border-white apple-shadow-lg transition-transform duration-[6000ms] ${
                 isSpinning ? 'ease-out' : 'hover:scale-105 ease-in-out duration-200'
               }`}
               style={{

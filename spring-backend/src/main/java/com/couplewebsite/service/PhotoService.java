@@ -229,10 +229,56 @@ public class PhotoService {
     }
 
     /**
+     * Toggle photo favorite status
+     */
+    public Photo toggleFavorite(Long photoId, boolean favorite) {
+        Optional<Photo> photoOpt = photoRepository.findById(photoId);
+        if (photoOpt.isPresent()) {
+            Photo photo = photoOpt.get();
+            photo.setIsFavorite(favorite);
+            return photoRepository.save(photo);
+        }
+        throw new RuntimeException("Photo not found with id: " + photoId);
+    }
+
+    /**
      * Get all favorite photos
      */
     public List<Photo> getFavoritePhotos() {
         return photoRepository.findByIsFavoriteTrue();
+    }
+
+    /**
+     * Bulk delete photos
+     */
+    public int bulkDeletePhotos(List<Long> photoIds) {
+        int deletedCount = 0;
+        for (Long photoId : photoIds) {
+            try {
+                if (deletePhoto(photoId)) {
+                    deletedCount++;
+                }
+            } catch (Exception e) {
+                logger.error("Error deleting photo with ID: {}", photoId, e);
+            }
+        }
+        return deletedCount;
+    }
+
+    /**
+     * Bulk update photo categories
+     */
+    public int bulkUpdatePhotoCategories(List<Long> photoIds, List<Long> categoryIds) {
+        int updatedCount = 0;
+        for (Long photoId : photoIds) {
+            try {
+                updatePhotoCategories(photoId, categoryIds);
+                updatedCount++;
+            } catch (Exception e) {
+                logger.error("Error updating categories for photo with ID: {}", photoId, e);
+            }
+        }
+        return updatedCount;
     }
 
     /**

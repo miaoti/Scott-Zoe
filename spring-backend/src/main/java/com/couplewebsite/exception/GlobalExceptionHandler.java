@@ -74,7 +74,8 @@ public class GlobalExceptionHandler {
         Map<String, String> response = new HashMap<>();
         response.put("message", "Access denied");
         
-        logger.warn("Access denied: {}", ex.getMessage());
+        logger.error("🚨 ACCESS DENIED EXCEPTION CAUGHT: {}", ex.getMessage(), ex);
+        logger.error("🚨 Stack trace: ", ex);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
     

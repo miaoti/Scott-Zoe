@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, Calendar, Heart, Image, Clock } from 'lucide-react';
+import { Camera, Calendar, Heart, Clock } from 'lucide-react';
 import api from '../utils/api';
 import LoveCounter from './LoveCounter';
+import WheelOpportunities from './WheelOpportunities';
 
 interface Photo {
   id: number;
@@ -92,16 +93,51 @@ function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <Link
             to="/gallery"
-            className="apple-card apple-card-hover p-6 text-center apple-shadow transition-all duration-200 hover:scale-105 cursor-pointer group"
+            className="apple-card apple-card-hover p-6 apple-shadow transition-all duration-300 hover:scale-105 cursor-pointer group relative overflow-hidden bg-gradient-to-br from-pink-50 to-purple-50 border border-pink-100/50"
           >
-            <Camera className="h-12 w-12 text-apple-blue mx-auto mb-4 group-hover:scale-110 transition-transform duration-200" />
-            <div className="text-3xl font-semibold text-apple-label mb-2">{stats.photos}</div>
-            <div className="text-apple-secondary-label group-hover:text-apple-blue transition-colors duration-200 mb-3">Photos Shared</div>
-            <div className="text-xs text-apple-tertiary-label">
-              Capturing beautiful moments together
-            </div>
-            <div className="mt-2 text-xs text-apple-blue font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              View Gallery →
+            {/* Lovely background decoration */}
+            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-pink-200/20 to-purple-200/20 rounded-full -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-pink-100/30 to-purple-100/30 rounded-full translate-y-8 -translate-x-8 group-hover:scale-125 transition-transform duration-700"></div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="bg-gradient-to-r from-pink-500 to-purple-500 p-2 rounded-xl group-hover:scale-110 transition-transform duration-200">
+                  <Camera className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">{stats.photos}</div>
+              </div>
+              
+              <div className="text-lg font-semibold text-gray-800 group-hover:text-pink-600 transition-colors duration-200 mb-4 text-left flex items-center">
+                💕 Photos Shared
+              </div>
+              
+              {/* Recent Photos Thumbnails with lovely styling */}
+              {recentPhotos.length > 0 && (
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                  {recentPhotos.slice(0, 4).map((photo, index) => (
+                    <div key={photo.id} className="aspect-square rounded-xl overflow-hidden bg-white shadow-sm border-2 border-pink-100 group-hover:border-pink-200 transition-all duration-300" style={{animationDelay: `${index * 100}ms`}}>
+                      <img
+                        src={`/api/photos/image/${photo.filename}`}
+                        alt={photo.caption || 'Recent photo'}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <div className="text-sm text-gray-600 text-left mb-2">
+                {recentPhotos.length > 0 ? '✨ Latest memories captured with love' : '🌟 Ready to capture beautiful moments together'}
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-pink-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  View Gallery →
+                </div>
+                <div className="text-xs text-gray-400">
+                  💖 Made with love
+                </div>
+              </div>
             </div>
           </Link>
 
@@ -112,7 +148,28 @@ function Dashboard() {
             <Calendar className="h-12 w-12 text-apple-blue-light mx-auto mb-4 group-hover:scale-110 transition-transform duration-200" />
             <div className="text-3xl font-semibold text-apple-label mb-2">{stats.memories}</div>
             <div className="text-apple-secondary-label group-hover:text-apple-blue-light transition-colors duration-200 mb-3">Memories Created</div>
-            <div className="text-xs text-apple-tertiary-label">
+            
+            {/* Recent memories preview */}
+            {upcomingMemories.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <div className="text-xs text-apple-tertiary-label mb-2">Recent:</div>
+                <div className="flex flex-wrap gap-1 justify-center">
+                  {upcomingMemories.slice(0, 2).map((memory, index) => (
+                    <div
+                      key={memory.id}
+                      className="bg-apple-gray-6/10 rounded-lg px-2 py-1 text-xs text-apple-secondary-label transform transition-all duration-300 hover:bg-apple-blue/10 hover:text-apple-blue"
+                      style={{
+                        animationDelay: `${index * 0.1}s`
+                      }}
+                    >
+                      {memory.title.length > 12 ? `${memory.title.substring(0, 12)}...` : memory.title}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <div className="text-xs text-apple-tertiary-label mt-3">
               Special moments we'll never forget
             </div>
             <div className="mt-2 text-xs text-apple-blue-light font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -121,6 +178,8 @@ function Dashboard() {
           </Link>
           
           <LoveCounter />
+          
+          <WheelOpportunities />
         </div>
 
         {/* Quick Actions */}
@@ -161,44 +220,7 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Recent Photos */}
-        {recentPhotos.length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-apple-label flex items-center">
-                <Image className="h-6 w-6 mr-3 text-apple-blue" />
-                Recent Photos
-              </h2>
-              <Link
-                to="/gallery"
-                className="text-apple-blue hover:text-apple-blue/80 font-medium transition-colors"
-              >
-                View All
-              </Link>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {recentPhotos.map((photo) => (
-                <Link
-                  key={photo.id}
-                  to={`/photo/${photo.id}`}
-                  className="group"
-                >
-                  <div className="aspect-square rounded-xl overflow-hidden apple-card apple-shadow group-hover:apple-shadow-large transition-all duration-200">
-                    <img
-                      src={`http://localhost:3001/uploads/${photo.filename}`}
-                      alt={photo.originalName}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <p className="text-sm text-apple-secondary-label mt-2 truncate">
-                    {photo.caption || photo.originalName}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {/* Upcoming Memories */}
         {upcomingMemories.length > 0 && (

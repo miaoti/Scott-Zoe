@@ -99,7 +99,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
       console.log('Sending upload request...');
       const response = await api.post('/api/photos/upload-multiple', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': undefined, // Remove default Content-Type to let browser set multipart/form-data
         },
       });
 
@@ -199,7 +199,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
               </p>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="px-8 py-4 bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-800 rounded-xl font-semibold transition-all duration-200 hover:bg-gray-50 shadow-sm"
+                className="px-8 py-4 bg-apple-blue hover:bg-apple-blue-dark text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 Choose Photos
               </button>

@@ -42,11 +42,21 @@ cors:
   allowed-headers: "*"
   allow-credentials: true
 
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
 # Logging Configuration
 logging:
   level:
-    com.couplewebsite: INFO
-    org.springframework.security: INFO
+    com.couplewebsite: DEBUG
+    org.springframework.security: DEBUG
     org.hibernate.SQL: INFO
     org.hibernate.type.descriptor.sql.BasicBinder: INFO
 

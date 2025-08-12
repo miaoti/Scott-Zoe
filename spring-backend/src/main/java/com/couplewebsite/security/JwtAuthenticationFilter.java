@@ -33,12 +33,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                   FilterChain filterChain) throws ServletException, IOException {
 
         String requestPath = request.getRequestURI();
+        
+        // Debug logging
+        logger.info("JWT Filter processing path: {}", requestPath);
 
         // Skip JWT processing for static files and public endpoints
         if (isPublicPath(requestPath)) {
+            logger.info("Path {} is public, skipping JWT processing", requestPath);
             filterChain.doFilter(request, response);
             return;
         }
+        
+        logger.info("Path {} requires JWT authentication", requestPath);
 
         try {
             String jwt = getJwtFromRequest(request);
@@ -73,6 +79,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                path.startsWith("/static/") ||
                path.startsWith("/uploads/") ||
                path.startsWith("/api/auth/") ||
+               path.startsWith("/api/photos/image/") ||
+               path.equals("/api/photos/test") ||
+               path.equals("/api/photos") ||
+               path.equals("/api/categories") ||
                path.equals("/health") ||
                path.startsWith("/api/health") ||
                path.startsWith("/api/debug/") ||

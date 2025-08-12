@@ -6,6 +6,9 @@
 README.md
 RAILWAY_DEPLOYMENT.md
 RAILWAY_SETUP.md
+RAILWAY_DEPLOYMENT_GUIDE.md
+DOCKER_SETUP.md
+GITHUB_RAILWAY_DEPLOYMENT.md
 *.md
 
 # Node modules (will be installed in container)
@@ -22,6 +25,16 @@ spring-backend/target
 .env.development
 .env.test
 .env.production
+
+# Deployment scripts
+deploy-railway.sh
+deploy-railway.cmd
+deploy.sh
+deploy.cmd
+deploy-github.sh
+deploy-github.cmd
+docker-compose.yml
+docker-compose.railway.yml
 
 # IDE files
 .vscode
