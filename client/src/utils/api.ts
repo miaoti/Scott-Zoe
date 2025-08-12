@@ -2,11 +2,24 @@ import axios from 'axios';
 
 // Debug: Log the API URL being used
 console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
-console.log('Using baseURL:', import.meta.env.VITE_API_URL || 'http://localhost:8080');
+console.log('Window location:', window.location.origin);
+
+// Determine API URL - Railway production vs local development
+const getApiUrl = () => {
+  // If deployed on Railway, use the same domain
+  if (window.location.hostname !== 'localhost') {
+    return window.location.origin;
+  }
+  // Local development
+  return import.meta.env.VITE_API_URL || 'http://localhost:8080';
+};
+
+const apiUrl = getApiUrl();
+console.log('Using API URL:', apiUrl);
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
+  baseURL: apiUrl,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

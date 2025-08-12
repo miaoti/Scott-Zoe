@@ -5,12 +5,12 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   
-  // Define environment variables for build time
+  // Define environment variables for build time - Railway deployment
   define: {
-    // Make environment variables available at build time
+    // Force Railway URL for production deployment
     'import.meta.env.VITE_API_URL': JSON.stringify(
-      process.env.VITE_API_URL || 
-      (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : 'http://localhost:8080')
+      process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : 
+      process.env.VITE_API_URL || 'http://localhost:8080'
     ),
   },
   
