@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Tag, Plus, Edit2, Trash2, Eye } from 'lucide-react';
+import { Tag, Plus, Edit2, Trash2, Eye, ArrowLeft } from 'lucide-react';
 import api from '../utils/api';
 import CategoryManager from './CategoryManager';
 
@@ -75,9 +75,17 @@ function Categories() {
     <div className="space-y-6 fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Photo Categories</h1>
-          <p className="text-gray-600">Organize your memories by themes and moments</p>
+        <div className="flex items-center space-x-4">
+          <Link
+            to="/gallery"
+            className="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors p-2 hover:bg-gray-100 rounded-full"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Photo Categories</h1>
+            <p className="text-gray-600">Organize your memories by themes and moments</p>
+          </div>
         </div>
         
         <button
