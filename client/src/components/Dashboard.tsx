@@ -144,7 +144,7 @@ function Dashboard() {
   return (
     <div className="relative space-y-8 fade-in min-h-screen overflow-hidden bg-white">
       {/* Interactive Animated Cat Components */}
-      <div className="fixed inset-0 z-0 pointer-events-auto">
+      <div className="fixed inset-0 z-10 pointer-events-auto">
         {catPositions.map((cat, index) => {
           const baseAnimations = ['animate-float', 'animate-float-slow', 'animate-pulse-glow'];
           const baseAnimation = baseAnimations[index % baseAnimations.length];
@@ -159,7 +159,7 @@ function Dashboard() {
                 top: cat.top,
                 left: cat.left,
                 animationDelay: `${index * 0.5}s`,
-                zIndex: cat.isJumping ? 50 : 1
+                zIndex: cat.isJumping ? 50 : 15
               }}
               title={cat.title}
               onClick={() => handleCatClick(cat.id)}
@@ -170,7 +170,7 @@ function Dashboard() {
         })}
       </div>
       
-      <div className="relative max-w-6xl mx-auto px-6 py-8 z-10">
+      <div className="relative max-w-6xl mx-auto px-6 py-8 z-5">
         {/* Welcome Section */}
         <div className="text-center slide-up mb-12">
           <h1 className="font-heading text-5xl font-semibold text-apple-label mb-6">
