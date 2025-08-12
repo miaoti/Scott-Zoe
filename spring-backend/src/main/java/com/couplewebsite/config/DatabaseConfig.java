@@ -51,7 +51,7 @@ public class DatabaseConfig {
             logger.info("Creating default users...");
             
             String hashedPassword = passwordEncoder.encode("mmqqforever");
-            LocalDate relationshipStartDate = LocalDate.of(2020, 6, 8);
+            LocalDate relationshipStartDate = LocalDate.of(2020, 8, 6);
             
             User scott = new User("scott", hashedPassword, "Scott", relationshipStartDate);
             User zoe = new User("zoe", hashedPassword, "Zoe", relationshipStartDate);
@@ -69,7 +69,7 @@ public class DatabaseConfig {
         if (!settingsRepository.existsByKey("relationshipStartDate")) {
             logger.info("Creating default settings...");
             
-            Settings relationshipStartSetting = new Settings("relationshipStartDate", "2020-06-08");
+            Settings relationshipStartSetting = new Settings("relationshipStartDate", "2020-08-06");
             settingsRepository.save(relationshipStartSetting);
             
             logger.info("✅ Default settings created successfully");

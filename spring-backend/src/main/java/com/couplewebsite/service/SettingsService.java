@@ -92,7 +92,7 @@ public class SettingsService {
         }
         
         // Default fallback date
-        return LocalDate.of(2020, 6, 8);
+        return LocalDate.of(2020, 8, 6);
     }
     
     /**
