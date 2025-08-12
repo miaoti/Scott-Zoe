@@ -33,62 +33,7 @@ public class StaticController {
         return ResponseEntity.notFound().build();
     }
     
-    /**
-     * Serve CSS files with correct MIME type
-     */
-    @GetMapping("/assets/{filename:.+\\.css}")
-    public ResponseEntity<Resource> serveCss(@PathVariable String filename) throws IOException {
-        ClassPathResource resource = new ClassPathResource("/static/assets/" + filename);
-        
-        if (resource.exists()) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.valueOf("text/css"));
-            headers.setCacheControl("max-age=31536000"); // 1 year cache
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(resource);
-        }
-        
-        return ResponseEntity.notFound().build();
-    }
-    
-    /**
-     * Serve JS files with correct MIME type
-     */
-    @GetMapping("/assets/{filename:.+\\.js}")
-    public ResponseEntity<Resource> serveJs(@PathVariable String filename) throws IOException {
-        ClassPathResource resource = new ClassPathResource("/static/assets/" + filename);
 
-        if (resource.exists()) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.valueOf("application/javascript"));
-            headers.setCacheControl("max-age=31536000"); // 1 year cache
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(resource);
-        }
-
-        return ResponseEntity.notFound().build();
-    }
-
-    /**
-     * Serve SVG files with correct MIME type
-     */
-    @GetMapping("/{filename:.+\\.svg}")
-    public ResponseEntity<Resource> serveSvg(@PathVariable String filename) throws IOException {
-        ClassPathResource resource = new ClassPathResource("/static/" + filename);
-        
-        if (resource.exists()) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.valueOf("image/svg+xml"));
-            headers.setCacheControl("max-age=31536000"); // 1 year cache
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(resource);
-        }
-        
-        return ResponseEntity.notFound().build();
-    }
 
     /**
      * Catch-all for React routing - serve index.html for any non-API route

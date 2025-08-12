@@ -16,7 +16,18 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Disable this for now - let StaticController handle static files
-        // This avoids conflicts with Spring Security
+        // Configure static resource handling for assets
+        registry.addResourceHandler("/assets/**")
+                .addResourceLocations("classpath:/static/assets/")
+                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
+                .resourceChain(true)
+                .addResolver(new PathResourceResolver());
+        
+        // Configure static resource handling for root level files (like vite.svg)
+        registry.addResourceHandler("/*.svg", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg")
+                .addResourceLocations("classpath:/static/")
+                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
+                .resourceChain(true)
+                .addResolver(new PathResourceResolver());
     }
 }
