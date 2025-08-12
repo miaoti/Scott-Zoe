@@ -6,7 +6,6 @@ import PhotoDetail from './components/PhotoDetail';
 import Memories from './components/Memories';
 import Settings from './components/Settings';
 import Categories from './components/Categories';
-import CategoryManager from './components/CategoryManager';
 import CategoryPhotos from './components/CategoryPhotos';
 import AllPhotos from './components/AllPhotos';
 import Header from './components/Header';
