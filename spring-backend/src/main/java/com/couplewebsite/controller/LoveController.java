@@ -14,7 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/love")
-@CrossOrigin(origins = "*", maxAge = 3600)
+
 public class LoveController {
     
     private static final Logger logger = LoggerFactory.getLogger(LoveController.class);

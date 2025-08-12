@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/settings")
-@CrossOrigin(origins = "*", maxAge = 3600)
+
 public class SettingsController {
     
     private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);

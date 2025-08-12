@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/wheel")
-@CrossOrigin(origins = "*", maxAge = 3600)
+
 public class WheelUsageController {
     
     private static final Logger logger = LoggerFactory.getLogger(WheelUsageController.class);

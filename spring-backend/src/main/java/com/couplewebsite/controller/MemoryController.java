@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/memories")
-@CrossOrigin(origins = "*", maxAge = 3600)
+
 public class MemoryController {
     
     private static final Logger logger = LoggerFactory.getLogger(MemoryController.class);

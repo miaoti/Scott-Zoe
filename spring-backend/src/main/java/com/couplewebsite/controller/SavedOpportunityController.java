@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/opportunities")
-@CrossOrigin(origins = "*", maxAge = 3600)
+
 public class SavedOpportunityController {
     
     private static final Logger logger = LoggerFactory.getLogger(SavedOpportunityController.class);
