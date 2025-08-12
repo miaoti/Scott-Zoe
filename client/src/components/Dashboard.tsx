@@ -5,6 +5,15 @@ import api from '../utils/api';
 import LoveCounter from './LoveCounter';
 import WheelOpportunities from './WheelOpportunities';
 
+interface CatPosition {
+  id: string;
+  top: string;
+  left: string;
+  emoji: string;
+  title: string;
+  isJumping: boolean;
+}
+
 interface Photo {
   id: number;
   filename: string;
@@ -27,6 +36,62 @@ function Dashboard() {
   const [recentPhotos, setRecentPhotos] = useState<Photo[]>([]);
   const [upcomingMemories, setUpcomingMemories] = useState<Memory[]>([]);
   const [stats, setStats] = useState({ photos: 0, memories: 0, totalLove: 0 });
+  const [catPositions, setCatPositions] = useState<CatPosition[]>([]);
+
+  // Generate random positions for cats
+  const generateRandomPosition = (): { top: string; left: string } => {
+    const top = Math.random() * 80 + 10; // 10% to 90% from top
+    const left = Math.random() * 80 + 10; // 10% to 90% from left
+    return {
+      top: `${top}%`,
+      left: `${left}%`
+    };
+  };
+
+  // Initialize cat positions
+  useEffect(() => {
+    const cats = [
+      { emoji: '🐱', title: 'Meow! 🐱' },
+      { emoji: '😸', title: 'Happy kitty! 😸' },
+      { emoji: '😻', title: 'Love you! 😻' },
+      { emoji: '🐾', title: 'Paw prints! 🐾' },
+      { emoji: '😺', title: 'Cute cat! 😺' },
+      { emoji: '🙀', title: 'Surprised! 🙀' },
+      { emoji: '😽', title: 'Kiss! 😽' },
+      { emoji: '💕', title: 'Love! 💕' },
+      { emoji: '💖', title: 'Heart! 💖' },
+      { emoji: '✨', title: 'Sparkle! ✨' },
+      { emoji: '⭐', title: 'Star! ⭐' }
+    ];
+
+    const initialPositions = cats.map((cat, index) => ({
+      id: `cat-${index}`,
+      ...generateRandomPosition(),
+      emoji: cat.emoji,
+      title: cat.title,
+      isJumping: false
+    }));
+
+    setCatPositions(initialPositions);
+  }, []);
+
+  // Handle cat click - trigger jump and relocate
+  const handleCatClick = (catId: string) => {
+    setCatPositions(prev => prev.map(cat => 
+      cat.id === catId 
+        ? { ...cat, isJumping: true }
+        : cat
+    ));
+
+    // After animation completes, relocate cat and reset jumping state
+    setTimeout(() => {
+      setCatPositions(prev => prev.map(cat => 
+        cat.id === catId 
+          ? { ...cat, ...generateRandomPosition(), isJumping: false }
+          : cat
+      ));
+    }, 1200); // Match animation duration
+  };
 
   useEffect(() => {
     fetchDashboardData();
@@ -80,69 +145,29 @@ function Dashboard() {
     <div className="relative space-y-8 fade-in min-h-screen overflow-hidden bg-white">
       {/* Interactive Animated Cat Components */}
       <div className="fixed inset-0 z-0 pointer-events-auto">
-        {/* Interactive floating cats with hover effects */}
-        <div className="absolute top-10 left-10 text-5xl animate-float cursor-pointer hover:scale-150 hover:rotate-12 transition-all duration-300 select-none" 
-             style={{animationDelay: '0s'}} 
-             title="Meow! 🐱">
-          🐱
-        </div>
-        <div className="absolute top-20 right-20 text-4xl animate-float-slow cursor-pointer hover:scale-125 hover:-rotate-6 transition-all duration-300 select-none" 
-             style={{animationDelay: '2s'}} 
-             title="Happy kitty! 😸">
-          😸
-        </div>
-        <div className="absolute bottom-40 left-1/4 text-6xl animate-float cursor-pointer hover:scale-110 hover:rotate-6 transition-all duration-300 select-none" 
-             style={{animationDelay: '4s'}} 
-             title="Love you! 😻">
-          😻
-        </div>
-        <div className="absolute bottom-20 right-1/3 text-4xl animate-float-slow cursor-pointer hover:scale-150 hover:rotate-12 transition-all duration-300 select-none" 
-             style={{animationDelay: '1s'}} 
-             title="Paw prints! 🐾">
-          🐾
-        </div>
-        <div className="absolute top-1/3 left-1/2 text-3xl animate-float cursor-pointer hover:scale-140 hover:-rotate-12 transition-all duration-300 select-none" 
-             style={{animationDelay: '3s'}} 
-             title="Cute cat! 😺">
-          😺
-        </div>
-        <div className="absolute top-2/3 right-1/5 text-5xl animate-float-slow cursor-pointer hover:scale-120 hover:rotate-6 transition-all duration-300 select-none" 
-             style={{animationDelay: '5s'}} 
-             title="Surprised! 🙀">
-          🙀
-        </div>
-        <div className="absolute bottom-1/3 left-3/4 text-4xl animate-float cursor-pointer hover:scale-130 hover:-rotate-6 transition-all duration-300 select-none" 
-             style={{animationDelay: '6s'}} 
-             title="Kiss! 😽">
-          😽
-        </div>
-        
-        {/* Interactive floating hearts and sparkles */}
-        <div className="absolute top-1/4 left-1/3 text-2xl animate-pulse-glow cursor-pointer hover:scale-200 hover:rotate-45 transition-all duration-300 select-none" 
-             style={{animationDelay: '0.5s'}} 
-             title="Love! 💕">
-          💕
-        </div>
-        <div className="absolute top-3/4 right-1/4 text-lg animate-pulse-glow cursor-pointer hover:scale-150 hover:-rotate-12 transition-all duration-300 select-none" 
-             style={{animationDelay: '2.5s'}} 
-             title="Paws! 🐾">
-          🐾
-        </div>
-        <div className="absolute top-1/2 left-1/5 text-xl animate-pulse-glow cursor-pointer hover:scale-180 hover:rotate-90 transition-all duration-300 select-none" 
-             style={{animationDelay: '4.5s'}} 
-             title="Heart! 💖">
-          💖
-        </div>
-        <div className="absolute top-1/6 right-1/3 text-2xl animate-float cursor-pointer hover:scale-160 hover:rotate-180 transition-all duration-300 select-none" 
-             style={{animationDelay: '7s'}} 
-             title="Sparkle! ✨">
-          ✨
-        </div>
-        <div className="absolute bottom-1/6 left-1/6 text-xl animate-pulse-glow cursor-pointer hover:scale-140 hover:-rotate-45 transition-all duration-300 select-none" 
-             style={{animationDelay: '8s'}} 
-             title="Star! ⭐">
-          ⭐
-        </div>
+        {catPositions.map((cat, index) => {
+          const baseAnimations = ['animate-float', 'animate-float-slow', 'animate-pulse-glow'];
+          const baseAnimation = baseAnimations[index % baseAnimations.length];
+          const textSizes = ['text-3xl', 'text-4xl', 'text-5xl', 'text-6xl', 'text-2xl', 'text-xl', 'text-lg'];
+          const textSize = textSizes[index % textSizes.length];
+          
+          return (
+            <div
+              key={cat.id}
+              className={`absolute ${textSize} ${cat.isJumping ? 'animate-jump-bounce' : baseAnimation} cursor-pointer hover:scale-150 hover:rotate-12 transition-all duration-300 select-none`}
+              style={{
+                top: cat.top,
+                left: cat.left,
+                animationDelay: `${index * 0.5}s`,
+                zIndex: cat.isJumping ? 50 : 1
+              }}
+              title={cat.title}
+              onClick={() => handleCatClick(cat.id)}
+            >
+              {cat.emoji}
+            </div>
+          );
+        })}
       </div>
       
       <div className="relative max-w-6xl mx-auto px-6 py-8 z-10">
