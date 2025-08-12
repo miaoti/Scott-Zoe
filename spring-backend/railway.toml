@@ -3,6 +3,10 @@
 builder = "nixpacks"
 buildCommand = "./mvnw clean package -DskipTests"
 
+# Service name for cross-service references
+[service]
+name = "backend"
+
 [deploy]
 # Backend deployment configuration
 startCommand = "java -Xmx512m -Dserver.port=$PORT -jar target/*.jar"
