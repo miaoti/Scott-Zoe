@@ -23,8 +23,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .resourceChain(true)
                 .addResolver(new PathResourceResolver());
         
-        // Configure static resource handling for root level files (like vite.svg)
-        registry.addResourceHandler("/*.svg", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg")
+        // Configure static resource handling for root level files
+        registry.addResourceHandler("/*.svg", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.css", "/*.js")
                 .addResourceLocations("classpath:/static/")
                 .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
                 .resourceChain(true)
