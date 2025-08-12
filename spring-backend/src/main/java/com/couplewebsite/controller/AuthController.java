@@ -29,7 +29,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthController {
     
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -46,14 +45,6 @@ public class AuthController {
     @Autowired
     private SettingsService settingsService;
     
-    /**
-     * Handle CORS preflight for login endpoint
-     */
-    @RequestMapping(value = "/login", method = RequestMethod.OPTIONS)
-    public ResponseEntity<?> handleLoginOptions() {
-        return ResponseEntity.ok().build();
-    }
-
     /**
      * User login endpoint
      */
