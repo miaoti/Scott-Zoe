@@ -67,7 +67,7 @@ function CategoryPhotos() {
       if (categoryId === '-1') {
         setCategory({
           id: -1,
-          name: 'Favorites',
+          name: 'Favorite',
           color: '#ef4444'
         });
       } else {

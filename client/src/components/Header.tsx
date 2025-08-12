@@ -25,7 +25,7 @@ function Header() {
   const [timeElapsed, setTimeElapsed] = useState<TimeElapsed>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   const calculateTimeElapsed = useCallback(() => {
-    const startDate = new Date('2024-06-08T00:00:00');
+    const startDate = new Date('2020-08-06T00:00:00');
     const now = new Date();
     const diffMs = now.getTime() - startDate.getTime();
     
