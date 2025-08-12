@@ -95,9 +95,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Parse allowed origins
-        List<String> origins = Arrays.asList(allowedOrigins.split(","));
-        configuration.setAllowedOrigins(origins);
+        // Allow all origins temporarily for debugging
+        configuration.addAllowedOrigin("*");
         
         // Parse allowed methods
         List<String> methods = Arrays.asList(allowedMethods.split(","));
@@ -111,7 +110,8 @@ public class SecurityConfig {
             configuration.setAllowedHeaders(headers);
         }
         
-        configuration.setAllowCredentials(allowCredentials);
+        // Note: Cannot use allowCredentials with allowedOrigin "*"
+        configuration.setAllowCredentials(false);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
