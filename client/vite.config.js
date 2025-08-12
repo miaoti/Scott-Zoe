@@ -8,7 +8,7 @@ export default defineConfig({
   // Define environment variables for build time
   define: {
     // Make environment variables available at build time
-    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || ''),
+    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'http://localhost:8080'),
   },
   
   server: {
