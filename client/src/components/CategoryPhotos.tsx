@@ -25,7 +25,7 @@ interface Category {
 type ImageSize = 'small' | 'medium' | 'large';
 
 function CategoryPhotos() {
-  const { categoryId } = useParams<{ categoryId: string }>();
+  const { id: categoryId } = useParams<{ id: string }>();
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
