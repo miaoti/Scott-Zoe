@@ -38,14 +38,31 @@ function Dashboard() {
   const [stats, setStats] = useState({ photos: 0, memories: 0, totalLove: 0 });
   const [catPositions, setCatPositions] = useState<CatPosition[]>([]);
 
-  // Generate random positions for cats
-  const generateRandomPosition = (): { top: string; left: string } => {
-    const top = Math.random() * 80 + 10; // 10% to 90% from top
-    const left = Math.random() * 80 + 10; // 10% to 90% from left
-    return {
-      top: `${top}%`,
-      left: `${left}%`
-    };
+  // Generate random positions for cats with minimum distance to avoid crowding
+  const generateRandomPosition = (existingPositions: CatPosition[] = []): { top: string; left: string } => {
+    let attempts = 0;
+    let position;
+    
+    do {
+      const top = Math.random() * 70 + 15; // 15% to 85% from top (more constrained)
+      const left = Math.random() * 70 + 15; // 15% to 85% from left (more constrained)
+      position = { top: `${top}%`, left: `${left}%` };
+      
+      // Check if position is far enough from existing cats
+      const isFarEnough = existingPositions.every(existing => {
+        const existingTop = parseFloat(existing.top);
+        const existingLeft = parseFloat(existing.left);
+        const distance = Math.sqrt(
+          Math.pow(top - existingTop, 2) + Math.pow(left - existingLeft, 2)
+        );
+        return distance > 15; // Minimum 15% distance
+      });
+      
+      if (isFarEnough || attempts > 20) break; // Give up after 20 attempts
+      attempts++;
+    } while (attempts <= 20);
+    
+    return position;
   };
 
   // Initialize cat positions
@@ -56,21 +73,20 @@ function Dashboard() {
       { emoji: '😻', title: 'Love you! 😻' },
       { emoji: '🐾', title: 'Paw prints! 🐾' },
       { emoji: '😺', title: 'Cute cat! 😺' },
-      { emoji: '🙀', title: 'Surprised! 🙀' },
-      { emoji: '😽', title: 'Kiss! 😽' },
-      { emoji: '💕', title: 'Love! 💕' },
-      { emoji: '💖', title: 'Heart! 💖' },
-      { emoji: '✨', title: 'Sparkle! ✨' },
-      { emoji: '⭐', title: 'Star! ⭐' }
+      { emoji: '💕', title: 'Love! 💕' }
     ];
 
-    const initialPositions = cats.map((cat, index) => ({
-      id: `cat-${index}`,
-      ...generateRandomPosition(),
-      emoji: cat.emoji,
-      title: cat.title,
-      isJumping: false
-    }));
+    const initialPositions: CatPosition[] = [];
+    cats.forEach((cat, index) => {
+      const position = generateRandomPosition(initialPositions);
+      initialPositions.push({
+        id: `cat-${index}`,
+        ...position,
+        emoji: cat.emoji,
+        title: cat.title,
+        isJumping: false
+      });
+    });
 
     setCatPositions(initialPositions);
   }, []);
@@ -85,11 +101,15 @@ function Dashboard() {
 
     // After animation completes, relocate cat and reset jumping state
     setTimeout(() => {
-      setCatPositions(prev => prev.map(cat => 
-        cat.id === catId 
-          ? { ...cat, ...generateRandomPosition(), isJumping: false }
-          : cat
-      ));
+      setCatPositions(prev => {
+        const otherCats = prev.filter(cat => cat.id !== catId);
+        const newPosition = generateRandomPosition(otherCats);
+        return prev.map(cat => 
+          cat.id === catId 
+            ? { ...cat, ...newPosition, isJumping: false }
+            : cat
+        );
+      });
     }, 1000); // Match animation duration
   };
 
