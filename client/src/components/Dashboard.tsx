@@ -90,7 +90,7 @@ function Dashboard() {
           ? { ...cat, ...generateRandomPosition(), isJumping: false }
           : cat
       ));
-    }, 1200); // Match animation duration
+    }, 1000); // Match animation duration
   };
 
   useEffect(() => {
@@ -170,7 +170,7 @@ function Dashboard() {
         })}
       </div>
       
-      <div className="relative max-w-6xl mx-auto px-6 py-8 z-20">
+      <div className="relative max-w-6xl mx-auto px-6 py-8 z-20 pointer-events-none">
         {/* Welcome Section */}
         <div className="text-center slide-up mb-12">
           <h1 className="font-heading text-5xl font-semibold text-apple-label mb-6">
@@ -185,7 +185,7 @@ function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <Link
             to="/gallery"
-            className="apple-card apple-card-hover p-6 apple-shadow transition-all duration-300 hover:scale-105 cursor-pointer group relative overflow-hidden bg-gradient-to-br from-pink-50 to-purple-50 border border-pink-100/50"
+            className="apple-card apple-card-hover p-6 apple-shadow transition-all duration-300 hover:scale-105 cursor-pointer group relative overflow-hidden bg-gradient-to-br from-pink-50 to-purple-50 border border-pink-100/50 pointer-events-auto"
           >
             {/* Lovely background decoration */}
             <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-pink-200/20 to-purple-200/20 rounded-full -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-500"></div>
@@ -235,7 +235,7 @@ function Dashboard() {
 
           <Link
             to="/memories"
-            className="apple-card apple-card-hover p-6 text-center apple-shadow transition-all duration-200 hover:scale-105 cursor-pointer group"
+            className="apple-card apple-card-hover p-6 text-center apple-shadow transition-all duration-200 hover:scale-105 cursor-pointer group pointer-events-auto"
           >
             <Calendar className="h-12 w-12 text-apple-blue-light mx-auto mb-4 group-hover:scale-110 transition-transform duration-200" />
             <div className="text-3xl font-semibold text-apple-label mb-2">{stats.memories}</div>
@@ -275,14 +275,14 @@ function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="apple-card apple-shadow p-8 mb-8">
+        <div className="apple-card apple-shadow p-8 mb-8 pointer-events-auto">
           <h2 className="text-2xl font-semibold text-apple-label mb-6 text-center">
             Create New Memories
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Link
               to="/gallery"
-              className="bg-apple-blue/5 border border-apple-blue/20 rounded-xl p-6 hover:bg-apple-blue/10 transition-all duration-300 group"
+              className="bg-apple-blue/5 border border-apple-blue/20 rounded-xl p-6 hover:bg-apple-blue/10 transition-all duration-300 group pointer-events-auto"
             >
               <div className="flex items-center space-x-4">
                 <div className="bg-apple-blue/10 p-3 rounded-xl group-hover:bg-apple-blue/20 transition-colors">
@@ -297,7 +297,7 @@ function Dashboard() {
 
             <Link
               to="/memories"
-              className="bg-apple-blue/5 border border-apple-blue/20 rounded-xl p-6 hover:bg-apple-blue/10 transition-all duration-300 group"
+              className="bg-apple-blue/5 border border-apple-blue/20 rounded-xl p-6 hover:bg-apple-blue/10 transition-all duration-300 group pointer-events-auto"
             >
               <div className="flex items-center space-x-4">
                 <div className="bg-apple-blue/10 p-3 rounded-xl group-hover:bg-apple-blue/20 transition-colors">
@@ -316,7 +316,7 @@ function Dashboard() {
 
         {/* Upcoming Memories */}
         {upcomingMemories.length > 0 && (
-          <div className="mb-8">
+          <div className="mb-8 pointer-events-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold text-apple-label flex items-center">
                 <Clock className="h-6 w-6 mr-3 text-apple-blue-light" />
@@ -324,7 +324,7 @@ function Dashboard() {
               </h2>
               <Link
                 to="/memories"
-                className="text-apple-blue-light hover:text-apple-blue-light/80 font-medium transition-colors"
+                className="text-apple-blue-light hover:text-apple-blue-light/80 font-medium transition-colors pointer-events-auto"
               >
                 View All
               </Link>
@@ -332,7 +332,7 @@ function Dashboard() {
             
             <div className="space-y-4">
               {upcomingMemories.map((memory) => (
-                <div key={memory.id} className="apple-card apple-shadow p-6">
+                <div key={memory.id} className="apple-card apple-shadow p-6 pointer-events-auto">
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-semibold text-apple-label">{memory.title}</h3>
