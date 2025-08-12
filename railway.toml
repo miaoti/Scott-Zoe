@@ -1,10 +1,9 @@
 [build]
-# Railway will auto-detect Spring Boot application
-builder = "nixpacks"
+# Use Dockerfile for multi-stage build (React + Spring Boot)
+builder = "dockerfile"
 
 [deploy]
-startCommand = "java -Dserver.port=$PORT -jar target/*.jar"
-rootDirectory = "spring-backend"
+# Dockerfile handles the complete build and startup
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
 
@@ -24,7 +23,7 @@ DATABASE_DRIVER = "org.sqlite.JDBC"
 DATABASE_PLATFORM = "org.hibernate.community.dialect.SQLiteDialect"
 
 # Security Configuration - IMPORTANT: Change this to a secure random string
-JWT_SECRET = "couple-website-super-secret-jwt-key-for-production-2024-railway-change-me"
+JWT_SECRET = "couple-website-super-secret-jwt-key-for-production-2024-railway"
 
 # CORS Configuration - allow Railway domain and common development origins
 CORS_ORIGINS = "https://${{RAILWAY_PUBLIC_DOMAIN}},http://localhost:5173,http://localhost:3000"
