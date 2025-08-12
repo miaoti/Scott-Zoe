@@ -87,9 +87,9 @@ spring:
       on-profile: production
 
   datasource:
-    # Use SQLite for single service deployment
-    url: ${DATABASE_URL:jdbc:sqlite:/app/database.sqlite}
-    driver-class-name: ${DATABASE_DRIVER:org.sqlite.JDBC}
+    # Use PostgreSQL for Railway deployment
+    url: ${DATABASE_URL}
+    driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 5
       minimum-idle: 0
@@ -98,8 +98,8 @@ spring:
       max-lifetime: 1800000
 
   jpa:
-    # Use SQLite dialect for single service deployment
-    database-platform: ${DATABASE_PLATFORM:org.hibernate.community.dialect.SQLiteDialect}
+    # Use PostgreSQL dialect for Railway deployment
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     show-sql: false
