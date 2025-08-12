@@ -78,24 +78,74 @@ function Dashboard() {
 
   return (
     <div className="relative space-y-8 fade-in min-h-screen overflow-hidden bg-white">
-      {/* Animated Cat Components */}
-      <div className="fixed inset-0 -z-10 pointer-events-none">
-        {/* Cute animated cats */}
-        <div className="absolute top-10 left-10 text-4xl animate-float" style={{animationDelay: '0s'}}>🐱</div>
-        <div className="absolute top-20 right-20 text-3xl animate-float-slow" style={{animationDelay: '2s'}}>😸</div>
-        <div className="absolute bottom-40 left-1/4 text-5xl animate-float" style={{animationDelay: '4s'}}>😻</div>
-        <div className="absolute bottom-20 right-1/3 text-3xl animate-float-slow" style={{animationDelay: '1s'}}>🐾</div>
-        <div className="absolute top-1/3 left-1/2 text-2xl animate-float" style={{animationDelay: '3s'}}>😺</div>
-        <div className="absolute top-2/3 right-1/5 text-4xl animate-float-slow" style={{animationDelay: '5s'}}>🙀</div>
+      {/* Interactive Animated Cat Components */}
+      <div className="fixed inset-0 z-0 pointer-events-auto">
+        {/* Interactive floating cats with hover effects */}
+        <div className="absolute top-10 left-10 text-5xl animate-float cursor-pointer hover:scale-150 hover:rotate-12 transition-all duration-300 select-none" 
+             style={{animationDelay: '0s'}} 
+             title="Meow! 🐱">
+          🐱
+        </div>
+        <div className="absolute top-20 right-20 text-4xl animate-float-slow cursor-pointer hover:scale-125 hover:-rotate-6 transition-all duration-300 select-none" 
+             style={{animationDelay: '2s'}} 
+             title="Happy kitty! 😸">
+          😸
+        </div>
+        <div className="absolute bottom-40 left-1/4 text-6xl animate-float cursor-pointer hover:scale-110 hover:rotate-6 transition-all duration-300 select-none" 
+             style={{animationDelay: '4s'}} 
+             title="Love you! 😻">
+          😻
+        </div>
+        <div className="absolute bottom-20 right-1/3 text-4xl animate-float-slow cursor-pointer hover:scale-150 hover:rotate-12 transition-all duration-300 select-none" 
+             style={{animationDelay: '1s'}} 
+             title="Paw prints! 🐾">
+          🐾
+        </div>
+        <div className="absolute top-1/3 left-1/2 text-3xl animate-float cursor-pointer hover:scale-140 hover:-rotate-12 transition-all duration-300 select-none" 
+             style={{animationDelay: '3s'}} 
+             title="Cute cat! 😺">
+          😺
+        </div>
+        <div className="absolute top-2/3 right-1/5 text-5xl animate-float-slow cursor-pointer hover:scale-120 hover:rotate-6 transition-all duration-300 select-none" 
+             style={{animationDelay: '5s'}} 
+             title="Surprised! 🙀">
+          🙀
+        </div>
+        <div className="absolute bottom-1/3 left-3/4 text-4xl animate-float cursor-pointer hover:scale-130 hover:-rotate-6 transition-all duration-300 select-none" 
+             style={{animationDelay: '6s'}} 
+             title="Kiss! 😽">
+          😽
+        </div>
         
-        {/* Small floating hearts and paws */}
-        <div className="absolute top-1/4 left-1/3 text-lg animate-pulse-glow" style={{animationDelay: '0.5s'}}>💕</div>
-        <div className="absolute top-3/4 right-1/4 text-sm animate-pulse-glow" style={{animationDelay: '2.5s'}}>🐾</div>
-        <div className="absolute top-1/2 left-1/5 text-base animate-pulse-glow" style={{animationDelay: '4.5s'}}>💖</div>
-        <div className="absolute bottom-1/3 left-3/4 text-lg animate-float" style={{animationDelay: '6s'}}>😽</div>
+        {/* Interactive floating hearts and sparkles */}
+        <div className="absolute top-1/4 left-1/3 text-2xl animate-pulse-glow cursor-pointer hover:scale-200 hover:rotate-45 transition-all duration-300 select-none" 
+             style={{animationDelay: '0.5s'}} 
+             title="Love! 💕">
+          💕
+        </div>
+        <div className="absolute top-3/4 right-1/4 text-lg animate-pulse-glow cursor-pointer hover:scale-150 hover:-rotate-12 transition-all duration-300 select-none" 
+             style={{animationDelay: '2.5s'}} 
+             title="Paws! 🐾">
+          🐾
+        </div>
+        <div className="absolute top-1/2 left-1/5 text-xl animate-pulse-glow cursor-pointer hover:scale-180 hover:rotate-90 transition-all duration-300 select-none" 
+             style={{animationDelay: '4.5s'}} 
+             title="Heart! 💖">
+          💖
+        </div>
+        <div className="absolute top-1/6 right-1/3 text-2xl animate-float cursor-pointer hover:scale-160 hover:rotate-180 transition-all duration-300 select-none" 
+             style={{animationDelay: '7s'}} 
+             title="Sparkle! ✨">
+          ✨
+        </div>
+        <div className="absolute bottom-1/6 left-1/6 text-xl animate-pulse-glow cursor-pointer hover:scale-140 hover:-rotate-45 transition-all duration-300 select-none" 
+             style={{animationDelay: '8s'}} 
+             title="Star! ⭐">
+          ⭐
+        </div>
       </div>
       
-      <div className="relative max-w-6xl mx-auto px-6 py-8">
+      <div className="relative max-w-6xl mx-auto px-6 py-8 z-10">
         {/* Welcome Section */}
         <div className="text-center slide-up mb-12">
           <h1 className="font-heading text-5xl font-semibold text-apple-label mb-6">
