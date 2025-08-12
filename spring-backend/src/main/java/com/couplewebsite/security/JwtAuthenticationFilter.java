@@ -33,9 +33,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                   FilterChain filterChain) throws ServletException, IOException {
 
         String requestPath = request.getRequestURI();
+        String requestMethod = request.getMethod();
         
         // Debug logging
-        logger.info("JWT Filter processing path: {}", requestPath);
+        logger.info("JWT Filter processing {} {}", requestMethod, requestPath);
+
+        // Skip JWT processing for OPTIONS requests (CORS preflight)
+        if ("OPTIONS".equals(requestMethod)) {
+            logger.info("OPTIONS request detected, skipping JWT processing");
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // Skip JWT processing for static files and public endpoints
         if (isPublicPath(requestPath)) {
