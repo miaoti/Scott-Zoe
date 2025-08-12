@@ -41,8 +41,9 @@ WORKDIR /app
 # Copy the built JAR
 COPY --from=backend-build /app/target/*.jar app.jar
 
-# Create uploads directory and set permissions
+# Create uploads directory and database directory with proper permissions
 RUN mkdir -p uploads && chmod 755 uploads
+RUN mkdir -p /app && chmod 755 /app
 
 # Create non-root user for security
 RUN groupadd -r appuser && useradd -r -g appuser appuser

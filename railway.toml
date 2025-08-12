@@ -19,13 +19,12 @@ SPRING_PROFILES_ACTIVE = "production"
 PORT = "8080"
 UPLOAD_DIR = "/app/uploads"
 
-# Database Configuration - Railway will inject DATABASE_URL automatically
-# These will be overridden by Railway's PostgreSQL service
-DATABASE_DRIVER = "org.postgresql.Driver"
-DATABASE_PLATFORM = "org.hibernate.dialect.PostgreSQLDialect"
+# Database Configuration - Using SQLite for single service deployment
+DATABASE_DRIVER = "org.sqlite.JDBC"
+DATABASE_PLATFORM = "org.hibernate.community.dialect.SQLiteDialect"
 
-# Security Configuration (using default value from .env.production)
-JWT_SECRET = "couple-website-super-secret-jwt-key-for-production-2024-railway"
+# Security Configuration - IMPORTANT: Change this to a secure random string
+JWT_SECRET = "couple-website-super-secret-jwt-key-for-production-2024-railway-change-me"
 
 # CORS Configuration - allow Railway domain and common development origins
 CORS_ORIGINS = "https://${{RAILWAY_PUBLIC_DOMAIN}},http://localhost:5173,http://localhost:3000"

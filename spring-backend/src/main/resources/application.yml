@@ -87,8 +87,8 @@ spring:
       on-profile: production
 
   datasource:
-    # Use PostgreSQL if DATABASE_URL is provided, otherwise fall back to SQLite
-    url: ${DATABASE_URL:jdbc:sqlite:database.sqlite}
+    # Use SQLite for single service deployment
+    url: ${DATABASE_URL:jdbc:sqlite:/app/database.sqlite}
     driver-class-name: ${DATABASE_DRIVER:org.sqlite.JDBC}
     hikari:
       maximum-pool-size: 5
@@ -98,7 +98,7 @@ spring:
       max-lifetime: 1800000
 
   jpa:
-    # Use PostgreSQL dialect if DATABASE_URL contains postgresql, otherwise SQLite
+    # Use SQLite dialect for single service deployment
     database-platform: ${DATABASE_PLATFORM:org.hibernate.community.dialect.SQLiteDialect}
     hibernate:
       ddl-auto: update
