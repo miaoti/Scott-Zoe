@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Settings, Plus, Trash2, Check, Tag } from 'lucide-react';
 import api from '../utils/api';
 import PhotoDetailModal from './PhotoDetailModal';
@@ -30,6 +30,10 @@ interface Category {
 type ImageSize = 'small' | 'medium' | 'large';
 
 function AllPhotos() {
+  const [searchParams] = useSearchParams();
+  const filter = searchParams.get('filter');
+  const isFavoritesView = filter === 'favorites';
+  
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [imageSize, setImageSize] = useState<ImageSize>('medium');
@@ -46,7 +50,7 @@ function AllPhotos() {
 
   useEffect(() => {
     fetchPhotos();
-  }, [page]);
+  }, [page, isFavoritesView]);
 
   useEffect(() => {
     fetchCategories();
@@ -55,10 +59,21 @@ function AllPhotos() {
   const fetchPhotos = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/api/photos?page=${page}&limit=20`);
-      setPhotos(response.data.photos);
-      setTotalPages(response.data.pagination.totalPages);
-      setTotalPhotos(response.data.pagination.total);
+      const endpoint = isFavoritesView 
+        ? '/api/photos/favorites'
+        : `/api/photos?page=${page}&limit=20`;
+      const response = await api.get(endpoint);
+      
+      if (isFavoritesView) {
+        // Favorites endpoint returns array directly
+        setPhotos(response.data);
+        setTotalPhotos(response.data.length);
+        setTotalPages(1);
+      } else {
+        setPhotos(response.data.photos);
+        setTotalPages(response.data.pagination.totalPages);
+        setTotalPhotos(response.data.pagination.total);
+      }
     } catch (error) {
       console.error('Error fetching photos:', error);
     } finally {
@@ -203,7 +218,7 @@ function AllPhotos() {
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-apple-label">All Photos</h1>
+            <h1 className="text-3xl font-bold text-apple-label">{isFavoritesView ? 'Favorites' : 'All Photos'}</h1>
             <p className="text-apple-secondary-label">{totalPhotos} photos</p>
           </div>
         </div>
