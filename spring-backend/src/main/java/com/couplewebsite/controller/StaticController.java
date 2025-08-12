@@ -38,7 +38,7 @@ public class StaticController {
     /**
      * Catch-all for React routing - serve index.html for any non-API route
      */
-    @GetMapping(value = {"/login", "/gallery", "/memories", "/wheel", "/settings", "/{path:^(?!api|uploads|health|assets).*}"})
+    @GetMapping(value = {"/login", "/gallery", "/memories", "/wheel", "/settings", "/category/**", "/photos", "/photo/**", "/{path:^(?!api|uploads|health|assets).*}"})
     public ResponseEntity<Resource> reactRouting() throws IOException {
         ClassPathResource resource = new ClassPathResource("/static/index.html");
 
