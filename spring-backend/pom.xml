@@ -156,6 +156,11 @@
                                     <directory>../client/dist</directory>
                                     <filtering>false</filtering>
                                 </resource>
+                                <!-- Fallback to local static files if client/dist doesn't exist -->
+                                <resource>
+                                    <directory>src/main/resources/static</directory>
+                                    <filtering>false</filtering>
+                                </resource>
                             </resources>
                         </configuration>
                     </execution>
