@@ -23,7 +23,7 @@ UPLOAD_DIR = "/app/uploads"
 # JWT_SECRET should be set manually in Railway dashboard for security
 
 # CORS Configuration - allow frontend domain and Railway domains
-CORS_ORIGINS = "https://scott-zoe-production.up.railway.app,https://*.up.railway.app,https://*.railway.app,http://localhost:5173,http://localhost:3000"
+CORS_ORIGINS = "https://scott-zoe-production.up.railway.app,http://localhost:5173,http://localhost:3000"
 
 [environments.production.deploy]
 healthcheckPath = "/actuator/health"
