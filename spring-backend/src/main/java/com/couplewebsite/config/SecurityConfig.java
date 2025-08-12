@@ -79,8 +79,8 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 // Static resources - must be first for proper precedence
                 .requestMatchers("/assets/**", "/static/**", "/*.svg", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.css", "/*.js", "/*.woff", "/*.woff2", "/*.ttf", "/*.eot", "/*.json", "/*.txt").permitAll()
-                // API endpoints - only auth and health endpoints are public
-                .requestMatchers("/api/auth/**", "/health", "/actuator/health").permitAll()
+                // API endpoints - auth, health, and image serving are public
+                .requestMatchers("/api/auth/**", "/health", "/actuator/health", "/api/photos/image/**").permitAll()
                 // Frontend routes
                 .requestMatchers("/", "/login", "/gallery", "/memories", "/wheel", "/settings").permitAll()
                 .anyRequest().authenticated()
