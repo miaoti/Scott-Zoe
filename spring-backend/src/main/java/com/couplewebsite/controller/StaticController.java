@@ -55,7 +55,7 @@ public class StaticController {
     /**
      * Serve JS files with correct MIME type
      */
-    @GetMapping("/assets/{filename:.+\.js}")
+    @GetMapping("/assets/{filename:.+\\.js}")
     public ResponseEntity<Resource> serveJs(@PathVariable String filename) throws IOException {
         ClassPathResource resource = new ClassPathResource("/static/assets/" + filename);
 
@@ -74,7 +74,7 @@ public class StaticController {
     /**
      * Serve SVG files with correct MIME type
      */
-    @GetMapping("/{filename:.+\.svg}")
+    @GetMapping("/{filename:.+\\.svg}")
     public ResponseEntity<Resource> serveSvg(@PathVariable String filename) throws IOException {
         ClassPathResource resource = new ClassPathResource("/static/" + filename);
         
