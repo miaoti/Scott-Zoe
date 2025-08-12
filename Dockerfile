@@ -6,6 +6,11 @@ WORKDIR /app/client
 COPY client/package*.json ./
 RUN npm ci --cache /tmp/.npm
 COPY client/ ./
+
+# Set build-time environment variables for Vite
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 RUN npm run build
 
 # Java build stage
