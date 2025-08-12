@@ -7,11 +7,17 @@ COPY client/package*.json ./
 RUN npm ci --cache /tmp/.npm
 COPY client/ ./
 
-# Use environment variable from Railway's build.env
-ENV VITE_API_URL=${VITE_API_URL}
+# Set Railway domain if available
+RUN if [ -n "$RAILWAY_PUBLIC_DOMAIN" ]; then \
+    export VITE_API_URL="https://$RAILWAY_PUBLIC_DOMAIN"; \
+    echo "Setting VITE_API_URL to: $VITE_API_URL"; \
+    elif [ -z "$VITE_API_URL" ]; then \
+    export VITE_API_URL="http://localhost:8080"; \
+    echo "Using fallback VITE_API_URL: $VITE_API_URL"; \
+    fi
 
-# Debug: Show the VITE_API_URL value
-RUN echo "VITE_API_URL is set to: $VITE_API_URL"
+# Ensure VITE_API_URL is available
+ENV VITE_API_URL=${VITE_API_URL:-http://localhost:8080}
 
 RUN npm run build
 

@@ -5,6 +5,7 @@ builder = "dockerfile"
 # Build-time environment variables for Vite
 [build.env]
 VITE_API_URL = "https://${{RAILWAY_PUBLIC_DOMAIN}}"
+RAILWAY_PUBLIC_DOMAIN = "${{RAILWAY_PUBLIC_DOMAIN}}"
 
 # Runtime configuration
 [deploy]
