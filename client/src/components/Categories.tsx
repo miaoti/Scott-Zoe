@@ -39,7 +39,7 @@ function Categories() {
     }
 
     try {
-      await api.delete(`/categories/${categoryId}`);
+      await api.delete(`/api/categories/${categoryId}`);
       await fetchCategories();
     } catch (error) {
       console.error('Error deleting category:', error);
