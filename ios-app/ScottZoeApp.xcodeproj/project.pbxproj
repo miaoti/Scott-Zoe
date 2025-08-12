@@ -1,0 +1,447 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		ScottZoeAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* ScottZoeAppApp.swift */; };
+		ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* ContentView.swift */; };
+		Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = /* Assets.xcassets */; };
+		Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = /* Preview Assets.xcassets */; };
+		MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* MainTabView.swift */; };
+		AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* AuthManager.swift */; };
+		APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* APIClient.swift */; };
+		KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* KeychainHelper.swift */; };
+		LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* LoginView.swift */; };
+		LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* LoadingView.swift */; };
+		DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* DashboardView.swift */; };
+		DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* DataManager.swift */; };
+		LoveCounterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* LoveCounterManager.swift */; };
+		Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* Models.swift */; };
+		PhotoGalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* PhotoGalleryView.swift */; };
+		PhotoDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* PhotoDetailView.swift */; };
+		LoveCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* LoveCounterView.swift */; };
+		PrizeWheelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* PrizeWheelView.swift */; };
+		MemoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* MemoriesView.swift */; };
+		MemoryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* MemoryDetailView.swift */; };
+		SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = /* SettingsView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		ScottZoeApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScottZoeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ScottZoeAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScottZoeAppApp.swift; sourceTree = "<group>"; };
+		ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
+		LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
+		DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
+		LoveCounterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoveCounterManager.swift; sourceTree = "<group>"; };
+		Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		PhotoGalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoGalleryView.swift; sourceTree = "<group>"; };
+		PhotoDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDetailView.swift; sourceTree = "<group>"; };
+		LoveCounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoveCounterView.swift; sourceTree = "<group>"; };
+		PrizeWheelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrizeWheelView.swift; sourceTree = "<group>"; };
+		MemoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoriesView.swift; sourceTree = "<group>"; };
+		MemoryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryDetailView.swift; sourceTree = "<group>"; };
+		SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		/* Begin PBXFrameworksBuildPhase section */
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		/* Begin PBXGroup section */
+			isa = PBXGroup;
+			children = (
+				/* ScottZoeApp */,
+				/* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		/* Products */ = {
+			isa = PBXGroup;
+			children = (
+				/* ScottZoeApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		/* ScottZoeApp */ = {
+			isa = PBXGroup;
+			children = (
+				/* ScottZoeAppApp.swift */,
+				/* ContentView.swift */,
+				/* MainTabView.swift */,
+				/* Views */,
+				/* Managers */,
+				/* Models */,
+				/* Utilities */,
+				/* Assets.xcassets */,
+				/* Preview Content */,
+			);
+			path = ScottZoeApp;
+			sourceTree = "<group>";
+		};
+		/* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				/* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		/* Views */ = {
+			isa = PBXGroup;
+			children = (
+				/* LoginView.swift */,
+				/* LoadingView.swift */,
+				/* DashboardView.swift */,
+				/* PhotoGalleryView.swift */,
+				/* PhotoDetailView.swift */,
+				/* LoveCounterView.swift */,
+				/* PrizeWheelView.swift */,
+				/* MemoriesView.swift */,
+				/* MemoryDetailView.swift */,
+				/* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		/* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				/* AuthManager.swift */,
+				/* DataManager.swift */,
+				/* LoveCounterManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		/* Models */ = {
+			isa = PBXGroup;
+			children = (
+				/* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		/* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				/* APIClient.swift */,
+				/* KeychainHelper.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		/* ScottZoeApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = /* XCConfigurationList "ScottZoeApp" */;
+			buildPhases = (
+				/* Sources */,
+				/* Frameworks */,
+				/* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ScottZoeApp;
+			productName = ScottZoeApp;
+			productReference = /* ScottZoeApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		/* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					/* ScottZoeApp */ = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = /* XCConfigurationList "Project object" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = /* */;
+			productRefGroup = /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				/* ScottZoeApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		/* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				/* Preview Assets.xcassets in Resources */,
+				/* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		/* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				/* ContentView.swift in Sources */,
+				/* ScottZoeAppApp.swift in Sources */,
+				/* MainTabView.swift in Sources */,
+				/* AuthManager.swift in Sources */,
+				/* APIClient.swift in Sources */,
+				/* KeychainHelper.swift in Sources */,
+				/* LoginView.swift in Sources */,
+				/* LoadingView.swift in Sources */,
+				/* DashboardView.swift in Sources */,
+				/* DataManager.swift in Sources */,
+				/* LoveCounterManager.swift in Sources */,
+				/* Models.swift in Sources */,
+				/* PhotoGalleryView.swift in Sources */,
+				/* PhotoDetailView.swift in Sources */,
+				/* LoveCounterView.swift in Sources */,
+				/* PrizeWheelView.swift in Sources */,
+				/* MemoriesView.swift in Sources */,
+				/* MemoryDetailView.swift in Sources */,
+				/* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		/* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASYNC_COMPILATION_ENABLED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		/* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASYNC_COMPILATION_ENABLED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		/* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"ScottZoeApp/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.scottzoe.loveapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		/* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"ScottZoeApp/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.scottzoe.loveapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		/* XCConfigurationList "ScottZoeApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				/* Debug */,
+				/* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		/* XCConfigurationList "Project object" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				/* Debug */,
+				/* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = /* Project object */;
+}
