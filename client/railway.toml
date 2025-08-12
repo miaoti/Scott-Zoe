@@ -1,0 +1,20 @@
+[build]
+# Frontend build configuration
+builder = "nixpacks"
+buildCommand = "npm ci && npm run build"
+
+[deploy]
+# Frontend deployment configuration
+startCommand = "npm run preview"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+[environments.production.variables]
+# Frontend environment variables
+# Railway will automatically set VITE_API_URL to point to backend service
+VITE_API_URL = "https://${{backend.RAILWAY_PUBLIC_DOMAIN}}"
+NODE_ENV = "production"
+
+[environments.production.deploy]
+healthcheckPath = "/"
+healthcheckTimeout = 300

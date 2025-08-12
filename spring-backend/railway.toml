@@ -1,0 +1,26 @@
+[build]
+# Backend build configuration
+builder = "nixpacks"
+buildCommand = "./mvnw clean package -DskipTests"
+
+[deploy]
+# Backend deployment configuration
+startCommand = "java -Xmx512m -Dserver.port=$PORT -jar target/*.jar"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+[environments.production.variables]
+# Backend environment variables
+SPRING_PROFILES_ACTIVE = "production"
+SERVER_PORT = "$PORT"
+UPLOAD_DIR = "/app/uploads"
+
+# Database Configuration - Railway will inject DATABASE_URL
+# JWT_SECRET should be set manually in Railway dashboard for security
+
+# CORS Configuration - allow frontend domain
+CORS_ORIGINS = "https://${{client.RAILWAY_PUBLIC_DOMAIN}}"
+
+[environments.production.deploy]
+healthcheckPath = "/actuator/health"
+healthcheckTimeout = 300
