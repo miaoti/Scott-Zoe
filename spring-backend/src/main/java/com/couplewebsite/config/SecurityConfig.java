@@ -18,10 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.web.WebSecurityCustomizer;
+
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -69,12 +67,7 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
     
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring()
-                .requestMatchers("/assets/**", "/*.svg", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.css", "/*.js", "/*.woff", "/*.woff2", "/*.ttf", "/*.eot");
-    }
-    
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -83,7 +76,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/api/auth/**", "/health", "/actuator/health", "/api/photos/image/**", "/api/photos/test", "/api/photos", "/api/categories").permitAll()
                 .requestMatchers("/", "/login", "/gallery", "/memories", "/wheel", "/settings").permitAll()
-                .requestMatchers("/assets/**", "/*.svg", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.css", "/*.js").permitAll()
+                .requestMatchers("/assets/**", "/*.svg", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.css", "/*.js", "/*.woff", "/*.woff2", "/*.ttf", "/*.eot").permitAll()
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
