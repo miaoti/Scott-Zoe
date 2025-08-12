@@ -77,22 +77,22 @@ function Dashboard() {
   };
 
   return (
-    <div className="relative space-y-8 fade-in min-h-screen overflow-hidden">
-      {/* Animated Background */}
-      <div className="fixed inset-0 -z-10">
-        {/* Base gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 animate-gradient"></div>
+    <div className="relative space-y-8 fade-in min-h-screen overflow-hidden bg-white">
+      {/* Animated Cat Components */}
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        {/* Cute animated cats */}
+        <div className="absolute top-10 left-10 text-4xl animate-float" style={{animationDelay: '0s'}}>🐱</div>
+        <div className="absolute top-20 right-20 text-3xl animate-float-slow" style={{animationDelay: '2s'}}>😸</div>
+        <div className="absolute bottom-40 left-1/4 text-5xl animate-float" style={{animationDelay: '4s'}}>😻</div>
+        <div className="absolute bottom-20 right-1/3 text-3xl animate-float-slow" style={{animationDelay: '1s'}}>🐾</div>
+        <div className="absolute top-1/3 left-1/2 text-2xl animate-float" style={{animationDelay: '3s'}}>😺</div>
+        <div className="absolute top-2/3 right-1/5 text-4xl animate-float-slow" style={{animationDelay: '5s'}}>🙀</div>
         
-        {/* Floating elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-pink-200/30 to-purple-200/30 rounded-full blur-xl animate-float"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-r from-blue-200/25 to-indigo-200/25 rounded-full blur-lg animate-float-slow" style={{animationDelay: '2s'}}></div>
-        <div className="absolute bottom-32 left-1/4 w-40 h-40 bg-gradient-to-r from-purple-200/20 to-pink-200/20 rounded-full blur-2xl animate-float" style={{animationDelay: '4s'}}></div>
-        <div className="absolute bottom-20 right-1/3 w-28 h-28 bg-gradient-to-r from-indigo-200/30 to-blue-200/30 rounded-full blur-xl animate-float-slow" style={{animationDelay: '1s'}}></div>
-        
-        {/* Subtle sparkle effects */}
-        <div className="absolute top-1/4 left-1/3 w-2 h-2 bg-pink-300 rounded-full animate-pulse-glow" style={{animationDelay: '0.5s'}}></div>
-        <div className="absolute top-3/4 right-1/4 w-1.5 h-1.5 bg-purple-300 rounded-full animate-pulse-glow" style={{animationDelay: '2.5s'}}></div>
-        <div className="absolute top-1/2 left-1/5 w-1 h-1 bg-blue-300 rounded-full animate-pulse-glow" style={{animationDelay: '4.5s'}}></div>
+        {/* Small floating hearts and paws */}
+        <div className="absolute top-1/4 left-1/3 text-lg animate-pulse-glow" style={{animationDelay: '0.5s'}}>💕</div>
+        <div className="absolute top-3/4 right-1/4 text-sm animate-pulse-glow" style={{animationDelay: '2.5s'}}>🐾</div>
+        <div className="absolute top-1/2 left-1/5 text-base animate-pulse-glow" style={{animationDelay: '4.5s'}}>💖</div>
+        <div className="absolute bottom-1/3 left-3/4 text-lg animate-float" style={{animationDelay: '6s'}}>😽</div>
       </div>
       
       <div className="relative max-w-6xl mx-auto px-6 py-8">
