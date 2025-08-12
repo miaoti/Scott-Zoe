@@ -74,9 +74,12 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
+                // Static resources - must be first for proper precedence
+                .requestMatchers("/assets/**", "/static/**", "/*.svg", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.css", "/*.js", "/*.woff", "/*.woff2", "/*.ttf", "/*.eot", "/*.json", "/*.txt").permitAll()
+                // API endpoints
                 .requestMatchers("/api/auth/**", "/health", "/actuator/health", "/api/photos/image/**", "/api/photos/test", "/api/photos", "/api/categories").permitAll()
+                // Frontend routes
                 .requestMatchers("/", "/login", "/gallery", "/memories", "/wheel", "/settings").permitAll()
-                .requestMatchers("/assets/**", "/*.svg", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.css", "/*.js", "/*.woff", "/*.woff2", "/*.ttf", "/*.eot").permitAll()
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())

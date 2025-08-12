@@ -16,18 +16,29 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Configure static resource handling for assets
+        // Configure static resource handling for assets with high priority
         registry.addResourceHandler("/assets/**")
                 .addResourceLocations("classpath:/static/assets/")
                 .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
                 .resourceChain(true)
-                .addResolver(new PathResourceResolver());
+                .addResolver(new PathResourceResolver() {
+                    @Override
+                    protected Resource getResource(String resourcePath, Resource location) throws IOException {
+                        Resource resource = super.getResource(resourcePath, location);
+                        return resource;
+                    }
+                });
         
         // Configure static resource handling for root level files
-        registry.addResourceHandler("/*.svg", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.css", "/*.js")
+        registry.addResourceHandler("/*.svg", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.css", "/*.js", "/*.woff", "/*.woff2", "/*.ttf", "/*.eot", "/*.json", "/*.txt", "/*.map")
                 .addResourceLocations("classpath:/static/")
                 .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
                 .resourceChain(true)
                 .addResolver(new PathResourceResolver());
+        
+        // Fallback for any static resources
+        registry.addResourceHandler("/static/**")
+                .addResourceLocations("classpath:/static/")
+                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
     }
 }
