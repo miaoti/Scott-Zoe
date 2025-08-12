@@ -55,7 +55,7 @@ public class StaticController {
     /**
      * Serve JS files with correct MIME type
      */
-    @GetMapping("/assets/{filename:.+\\.js}")
+    @GetMapping("/assets/{filename:.+\.js}")
     public ResponseEntity<Resource> serveJs(@PathVariable String filename) throws IOException {
         ClassPathResource resource = new ClassPathResource("/static/assets/" + filename);
 
@@ -68,6 +68,25 @@ public class StaticController {
                     .body(resource);
         }
 
+        return ResponseEntity.notFound().build();
+    }
+
+    /**
+     * Serve SVG files with correct MIME type
+     */
+    @GetMapping("/{filename:.+\.svg}")
+    public ResponseEntity<Resource> serveSvg(@PathVariable String filename) throws IOException {
+        ClassPathResource resource = new ClassPathResource("/static/" + filename);
+        
+        if (resource.exists()) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.valueOf("image/svg+xml"));
+            headers.setCacheControl("max-age=31536000"); // 1 year cache
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(resource);
+        }
+        
         return ResponseEntity.notFound().build();
     }
 
