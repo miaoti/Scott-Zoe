@@ -17,7 +17,7 @@ import java.nio.file.Path;
 
 @RestController
 @RequestMapping("/uploads")
-@CrossOrigin(origins = "*", maxAge = 3600)
+
 public class FileController {
     
     private static final Logger logger = LoggerFactory.getLogger(FileController.class);

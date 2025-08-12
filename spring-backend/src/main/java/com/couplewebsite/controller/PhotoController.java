@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/photos")
-@CrossOrigin(origins = "*", maxAge = 3600)
+
 public class PhotoController {
     
     private static final Logger logger = LoggerFactory.getLogger(PhotoController.class);
