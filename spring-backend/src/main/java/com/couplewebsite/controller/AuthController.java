@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -45,6 +46,14 @@ public class AuthController {
     @Autowired
     private SettingsService settingsService;
     
+    /**
+     * Handle CORS preflight for login endpoint
+     */
+    @RequestMapping(value = "/login", method = RequestMethod.OPTIONS)
+    public ResponseEntity<?> handleLoginOptions() {
+        return ResponseEntity.ok().build();
+    }
+
     /**
      * User login endpoint
      */
