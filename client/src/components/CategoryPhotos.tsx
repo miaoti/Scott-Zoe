@@ -37,27 +37,45 @@ function CategoryPhotos() {
   const [showPhotoDetail, setShowPhotoDetail] = useState(false);
 
   useEffect(() => {
+    console.log('CategoryPhotos useEffect triggered with categoryId:', categoryId);
     if (categoryId) {
+      console.log('Fetching data for categoryId:', categoryId);
       fetchCategoryPhotos();
       fetchCategoryInfo();
+    } else {
+      console.log('No categoryId provided');
     }
   }, [categoryId]);
 
   const fetchCategoryPhotos = async () => {
+    console.log('fetchCategoryPhotos called for categoryId:', categoryId);
     try {
+      console.log('Setting loading to true');
       setLoading(true);
       setError(null);
       if (categoryId === '-1') {
         // Fetch favorite photos
+        console.log('Fetching favorite photos from /api/photos/favorites');
         const response = await api.get('/api/photos/favorites');
+        console.log('Favorite photos response:', response.data);
         setPhotos(response.data);
       } else {
         // Fetch photos by category
-        const response = await api.get(`/api/categories/${categoryId}/photos`);
+        const url = `/api/categories/${categoryId}/photos`;
+        console.log('Fetching category photos from:', url);
+        const response = await api.get(url);
+        console.log('Category photos response:', response.data);
         setPhotos(response.data);
       }
+      console.log('Photos fetched successfully');
     } catch (error: any) {
       console.error('Error fetching category photos:', error);
+      console.error('Error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
       // Check if it's an authentication error
       if (error.response?.status === 401 || error.response?.status === 403) {
         setError('Authentication required. Please log in.');
@@ -66,24 +84,37 @@ function CategoryPhotos() {
       }
       setPhotos([]);
     } finally {
+      console.log('Setting loading to false');
       setLoading(false);
     }
   };
 
   const fetchCategoryInfo = async () => {
+    console.log('fetchCategoryInfo called for categoryId:', categoryId);
     try {
       if (categoryId === '-1') {
+        console.log('Setting favorites category info');
         setCategory({
           id: -1,
           name: 'Favorites',
           color: '#ef4444'
         });
       } else {
-        const response = await api.get(`/api/categories/${categoryId}`);
+        const url = `/api/categories/${categoryId}`;
+        console.log('Fetching category info from:', url);
+        const response = await api.get(url);
+        console.log('Category info response:', response.data);
         setCategory(response.data);
       }
+      console.log('Category info fetched successfully');
     } catch (err: any) {
       console.error('Error fetching category info:', err);
+      console.error('Category info error details:', {
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        data: err.response?.data,
+        message: err.message
+      });
       // Check if it's an authentication error
       if (err.response?.status === 401 || err.response?.status === 403) {
         console.error('Authentication required. Please log in.');
@@ -181,7 +212,10 @@ function CategoryPhotos() {
     }
   };
 
+  console.log('CategoryPhotos render - loading:', loading, 'error:', error, 'photos.length:', photos.length, 'category:', category);
+  
   if (loading) {
+    console.log('Rendering loading spinner');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400"></div>
