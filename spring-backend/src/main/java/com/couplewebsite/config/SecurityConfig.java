@@ -75,6 +75,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
+                // Allow all OPTIONS requests for CORS preflight - must be first
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 // Static resources - must be first for proper precedence
                 .requestMatchers("/assets/**", "/static/**", "/*.svg", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.css", "/*.js", "/*.woff", "/*.woff2", "/*.ttf", "/*.eot", "/*.json", "/*.txt").permitAll()
                 // API endpoints
