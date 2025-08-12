@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Tag, X, Check } from 'lucide-react';
 import api from '../utils/api';
 
+// Force deployment update - API endpoints fixed
+
 interface Category {
   id: number;
   name: string;
