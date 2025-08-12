@@ -1,5 +1,5 @@
 server:
-  port: 3001
+  port: ${PORT:8080}
   servlet:
     context-path: /
   max-http-header-size: 8KB
@@ -105,7 +105,7 @@ spring:
     show-sql: false
 
 server:
-  port: ${PORT:10000}
+  port: ${PORT:8080}
 
 # Production CORS Configuration
 cors:

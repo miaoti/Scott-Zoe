@@ -1,7 +1,10 @@
 [build]
-builder = "dockerfile"
+# Railway will auto-detect Spring Boot application
+builder = "nixpacks"
 
 [deploy]
+startCommand = "java -Dserver.port=$PORT -jar target/*.jar"
+rootDirectory = "spring-backend"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
 
@@ -16,23 +19,16 @@ SPRING_PROFILES_ACTIVE = "production"
 PORT = "8080"
 UPLOAD_DIR = "/app/uploads"
 
-# Database Configuration (using default values from .env.production)
-POSTGRES_DB = "couple_website"
-POSTGRES_USER = "couple_user"
-POSTGRES_PASSWORD = "couple_secure_password_2024"
-DATABASE_URL = "jdbc:postgresql://db:5432/couple_website?user=couple_user&password=couple_secure_password_2024"
+# Database Configuration - Railway will inject DATABASE_URL automatically
+# These will be overridden by Railway's PostgreSQL service
 DATABASE_DRIVER = "org.postgresql.Driver"
 DATABASE_PLATFORM = "org.hibernate.dialect.PostgreSQLDialect"
-SPRING_DATASOURCE_URL = "jdbc:postgresql://db:5432/couple_website"
-SPRING_DATASOURCE_USERNAME = "couple_user"
-SPRING_DATASOURCE_PASSWORD = "couple_secure_password_2024"
-SPRING_DATASOURCE_DRIVER_CLASS_NAME = "org.postgresql.Driver"
 
 # Security Configuration (using default value from .env.production)
 JWT_SECRET = "couple-website-super-secret-jwt-key-for-production-2024-railway"
 
-# CORS Configuration (will be set to your Railway domain)
-CORS_ORIGINS = "https://${{RAILWAY_PUBLIC_DOMAIN}}"
+# CORS Configuration - allow Railway domain and common development origins
+CORS_ORIGINS = "https://${{RAILWAY_PUBLIC_DOMAIN}},http://localhost:5173,http://localhost:3000"
 
 [environments.production.deploy]
 healthcheckPath = "/actuator/health"
