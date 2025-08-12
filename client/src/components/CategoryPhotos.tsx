@@ -37,14 +37,26 @@ function CategoryPhotos() {
 
   useEffect(() => {
     if (categoryId) {
-      fetchCategoryPhotos();
-      fetchCategoryInfo();
+      fetchData();
     }
   }, [categoryId]);
 
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      await Promise.all([
+        fetchCategoryPhotos(),
+        fetchCategoryInfo()
+      ]);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchCategoryPhotos = async () => {
     try {
-      setLoading(true);
       if (categoryId === '-1') {
         // Fetch favorite photos
         const response = await api.get('/api/photos/favorites');
@@ -57,8 +69,6 @@ function CategoryPhotos() {
     } catch (error) {
       console.error('Error fetching category photos:', error);
       setPhotos([]);
-    } finally {
-      setLoading(false);
     }
   };
 

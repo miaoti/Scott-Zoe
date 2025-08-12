@@ -45,7 +45,7 @@ function Settings() {
                   Your Love Story
                 </div>
                 <div className="text-apple-secondary-label">
-                  Started on June 8th, 2024
+                  Started on June 8th, 2020
                 </div>
                 <div className="text-sm text-apple-tertiary-label mt-4">
                   Watch your days together count up in real-time in the header!
@@ -64,7 +64,7 @@ function Settings() {
         {/* Additional Info */}
         <div className="mt-8 text-center">
           <p className="text-sm text-apple-tertiary-label">
-            Your love story began on June 8th, 2024. Every moment since then is precious! 💖
+            Your love story began on June 8th, 2020. Every moment since then is precious! 💖
           </p>
         </div>
       </div>
