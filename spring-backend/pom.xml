@@ -152,13 +152,14 @@
                         <configuration>
                             <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
                             <resources>
-                                <resource>
-                                    <directory>../client/dist</directory>
-                                    <filtering>false</filtering>
-                                </resource>
-                                <!-- Fallback to local static files if client/dist doesn't exist -->
+                                <!-- Fallback to local static files if client/dist doesn't exist (copied first) -->
                                 <resource>
                                     <directory>src/main/resources/static</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                                <!-- Copy built frontend last so it overwrites any fallback files -->
+                                <resource>
+                                    <directory>../client/dist</directory>
                                     <filtering>false</filtering>
                                 </resource>
                             </resources>
