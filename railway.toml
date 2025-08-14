@@ -24,9 +24,9 @@ SPRING_PROFILES_ACTIVE = "production"
 PORT = "8080"
 UPLOAD_DIR = "/app/uploads"
 
-# Database Configuration - Using SQLite for single service deployment
-DATABASE_DRIVER = "org.sqlite.JDBC"
-DATABASE_PLATFORM = "org.hibernate.community.dialect.SQLiteDialect"
+# Database Configuration - Using PostgreSQL for persistent data storage
+# Railway will automatically provide PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD
+# when you add a PostgreSQL database service to your project
 
 # Security Configuration - IMPORTANT: Change this to a secure random string
 JWT_SECRET = "couple-website-super-secret-jwt-key-for-production-2024-railway"

@@ -47,6 +47,7 @@ function Settings() {
   const [savedOpportunities, setSavedOpportunities] = useState(0);
   const [loadingUserData, setLoadingUserData] = useState(true);
   const [otherUser, setOtherUser] = useState<OtherUser | null>(null);
+  const [myWheelPrizes, setMyWheelPrizes] = useState<PrizeTemplate[]>([]);
   const [otherWheelPrizes, setOtherWheelPrizes] = useState<PrizeTemplate[]>([]);
 
   useEffect(() => {
