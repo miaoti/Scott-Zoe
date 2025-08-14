@@ -3,7 +3,7 @@ ALTER TABLE users ADD COLUMN total_earnings INTEGER DEFAULT 0;
 
 -- Create earnings table
 CREATE TABLE earnings (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     amount INTEGER NOT NULL,
     total_after INTEGER NOT NULL,

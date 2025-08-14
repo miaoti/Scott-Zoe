@@ -1,6 +1,6 @@
 -- Create wheel_usage table
 CREATE TABLE wheel_usage (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     used_at TIMESTAMP NOT NULL,
     week_start TIMESTAMP NOT NULL,

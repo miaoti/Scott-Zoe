@@ -1,6 +1,6 @@
 -- Create saved_opportunities table
 CREATE TABLE saved_opportunities (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL,
     source VARCHAR(255) NOT NULL DEFAULT 'milestone_520',
