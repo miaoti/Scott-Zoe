@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Camera, Calendar, Heart, Clock } from 'lucide-react';
 import api, { API_BASE_URL } from '../utils/api';
 import LoveCounter from './LoveCounter';
+import PartnerLoveCard from './PartnerLoveCard';
 import PrizeWheel from './PrizeWheel';
 
 interface CatPosition {
@@ -304,6 +305,10 @@ function Dashboard() {
           
           <div className="relative z-20 pointer-events-auto">
             <LoveCounter />
+          </div>
+          
+          <div className="relative z-20 pointer-events-auto">
+            <PartnerLoveCard />
           </div>
         </div>
 

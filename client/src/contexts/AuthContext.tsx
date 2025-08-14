@@ -31,10 +31,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (token) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setIsAuthenticated(true);
-      // You could also verify the token with the server here
+      // Fetch user data to populate the user state
+      fetchUserData();
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await api.get('/api/auth/profile');
+      setUser(response.data);
+    } catch (error) {
+      console.error('Failed to fetch user data:', error);
+      // If token is invalid, clear it
+      logout();
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
