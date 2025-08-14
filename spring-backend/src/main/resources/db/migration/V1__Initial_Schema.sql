@@ -73,5 +73,12 @@ BEGIN
 END $$;
 CREATE INDEX IF NOT EXISTS idx_photos_created_at ON photos(created_at);
 CREATE INDEX IF NOT EXISTS idx_notes_photo_id ON notes(photo_id);
-CREATE INDEX IF NOT EXISTS idx_notes_author_id ON notes(author_id);
+-- Only create index if author_id column exists
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.columns 
+               WHERE table_name = 'notes' AND column_name = 'author_id') THEN
+        CREATE INDEX IF NOT EXISTS idx_notes_author_id ON notes(author_id);
+    END IF;
+END $$;
 CREATE INDEX IF NOT EXISTS idx_love_stats_user_id ON love_stats(user_id);
