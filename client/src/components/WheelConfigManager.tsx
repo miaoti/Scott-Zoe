@@ -281,19 +281,23 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
       // Normalize probabilities to ensure exact 100% total
       const normalizedPrizes = [...prizes];
       const currentTotal = normalizedPrizes.reduce((sum, prize) => sum + prize.probability, 0);
-      if (Math.abs(currentTotal - 100) > 0.001) {
-        const factor = 100 / currentTotal;
-        normalizedPrizes.forEach(prize => {
-          prize.probability = parseFloat((prize.probability * factor).toFixed(6));
-        });
-        
-        // Final adjustment to ensure exact 100%
-        const finalTotal = normalizedPrizes.reduce((sum, prize) => sum + prize.probability, 0);
-        const difference = 100 - finalTotal;
-        if (Math.abs(difference) > 0.000001) {
-          normalizedPrizes[0].probability = parseFloat((normalizedPrizes[0].probability + difference).toFixed(6));
-        }
+      console.log('Original total probability:', currentTotal);
+      
+      // Always normalize to avoid any floating point issues
+      const factor = 100 / currentTotal;
+      normalizedPrizes.forEach(prize => {
+        prize.probability = parseFloat((prize.probability * factor).toFixed(8));
+      });
+      
+      // Final adjustment to ensure exact 100%
+      const finalTotal = normalizedPrizes.reduce((sum, prize) => sum + prize.probability, 0);
+      const difference = 100 - finalTotal;
+      if (Math.abs(difference) > 0.0000001) {
+        normalizedPrizes[0].probability = parseFloat((normalizedPrizes[0].probability + difference).toFixed(8));
       }
+      
+      const verifyTotal = normalizedPrizes.reduce((sum, prize) => sum + prize.probability, 0);
+      console.log('Normalized total probability:', verifyTotal);
       
       // Wrap prizes in the expected request structure
       const requestData = {

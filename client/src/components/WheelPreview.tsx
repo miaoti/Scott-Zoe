@@ -92,16 +92,16 @@ const WheelPreview: React.FC<WheelPreviewProps> = ({ prizes, size = 300 }) => {
     const midAngle = (startAngle + endAngle) / 2;
     // Adjust text radius based on number of prizes for optimal centering
     const segmentAngle = endAngle - startAngle;
-    const baseRadius = radius - 40; // More margin from edge
+    const baseRadius = radius - 20; // Less margin from edge
     
-    // Conservative radius adjustment for consistent centering
+    // More aggressive radius adjustment for better centering
     let radiusMultiplier;
-    if (segmentAngle <= 30) radiusMultiplier = 0.6;      // 12+ prizes
-    else if (segmentAngle <= 45) radiusMultiplier = 0.65; // 8-11 prizes  
-    else if (segmentAngle <= 60) radiusMultiplier = 0.7;  // 6-7 prizes
-    else if (segmentAngle <= 90) radiusMultiplier = 0.75; // 4-5 prizes
-    else if (segmentAngle <= 120) radiusMultiplier = 0.8; // 3 prizes
-    else radiusMultiplier = 0.85;                         // 2 prizes
+    if (segmentAngle <= 30) radiusMultiplier = 0.5;      // 12+ prizes
+    else if (segmentAngle <= 45) radiusMultiplier = 0.55; // 8-11 prizes  
+    else if (segmentAngle <= 60) radiusMultiplier = 0.6;  // 6-7 prizes
+    else if (segmentAngle <= 90) radiusMultiplier = 0.65; // 4-5 prizes
+    else if (segmentAngle <= 120) radiusMultiplier = 0.7; // 3 prizes
+    else radiusMultiplier = 0.75;                         // 2 prizes
     
     const textRadius = baseRadius * radiusMultiplier;
     const midAngleRad = (midAngle * Math.PI) / 180;
