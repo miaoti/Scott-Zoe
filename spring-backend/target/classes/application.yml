@@ -94,6 +94,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  
+  flyway:
+    enabled: false  # Disable Flyway for SQLite development
 
 ---
 # Production Profile
@@ -119,8 +122,14 @@ spring:
     # Use PostgreSQL dialect for Railway deployment
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
+  
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
 
 server:
   port: ${PORT:8080}
