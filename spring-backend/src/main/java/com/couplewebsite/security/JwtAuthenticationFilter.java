@@ -110,13 +110,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
     
     /**
-     * Extract JWT token from Authorization header
+     * Extract JWT token from Authorization header or query parameter
      */
     private String getJwtFromRequest(HttpServletRequest request) {
+        // First try Authorization header
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
+        
+        // For SSE endpoints, try query parameter
+        String requestPath = request.getRequestURI();
+        if (requestPath.contains("/api/love-updates/subscribe")) {
+            String tokenParam = request.getParameter("token");
+            if (StringUtils.hasText(tokenParam)) {
+                return tokenParam;
+            }
+        }
+        
         return null;
     }
 }

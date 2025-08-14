@@ -37,7 +37,15 @@ const PartnerLoveCard: React.FC = () => {
 
   const setupSSE = () => {
     try {
-      const eventSource = new EventSource('/api/love-updates/subscribe', {
+      // Get JWT token from localStorage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No authentication token found for SSE');
+        fetchPartnerLoveCount(); // Fallback to polling
+        return;
+      }
+      
+      const eventSource = new EventSource(`/api/love-updates/subscribe?token=${encodeURIComponent(token)}`, {
         withCredentials: true
       });
       
