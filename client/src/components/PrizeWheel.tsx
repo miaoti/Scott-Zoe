@@ -226,11 +226,23 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
     }
     
     if (!isSpinning && wonPrize) {
-      // Call onPrizeWon to save earnings to backend
-      if (onPrizeWon) {
-        await onPrizeWon(wonPrize.amount);
-        console.log('✅ Prize claimed and saved:', wonPrize.amount);
+      try {
+        // Record the prize win in backend
+        await api.post('/api/wheel-prizes', {
+          prizeType: wonPrize.prizeType,
+          prizeValue: wonPrize.amount,
+          prizeDescription: wonPrize.prizeDescription
+        });
+        console.log('✅ Prize claimed and recorded:', wonPrize.amount);
+        
+        // Call onPrizeWon callback if provided
+        if (onPrizeWon) {
+          await onPrizeWon(wonPrize.amount);
+        }
+      } catch (error) {
+        console.error('❌ Error recording prize:', error);
       }
+      
       // Close the modal after claiming
       onClose();
     }
