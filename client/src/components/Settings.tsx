@@ -1,7 +1,38 @@
+import { useState, useEffect } from 'react';
 import { Heart, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import api from '../utils/api';
+
+interface RelationshipInfo {
+  startDate: string;
+  daysTogether: number;
+  names: string[];
+}
 
 function Settings() {
+  const [relationshipInfo, setRelationshipInfo] = useState<RelationshipInfo | null>(null);
+
+  useEffect(() => {
+    const fetchRelationshipInfo = async () => {
+      try {
+        const response = await api.get('/api/auth/relationship-info');
+        setRelationshipInfo(response.data);
+      } catch (error) {
+        console.error('Error fetching relationship info:', error);
+      }
+    };
+
+    fetchRelationshipInfo();
+  }, []);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
 
   // Settings functionality has been simplified - days together is now calculated in real-time
 
@@ -45,7 +76,7 @@ function Settings() {
                   Your Love Story
                 </div>
                 <div className="text-apple-secondary-label">
-                  Started on August 6th, 2020
+                  Started on {relationshipInfo ? formatDate(relationshipInfo.startDate) : 'June 8th, 2020'}
                 </div>
                 <div className="text-sm text-apple-tertiary-label mt-4">
                   Watch your days together count up in real-time in the header!
@@ -64,7 +95,7 @@ function Settings() {
         {/* Additional Info */}
         <div className="mt-8 text-center">
           <p className="text-sm text-apple-tertiary-label">
-            Your love story began on August 6th, 2020. Every moment since then is precious! 💖
+            Your love story began on {relationshipInfo ? formatDate(relationshipInfo.startDate) : 'June 8th, 2020'}. Every moment since then is precious! 💖
           </p>
         </div>
       </div>

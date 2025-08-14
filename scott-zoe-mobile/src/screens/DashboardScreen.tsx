@@ -95,10 +95,10 @@ export default function DashboardScreen() {
   };
 
   const calculateDaysInRelationship = () => {
-    if (!relationshipInfo?.anniversary) return 0;
-    const anniversary = new Date(relationshipInfo.anniversary);
+    if (!relationshipInfo?.startDate) return 0;
+    const startDate = new Date(relationshipInfo.startDate);
     const today = new Date();
-    const diffTime = Math.abs(today.getTime() - anniversary.getTime());
+    const diffTime = Math.abs(today.getTime() - startDate.getTime());
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
@@ -140,7 +140,7 @@ export default function DashboardScreen() {
           <View style={styles.relationshipCard}>
             <Text style={styles.relationshipTitle}>Together Since</Text>
             <Text style={styles.relationshipDate}>
-              {formatDate(relationshipInfo.anniversary)}
+              {formatDate(relationshipInfo.startDate)}
             </Text>
             <Text style={styles.relationshipDays}>
               {calculateDaysInRelationship()} days of love ❤️
