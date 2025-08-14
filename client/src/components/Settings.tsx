@@ -268,11 +268,11 @@ function Settings() {
         </div>
 
         {/* Developer Settings - Only for Scott */}
-        {user?.username === 'scott' && (
+        {/* {user?.username === 'scott' && (
           <div className="mt-8">
             <DeveloperSettings />
           </div>
-        )}
+        )} */}
 
         {/* Additional Info */}
         <div className="mt-8 text-center">
