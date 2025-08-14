@@ -159,7 +159,12 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
     }, 6500); // Match the CSS animation duration + small buffer (6 seconds + buffer)
   };
 
-  const handleClaimPrize = async () => {
+  const handleClaimPrize = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     if (!isSpinning && wonPrize) {
       // Call onPrizeWon to save earnings to backend
       if (onPrizeWon) {
@@ -171,7 +176,12 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
     }
   };
 
-  const handleClose = () => {
+  const handleClose = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     if (!isSpinning) {
       onClose();
     }
@@ -192,8 +202,23 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl max-w-md w-full p-8 apple-shadow-lg relative overflow-hidden">
+    <div 
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.target === e.currentTarget) {
+          handleClose();
+        }
+      }}
+    >
+      <div 
+        className="bg-white rounded-3xl max-w-md w-full p-8 apple-shadow-lg relative overflow-hidden"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
         {/* Background Decoration */}
         <div className="absolute inset-0 bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50 opacity-50" />
         
@@ -219,7 +244,11 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
               )}
             </div>
             <button
-              onClick={handleClose}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleClose();
+              }}
               disabled={isSpinning}
               className="w-8 h-8 rounded-full bg-apple-gray-6/10 hover:bg-apple-gray-6/20 flex items-center justify-center transition-colors disabled:opacity-50"
             >
@@ -290,7 +319,11 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
           {/* Spin Button */}
           {!showResult && (
             <button
-              onClick={spinWheel}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                spinWheel();
+              }}
               disabled={isSpinning}
               className={`px-8 py-4 bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-800 rounded-xl font-semibold transition-all duration-200 shadow-sm ${
                 isSpinning
@@ -328,7 +361,11 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
                   You won ${wonPrize.amount}!
                 </p>
                 <button
-                  onClick={handleClaimPrize}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleClaimPrize();
+                  }}
                   className="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   💰 Claim ${wonPrize.amount} Prize

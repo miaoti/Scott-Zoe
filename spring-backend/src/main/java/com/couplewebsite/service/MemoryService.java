@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -143,11 +144,21 @@ public class MemoryService {
     }
     
     /**
-     * Get memories by specific date
+     * Get memories by specific date (including annual repetitions)
      */
     public List<Memory> getMemoriesByDate(LocalDate date) {
         try {
-            return memoryRepository.findByDate(date);
+            // Get all memories
+            List<Memory> allMemories = memoryRepository.findAll();
+            
+            // Filter memories that match the month and day, regardless of year
+            return allMemories.stream()
+                .filter(memory -> {
+                    LocalDate memoryDate = memory.getDate();
+                    return memoryDate.getMonthValue() == date.getMonthValue() &&
+                           memoryDate.getDayOfMonth() == date.getDayOfMonth();
+                })
+                .collect(Collectors.toList());
         } catch (Exception e) {
             logger.error("Error fetching memories for date: {}", date, e);
             throw new RuntimeException("Failed to fetch memories for date: " + e.getMessage());
@@ -155,13 +166,20 @@ public class MemoryService {
     }
     
     /**
-     * Get memories for a specific month
+     * Get memories for a specific month (including annual repetitions)
      */
     public List<Memory> getMemoriesForMonth(int year, int month) {
         try {
-            LocalDate startDate = LocalDate.of(year, month, 1);
-            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
-            return memoryRepository.findByDateBetween(startDate, endDate);
+            // Get all memories
+            List<Memory> allMemories = memoryRepository.findAll();
+            
+            // Filter memories that match the month and day, regardless of year
+            return allMemories.stream()
+                .filter(memory -> {
+                    LocalDate memoryDate = memory.getDate();
+                    return memoryDate.getMonthValue() == month;
+                })
+                .collect(Collectors.toList());
         } catch (Exception e) {
             logger.error("Error fetching memories for month: {}/{}", year, month, e);
             throw new RuntimeException("Failed to fetch memories for month: " + e.getMessage());

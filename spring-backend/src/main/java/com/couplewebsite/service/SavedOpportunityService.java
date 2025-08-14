@@ -95,6 +95,17 @@ public class SavedOpportunityService {
     }
     
     /**
+     * Clear all unused opportunities for a user (for developer settings)
+     */
+    public void clearUnusedOpportunities(User user) {
+        List<SavedOpportunity> unusedOpportunities = getUnusedOpportunities(user);
+        savedOpportunityRepository.deleteAll(unusedOpportunities);
+        
+        logger.info("Cleared {} unused opportunities for user {}", 
+                unusedOpportunities.size(), user.getUsername());
+    }
+    
+    /**
      * DTO class for opportunity statistics
      */
     public static class OpportunityStats {

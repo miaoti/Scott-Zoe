@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Plus, Edit2, Trash2, Heart, Star, Gift, Clock } from 'lucide-react';
+import { Calendar, Plus, Edit2, Trash2, Heart, Star, Gift, Clock, ArrowUpDown } from 'lucide-react';
 import api from '../utils/api';
 import CalendarComponent from './Calendar';
 import DayMemoriesModal from './DayMemoriesModal';
@@ -33,6 +33,7 @@ function Memories() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [filter, setFilter] = useState<string>('all');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedDayMemories, setSelectedDayMemories] = useState<Memory[]>([]);
   const [showDayModal, setShowDayModal] = useState(false);
@@ -140,8 +141,14 @@ function Memories() {
   });
 
   const sortedMemories = filteredMemories.sort((a, b) => {
-    return new Date(a.date).getTime() - new Date(b.date).getTime();
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
   });
+
+  const toggleSortOrder = () => {
+    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
 
   const upcomingMemories = memories
     .map((memory) => {
@@ -232,22 +239,32 @@ function Memories() {
           All Memories
         </h2>
         
-        {/* Filters */}
-        <div className="flex items-center space-x-4 mb-6">
-          <span className="text-gray-600 font-medium">Filter by type:</span>
-          {['all', 'anniversary', 'milestone', 'special_moment'].map((type) => (
-            <button
-              key={type}
-              onClick={() => setFilter(type)}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                filter === type
-                  ? 'romantic-gradient text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {type === 'all' ? 'All' : getTypeLabel(type)}
-            </button>
-          ))}
+        {/* Filters and Sort */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <span className="text-gray-600 font-medium">Filter by type:</span>
+            {['all', 'anniversary', 'milestone', 'special_moment'].map((type) => (
+              <button
+                key={type}
+                onClick={() => setFilter(type)}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  filter === type
+                    ? 'romantic-gradient text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {type === 'all' ? 'All' : getTypeLabel(type)}
+              </button>
+            ))}
+          </div>
+          
+          <button
+            onClick={toggleSortOrder}
+            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            <ArrowUpDown className="h-4 w-4" />
+            <span>Sort by Date ({sortOrder === 'asc' ? 'Oldest First' : 'Newest First'})</span>
+          </button>
         </div>
 
       {/* Memory Form Modal */}

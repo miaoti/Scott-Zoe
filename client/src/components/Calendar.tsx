@@ -84,25 +84,36 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
     onDayClick(dateString, dayMemories);
   };
   
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'anniversary':
+        return '❤️';
+      case 'milestone':
+        return '⭐';
+      default:
+        return '🎁';
+    }
+  };
+
   const renderCalendarDays = () => {
     const days = [];
     
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < firstDayWeekday; i++) {
-      days.push(<div key={`empty-${i}`} className="h-12"></div>);
+      days.push(<div key={`empty-${i}`} className="h-16"></div>);
     }
     
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
-      const hasMemories = memoriesByDay[day] && memoriesByDay[day].length > 0;
-      const memoryCount = memoriesByDay[day]?.length || 0;
+      const dayMemories = memoriesByDay[day] || [];
+      const hasMemories = dayMemories.length > 0;
       
       days.push(
         <div
           key={day}
           onClick={() => handleDayClick(day)}
-          className={`h-12 flex flex-col items-center justify-center cursor-pointer rounded-lg transition-colors relative ${
+          className={`h-16 flex flex-col items-center justify-start cursor-pointer rounded-lg transition-colors relative p-1 ${
             isToday
               ? 'bg-pink-500 text-white font-semibold'
               : hasMemories
@@ -110,14 +121,24 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
               : 'hover:bg-gray-100 text-gray-700'
           }`}
         >
-          <span className="text-sm">{day}</span>
+          <span className="text-sm font-medium">{day}</span>
           {hasMemories && (
-            <div className={`absolute bottom-1 w-1 h-1 rounded-full ${
-              isToday ? 'bg-white' : 'bg-purple-500'
-            }`}>
-              {memoryCount > 1 && (
-                <span className="absolute -top-1 -right-1 text-xs font-bold">
-                  {memoryCount}
+            <div className="flex flex-col items-center space-y-0.5 mt-0.5">
+              {dayMemories.slice(0, 2).map((memory, index) => (
+                <div key={memory.id} className="flex items-center space-x-1">
+                  <span className="text-xs">{getTypeIcon(memory.type)}</span>
+                  <span className={`text-xs truncate max-w-12 ${
+                    isToday ? 'text-white' : 'text-purple-700'
+                  }`}>
+                    {memory.title}
+                  </span>
+                </div>
+              ))}
+              {dayMemories.length > 2 && (
+                <span className={`text-xs ${
+                  isToday ? 'text-white' : 'text-purple-600'
+                }`}>
+                  +{dayMemories.length - 2} more
                 </span>
               )}
             </div>
@@ -173,10 +194,18 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
       </div>
       
       {/* Legend */}
-      <div className="flex items-center justify-center space-x-4 mt-4 text-xs text-gray-500">
+      <div className="flex items-center justify-center space-x-6 mt-4 text-xs text-gray-500">
         <div className="flex items-center space-x-1">
-          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-          <span>Has memories</span>
+          <span>❤️</span>
+          <span>Anniversary</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <span>⭐</span>
+          <span>Milestone</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <span>🎁</span>
+          <span>Special Moment</span>
         </div>
         <div className="flex items-center space-x-1">
           <div className="w-2 h-2 bg-pink-500 rounded-full"></div>

@@ -1,0 +1,113 @@
+package com.couplewebsite.service;
+
+import com.couplewebsite.entity.User;
+import com.couplewebsite.entity.WheelPrize;
+import com.couplewebsite.repository.WheelPrizeRepository;
+import com.couplewebsite.security.CustomUserDetailsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@Transactional
+public class WheelPrizeService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(WheelPrizeService.class);
+    
+    @Autowired
+    private WheelPrizeRepository wheelPrizeRepository;
+    
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
+    
+    /**
+     * Record a wheel prize for the current user
+     */
+    public WheelPrize recordPrize(String prizeType, Integer prizeValue, String prizeDescription) {
+        try {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            User currentUser = userDetailsService.getUserByUsername(currentUsername);
+            
+            WheelPrize wheelPrize = new WheelPrize(currentUser, prizeType, prizeValue, prizeDescription);
+            WheelPrize savedPrize = wheelPrizeRepository.save(wheelPrize);
+            
+            logger.info("Wheel prize recorded for user: {} - Type: {}, Value: {}", 
+                       currentUsername, prizeType, prizeValue);
+            
+            return savedPrize;
+            
+        } catch (Exception e) {
+            logger.error("Error recording wheel prize", e);
+            throw new RuntimeException("Failed to record wheel prize: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Get all wheel prizes for the current user
+     */
+    public List<WheelPrize> getCurrentUserPrizes() {
+        try {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            User currentUser = userDetailsService.getUserByUsername(currentUsername);
+            
+            return wheelPrizeRepository.findByUserOrderByWonAtDesc(currentUser);
+            
+        } catch (Exception e) {
+            logger.error("Error getting current user wheel prizes", e);
+            throw new RuntimeException("Failed to get wheel prizes: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Get total count of prizes won by current user
+     */
+    public long getCurrentUserPrizeCount() {
+        try {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            User currentUser = userDetailsService.getUserByUsername(currentUsername);
+            
+            return wheelPrizeRepository.countByUser(currentUser);
+            
+        } catch (Exception e) {
+            logger.error("Error getting current user prize count", e);
+            return 0L;
+        }
+    }
+    
+    /**
+     * Get total value of all prizes won by current user
+     */
+    public Long getCurrentUserTotalPrizeValue() {
+        try {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            User currentUser = userDetailsService.getUserByUsername(currentUsername);
+            
+            return wheelPrizeRepository.getTotalPrizeValueByUser(currentUser);
+            
+        } catch (Exception e) {
+            logger.error("Error getting current user total prize value", e);
+            return 0L;
+        }
+    }
+    
+    /**
+     * Get prizes by type for current user
+     */
+    public List<WheelPrize> getCurrentUserPrizesByType(String prizeType) {
+        try {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            User currentUser = userDetailsService.getUserByUsername(currentUsername);
+            
+            return wheelPrizeRepository.findByUserAndPrizeTypeOrderByWonAtDesc(currentUser, prizeType);
+            
+        } catch (Exception e) {
+            logger.error("Error getting current user prizes by type: {}", prizeType, e);
+            throw new RuntimeException("Failed to get wheel prizes by type: " + e.getMessage());
+        }
+    }
+}

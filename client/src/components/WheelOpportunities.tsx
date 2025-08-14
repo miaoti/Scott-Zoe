@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Gift, Clock, Sparkles } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 
 interface WheelOpportunitiesProps {
@@ -7,6 +8,7 @@ interface WheelOpportunitiesProps {
 }
 
 function WheelOpportunities({ onUseOpportunity }: WheelOpportunitiesProps) {
+  const { user } = useAuth();
   const [savedOpportunities, setSavedOpportunities] = useState(0);
   const [canUseWheelThisWeek, setCanUseWheelThisWeek] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -69,7 +71,7 @@ function WheelOpportunities({ onUseOpportunity }: WheelOpportunitiesProps) {
       <Gift className="h-12 w-12 text-yellow-500 mx-auto mb-4 group-hover:scale-110 transition-transform duration-200" />
       <div className="text-3xl font-semibold text-apple-label mb-2">{savedOpportunities}</div>
       <div className="text-apple-secondary-label group-hover:text-yellow-500 transition-colors duration-200 mb-3">
-        Saved Wheel {savedOpportunities === 1 ? 'Opportunity' : 'Opportunities'}
+        {user?.name || user?.username || 'Your'} Saved {savedOpportunities === 1 ? 'Opportunity' : 'Opportunities'}
       </div>
       <div className="text-xs text-apple-tertiary-label mb-3">
         {canUseWheelThisWeek 

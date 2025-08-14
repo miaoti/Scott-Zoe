@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Heart, Gift, Sparkles, Star } from 'lucide-react';
 import PrizeWheel from './PrizeWheel';
 import { useToast } from '../contexts/ToastContext';
+import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 
 interface LoveCounterProps {
@@ -19,6 +20,7 @@ interface LoveStats {
 }
 
 const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
+  const { user } = useAuth();
   const [loveStats, setLoveStats] = useState<LoveStats>({
     count: 0,
     totalCount: 0,
@@ -135,39 +137,19 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
     }
   };
 
-  const handlePrizeWon = async (amount: number) => {
-    console.log('🎰 Claiming prize:', amount);
-
-    // Save to backend first
+  const handlePrizeWon = async (prize: { type: string; value: number; description: string }) => {
     try {
-      const response = await api.post('/api/user/earnings', {
-        amount: amount,
-        source: 'prize_wheel'
+      // Record wheel prize in backend
+      await api.post('/api/wheel-prizes', {
+        prizeType: prize.type,
+        prizeValue: prize.value,
+        prizeDescription: prize.description
       });
-
-      console.log('✅ Prize earnings saved to backend successfully:', response.data);
-
-      // Update frontend with backend response (more reliable)
-      const backendTotal = response.data.total;
-      setTotalEarnings(backendTotal);
-      localStorage.setItem('totalEarnings', backendTotal.toString());
-
-      // Show success feedback to user
-      showToast(`💰 $${amount} prize saved to your account! Total: $${backendTotal}`, 'general', 5000);
-
-      // Refresh earnings from backend to ensure consistency
-      await fetchEarnings();
-
+      
+      console.log('Prize recorded successfully:', prize);
+      
     } catch (error) {
-      console.error('❌ Error saving prize earnings to backend:', error);
-
-      // Fallback to localStorage
-      const newTotal = totalEarnings + amount;
-      setTotalEarnings(newTotal);
-      localStorage.setItem('totalEarnings', newTotal.toString());
-
-      // Still show success to user since localStorage worked
-      showToast(`💰 $${amount} prize claimed! Total: $${newTotal} (saved locally)`, 'general', 5000);
+      console.error('Error recording wheel prize:', error);
     }
   };
 
@@ -370,14 +352,7 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
             </div>
             <div className="text-apple-secondary-label mb-2">Love Shared</div>
 
-            {/* Earnings Display */}
-            {totalEarnings > 0 && (
-              <div className="mb-4 p-2 bg-green-50 rounded-lg border border-green-200">
-                <div className="text-sm text-green-700 font-medium">
-                  💰 {totalEarnings} Zoe Total Earned
-                </div>
-              </div>
-            )}
+            {/* Earnings Display - Removed as requested */}
 
             {/* Saved Opportunities Display */}
             {savedOpportunities > 0 && (() => {

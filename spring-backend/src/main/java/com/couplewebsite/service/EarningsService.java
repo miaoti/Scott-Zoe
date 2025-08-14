@@ -45,4 +45,16 @@ public class EarningsService {
     public List<Earnings> getEarningsBySource(User user, String source) {
         return earningsRepository.findByUserAndSourceOrderByCreatedAtDesc(user, source);
     }
+    
+    /**
+     * Clear all earnings history for a user (for developer settings)
+     */
+    public void clearEarningsHistory(User user) {
+        List<Earnings> userEarnings = earningsRepository.findByUserOrderByCreatedAtDesc(user);
+        earningsRepository.deleteAll(userEarnings);
+        
+        // Reset user's total earnings to 0
+        user.setTotalEarnings(0);
+        userRepository.save(user);
+    }
 }
