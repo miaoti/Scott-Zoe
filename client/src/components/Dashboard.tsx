@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Camera, Calendar, Heart, Clock } from 'lucide-react';
 import api, { API_BASE_URL } from '../utils/api';
 import PrizeWheel from './PrizeWheel';
+import LoveCounter from './LoveCounter';
+import PartnerLoveCard from './PartnerLoveCard';
 
 interface CatPosition {
   id: string;
@@ -211,6 +213,12 @@ function Dashboard() {
           <p className="text-xl text-apple-secondary-label max-w-3xl mx-auto leading-relaxed">
             A private sanctuary where we celebrate our precious moments, memories, and the beautiful journey of our love ✨
           </p>
+        </div>
+
+        {/* Love Share Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <LoveCounter />
+          <PartnerLoveCard />
         </div>
 
         {/* Quick Stats */}
