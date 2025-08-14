@@ -157,9 +157,6 @@ const WheelPreview: React.FC<WheelPreviewProps> = ({ prizes, size = 300 }) => {
                 <div className="text-xs font-medium whitespace-nowrap">
                   {segment.prizeName}
                 </div>
-                <div className="text-xs opacity-75">
-                  {segment.probability.toFixed(1)}%
-                </div>
               </div>
             </div>
           );

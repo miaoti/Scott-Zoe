@@ -173,12 +173,18 @@ public class WheelConfigurationController {
     @PostMapping("/save-for-user/{userId}")
     public ResponseEntity<?> saveWheelConfigurationForUser(@PathVariable Long userId, @Valid @RequestBody ConfigureWheelRequest request) {
         try {
+            logger.info("Received save request for user {}: {}", userId, request);
+            logger.info("Request prizes count: {}", request.getPrizes() != null ? request.getPrizes().size() : "null");
+            
             // Validate that probabilities sum to 100%
             BigDecimal totalProbability = request.getPrizes().stream()
                     .map(prize -> new BigDecimal(prize.getProbability().toString()))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             
+            logger.info("Total probability calculated: {}", totalProbability);
+            
             if (totalProbability.compareTo(new BigDecimal("100.00")) != 0) {
+                logger.warn("Probability validation failed. Total: {}", totalProbability);
                 Map<String, String> error = new HashMap<>();
                 error.put("message", "Total probability must equal 100%. Current total: " + totalProbability + "%");
                 return ResponseEntity.badRequest().body(error);
@@ -324,6 +330,9 @@ public class WheelConfigurationController {
     
     // Request DTOs
     public static class ConfigureWheelRequest {
+        @jakarta.validation.constraints.NotNull(message = "Prizes list cannot be null")
+        @jakarta.validation.constraints.NotEmpty(message = "Prizes list cannot be empty")
+        @jakarta.validation.Valid
         private List<PrizeTemplateRequest> prizes;
         
         public List<PrizeTemplateRequest> getPrizes() {
@@ -333,14 +342,33 @@ public class WheelConfigurationController {
         public void setPrizes(List<PrizeTemplateRequest> prizes) {
             this.prizes = prizes;
         }
+        
+        @Override
+        public String toString() {
+            return "ConfigureWheelRequest{prizes=" + prizes + "}";
+        }
     }
     
     public static class PrizeTemplateRequest {
+        @jakarta.validation.constraints.NotBlank(message = "Prize name cannot be blank")
         private String prizeName;
+        
+        @jakarta.validation.constraints.NotBlank(message = "Prize description cannot be blank")
         private String prizeDescription;
+        
+        @jakarta.validation.constraints.NotBlank(message = "Prize type cannot be blank")
         private String prizeType;
+        
+        @jakarta.validation.constraints.NotNull(message = "Prize value cannot be null")
+        @jakarta.validation.constraints.Positive(message = "Prize value must be positive")
         private Integer prizeValue;
+        
+        @jakarta.validation.constraints.NotNull(message = "Probability cannot be null")
+        @jakarta.validation.constraints.DecimalMin(value = "0.01", message = "Probability must be at least 0.01")
+        @jakarta.validation.constraints.DecimalMax(value = "100.0", message = "Probability cannot exceed 100")
         private Double probability;
+        
+        @jakarta.validation.constraints.NotBlank(message = "Color cannot be blank")
         private String color;
         
         // Getters and setters
@@ -390,6 +418,18 @@ public class WheelConfigurationController {
         
         public void setColor(String color) {
             this.color = color;
+        }
+        
+        @Override
+        public String toString() {
+            return "PrizeTemplateRequest{" +
+                    "prizeName='" + prizeName + "'" +
+                    ", prizeDescription='" + prizeDescription + "'" +
+                    ", prizeType='" + prizeType + "'" +
+                    ", prizeValue=" + prizeValue +
+                    ", probability=" + probability +
+                    ", color='" + color + "'" +
+                    "}";
         }
     }
 }
