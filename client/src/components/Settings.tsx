@@ -275,11 +275,11 @@ function Settings() {
         )} */}
 
         {/* Additional Info */}
-        <div className="mt-8 text-center">
+        {/* <div className="mt-8 text-center">
           <p className="text-sm text-apple-tertiary-label">
             Your love story began on {relationshipInfo ? formatDate(relationshipInfo.startDate) : 'June 8th, 2020'}. Every moment since then is precious! 💖
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );
