@@ -499,4 +499,172 @@ public class PhotoController {
             return ResponseEntity.status(500).body(error);
         }
     }
+    
+    /**
+     * Get deleted photos (recycle bin)
+     */
+    @GetMapping("/recycle-bin")
+    public ResponseEntity<?> getDeletedPhotos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        try {
+            Page<Photo> deletedPhotos = photoService.getDeletedPhotos(page, size);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("photos", deletedPhotos.getContent().stream()
+                    .map(this::createPhotoResponseWithStats)
+                    .collect(Collectors.toList()));
+            response.put("currentPage", deletedPhotos.getNumber());
+            response.put("totalPages", deletedPhotos.getTotalPages());
+            response.put("totalElements", deletedPhotos.getTotalElements());
+            response.put("hasNext", deletedPhotos.hasNext());
+            response.put("hasPrevious", deletedPhotos.hasPrevious());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Error fetching deleted photos", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Recover photo from recycle bin
+     */
+    @PutMapping("/{id}/recover")
+    public ResponseEntity<?> recoverPhoto(@PathVariable Long id) {
+        try {
+            boolean recovered = photoService.recoverPhoto(id);
+            
+            if (recovered) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Photo recovered successfully");
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Photo not found in recycle bin");
+                return ResponseEntity.status(404).body(error);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error recovering photo with ID: {}", id, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Permanently delete photo from recycle bin
+     */
+    @DeleteMapping("/{id}/permanent")
+    public ResponseEntity<?> permanentlyDeletePhoto(@PathVariable Long id) {
+        try {
+            boolean deleted = photoService.permanentlyDeletePhoto(id);
+            
+            if (deleted) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Photo permanently deleted");
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Photo not found in recycle bin");
+                return ResponseEntity.status(404).body(error);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error permanently deleting photo with ID: {}", id, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Bulk recover photos from recycle bin
+     */
+    @PutMapping("/bulk/recover")
+    public ResponseEntity<?> bulkRecoverPhotos(@RequestBody Map<String, Object> request) {
+        try {
+            @SuppressWarnings("unchecked")
+            List<Object> photoIdsRaw = (List<Object>) request.get("photoIds");
+            
+            if (photoIdsRaw == null || photoIdsRaw.isEmpty()) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "No photo IDs provided");
+                return ResponseEntity.badRequest().body(error);
+            }
+            
+            // Convert to Long list
+            List<Long> photoIds = photoIdsRaw.stream()
+                .map(obj -> {
+                    if (obj instanceof Integer) {
+                        return ((Integer) obj).longValue();
+                    } else if (obj instanceof Long) {
+                        return (Long) obj;
+                    } else {
+                        return Long.valueOf(obj.toString());
+                    }
+                })
+                .collect(Collectors.toList());
+            
+            int recoveredCount = photoService.bulkRecoverPhotos(photoIds);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", recoveredCount + " photo(s) recovered successfully");
+            response.put("recoveredCount", recoveredCount);
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Error bulk recovering photos", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error during bulk recovery");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Bulk permanently delete photos from recycle bin
+     */
+    @DeleteMapping("/bulk/permanent")
+    public ResponseEntity<?> bulkPermanentlyDeletePhotos(@RequestBody Map<String, Object> request) {
+        try {
+            @SuppressWarnings("unchecked")
+            List<Object> photoIdsRaw = (List<Object>) request.get("photoIds");
+            
+            if (photoIdsRaw == null || photoIdsRaw.isEmpty()) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "No photo IDs provided");
+                return ResponseEntity.badRequest().body(error);
+            }
+            
+            // Convert to Long list
+            List<Long> photoIds = photoIdsRaw.stream()
+                .map(obj -> {
+                    if (obj instanceof Integer) {
+                        return ((Integer) obj).longValue();
+                    } else if (obj instanceof Long) {
+                        return (Long) obj;
+                    } else {
+                        return Long.valueOf(obj.toString());
+                    }
+                })
+                .collect(Collectors.toList());
+            
+            int deletedCount = photoService.bulkPermanentlyDeletePhotos(photoIds);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", deletedCount + " photo(s) permanently deleted");
+            response.put("deletedCount", deletedCount);
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Error bulk permanently deleting photos", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error during bulk deletion");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
 }

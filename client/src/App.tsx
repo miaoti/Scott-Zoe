@@ -8,6 +8,7 @@ import Settings from './components/Settings';
 import Categories from './components/Categories';
 import CategoryPhotos from './components/CategoryPhotos';
 import AllPhotos from './components/AllPhotos';
+import RecycleBin from './components/RecycleBin';
 import Header from './components/Header';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -43,6 +44,7 @@ function AppContent() {
           <Route path="/photo/:id" element={<PhotoDetail />} />
           <Route path="/memories" element={<Memories />} />
           <Route path="/categories" element={<Categories />} />
+          <Route path="/recycle-bin" element={<RecycleBin />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

@@ -50,4 +50,62 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
      * Find all favorite photos
      */
     List<Photo> findByIsFavoriteTrue();
+    
+    /**
+     * Find all non-deleted photos with pagination, ordered by creation date descending
+     */
+    Page<Photo> findByIsDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
+    
+    /**
+     * Find all deleted photos with pagination, ordered by deletion date descending
+     */
+    Page<Photo> findByIsDeletedTrueOrderByDeletedAtDesc(Pageable pageable);
+    
+    /**
+     * Find non-deleted photo by ID with details
+     */
+    @Query("SELECT p FROM Photo p " +
+           "LEFT JOIN FETCH p.uploader " +
+           "LEFT JOIN FETCH p.notes n " +
+           "LEFT JOIN FETCH n.author " +
+           "LEFT JOIN FETCH p.categories " +
+           "WHERE p.id = :id AND p.isDeleted = false")
+    Optional<Photo> findByIdAndIsDeletedFalseWithDetails(@Param("id") Long id);
+    
+    /**
+     * Find deleted photo by ID with details
+     */
+    @Query("SELECT p FROM Photo p " +
+           "LEFT JOIN FETCH p.uploader " +
+           "LEFT JOIN FETCH p.notes n " +
+           "LEFT JOIN FETCH n.author " +
+           "LEFT JOIN FETCH p.categories " +
+           "WHERE p.id = :id AND p.isDeleted = true")
+    Optional<Photo> findByIdAndIsDeletedTrueWithDetails(@Param("id") Long id);
+    
+    /**
+     * Find non-deleted photos by category
+     */
+    @Query("SELECT p FROM Photo p JOIN p.categories c WHERE c.id = :categoryId AND p.isDeleted = false ORDER BY p.createdAt DESC")
+    Page<Photo> findByCategoryIdAndIsDeletedFalseOrderByCreatedAtDesc(@Param("categoryId") Long categoryId, Pageable pageable);
+    
+    /**
+     * Count non-deleted photos by uploader
+     */
+    long countByUploaderIdAndIsDeletedFalse(Long uploaderId);
+    
+    /**
+     * Count deleted photos by uploader
+     */
+    long countByUploaderIdAndIsDeletedTrue(Long uploaderId);
+    
+    /**
+     * Find all non-deleted photos by IDs
+     */
+    List<Photo> findByIdInAndIsDeletedFalse(List<Long> ids);
+    
+    /**
+     * Find all deleted photos by IDs
+     */
+    List<Photo> findByIdInAndIsDeletedTrue(List<Long> ids);
 }

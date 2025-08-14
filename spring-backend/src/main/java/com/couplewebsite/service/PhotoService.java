@@ -153,18 +153,33 @@ public class PhotoService {
     }
     
     /**
-     * Get all photos with pagination
+     * Get all non-deleted photos with pagination
      */
     public Page<Photo> getAllPhotos(int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(Math.max(1, size), 50)); // Limit to 50 per page
-        return photoRepository.findAllByOrderByCreatedAtDesc(pageable);
+        return photoRepository.findByIsDeletedFalseOrderByCreatedAtDesc(pageable);
     }
     
     /**
-     * Get photo by ID with details
+     * Get all deleted photos with pagination (recycle bin)
+     */
+    public Page<Photo> getDeletedPhotos(int page, int size) {
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(Math.max(1, size), 50)); // Limit to 50 per page
+        return photoRepository.findByIsDeletedTrueOrderByDeletedAtDesc(pageable);
+    }
+    
+    /**
+     * Get non-deleted photo by ID with details
      */
     public Optional<Photo> getPhotoById(Long id) {
-        return photoRepository.findByIdWithDetails(id);
+        return photoRepository.findByIdAndIsDeletedFalseWithDetails(id);
+    }
+    
+    /**
+     * Get deleted photo by ID with details (for recycle bin)
+     */
+    public Optional<Photo> getDeletedPhotoById(Long id) {
+        return photoRepository.findByIdAndIsDeletedTrueWithDetails(id);
     }
     
     /**
@@ -181,11 +196,61 @@ public class PhotoService {
 
     
     /**
-     * Delete photo
+     * Soft delete photo (move to recycle bin)
      */
     public boolean deletePhoto(Long id) {
         try {
-            Optional<Photo> photoOpt = photoRepository.findById(id);
+            Optional<Photo> photoOpt = photoRepository.findByIdAndIsDeletedFalseWithDetails(id);
+            if (photoOpt.isPresent()) {
+                Photo photo = photoOpt.get();
+                
+                // Mark as deleted
+                photo.setIsDeleted(true);
+                photo.setDeletedAt(java.time.LocalDateTime.now());
+                
+                photoRepository.save(photo);
+                
+                logger.info("Photo moved to recycle bin: {}", photo.getFilename());
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            logger.error("Error moving photo to recycle bin with ID: {}", id, e);
+            return false;
+        }
+    }
+    
+    /**
+     * Recover photo from recycle bin
+     */
+    public boolean recoverPhoto(Long id) {
+        try {
+            Optional<Photo> photoOpt = photoRepository.findByIdAndIsDeletedTrueWithDetails(id);
+            if (photoOpt.isPresent()) {
+                Photo photo = photoOpt.get();
+                
+                // Mark as not deleted
+                photo.setIsDeleted(false);
+                photo.setDeletedAt(null);
+                
+                photoRepository.save(photo);
+                
+                logger.info("Photo recovered from recycle bin: {}", photo.getFilename());
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            logger.error("Error recovering photo with ID: {}", id, e);
+            return false;
+        }
+    }
+    
+    /**
+     * Permanently delete photo from recycle bin
+     */
+    public boolean permanentlyDeletePhoto(Long id) {
+        try {
+            Optional<Photo> photoOpt = photoRepository.findByIdAndIsDeletedTrueWithDetails(id);
             if (photoOpt.isPresent()) {
                 Photo photo = photoOpt.get();
                 
@@ -195,13 +260,61 @@ public class PhotoService {
                 // Delete from database
                 photoRepository.delete(photo);
                 
-                logger.info("Photo deleted successfully: {}", photo.getFilename());
+                logger.info("Photo permanently deleted: {}", photo.getFilename());
                 return true;
             }
             return false;
         } catch (Exception e) {
-            logger.error("Error deleting photo with ID: {}", id, e);
+            logger.error("Error permanently deleting photo with ID: {}", id, e);
             return false;
+        }
+    }
+    
+    /**
+     * Bulk recover photos from recycle bin
+     */
+    public int bulkRecoverPhotos(List<Long> photoIds) {
+        try {
+            List<Photo> deletedPhotos = photoRepository.findByIdInAndIsDeletedTrue(photoIds);
+            int recoveredCount = 0;
+            
+            for (Photo photo : deletedPhotos) {
+                photo.setIsDeleted(false);
+                photo.setDeletedAt(null);
+                photoRepository.save(photo);
+                recoveredCount++;
+            }
+            
+            logger.info("Bulk recovered {} photos from recycle bin", recoveredCount);
+            return recoveredCount;
+        } catch (Exception e) {
+            logger.error("Error bulk recovering photos", e);
+            return 0;
+        }
+    }
+    
+    /**
+     * Bulk permanently delete photos from recycle bin
+     */
+    public int bulkPermanentlyDeletePhotos(List<Long> photoIds) {
+        try {
+            List<Photo> deletedPhotos = photoRepository.findByIdInAndIsDeletedTrue(photoIds);
+            int deletedCount = 0;
+            
+            for (Photo photo : deletedPhotos) {
+                // Delete file from storage
+                fileStorageService.deleteFile(photo.getFilename());
+                
+                // Delete from database
+                photoRepository.delete(photo);
+                deletedCount++;
+            }
+            
+            logger.info("Bulk permanently deleted {} photos", deletedCount);
+            return deletedCount;
+        } catch (Exception e) {
+            logger.error("Error bulk permanently deleting photos", e);
+            return 0;
         }
     }
 
