@@ -4,6 +4,7 @@ import { Camera, Calendar, Heart, Clock } from 'lucide-react';
 import api, { API_BASE_URL } from '../utils/api';
 import LoveCounter from './LoveCounter';
 import WheelOpportunities from './WheelOpportunities';
+import PrizeWheel from './PrizeWheel';
 
 interface CatPosition {
   id: string;
@@ -37,6 +38,7 @@ function Dashboard() {
   const [upcomingMemories, setUpcomingMemories] = useState<Memory[]>([]);
   const [stats, setStats] = useState({ photos: 0, memories: 0, totalLove: 0 });
   const [catPositions, setCatPositions] = useState<CatPosition[]>([]);
+  const [showWheel, setShowWheel] = useState(false);
 
   // Generate random positions for cats with minimum distance to avoid crowding
   const generateRandomPosition = (existingPositions: CatPosition[] = []): { top: string; left: string } => {
@@ -90,6 +92,18 @@ function Dashboard() {
 
     setCatPositions(initialPositions);
   }, []);
+
+  // Handle wheel opportunity usage
+  const handleUseOpportunity = async () => {
+    try {
+      // Use the saved opportunity
+      await api.post('/api/opportunities/use');
+      // Open the prize wheel
+      setShowWheel(true);
+    } catch (error) {
+      console.error('Error using opportunity:', error);
+    }
+  };
 
   // Handle cat click - trigger jump and relocate
   const handleCatClick = (catId: string) => {
@@ -291,7 +305,7 @@ function Dashboard() {
           
           <LoveCounter />
           
-          <WheelOpportunities />
+          <WheelOpportunities onUseOpportunity={handleUseOpportunity} />
         </div>
 
         {/* Quick Actions */}
@@ -381,6 +395,18 @@ function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Prize Wheel Modal */}
+      {showWheel && (
+        <PrizeWheel
+          onClose={() => setShowWheel(false)}
+          level={1}
+          onPrizeWon={async (amount: number) => {
+            console.log('Prize won:', amount);
+            // The prize is automatically saved by the PrizeWheel component
+          }}
+        />
+      )}
     </div>
   );
 }
