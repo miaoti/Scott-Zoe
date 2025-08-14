@@ -158,10 +158,12 @@ const WheelPreview: React.FC<WheelPreviewProps> = ({ prizes, size = 300 }) => {
           return (
             <div
               key={index}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 text-center"
+              className="absolute flex flex-col items-center justify-center text-center"
               style={{
-                left: textPos.x,
-                top: textPos.y,
+                left: textPos.x - 20,
+                top: textPos.y - 15,
+                width: 40,
+                height: 30,
                 color: textColor
               }}
             >

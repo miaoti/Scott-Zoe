@@ -404,13 +404,14 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
                 return (
                   <div
                     key={prize.id}
-                    className="absolute flex items-center justify-center text-white font-bold text-xs"
+                    className="absolute flex flex-col items-center justify-center text-white font-bold text-xs"
                     style={{
-                      left: `calc(50% + ${x}px)`,
-                      top: `calc(50% + ${y}px)`,
-                      transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+                      left: `calc(50% + ${x - 20}px)`,
+                      top: `calc(50% + ${y - 15}px)`,
+                      width: 40,
+                      height: 30,
+                      transform: `rotate(${angle}deg)`,
                       transformOrigin: 'center',
-                      minWidth: 'max-content',
                       textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
                     }}
                   >
