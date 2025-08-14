@@ -37,8 +37,7 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
       // For now, let's fetch all memories and filter on frontend
       // since the backend month endpoint might have issues
       const response = await api.get('/api/memories');
-      console.log('Total memories loaded:', response.data.length);
-      console.log('Sample memory:', response.data[0]);
+
       setMemories(response.data);
     } catch (error) {
       console.error('Error fetching memories:', error);
@@ -56,25 +55,37 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
   
   // Get memories for current month (including recurring memories from other years)
   const monthMemories = memories.filter(memory => {
-    // Parse date string properly to avoid timezone issues
-    // Backend sends dates in YYYY-MM-DD format
-    const dateStr = memory.date.toString();
-    const [memoryYear, memoryMonth, memoryDay] = dateStr.split('-').map(Number);
-    // JavaScript months are 0-indexed, so subtract 1 from the month
+    // Backend sends dates as arrays [year, month, day]
+    let memoryMonth;
+    if (Array.isArray(memory.date)) {
+      memoryMonth = memory.date[1]; // Month from array (1-indexed)
+    } else {
+      // Fallback for string format
+      const dateStr = memory.date.toString();
+      const [memoryYear, month, memoryDay] = dateStr.split('-').map(Number);
+      memoryMonth = month;
+    }
+    // Backend months are 1-indexed, JavaScript months are 0-indexed
     return (memoryMonth - 1) === month;
   });
   
   // Group memories by day
   const memoriesByDay: { [key: number]: Memory[] } = {};
   monthMemories.forEach(memory => {
-    // Parse date string properly to get the day
-    const dateStr = memory.date.toString();
-    const [memoryYear, memoryMonth, memoryDay] = dateStr.split('-').map(Number);
-    const day = memoryDay;
-    if (!memoriesByDay[day]) {
-      memoriesByDay[day] = [];
+    let memoryDay;
+    if (Array.isArray(memory.date)) {
+      memoryDay = memory.date[2]; // Day from array
+    } else {
+      // Fallback for string format
+      const dateStr = memory.date.toString();
+      const [memoryYear, memoryMonth, day] = dateStr.split('-').map(Number);
+      memoryDay = day;
     }
-    memoriesByDay[day].push(memory);
+    
+    if (!memoriesByDay[memoryDay]) {
+      memoriesByDay[memoryDay] = [];
+    }
+    memoriesByDay[memoryDay].push(memory);
   });
   
   const navigateMonth = (direction: 'prev' | 'next') => {
