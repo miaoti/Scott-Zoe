@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Camera, Calendar, Heart, Clock } from 'lucide-react';
-import api from '../utils/api';
+import api, { API_BASE_URL } from '../utils/api';
 import LoveCounter from './LoveCounter';
 import WheelOpportunities from './WheelOpportunities';
 
@@ -229,7 +229,7 @@ function Dashboard() {
                   {recentPhotos.slice(0, 4).map((photo, index) => (
                     <div key={photo.id} className="aspect-square rounded-xl overflow-hidden bg-white shadow-sm border-2 border-pink-100 group-hover:border-pink-200 transition-all duration-300" style={{animationDelay: `${index * 100}ms`}}>
                       <img
-                        src={`/api/photos/image/${photo.filename}`}
+                        src={`${API_BASE_URL}/api/photos/image/${photo.filename}`}
                         alt={photo.caption || 'Recent photo'}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                       />

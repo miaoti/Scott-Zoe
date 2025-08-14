@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Heart, MessageCircle, Tag, Calendar, User, Plus, X, Edit2 } from 'lucide-react';
-import api from '../utils/api';
+import api, { API_BASE_URL } from '../utils/api';
 
 interface Photo {
   id: number;
@@ -182,7 +182,7 @@ function PhotoDetail() {
         {/* Photo */}
         <div className="glass-effect rounded-xl overflow-hidden love-shadow">
           <img
-            src={`/api/photos/image/${photo.filename}`}
+            src={`${API_BASE_URL}/api/photos/image/${photo.filename}`}
             alt={photo.originalName}
             className="w-full h-auto max-h-96 object-contain bg-gray-50"
           />

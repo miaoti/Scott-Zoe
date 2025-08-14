@@ -53,4 +53,7 @@ api.interceptors.response.use(
   }
 );
 
+// Export the API URL for use in image sources
+export const API_BASE_URL = apiUrl;
+
 export default api;

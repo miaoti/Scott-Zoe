@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Settings, Trash2, Check, Heart } from 'lucide-react';
-import api from '../utils/api';
+import api, { API_BASE_URL } from '../utils/api';
 import PhotoDetailModal from './PhotoDetailModal';
 
 interface Photo {
@@ -332,7 +332,7 @@ function CategoryPhotos() {
                 onClick={() => selectionMode ? togglePhotoSelection(photo.id) : openPhotoDetail(photo)}
               >
                 <img
-                  src={`/api/photos/image/${photo.filename}`}
+                  src={`${API_BASE_URL}/api/photos/image/${photo.filename}`}
                   alt={photo.originalName}
                   className="w-full h-full object-cover"
                   loading="lazy"

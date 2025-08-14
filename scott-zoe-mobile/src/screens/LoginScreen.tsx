@@ -28,6 +28,7 @@ interface FloatingHeart {
 }
 
 export default function LoginScreen() {
+  const [username, setUsername] = useState('scott');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hearts, setHearts] = useState<FloatingHeart[]>([]);
@@ -118,7 +119,7 @@ export default function LoginScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     try {
-      const success = await login(password);
+      const success = await login(username, password);
       if (success) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } else {
@@ -192,6 +193,43 @@ export default function LoginScreen() {
 
           {/* Login Form */}
           <View style={styles.formContainer}>
+            {/* Username Selection */}
+            <View style={styles.usernameContainer}>
+              <Text style={styles.usernameLabel}>Who are you?</Text>
+              <View style={styles.usernameToggle}>
+                <TouchableOpacity
+                  style={[styles.usernameOption, username === 'scott' && styles.usernameOptionActive]}
+                  onPress={() => {
+                    setUsername('scott');
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }}
+                >
+                  <Ionicons 
+                    name="person" 
+                    size={20} 
+                    color={username === 'scott' ? 'white' : '#FF6B9D'} 
+                    style={styles.usernameIcon} 
+                  />
+                  <Text style={[styles.usernameText, username === 'scott' && styles.usernameTextActive]}>Scott</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.usernameOption, username === 'zoe' && styles.usernameOptionActive]}
+                  onPress={() => {
+                    setUsername('zoe');
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }}
+                >
+                  <Ionicons 
+                    name="person" 
+                    size={20} 
+                    color={username === 'zoe' ? 'white' : '#FF6B9D'} 
+                    style={styles.usernameIcon} 
+                  />
+                  <Text style={[styles.usernameText, username === 'zoe' && styles.usernameTextActive]}>Zoe</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
             <View style={styles.inputContainer}>
               <Ionicons name="lock-closed" size={20} color="#FF6B9D" style={styles.inputIcon} />
               <TextInput
@@ -283,6 +321,53 @@ const styles = StyleSheet.create({
   formContainer: {
     width: '100%',
     maxWidth: 300,
+  },
+  usernameContainer: {
+    marginBottom: 20,
+  },
+  usernameLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.9)',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  usernameToggle: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  usernameOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    minWidth: 100,
+    justifyContent: 'center',
+  },
+  usernameOptionActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  usernameIcon: {
+    marginRight: 6,
+  },
+  usernameText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.9)',
+  },
+  usernameTextActive: {
+    color: '#FF6B9D',
   },
   inputContainer: {
     flexDirection: 'row',

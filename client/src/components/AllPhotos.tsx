@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Settings, Plus, Trash2, Check, Tag } from 'lucide-react';
-import api from '../utils/api';
+import api, { API_BASE_URL } from '../utils/api';
 import PhotoDetailModal from './PhotoDetailModal';
 import PhotoUpload from './PhotoUpload';
 
@@ -308,7 +308,7 @@ function AllPhotos() {
                 onClick={() => selectionMode ? togglePhotoSelection(photo.id) : openPhotoDetail(photo)}
               >
                 <img
-                  src={`/api/photos/image/${photo.filename}`}
+                  src={`${API_BASE_URL}/api/photos/image/${photo.filename}`}
                   alt={photo.originalName}
                   className="w-full h-full object-cover"
                   loading="lazy"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Heart, Calendar, User, Tag, Edit3, Save, Trash2 } from 'lucide-react';
-import api from '../utils/api';
+import api, { API_BASE_URL } from '../utils/api';
 
 interface Photo {
   id: number;
@@ -188,7 +188,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
           {/* Image Section */}
           <div className="flex-1 bg-black flex items-center justify-center">
             <img
-              src={`/api/photos/image/${photo.filename}`}
+              src={`${API_BASE_URL}/api/photos/image/${photo.filename}`}
               alt={photo.originalName}
               className="max-w-full max-h-full object-contain"
             />

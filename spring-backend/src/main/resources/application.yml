@@ -51,6 +51,22 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+  # Observability Configuration - Fix for ObservationFilterChainDecorator error
+  observations:
+    web:
+      server:
+        enabled: true
+    annotations:
+      enabled: false
+  metrics:
+    web:
+      server:
+        enabled: true
+        request:
+          autotime:
+            enabled: false
+  tracing:
+    enabled: false
 
 # Logging Configuration
 logging:

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Upload, Heart, Settings, Camera } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import api from '../utils/api';
+import api, { API_BASE_URL } from '../utils/api';
 import PhotoDetailModal from './PhotoDetailModal';
 import PhotoUpload from './PhotoUpload';
 
@@ -153,7 +153,7 @@ function PhotoGallery() {
               onClick={() => openPhotoDetail(photo)}
             >
               <img
-                src={`/api/photos/image/${photo.filename}`}
+                src={`${API_BASE_URL}/api/photos/image/${photo.filename}`}
                 alt={photo.originalName}
                 className="w-full h-full object-cover"
                 loading="lazy"
@@ -297,7 +297,7 @@ function PhotoGallery() {
                       {categoryPhotos.slice(0, 3).map((photo) => (
                         <div key={photo.id} className="aspect-square relative overflow-hidden rounded-lg">
                           <img
-                            src={`/api/photos/image/${photo.filename}`}
+                            src={`${API_BASE_URL}/api/photos/image/${photo.filename}`}
                             alt={photo.originalName}
                             className="w-full h-full object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
                             onClick={() => openPhotoDetail(photo)}

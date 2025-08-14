@@ -19,7 +19,7 @@ interface AuthContextType {
   isLoading: boolean;
   user: User | null;
   relationshipInfo: RelationshipInfo | null;
-  login: (password: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   checkAuthStatus: () => Promise<void>;
 }
@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [relationshipInfo, setRelationshipInfo] = useState<RelationshipInfo | null>(null);
 
-  const login = async (password: string): Promise<boolean> => {
+  const login = async (username: string, password: string): Promise<boolean> => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          username: 'scott-zoe', // Default username for the couple
+          username,
           password 
         }),
       });
