@@ -47,8 +47,6 @@ function Settings() {
   const [savedOpportunities, setSavedOpportunities] = useState(0);
   const [loadingUserData, setLoadingUserData] = useState(true);
   const [otherUser, setOtherUser] = useState<OtherUser | null>(null);
-  const [activeTab, setActiveTab] = useState<'my-wheel' | 'other-wheel'>('my-wheel');
-  const [myWheelPrizes, setMyWheelPrizes] = useState<PrizeTemplate[]>([]);
   const [otherWheelPrizes, setOtherWheelPrizes] = useState<PrizeTemplate[]>([]);
 
   useEffect(() => {
@@ -358,97 +356,17 @@ function Settings() {
             
             <div className="text-center mb-6">
               <p className="text-apple-secondary-label">
-                Customize each other's prize wheels and adjust winning probabilities
+                Customize {otherUser?.displayName || otherUser?.username || 'your partner'}'s prize wheel and adjust winning probabilities
               </p>
             </div>
 
-            {/* Tab Navigation */}
-            <div className="flex justify-center mb-8">
-              <div className="bg-apple-secondary-background rounded-lg p-1 flex">
-                <button
-                  onClick={() => setActiveTab('my-wheel')}
-                  className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                    activeTab === 'my-wheel'
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-apple-secondary-label hover:text-apple-label'
-                  }`}
-                >
-                  My Wheel
-                </button>
-                <button
-                  onClick={() => setActiveTab('other-wheel')}
-                  className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                    activeTab === 'other-wheel'
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-apple-secondary-label hover:text-apple-label'
-                  }`}
-                >
-                  {otherUser?.displayName || otherUser?.username || 'Partner'}'s Wheel
-                </button>
-              </div>
-            </div>
-
-            {/* Tab Content */}
-            <div className="space-y-8">
-              {activeTab === 'my-wheel' ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div>
-                    <h3 className="text-lg font-semibold text-apple-label mb-4">
-                      Current Configuration
-                    </h3>
-                    <div className="flex justify-center">
-                      <WheelPreview prizes={myWheelPrizes} size={250} />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-apple-label mb-4">
-                      Configuration Details
-                    </h3>
-                    <div className="bg-apple-secondary-background rounded-lg p-4">
-                      {myWheelPrizes.length > 0 ? (
-                        <div className="space-y-2">
-                          {myWheelPrizes.map((prize, index) => (
-                            <div key={index} className="flex justify-between items-center py-2 border-b border-apple-separator last:border-b-0">
-                              <div className="flex items-center space-x-3">
-                                <div 
-                                  className="w-4 h-4 rounded"
-                                  style={{ backgroundColor: prize.color }}
-                                ></div>
-                                <span className="font-medium">{prize.prizeName}</span>
-                              </div>
-                              <span className="text-sm text-apple-secondary-label">
-                                {prize.probability.toFixed(1)}%
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-apple-secondary-label text-center py-4">
-                          No configuration set yet
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <WheelConfigManager 
-                    targetUserId={otherUser?.id} 
-                    targetUserName={otherUser?.displayName || otherUser?.username}
-                  />
-                  
-                  {otherWheelPrizes.length > 0 && (
-                    <div className="mt-8">
-                      <h3 className="text-lg font-semibold text-apple-label mb-4 text-center">
-                        Live Preview
-                      </h3>
-                      <div className="flex justify-center">
-                        <WheelPreview prizes={otherWheelPrizes} size={300} />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+            {/* Wheel Configuration Content */}
+            <div>
+              <WheelConfigManager 
+                targetUserId={otherUser?.id} 
+                targetUserName={otherUser?.displayName || otherUser?.username}
+                onPrizesChange={setOtherWheelPrizes}
+              />
             </div>
           </div>
         </div>

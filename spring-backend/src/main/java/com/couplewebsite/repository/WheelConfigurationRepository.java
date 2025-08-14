@@ -3,6 +3,7 @@ package com.couplewebsite.repository;
 import com.couplewebsite.entity.User;
 import com.couplewebsite.entity.WheelConfiguration;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -49,6 +50,7 @@ public interface WheelConfigurationRepository extends JpaRepository<WheelConfigu
     /**
      * Deactivate all existing configurations for a user (used when creating a new active configuration)
      */
+    @Modifying
     @Query("UPDATE WheelConfiguration wc SET wc.isActive = false WHERE wc.ownerUser = :ownerUser AND wc.isActive = true")
     void deactivateAllForOwnerUser(@Param("ownerUser") User ownerUser);
 }

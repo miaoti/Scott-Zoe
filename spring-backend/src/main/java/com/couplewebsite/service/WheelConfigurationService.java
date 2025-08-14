@@ -49,6 +49,20 @@ public class WheelConfigurationService {
     }
     
     /**
+     * Get the active wheel configuration for a user by user ID
+     */
+    public Optional<WheelConfiguration> getWheelConfigurationByUserId(Long userId) {
+        return wheelConfigurationRepository.findByOwnerUserIdAndIsActiveTrue(userId);
+    }
+    
+    /**
+     * Get user by ID
+     */
+    public User getUserById(Long userId) {
+        return userDetailsService.getUserById(userId);
+    }
+    
+    /**
      * Get the active wheel configuration for another user (for cross-user configuration)
      */
     public Optional<WheelConfiguration> getOtherUserActiveWheelConfiguration() {

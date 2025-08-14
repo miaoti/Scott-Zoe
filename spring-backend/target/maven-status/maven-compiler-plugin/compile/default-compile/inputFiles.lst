@@ -20,11 +20,14 @@ C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\service\SettingsService.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\repository\EarningsRepository.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\repository\PhotoRepository.java
+C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\repository\WheelPrizeTemplateRepository.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\controller\EarningsController.java
+C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\controller\WheelConfigurationController.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\repository\WheelUsageRepository.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\entity\Note.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\repository\CategoryRepository.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\config\MimeTypeConfig.java
+C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\entity\WheelConfiguration.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\entity\SavedOpportunity.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\controller\SettingsController.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\repository\SettingsRepository.java
@@ -44,6 +47,7 @@ C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\controller\DeveloperController.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\repository\LoveRepository.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\service\FileStorageService.java
+C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\repository\WheelConfigurationRepository.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\exception\GlobalExceptionHandler.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\entity\Earnings.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\service\CategoryService.java
@@ -52,6 +56,7 @@ C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\controller\AuthController.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\service\SavedOpportunityService.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\controller\WheelUsageController.java
+C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\service\WheelConfigurationService.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\security\JwtUtil.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\dto\LoginRequest.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\repository\MemoryRepository.java
@@ -61,3 +66,4 @@ C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\controller\HealthController.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\config\StaticResourceFilter.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\service\LoveService.java
+C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\entity\WheelPrizeTemplate.java

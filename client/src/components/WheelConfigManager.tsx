@@ -2,6 +2,55 @@ import React, { useState, useEffect } from 'react';
 import { Settings, Plus, Trash2, Save, RotateCcw, Palette, DollarSign, Gift } from 'lucide-react';
 import api from '../utils/api';
 import { useToast } from '../contexts/ToastContext';
+import WheelPreview from './WheelPreview';
+
+// Custom CSS for slider styling
+const sliderStyles = `
+  .slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 12px;
+    border-radius: 6px;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+  
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #3B82F6;
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+  }
+  
+  .slider::-webkit-slider-thumb:hover {
+    background: #2563EB;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #3B82F6;
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+  }
+  
+  .slider::-moz-range-thumb:hover {
+    background: #2563EB;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+`;
 
 interface PrizeTemplate {
   id?: number;
@@ -17,9 +66,10 @@ interface PrizeTemplate {
 interface WheelConfigManagerProps {
   targetUserId?: number;
   targetUserName?: string;
+  onPrizesChange?: (prizes: PrizeTemplate[]) => void;
 }
 
-const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, targetUserName }) => {
+const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, targetUserName, onPrizesChange }) => {
   const [prizes, setPrizes] = useState<PrizeTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -63,10 +113,26 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
           displayOrder: prize.displayOrder || index
         })));
         setHasConfiguration(true);
+        if (onPrizesChange) {
+          onPrizesChange(response.data.prizes.map((prize: any, index: number) => ({
+            id: prize.id,
+            prizeName: prize.prizeName,
+            prizeDescription: prize.prizeDescription,
+            prizeType: prize.prizeType,
+            prizeValue: prize.prizeValue,
+            probability: parseFloat(prize.probability),
+            color: prize.color,
+            displayOrder: prize.displayOrder || index
+          })));
+        }
       } else {
         // Create default configuration
-        setPrizes(getDefaultPrizes());
+        const defaultPrizes = getDefaultPrizes();
+        setPrizes(defaultPrizes);
         setHasConfiguration(false);
+        if (onPrizesChange) {
+          onPrizesChange(defaultPrizes);
+        }
       }
     } catch (error) {
       console.error('Error loading wheel configuration:', error);
@@ -99,7 +165,11 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
       color: colorOptions[Math.floor(Math.random() * colorOptions.length)],
       displayOrder: prizes.length
     };
-    setPrizes([...prizes, newPrize]);
+    const newPrizes = [...prizes, newPrize];
+    setPrizes(newPrizes);
+    if (onPrizesChange) {
+      onPrizesChange(newPrizes);
+    }
   };
 
   const removePrize = (index: number) => {
@@ -110,12 +180,18 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
     const newPrizes = prizes.filter((_, i) => i !== index);
     // Redistribute probabilities
     redistributeProbabilities(newPrizes);
+    if (onPrizesChange) {
+      onPrizesChange(newPrizes);
+    }
   };
 
   const updatePrize = (index: number, field: keyof PrizeTemplate, value: any) => {
     const newPrizes = [...prizes];
     newPrizes[index] = { ...newPrizes[index], [field]: value };
     setPrizes(newPrizes);
+    if (onPrizesChange) {
+      onPrizesChange(newPrizes);
+    }
   };
 
   const updateProbability = (index: number, newProbability: number) => {
@@ -140,6 +216,9 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
     
     // Normalize to ensure total is 100
     normalizeProbabilities(newPrizes);
+    if (onPrizesChange) {
+      onPrizesChange(newPrizes);
+    }
   };
 
   const redistributeProbabilities = (prizeList: PrizeTemplate[]) => {
@@ -164,8 +243,12 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
   };
 
   const resetToDefault = () => {
-    setPrizes(getDefaultPrizes());
+    const defaultPrizes = getDefaultPrizes();
+    setPrizes(defaultPrizes);
     showToast('Reset to default configuration', 'general');
+    if (onPrizesChange) {
+      onPrizesChange(defaultPrizes);
+    }
   };
 
   const saveConfiguration = async () => {
@@ -229,167 +312,240 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
   }
 
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-2">
-          <Settings className="w-5 h-5 text-blue-500" />
-          <h3 className="text-lg font-semibold text-gray-800">
-            {targetUserId ? `${targetUserName}'s Wheel Configuration` : 'My Wheel Configuration'}
-          </h3>
-        </div>
-        <div className="flex items-center space-x-2">
-          <span className={`text-sm font-medium ${
-            Math.abs(totalProbability - 100) < 0.1 ? 'text-green-600' : 'text-red-600'
-          }`}>
-            Total: {totalProbability.toFixed(1)}%
-          </span>
+    <>
+      <style>{sliderStyles}</style>
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-100">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center space-x-3">
+            <div className="bg-blue-100 p-2 rounded-lg">
+              <Settings className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {targetUserId ? `${targetUserName}'s Wheel Configuration` : 'My Wheel Configuration'}
+              </h3>
+              <p className="text-sm text-gray-600">Configure prizes and probabilities</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              Math.abs(totalProbability - 100) < 0.1 
+                ? 'bg-green-100 text-green-700' 
+                : 'bg-red-100 text-red-700'
+            }`}>
+              Total: {totalProbability.toFixed(1)}%
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-4 mb-6">
-        {prizes.map((prize, index) => (
-          <div key={index} className="border border-gray-200 rounded-lg p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Prize Name
-                </label>
-                <input
-                  type="text"
-                  value={prize.prizeName}
-                  onChange={(e) => updatePrize(index, 'prizeName', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., $10"
-                />
+      {/* Main Content */}
+      <div className="p-6">
+        {/* Live Preview */}
+        <div className="mb-8">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+            Live Preview
+          </h4>
+          <div className="flex justify-center">
+            <WheelPreview prizes={prizes} size={280} />
+          </div>
+        </div>
+
+        {/* Prize Configuration */}
+        <div className="space-y-6 mb-8">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">
+            Prize Configuration
+          </h4>
+          {prizes.map((prize, index) => (
+            <div key={index} className="bg-gray-50 border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+              {/* Prize Header */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div 
+                    className="w-6 h-6 rounded-full border-2 border-white shadow-sm"
+                    style={{ backgroundColor: prize.color }}
+                  ></div>
+                  <span className="font-medium text-gray-900">Prize {index + 1}</span>
+                </div>
+                <button
+                  onClick={() => removePrize(index)}
+                  disabled={prizes.length <= 2}
+                  className={`p-2 rounded-lg transition-colors ${
+                    prizes.length <= 2 
+                      ? 'text-gray-400 cursor-not-allowed' 
+                      : 'text-red-500 hover:text-red-700 hover:bg-red-50'
+                  }`}
+                  title={prizes.length <= 2 ? 'Minimum 2 prizes required' : 'Remove prize'}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
-                <input
-                  type="text"
-                  value={prize.prizeDescription}
-                  onChange={(e) => updatePrize(index, 'prizeDescription', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Prize description"
-                />
+
+              {/* Prize Fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Prize Name
+                  </label>
+                  <input
+                    type="text"
+                    value={prize.prizeName}
+                    onChange={(e) => updatePrize(index, 'prizeName', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., $10"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                  </label>
+                  <input
+                    type="text"
+                    value={prize.prizeDescription}
+                    onChange={(e) => updatePrize(index, 'prizeDescription', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Prize description"
+                  />
+                </div>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Type & Value
-                </label>
-                <div className="flex space-x-2">
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Type
+                  </label>
                   <select
                     value={prize.prizeType}
                     onChange={(e) => updatePrize(index, 'prizeType', e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="MONEY">Money</option>
-                    <option value="GIFT">Gift</option>
-                    <option value="EXPERIENCE">Experience</option>
+                    <option value="MONEY">💰 Money</option>
+                    <option value="GIFT">🎁 Gift</option>
+                    <option value="EXPERIENCE">✨ Experience</option>
                   </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Value
+                  </label>
                   <input
                     type="number"
                     value={prize.prizeValue}
                     onChange={(e) => updatePrize(index, 'prizeValue', parseFloat(e.target.value) || 0)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Value"
                     min="0"
                     step="0.01"
                   />
                 </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Color
-                </label>
-                <div className="flex items-center space-x-2">
-                  <div 
-                    className="w-8 h-8 rounded border border-gray-300 cursor-pointer"
-                    style={{ backgroundColor: prize.color }}
-                  ></div>
-                  <select
-                    value={prize.color}
-                    onChange={(e) => updatePrize(index, 'color', e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {colorOptions.map(color => (
-                      <option key={color} value={color}>
-                        {color}
-                      </option>
-                    ))}
-                  </select>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Color
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <div 
+                      className="w-10 h-10 rounded-lg border-2 border-gray-300 cursor-pointer shadow-sm"
+                      style={{ backgroundColor: prize.color }}
+                    ></div>
+                    <select
+                      value={prize.color}
+                      onChange={(e) => updatePrize(index, 'color', e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    >
+                      {colorOptions.map(color => (
+                        <option key={color} value={color}>
+                          {color}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Probability: {prize.probability.toFixed(1)}%
-                </label>
-                <button
-                  onClick={() => removePrize(index)}
-                  className="text-red-500 hover:text-red-700 p-1"
-                  disabled={prizes.length <= 2}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+              
+              {/* Probability Slider */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-sm font-medium text-gray-700">
+                    Probability
+                  </label>
+                  <span className="text-sm font-semibold text-blue-600">
+                    {prize.probability.toFixed(1)}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="95"
+                  step="0.1"
+                  value={prize.probability}
+                  onChange={(e) => updateProbability(index, parseFloat(e.target.value))}
+                  className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                  style={{
+                    background: `linear-gradient(to right, ${prize.color} 0%, ${prize.color} ${prize.probability}%, #e5e7eb ${prize.probability}%, #e5e7eb 100%)`
+                  }}
+                />
               </div>
-              <input
-                type="range"
-                min="0.1"
-                max="95"
-                step="0.1"
-                value={prize.probability}
-                onChange={(e) => updateProbability(index, parseFloat(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-              />
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex space-x-2">
-          <button
-            onClick={addPrize}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Prize</span>
-          </button>
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={addPrize}
+              className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="font-medium">Add Prize</span>
+            </button>
+            
+            <button
+              onClick={resetToDefault}
+              className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            >
+              <RotateCcw className="w-5 h-5" />
+              <span className="font-medium">Reset to Default</span>
+            </button>
+          </div>
           
           <button
-            onClick={resetToDefault}
-            className="flex items-center space-x-2 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+            onClick={saveConfiguration}
+            disabled={saving || Math.abs(totalProbability - 100) > 0.1}
+            className={`flex items-center justify-center space-x-2 px-8 py-3 rounded-xl font-medium transition-all duration-200 shadow-md transform ${
+              saving || Math.abs(totalProbability - 100) > 0.1
+                ? 'bg-gray-400 cursor-not-allowed text-white'
+                : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 hover:shadow-lg hover:-translate-y-0.5'
+            }`}
           >
-            <RotateCcw className="w-4 h-4" />
-            <span>Reset to Default</span>
+            <Save className="w-5 h-5" />
+            <span>{saving ? 'Saving...' : 'Save Configuration'}</span>
           </button>
         </div>
         
-        <button
-          onClick={saveConfiguration}
-          disabled={saving || Math.abs(totalProbability - 100) > 0.1}
-          className="flex items-center space-x-2 px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-        >
-          <Save className="w-4 h-4" />
-          <span>{saving ? 'Saving...' : 'Save Configuration'}</span>
-        </button>
+        {/* Warning Message */}
+        {Math.abs(totalProbability - 100) > 0.1 && (
+          <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <div className="flex items-center space-x-2">
+              <div className="text-amber-500">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-amber-800">
+                Total probability must equal 100% to save the configuration. Current total: {totalProbability.toFixed(1)}%
+              </p>
+            </div>
+          </div>
+        )}
       </div>
-      
-      {Math.abs(totalProbability - 100) > 0.1 && (
-        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-          <p className="text-sm text-yellow-800">
-            ⚠️ Total probability must equal 100% to save the configuration.
-          </p>
-        </div>
-      )}
     </div>
+    </>
   );
 };
 

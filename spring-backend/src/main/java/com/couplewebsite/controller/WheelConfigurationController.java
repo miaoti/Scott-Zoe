@@ -64,6 +64,58 @@ public class WheelConfigurationController {
     }
     
     /**
+     * Get other user's active wheel configuration by user ID
+     */
+    @GetMapping("/other-user-wheel/{userId}")
+    public ResponseEntity<?> getOtherUserWheelConfiguration(@PathVariable Long userId) {
+        try {
+            Optional<WheelConfiguration> configOpt = wheelConfigurationService.getWheelConfigurationByUserId(userId);
+            
+            if (configOpt.isEmpty()) {
+                // Create default configuration for the other user
+                User otherUser = wheelConfigurationService.getUserById(userId);
+                if (otherUser == null) {
+                    Map<String, String> error = new HashMap<>();
+                    error.put("message", "User not found");
+                    return ResponseEntity.status(404).body(error);
+                }
+                
+                WheelConfiguration defaultConfig = wheelConfigurationService.createDefaultWheelConfiguration(otherUser);
+                List<WheelPrizeTemplate> prizeTemplates = wheelConfigurationService.getPrizeTemplates(defaultConfig);
+                
+                Map<String, Object> response = new HashMap<>();
+                response.put("hasConfiguration", true);
+                response.put("isDefault", true);
+                response.put("configuration", createConfigurationResponse(defaultConfig));
+                response.put("prizes", prizeTemplates.stream()
+                        .map(this::createPrizeTemplateResponse)
+                        .collect(Collectors.toList()));
+                
+                return ResponseEntity.ok(response);
+            }
+            
+            WheelConfiguration config = configOpt.get();
+            List<WheelPrizeTemplate> prizeTemplates = wheelConfigurationService.getPrizeTemplates(config);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("hasConfiguration", true);
+            response.put("isDefault", false);
+            response.put("configuration", createConfigurationResponse(config));
+            response.put("prizes", prizeTemplates.stream()
+                    .map(this::createPrizeTemplateResponse)
+                    .collect(Collectors.toList()));
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Error getting other user's wheel configuration", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Failed to get other user's wheel configuration");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
      * Get other user's active wheel configuration (for cross-user management)
      */
     @GetMapping("/other-wheel")
@@ -111,6 +163,68 @@ public class WheelConfigurationController {
             logger.error("Error getting other user's wheel configuration", e);
             Map<String, String> error = new HashMap<>();
             error.put("message", "Failed to get other user's wheel configuration");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Save wheel configuration for specific user
+     */
+    @PostMapping("/save-for-user/{userId}")
+    public ResponseEntity<?> saveWheelConfigurationForUser(@PathVariable Long userId, @Valid @RequestBody ConfigureWheelRequest request) {
+        try {
+            // Validate that probabilities sum to 100%
+            BigDecimal totalProbability = request.getPrizes().stream()
+                    .map(prize -> new BigDecimal(prize.getProbability().toString()))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            
+            if (totalProbability.compareTo(new BigDecimal("100.00")) != 0) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Total probability must equal 100%. Current total: " + totalProbability + "%");
+                return ResponseEntity.badRequest().body(error);
+            }
+            
+            User targetUser = wheelConfigurationService.getUserById(userId);
+            if (targetUser == null) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "User not found");
+                return ResponseEntity.status(404).body(error);
+            }
+            
+            // Convert request to prize templates
+            List<WheelPrizeTemplate> prizeTemplates = request.getPrizes().stream()
+                    .map(prizeRequest -> {
+                        WheelPrizeTemplate template = new WheelPrizeTemplate();
+                        template.setPrizeName(prizeRequest.getPrizeName());
+                        template.setPrizeDescription(prizeRequest.getPrizeDescription());
+                        template.setPrizeType(prizeRequest.getPrizeType());
+                        template.setPrizeValue(prizeRequest.getPrizeValue());
+                        template.setProbability(new BigDecimal(prizeRequest.getProbability().toString()));
+                        template.setColor(prizeRequest.getColor());
+                        return template;
+                    })
+                    .collect(Collectors.toList());
+            
+            WheelConfiguration savedConfig = wheelConfigurationService.saveWheelConfiguration(targetUser, prizeTemplates);
+            List<WheelPrizeTemplate> savedPrizeTemplates = wheelConfigurationService.getPrizeTemplates(savedConfig);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Wheel configuration saved successfully");
+            response.put("configuration", createConfigurationResponse(savedConfig));
+            response.put("prizes", savedPrizeTemplates.stream()
+                    .map(this::createPrizeTemplateResponse)
+                    .collect(Collectors.toList()));
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (IllegalArgumentException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        } catch (Exception e) {
+            logger.error("Error saving wheel configuration for user", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Failed to save wheel configuration");
             return ResponseEntity.status(500).body(error);
         }
     }
