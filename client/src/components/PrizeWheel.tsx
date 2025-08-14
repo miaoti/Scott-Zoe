@@ -392,7 +392,8 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
                 let radiusMultiplier;
                 if (segmentAngle <= 30) radiusMultiplier = 0.5;      // 12+ prizes
                 else if (segmentAngle <= 45) radiusMultiplier = 0.55; // 8-11 prizes  
-                else if (segmentAngle <= 60) radiusMultiplier = 0.6;  // 6-7 prizes
+                else if (segmentAngle <= 52) radiusMultiplier = 0.65; // 7 prizes (51.4°)
+                else if (segmentAngle <= 60) radiusMultiplier = 0.6;  // 6 prizes
                 else if (segmentAngle <= 90) radiusMultiplier = 0.65; // 4-5 prizes
                 else if (segmentAngle <= 120) radiusMultiplier = 0.7; // 3 prizes
                 else radiusMultiplier = 0.75;                         // 2 prizes

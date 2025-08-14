@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Plus, Trash2, Save, RotateCcw, Palette, DollarSign, Gift, Lock, Unlock } from 'lucide-react';
+import { Settings, Plus, Trash2, Save, RotateCcw, Palette, DollarSign, Gift, Lock, Unlock, ChevronDown, ChevronRight } from 'lucide-react';
 import api from '../utils/api';
 import { useToast } from '../contexts/ToastContext';
 import WheelPreview from './WheelPreview';
@@ -75,6 +75,7 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasConfiguration, setHasConfiguration] = useState(false);
+  const [expandedPrizes, setExpandedPrizes] = useState<Set<number>>(new Set());
   const { showToast } = useToast();
 
   // Color options for prizes with descriptive names
@@ -188,6 +189,16 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
     { prizeName: '$1000', prizeDescription: 'Win $1000 love points', prizeType: 'MONEY', prizeValue: 1000, probability: 0.5, color: '#1F2937', displayOrder: 7 },
   ];
 
+  const togglePrizeExpansion = (index: number) => {
+    const newExpanded = new Set(expandedPrizes);
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index);
+    } else {
+      newExpanded.add(index);
+    }
+    setExpandedPrizes(newExpanded);
+  };
+
   const addPrize = () => {
     const newPrize: PrizeTemplate = {
       prizeName: 'New Prize',
@@ -200,6 +211,8 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
     };
     const newPrizes = [...prizes, newPrize];
     setPrizes(newPrizes);
+    // Auto-expand the new prize
+    setExpandedPrizes(prev => new Set([...prev, prizes.length]));
     if (onPrizesChange) {
       onPrizesChange(newPrizes);
     }
@@ -397,33 +410,55 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
           <h4 className="text-lg font-semibold text-gray-900 mb-4">
             Prize Configuration
           </h4>
-          {prizes.map((prize, index) => (
-            <div key={index} className="bg-gray-50 border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
-              {/* Prize Header */}
-              <div className="flex items-center justify-between mb-4">
+          {prizes.map((prize, index) => {
+            const isExpanded = expandedPrizes.has(index);
+            return (
+            <div key={index} className="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+              {/* Prize Header - Always Visible */}
+              <div 
+                className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                onClick={() => togglePrizeExpansion(index)}
+              >
                 <div className="flex items-center space-x-3">
                   <div 
                     className="w-6 h-6 rounded-full border-2 border-white shadow-sm"
                     style={{ backgroundColor: prize.color }}
                   ></div>
-                  <span className="font-medium text-gray-900">Prize {index + 1}</span>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-900">{prize.prizeName}</span>
+                    <span className="text-sm text-gray-500">{prize.probability.toFixed(1)}% chance</span>
+                  </div>
                 </div>
-                <button
-                  onClick={() => removePrize(index)}
-                  disabled={prizes.length <= 2}
-                  className={`p-2 rounded-lg transition-colors ${
-                    prizes.length <= 2 
-                      ? 'text-gray-400 cursor-not-allowed' 
-                      : 'text-red-500 hover:text-red-700 hover:bg-red-50'
-                  }`}
-                  title={prizes.length <= 2 ? 'Minimum 2 prizes required' : 'Remove prize'}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removePrize(index);
+                    }}
+                    disabled={prizes.length <= 2}
+                    className={`p-2 rounded-lg transition-colors ${
+                      prizes.length <= 2 
+                        ? 'text-gray-400 cursor-not-allowed' 
+                        : 'text-red-500 hover:text-red-700 hover:bg-red-50'
+                    }`}
+                    title={prizes.length <= 2 ? 'Minimum 2 prizes required' : 'Remove prize'}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                  {isExpanded ? (
+                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                  ) : (
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  )}
+                </div>
               </div>
 
-              {/* Prize Fields */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              {/* Prize Configuration - Collapsible */}
+              {isExpanded && (
+                <div className="px-4 pb-4 border-t border-gray-200">
+                  <div className="pt-4">
+                    {/* Prize Fields */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Prize Name
@@ -570,10 +605,13 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
                   style={{
                     background: `linear-gradient(to right, ${prize.color} 0%, ${prize.color} ${prize.probability}%, #e5e7eb ${prize.probability}%, #e5e7eb 100%)`
                   }}
-                />
-              </div>
+                />                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Action Buttons */}
