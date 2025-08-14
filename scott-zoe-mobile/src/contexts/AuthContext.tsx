@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const authToken = token || await getToken();
       if (!authToken) return;
 
-      const response = await fetch(`${API_BASE_URL}/api/relationship/info`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/relationship-info`, {
         headers: {
           'Authorization': `Bearer ${authToken}`,
         },
