@@ -50,16 +50,23 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
   const firstDayWeekday = firstDayOfMonth.getDay();
   const daysInMonth = lastDayOfMonth.getDate();
   
-  // Get memories for current month
+  // Get memories for current month (including recurring memories from other years)
   const monthMemories = memories.filter(memory => {
-    const memoryDate = new Date(memory.date);
-    return memoryDate.getFullYear() === year && memoryDate.getMonth() === month;
+    // Parse date string properly to avoid timezone issues
+    // Backend sends dates in YYYY-MM-DD format
+    const dateStr = memory.date.toString();
+    const [memoryYear, memoryMonth, memoryDay] = dateStr.split('-').map(Number);
+    // JavaScript months are 0-indexed, so subtract 1 from the month
+    return (memoryMonth - 1) === month;
   });
   
   // Group memories by day
   const memoriesByDay: { [key: number]: Memory[] } = {};
   monthMemories.forEach(memory => {
-    const day = new Date(memory.date).getDate();
+    // Parse date string properly to get the day
+    const dateStr = memory.date.toString();
+    const [memoryYear, memoryMonth, memoryDay] = dateStr.split('-').map(Number);
+    const day = memoryDay;
     if (!memoriesByDay[day]) {
       memoriesByDay[day] = [];
     }
@@ -79,6 +86,7 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
   };
   
   const handleDayClick = (day: number) => {
+    // Create date string directly to avoid timezone conversion issues
     const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayMemories = memoriesByDay[day] || [];
     onDayClick(dateString, dayMemories);

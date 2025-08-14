@@ -375,8 +375,7 @@ function Memories() {
                       </div>
                       <span>•</span>
                       <span>Added by {memory.creator.name}</span>
-                      <span>•</span>
-                      <span>{new Date(memory.createdAt).toLocaleDateString()}</span>
+                  
                     </div>
                   </div>
                   
