@@ -8,6 +8,9 @@ interface Prize {
   color: string;
   probability: number;
   icon: React.ReactNode;
+  prizeName: string;
+  prizeDescription: string;
+  prizeType: string;
 }
 
 interface PrizeWheelProps {
@@ -22,22 +25,82 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
   const [showResult, setShowResult] = useState(false);
   const [hasUsedToday, setHasUsedToday] = useState(false);
   const [savedOpportunities, setSavedOpportunities] = useState(0);
+  const [prizes, setPrizes] = useState<Prize[]>([]);
+  const [loadingPrizes, setLoadingPrizes] = useState(true);
   const wheelRef = useRef<HTMLDivElement>(null);
 
-  // Check if user has used wheel this week and load saved opportunities
+  // Helper function to get icon for prize type and value
+  const getIconForPrize = (prizeType: string, prizeValue: number) => {
+    if (prizeType === 'MONEY') {
+      if (prizeValue >= 500) {
+        return <Sparkles className="w-4 h-4 text-yellow-400" />;
+      } else if (prizeValue >= 100) {
+        return <Sparkles className="w-4 h-4 text-white" />;
+      } else if (prizeValue >= 50) {
+        return <Star className="w-4 h-4 text-white" />;
+      } else if (prizeValue >= 25) {
+        return <DollarSign className="w-4 h-4 text-white" />;
+      } else if (prizeValue >= 10) {
+        return <DollarSign className="w-4 h-4 text-gray-800" />;
+      } else {
+        return <DollarSign className="w-4 h-4 text-gray-600" />;
+      }
+    } else {
+      return <Gift className="w-4 h-4 text-white" />;
+    }
+  };
+
+  // Default prizes fallback
+  const getDefaultPrizes = (): Prize[] => [
+    { id: 1, amount: 1, color: '#F3F4F6', probability: 45, prizeName: '$1', prizeDescription: 'Win $1 love points', prizeType: 'MONEY', icon: <DollarSign className="w-4 h-4 text-gray-600" /> },
+    { id: 2, amount: 5, color: '#E5E7EB', probability: 25, prizeName: '$5', prizeDescription: 'Win $5 love points', prizeType: 'MONEY', icon: <DollarSign className="w-4 h-4 text-gray-700" /> },
+    { id: 3, amount: 10, color: '#D1D5DB', probability: 15, prizeName: '$10', prizeDescription: 'Win $10 love points', prizeType: 'MONEY', icon: <DollarSign className="w-4 h-4 text-gray-800" /> },
+    { id: 4, amount: 25, color: '#9CA3AF', probability: 10, prizeName: '$25', prizeDescription: 'Win $25 love points', prizeType: 'MONEY', icon: <DollarSign className="w-4 h-4 text-white" /> },
+    { id: 5, amount: 77, color: '#6B7280', probability: 2.5, prizeName: '$77', prizeDescription: 'Win $77 love points', prizeType: 'MONEY', icon: <Star className="w-4 h-4 text-white" /> },
+    { id: 6, amount: 100, color: '#4B5563', probability: 1.5, prizeName: '$100', prizeDescription: 'Win $100 love points', prizeType: 'MONEY', icon: <Star className="w-4 h-4 text-white" /> },
+    { id: 7, amount: 500, color: '#374151', probability: 0.5, prizeName: '$500', prizeDescription: 'Win $500 love points', prizeType: 'MONEY', icon: <Sparkles className="w-4 h-4 text-white" /> },
+    { id: 8, amount: 1000, color: '#1F2937', probability: 0.5, prizeName: '$1000', prizeDescription: 'Win $1000 love points', prizeType: 'MONEY', icon: <Sparkles className="w-4 h-4 text-yellow-400" /> },
+  ];
+
+  // Check if user has used wheel this week and load saved opportunities and wheel configuration
   useEffect(() => {
-    const loadWheelStatus = async () => {
+    const loadWheelData = async () => {
       try {
-        // Check wheel usage status from backend
-        const wheelResponse = await api.get('/api/wheel/stats');
-        setHasUsedToday(!wheelResponse.data.canUseThisWeek);
+        const [wheelResponse, opportunitiesResponse, configResponse] = await Promise.all([
+          api.get('/api/wheel/stats'),
+          api.get('/api/opportunities/stats'),
+          api.get('/api/wheel-config/my-wheel')
+        ]);
         
-        // Load saved opportunities from backend
-        const opportunitiesResponse = await api.get('/api/opportunities/stats');
+        setHasUsedToday(!wheelResponse.data.canUseThisWeek);
         setSavedOpportunities(opportunitiesResponse.data.unused || 0);
+        
+        // Load wheel configuration
+        if (configResponse.data.hasConfiguration && configResponse.data.prizes) {
+          const dynamicPrizes = configResponse.data.prizes.map((prize: any, index: number) => ({
+            id: prize.id || index + 1,
+            amount: prize.prizeValue,
+            color: prize.color,
+            probability: parseFloat(prize.probability),
+            prizeName: prize.prizeName,
+            prizeDescription: prize.prizeDescription,
+            prizeType: prize.prizeType,
+            icon: getIconForPrize(prize.prizeType, prize.prizeValue)
+          }));
+          setPrizes(dynamicPrizes);
+        } else {
+          // Fallback to default prizes if no configuration
+          setPrizes(getDefaultPrizes());
+        }
+        
+        console.log('✅ Wheel data loaded:', {
+          canUseThisWeek: wheelResponse.data.canUseThisWeek,
+          savedOpportunities: opportunitiesResponse.data.unused,
+          prizesCount: configResponse.data.prizes?.length || 0
+        });
       } catch (error) {
-        console.error('Error loading wheel status from backend:', error);
-        // Fallback to localStorage
+        console.error('❌ Error loading wheel data from backend:', error);
+        // Fallback to localStorage and default prizes
         const today = new Date();
         const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
         const weekKey = startOfWeek.toDateString();
@@ -48,22 +111,17 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
           setHasUsedToday(true);
         }
         setSavedOpportunities(opportunities);
+        
+        setPrizes(getDefaultPrizes());
+      } finally {
+        setLoadingPrizes(false);
       }
     };
     
-    loadWheelStatus();
+    loadWheelData();
   }, []);
 
-  const prizes: Prize[] = [
-    { id: 1, amount: 1, color: '#F3F4F6', probability: 45, icon: <DollarSign className="w-4 h-4 text-gray-600" /> },
-    { id: 2, amount: 5, color: '#E5E7EB', probability: 25, icon: <DollarSign className="w-4 h-4 text-gray-700" /> },
-    { id: 3, amount: 10, color: '#D1D5DB', probability: 15, icon: <DollarSign className="w-4 h-4 text-gray-800" /> },
-    { id: 4, amount: 25, color: '#9CA3AF', probability: 10, icon: <DollarSign className="w-4 h-4 text-white" /> },
-    { id: 5, amount: 77, color: '#6B7280', probability: 2.5, icon: <Star className="w-4 h-4 text-white" /> },
-    { id: 6, amount: 100, color: '#4B5563', probability: 1.5, icon: <Star className="w-4 h-4 text-white" /> },
-    { id: 7, amount: 500, color: '#374151', probability: 0.5, icon: <Sparkles className="w-4 h-4 text-white" /> },
-    { id: 8, amount: 1000, color: '#1F2937', probability: 0.5, icon: <Sparkles className="w-4 h-4 text-yellow-400" /> },
-  ];
+
 
   const selectPrize = (): Prize => {
     const random = Math.random() * 100;
@@ -139,6 +197,18 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
         localStorage.setItem('wheelLastUsedWeek', weekKey);
       }
 
+      // Record the prize win
+      try {
+        await api.post('/api/wheel-prizes', {
+          prizeType: selectedPrize.prizeType,
+          prizeValue: selectedPrize.amount,
+          prizeDescription: selectedPrize.prizeDescription
+        });
+        console.log('✅ Prize recorded successfully');
+      } catch (error) {
+        console.error('❌ Error recording prize:', error);
+      }
+
       setHasUsedToday(true);
 
       // Use up one opportunity if available
@@ -200,6 +270,36 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
       default: return '#F3F4F6';   // Very light gray
     }
   };
+
+  if (loadingPrizes) {
+    return (
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+        <div className="bg-white rounded-3xl max-w-md w-full p-8 apple-shadow-lg relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50 opacity-50" />
+          <div className="relative z-10 text-center">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-8 h-8" />
+              <div className="flex items-center space-x-2">
+                <Gift className="w-6 h-6 text-yellow-500" />
+                <h2 className="text-2xl font-bold text-apple-label">Prize Wheel</h2>
+                <Sparkles className="w-6 h-6 text-yellow-500" />
+              </div>
+              <button
+                onClick={onClose}
+                className="w-8 h-8 rounded-full bg-apple-gray-6/10 hover:bg-apple-gray-6/20 flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4 text-apple-secondary-label" />
+              </button>
+            </div>
+            <div className="py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+              <p className="text-apple-secondary-label">Loading wheel configuration...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div 
@@ -303,7 +403,7 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
                   >
                     <div className="flex items-center space-x-1">
                       {prize.icon}
-                      <span>${prize.amount}</span>
+                      <span>{prize.prizeName}</span>
                     </div>
                   </div>
                 );
@@ -357,8 +457,11 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
                 <h3 className="text-2xl font-bold text-apple-label mb-2">
                   Congratulations! 🎉
                 </h3>
-                <p className="text-apple-secondary-label mb-4">
-                  You won ${wonPrize.amount}!
+                <p className="text-apple-secondary-label mb-2">
+                  You won {wonPrize.prizeName}!
+                </p>
+                <p className="text-sm text-apple-secondary-label mb-4">
+                  {wonPrize.prizeDescription}
                 </p>
                 <button
                   onClick={(e) => {

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Heart, ArrowLeft, Trophy, Gift, User } from 'lucide-react';
+import { Heart, ArrowLeft, Trophy, Gift, User, Settings as SettingsIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import DeveloperSettings from './DeveloperSettings';
+import WheelConfigManager from './WheelConfigManager';
+import WheelPreview from './WheelPreview';
 
 interface RelationshipInfo {
   startDate: string;
@@ -19,6 +21,23 @@ interface WheelPrize {
   wonAt: string;
 }
 
+interface OtherUser {
+  id: number;
+  username: string;
+  displayName: string;
+}
+
+interface PrizeTemplate {
+  id?: number;
+  prizeName: string;
+  prizeDescription: string;
+  prizeType: string;
+  prizeValue: number;
+  probability: number;
+  color: string;
+  displayOrder: number;
+}
+
 function Settings() {
   const { user } = useAuth();
   const [relationshipInfo, setRelationshipInfo] = useState<RelationshipInfo | null>(null);
@@ -27,6 +46,10 @@ function Settings() {
   const [loadingPrizes, setLoadingPrizes] = useState(true);
   const [savedOpportunities, setSavedOpportunities] = useState(0);
   const [loadingUserData, setLoadingUserData] = useState(true);
+  const [otherUser, setOtherUser] = useState<OtherUser | null>(null);
+  const [activeTab, setActiveTab] = useState<'my-wheel' | 'other-wheel'>('my-wheel');
+  const [myWheelPrizes, setMyWheelPrizes] = useState<PrizeTemplate[]>([]);
+  const [otherWheelPrizes, setOtherWheelPrizes] = useState<PrizeTemplate[]>([]);
 
   useEffect(() => {
     const fetchRelationshipInfo = async () => {
@@ -57,8 +80,8 @@ function Settings() {
     const fetchUserData = async () => {
       try {
         setLoadingUserData(true);
-        const opportunitiesResponse = await api.get('/api/opportunities/stats');
-        setSavedOpportunities(opportunitiesResponse.data.unused || 0);
+        const response = await api.get('/api/opportunities/stats');
+        setSavedOpportunities(response.data.unused || 0);
       } catch (error) {
         console.error('Error fetching user data:', error);
       } finally {
@@ -66,10 +89,64 @@ function Settings() {
       }
     };
 
+    const fetchOtherUser = async () => {
+      try {
+        const response = await api.get('/api/auth/other-user');
+        setOtherUser(response.data);
+      } catch (error) {
+        console.error('Error fetching other user:', error);
+      }
+    };
+
+    const fetchWheelConfigurations = async () => {
+      try {
+        // Fetch my wheel configuration
+        const myWheelResponse = await api.get('/api/wheel-config/my-wheel');
+        if (myWheelResponse.data.hasConfiguration && myWheelResponse.data.prizes) {
+          setMyWheelPrizes(myWheelResponse.data.prizes);
+        }
+
+        // Fetch other user's wheel configuration
+        if (otherUser) {
+          const otherWheelResponse = await api.get(`/api/wheel-config/other-user-wheel/${otherUser.id}`);
+          if (otherWheelResponse.data.hasConfiguration && otherWheelResponse.data.prizes) {
+            setOtherWheelPrizes(otherWheelResponse.data.prizes);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching wheel configurations:', error);
+      }
+    };
+
     fetchRelationshipInfo();
     fetchWheelPrizes();
     fetchUserData();
+    fetchOtherUser();
   }, []);
+
+  useEffect(() => {
+    if (otherUser) {
+      const fetchWheelConfigurations = async () => {
+        try {
+          // Fetch my wheel configuration
+          const myWheelResponse = await api.get('/api/wheel-config/my-wheel');
+          if (myWheelResponse.data.hasConfiguration && myWheelResponse.data.prizes) {
+            setMyWheelPrizes(myWheelResponse.data.prizes);
+          }
+
+          // Fetch other user's wheel configuration
+          const otherWheelResponse = await api.get(`/api/wheel-config/other-user-wheel/${otherUser.id}`);
+          if (otherWheelResponse.data.hasConfiguration && otherWheelResponse.data.prizes) {
+            setOtherWheelPrizes(otherWheelResponse.data.prizes);
+          }
+        } catch (error) {
+          console.error('Error fetching wheel configurations:', error);
+        }
+      };
+
+      fetchWheelConfigurations();
+    }
+  }, [otherUser]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -264,6 +341,115 @@ function Settings() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Wheel Configuration Management */}
+        <div className="mt-8">
+          <div className="apple-card apple-shadow p-8">
+            <div className="flex items-center justify-center mb-6">
+              <div className="bg-blue-100 p-3 rounded-2xl mr-4">
+                <SettingsIcon className="h-6 w-6 text-blue-600" />
+              </div>
+              <h2 className="font-heading text-2xl font-semibold text-apple-label">
+                Wheel Configuration
+              </h2>
+            </div>
+            
+            <div className="text-center mb-6">
+              <p className="text-apple-secondary-label">
+                Customize each other's prize wheels and adjust winning probabilities
+              </p>
+            </div>
+
+            {/* Tab Navigation */}
+            <div className="flex justify-center mb-8">
+              <div className="bg-apple-secondary-background rounded-lg p-1 flex">
+                <button
+                  onClick={() => setActiveTab('my-wheel')}
+                  className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                    activeTab === 'my-wheel'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-apple-secondary-label hover:text-apple-label'
+                  }`}
+                >
+                  My Wheel
+                </button>
+                <button
+                  onClick={() => setActiveTab('other-wheel')}
+                  className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                    activeTab === 'other-wheel'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-apple-secondary-label hover:text-apple-label'
+                  }`}
+                >
+                  {otherUser?.displayName || otherUser?.username || 'Partner'}'s Wheel
+                </button>
+              </div>
+            </div>
+
+            {/* Tab Content */}
+            <div className="space-y-8">
+              {activeTab === 'my-wheel' ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div>
+                    <h3 className="text-lg font-semibold text-apple-label mb-4">
+                      Current Configuration
+                    </h3>
+                    <div className="flex justify-center">
+                      <WheelPreview prizes={myWheelPrizes} size={250} />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-apple-label mb-4">
+                      Configuration Details
+                    </h3>
+                    <div className="bg-apple-secondary-background rounded-lg p-4">
+                      {myWheelPrizes.length > 0 ? (
+                        <div className="space-y-2">
+                          {myWheelPrizes.map((prize, index) => (
+                            <div key={index} className="flex justify-between items-center py-2 border-b border-apple-separator last:border-b-0">
+                              <div className="flex items-center space-x-3">
+                                <div 
+                                  className="w-4 h-4 rounded"
+                                  style={{ backgroundColor: prize.color }}
+                                ></div>
+                                <span className="font-medium">{prize.prizeName}</span>
+                              </div>
+                              <span className="text-sm text-apple-secondary-label">
+                                {prize.probability.toFixed(1)}%
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-apple-secondary-label text-center py-4">
+                          No configuration set yet
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <WheelConfigManager 
+                    targetUserId={otherUser?.id} 
+                    targetUserName={otherUser?.displayName || otherUser?.username}
+                  />
+                  
+                  {otherWheelPrizes.length > 0 && (
+                    <div className="mt-8">
+                      <h3 className="text-lg font-semibold text-apple-label mb-4 text-center">
+                        Live Preview
+                      </h3>
+                      <div className="flex justify-center">
+                        <WheelPreview prizes={otherWheelPrizes} size={300} />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

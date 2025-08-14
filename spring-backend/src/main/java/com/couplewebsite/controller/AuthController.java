@@ -149,6 +149,42 @@ public class AuthController {
     }
 
     /**
+     * Get other user information (partner)
+     */
+    @GetMapping("/other-user")
+    public ResponseEntity<?> getOtherUser() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUsername = authentication.getName();
+            
+            // Get the other user (Scott gets Zoe, Zoe gets Scott)
+            String otherUsername = currentUsername.equals("scott") ? "zoe" : "scott";
+            User otherUser = userDetailsService.getUserByUsername(otherUsername);
+            
+            if (otherUser == null) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Partner user not found");
+                return ResponseEntity.status(404).body(error);
+            }
+            
+            // Create response without sensitive data
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", otherUser.getId());
+            response.put("username", otherUser.getUsername());
+            response.put("name", otherUser.getName());
+            response.put("relationshipStartDate", otherUser.getRelationshipStartDate());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Error getting other user info", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Failed to get partner information");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+
+    /**
      * Get relationship information
      */
     @GetMapping("/relationship-info")
