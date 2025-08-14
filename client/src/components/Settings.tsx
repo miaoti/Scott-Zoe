@@ -25,7 +25,6 @@ function Settings() {
   const [wheelPrizes, setWheelPrizes] = useState<WheelPrize[]>([]);
   const [prizeStats, setPrizeStats] = useState({ totalPrizes: 0, totalValue: 0 });
   const [loadingPrizes, setLoadingPrizes] = useState(true);
-  const [totalEarnings, setTotalEarnings] = useState(0);
   const [savedOpportunities, setSavedOpportunities] = useState(0);
   const [loadingUserData, setLoadingUserData] = useState(true);
 
@@ -58,11 +57,7 @@ function Settings() {
     const fetchUserData = async () => {
       try {
         setLoadingUserData(true);
-        const [earningsResponse, opportunitiesResponse] = await Promise.all([
-          api.get('/api/user/earnings'),
-          api.get('/api/opportunities/stats')
-        ]);
-        setTotalEarnings(earningsResponse.data.total || 0);
+        const opportunitiesResponse = await api.get('/api/opportunities/stats');
         setSavedOpportunities(opportunitiesResponse.data.unused || 0);
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -165,22 +160,9 @@ function Settings() {
                 <div className="text-sm text-apple-secondary-label">Loading your stats...</div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Total Earnings */}
-                <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-2">
-                    ${totalEarnings}
-                  </div>
-                  <div className="text-green-700 font-medium mb-1">
-                    Total Earnings
-                  </div>
-                  <div className="text-sm text-green-600">
-                    From prize wheel wins
-                  </div>
-                </div>
-                
+              <div className="flex justify-center">
                 {/* Saved Opportunities */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center max-w-sm">
                   <div className="text-3xl font-bold text-yellow-600 mb-2">
                     {savedOpportunities}
                   </div>

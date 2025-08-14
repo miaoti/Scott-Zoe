@@ -96,6 +96,18 @@ public class WheelPrizeService {
     }
     
     /**
+     * Get total value of all prizes won by specific user
+     */
+    public Long getTotalPrizeValueByUser(User user) {
+        try {
+            return wheelPrizeRepository.getTotalPrizeValueByUser(user);
+        } catch (Exception e) {
+            logger.error("Error getting total prize value for user: {}", user.getUsername(), e);
+            return 0L;
+        }
+    }
+    
+    /**
      * Get prizes by type for current user
      */
     public List<WheelPrize> getCurrentUserPrizesByType(String prizeType) {

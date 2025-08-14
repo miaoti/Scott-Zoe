@@ -1,5 +1,5 @@
 server:
-  port: 3001
+  port: ${PORT:8080}
   servlet:
     context-path: /
   max-http-header-size: 8KB
@@ -51,12 +51,28 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+  # Observability Configuration - Fix for ObservationFilterChainDecorator error
+  observations:
+    web:
+      server:
+        enabled: true
+    annotations:
+      enabled: false
+  metrics:
+    web:
+      server:
+        enabled: true
+        request:
+          autotime:
+            enabled: false
+  tracing:
+    enabled: false
 
 # Logging Configuration
 logging:
   level:
-    com.couplewebsite: INFO
-    org.springframework.security: INFO
+    com.couplewebsite: DEBUG
+    org.springframework.security: DEBUG
     org.hibernate.SQL: INFO
     org.hibernate.type.descriptor.sql.BasicBinder: INFO
 
@@ -87,9 +103,11 @@ spring:
       on-profile: production
 
   datasource:
-    # Use PostgreSQL if DATABASE_URL is provided, otherwise fall back to SQLite
-    url: ${DATABASE_URL:jdbc:sqlite:database.sqlite}
-    driver-class-name: ${DATABASE_DRIVER:org.sqlite.JDBC}
+    # Use PostgreSQL for Railway deployment
+    url: jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:railway}
+    username: ${PGUSER:postgres}
+    password: ${PGPASSWORD:}
+    driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 5
       minimum-idle: 0
@@ -98,18 +116,18 @@ spring:
       max-lifetime: 1800000
 
   jpa:
-    # Use PostgreSQL dialect if DATABASE_URL contains postgresql, otherwise SQLite
-    database-platform: ${DATABASE_PLATFORM:org.hibernate.community.dialect.SQLiteDialect}
+    # Use PostgreSQL dialect for Railway deployment
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     show-sql: false
 
 server:
-  port: ${PORT:10000}
+  port: ${PORT:8080}
 
 # Production CORS Configuration
 cors:
-  allowed-origins: ${CORS_ORIGINS:https://*.railway.app}
+  allowed-origins: ${CORS_ORIGINS:https://*.railway.app,https://scott-zoe-production.up.railway.app,https://*.up.railway.app,http://localhost:8081,http://localhost:3000,http://localhost:5173}
   allowed-methods: GET,POST,PUT,DELETE,OPTIONS
   allowed-headers: "*"
   allow-credentials: true

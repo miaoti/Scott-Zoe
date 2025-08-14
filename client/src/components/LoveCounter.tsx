@@ -34,7 +34,7 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [showHearts, setShowHearts] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [totalEarnings, setTotalEarnings] = useState(0);
+
   const [savedOpportunities, setSavedOpportunities] = useState(0);
   const [canUseWheelThisWeek, setCanUseWheelThisWeek] = useState(true);
   const { showLoveSuccess, showToast } = useToast();
@@ -42,7 +42,6 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
   // Load love stats from backend on component mount
   useEffect(() => {
     fetchLoveStats();
-    fetchEarnings();
     loadSavedOpportunities();
     fetchWheelUsageStatus();
   }, []);
@@ -74,7 +73,13 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
     }
   };
 
-  const useSavedOpportunity = async () => {
+  const useSavedOpportunity = async (event?: React.MouseEvent) => {
+    // Prevent event bubbling to parent elements
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
     if (savedOpportunities > 0) {
       try {
         // Check wheel usage status from backend
@@ -107,22 +112,7 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
     }
   };
 
-  const fetchEarnings = async () => {
-    try {
-      // Try to fetch from backend first
-      const response = await api.get('/api/user/earnings');
-      setTotalEarnings(response.data.total || 0);
-      // Sync with localStorage
-      localStorage.setItem('totalEarnings', (response.data.total || 0).toString());
-    } catch (error) {
-      console.log('Backend earnings endpoint not available, using localStorage');
-      // Fallback to localStorage
-      const savedEarnings = localStorage.getItem('totalEarnings');
-      if (savedEarnings) {
-        setTotalEarnings(parseInt(savedEarnings));
-      }
-    }
-  };
+
 
   const fetchLoveStats = async () => {
     try {
@@ -137,16 +127,16 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
     }
   };
 
-  const handlePrizeWon = async (prize: { type: string; value: number; description: string }) => {
+  const handlePrizeWon = async (amount: number) => {
     try {
       // Record wheel prize in backend
       await api.post('/api/wheel-prizes', {
-        prizeType: prize.type,
-        prizeValue: prize.value,
-        prizeDescription: prize.description
+        prizeType: 'MONEY',
+        prizeValue: amount,
+        prizeDescription: `Won $${amount} from prize wheel`
       });
       
-      console.log('Prize recorded successfully:', prize);
+      console.log('Prize recorded successfully:', amount);
       
     } catch (error) {
       console.error('Error recording wheel prize:', error);
@@ -273,7 +263,13 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
     }
   };
 
-  const handleLoveClick = async () => {
+  const handleLoveClick = async (event?: React.MouseEvent) => {
+    // Prevent event bubbling to parent elements
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
     // Trigger visual feedback immediately
     setIsAnimating(true);
     setShowHearts(true);
@@ -331,7 +327,7 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
           {/* Main Content */}
           <div className="relative z-10">
             <button
-              onClick={handleLoveClick}
+              onClick={(e) => handleLoveClick(e)}
               className={`group relative transition-all duration-300 touch-manipulation active:scale-95 ${
                 isAnimating ? 'scale-125' : 'hover:scale-110'
               }`}
@@ -374,7 +370,7 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
                       </div>
                     </div>
                     <button
-                      onClick={useSavedOpportunity}
+                      onClick={(e) => useSavedOpportunity(e)}
                       disabled={!canUseThisWeek}
                       className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                         canUseThisWeek
@@ -437,7 +433,6 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
           onClose={() => {
             setShowWheel(false);
             loadSavedOpportunities(); // Refresh saved opportunities count
-            fetchEarnings(); // Refresh earnings from backend
             fetchWheelUsageStatus(); // Refresh wheel usage status
           }}
           level={loveStats.currentLevel}

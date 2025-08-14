@@ -2,6 +2,7 @@ com\couplewebsite\entity\Note.class
 com\couplewebsite\service\SettingsService.class
 com\couplewebsite\service\WheelUsageService.class
 com\couplewebsite\controller\SettingsController$SetSettingRequest.class
+com\couplewebsite\controller\SavedOpportunityController.class
 com\couplewebsite\entity\Earnings.class
 com\couplewebsite\repository\NoteRepository.class
 com\couplewebsite\service\MemoryService$AnniversaryInfo.class
@@ -9,9 +10,13 @@ com\couplewebsite\service\FileStorageService.class
 com\couplewebsite\dto\LoginRequest.class
 com\couplewebsite\entity\Photo.class
 com\couplewebsite\entity\Settings.class
+com\couplewebsite\repository\SavedOpportunityRepository.class
 com\couplewebsite\entity\Memory$MemoryType.class
 com\couplewebsite\controller\LoveController.class
+com\couplewebsite\config\WebConfig$1.class
 com\couplewebsite\entity\User.class
+com\couplewebsite\service\SavedOpportunityService$OpportunityStats.class
+com\couplewebsite\service\SavedOpportunityService.class
 com\couplewebsite\controller\CategoryController.class
 com\couplewebsite\repository\LoveRepository.class
 com\couplewebsite\security\CustomUserDetailsService.class
@@ -19,6 +24,7 @@ com\couplewebsite\controller\SettingsController$SetDateRequest.class
 com\couplewebsite\service\WheelUsageService$WheelUsageStats.class
 com\couplewebsite\dto\LoginResponse.class
 com\couplewebsite\CoupleWebsiteApplication.class
+com\couplewebsite\repository\WheelPrizeRepository.class
 com\couplewebsite\service\LoveService$LoveStats.class
 com\couplewebsite\repository\EarningsRepository.class
 com\couplewebsite\service\UserService.class
@@ -26,6 +32,7 @@ com\couplewebsite\repository\WheelUsageRepository.class
 com\couplewebsite\controller\CategoryController$CreateCategoryRequest.class
 com\couplewebsite\config\WebConfig.class
 com\couplewebsite\repository\MemoryRepository.class
+com\couplewebsite\config\MimeTypeConfig$1.class
 com\couplewebsite\entity\Memory.class
 com\couplewebsite\security\JwtUtil.class
 com\couplewebsite\repository\CategoryRepository.class
@@ -40,10 +47,19 @@ com\couplewebsite\entity\Love.class
 com\couplewebsite\dto\LoginResponse$UserInfo.class
 com\couplewebsite\config\SecurityConfig.class
 com\couplewebsite\config\DatabaseConfig.class
+com\couplewebsite\config\StaticResourceSecurityConfig.class
+com\couplewebsite\entity\WheelPrize.class
+com\couplewebsite\config\DateConfig.class
+com\couplewebsite\controller\DeveloperController.class
 com\couplewebsite\controller\MemoryController$CreateMemoryRequest.class
 com\couplewebsite\entity\WheelUsage.class
 com\couplewebsite\entity\Category.class
+com\couplewebsite\entity\SavedOpportunity.class
+com\couplewebsite\service\WheelPrizeService.class
+com\couplewebsite\config\MimeTypeConfig.class
 com\couplewebsite\service\EarningsService.class
+com\couplewebsite\config\StaticResourceFilter.class
+com\couplewebsite\controller\WheelPrizeController.class
 com\couplewebsite\controller\FileController.class
 com\couplewebsite\config\ValidationConfig.class
 com\couplewebsite\controller\EarningsController.class
@@ -54,7 +70,9 @@ com\couplewebsite\controller\StaticController.class
 com\couplewebsite\exception\GlobalExceptionHandler.class
 com\couplewebsite\controller\PhotoController.class
 com\couplewebsite\service\LoveService.class
+com\couplewebsite\controller\WheelPrizeController$RecordPrizeRequest.class
 com\couplewebsite\controller\LoveController$SetLoveCountRequest.class
 com\couplewebsite\controller\MemoryController.class
+com\couplewebsite\config\DateConfig$LocalDateDeserializer.class
 com\couplewebsite\controller\HealthController.class
 com\couplewebsite\controller\AuthController.class

@@ -4,6 +4,7 @@ import com.couplewebsite.entity.User;
 import com.couplewebsite.entity.WheelUsage;
 import com.couplewebsite.service.UserService;
 import com.couplewebsite.service.WheelUsageService;
+import com.couplewebsite.service.WheelPrizeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class WheelUsageController {
     @Autowired
     private UserService userService;
     
+    @Autowired
+    private WheelPrizeService wheelPrizeService;
+    
     /**
      * Get wheel usage stats for current user
      */
@@ -39,12 +43,16 @@ public class WheelUsageController {
             
             WheelUsageService.WheelUsageStats stats = wheelUsageService.getWheelUsageStats(user);
             
+            // Get total prize value from wheel prizes (for iOS compatibility)
+            Long totalPrizeValue = wheelPrizeService.getTotalPrizeValueByUser(user);
+            
             Map<String, Object> response = new HashMap<>();
             response.put("canUseThisWeek", stats.canUseThisWeek());
             response.put("hasUsedThisWeek", !stats.canUseThisWeek());
             response.put("currentWeekStart", stats.getCurrentWeekStart().toString());
             response.put("totalPrizesWon", stats.getTotalPrizesWon());
             response.put("totalUsages", stats.getTotalUsages());
+            response.put("totalEarnings", totalPrizeValue != null ? totalPrizeValue.intValue() : 0);
             
             if (stats.getThisWeekUsage() != null) {
                 WheelUsage usage = stats.getThisWeekUsage();
