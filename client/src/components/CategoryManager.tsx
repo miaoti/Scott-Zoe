@@ -48,9 +48,9 @@ function CategoryManager({ category, onClose, onCategoryUpdated }: CategoryManag
         description: category.description || '',
         color: category.color
       });
-      setShowCreateForm(true);
-    } else if (onClose) {
-      // If onClose is provided, this is being used as a modal, so show the create form
+    }
+    // When used as a modal (onClose provided), always show the form
+    if (onClose) {
       setShowCreateForm(true);
     }
   }, [category, onClose]);

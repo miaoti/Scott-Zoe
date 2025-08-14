@@ -168,7 +168,7 @@ function Categories() {
 
               {/* View Category Button */}
               <Link
-                to={`/categories/${category.id}`}
+                to={`/photos/category/${category.id}`}
                 className="flex items-center justify-center space-x-2 w-full py-2 px-4 bg-gray-800 hover:bg-gray-900 text-white rounded-lg transition-colors font-medium"
               >
                 <Eye className="h-4 w-4" />
@@ -198,7 +198,7 @@ function Categories() {
       {categories.length > 0 && (
         <div className="glass-effect rounded-xl p-6 love-shadow">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Category Overview</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-700">{categories.length}</div>
               <div className="text-sm text-gray-600">Total Categories</div>
@@ -208,12 +208,6 @@ function Categories() {
                 {categories.reduce((sum, cat) => sum + cat.photoCount, 0)}
               </div>
               <div className="text-sm text-gray-600">Categorized Photos</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {categories.filter(cat => cat.photoCount > 0).length}
-              </div>
-              <div className="text-sm text-gray-600">Active Categories</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">
