@@ -138,30 +138,39 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
           onClick={() => handleDayClick(day)}
           className={`h-16 flex flex-col items-center justify-start cursor-pointer rounded-lg transition-colors relative p-1 ${
             isToday
-              ? 'bg-pink-500 text-white font-semibold'
+              ? 'bg-gradient-to-br from-pink-500 to-pink-600 text-white font-bold shadow-lg ring-2 ring-pink-300'
               : hasMemories
               ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
               : 'hover:bg-gray-100 text-gray-700'
           }`}
         >
           <span className="text-sm font-medium">{day}</span>
-          {hasMemories && (
+          {isToday && (
+            <span className="text-xs font-semibold mt-0.5 opacity-90">Today</span>
+          )}
+          {hasMemories && !isToday && (
             <div className="flex flex-col items-center space-y-0.5 mt-0.5">
               {dayMemories.slice(0, 2).map((memory, index) => (
                 <div key={memory.id} className="flex items-center space-x-1">
                   <span className="text-xs">{getTypeIcon(memory.type)}</span>
-                  <span className={`text-xs truncate max-w-12 ${
-                    isToday ? 'text-white' : 'text-purple-700'
-                  }`}>
+                  <span className="text-xs truncate max-w-12 text-purple-700">
                     {memory.title}
                   </span>
                 </div>
               ))}
               {dayMemories.length > 2 && (
-                <span className={`text-xs ${
-                  isToday ? 'text-white' : 'text-purple-600'
-                }`}>
+                <span className="text-xs text-purple-600">
                   +{dayMemories.length - 2} more
+                </span>
+              )}
+            </div>
+          )}
+          {hasMemories && isToday && (
+            <div className="flex items-center space-x-1 mt-0.5">
+              <span className="text-xs">{getTypeIcon(dayMemories[0].type)}</span>
+              {dayMemories.length > 1 && (
+                <span className="text-xs text-white opacity-90">
+                  +{dayMemories.length - 1}
                 </span>
               )}
             </div>

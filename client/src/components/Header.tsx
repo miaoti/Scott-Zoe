@@ -105,7 +105,7 @@ function Header() {
   };
 
   return (
-    <header className="apple-glass-effect border-b border-apple-separator sticky top-0 z-50 backdrop-blur-xl">
+    <header className="apple-glass-effect border-b border-apple-separator sticky top-0 z-40 backdrop-blur-xl">
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -129,7 +129,7 @@ function Header() {
               </button>
               
               {showDropdown && (
-                <div className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-xl p-6 apple-shadow border border-apple-separator min-w-[280px] z-50">
+                <div className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-xl p-6 apple-shadow border border-apple-separator min-w-[280px] z-40">
                   <div className="text-center">
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div className="bg-apple-blue/5 rounded-lg p-3">

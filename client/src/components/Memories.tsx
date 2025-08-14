@@ -269,7 +269,7 @@ function Memories() {
 
       {/* Memory Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
           <div className="bg-white rounded-xl p-6 w-full max-w-md">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
               {editingMemory ? 'Edit Memory' : 'Add New Memory'}
@@ -304,15 +304,17 @@ function Memories() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date
+                  📅 Date
                 </label>
-                <input
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors text-gray-700 font-medium"
+                    required
+                  />
+                </div>
               </div>
               
               <div>

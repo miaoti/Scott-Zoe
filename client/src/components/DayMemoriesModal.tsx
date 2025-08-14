@@ -99,8 +99,8 @@ const DayMemoriesModal: React.FC<DayMemoriesModalProps> = ({
                       <p className="text-gray-600 mb-3">{memory.description}</p>
                       <div className="flex items-center space-x-4 text-xs text-gray-500">
                         <span>Added by {memory.creator.name}</span>
-                        <span>•</span>
-                        <span>{new Date(memory.createdAt).toLocaleDateString()}</span>
+                        {/* <span>•</span>
+                        <span>{new Date(memory.createdAt).toLocaleDateString()}</span> */}
                       </div>
                     </div>
                     <div className="flex items-center space-x-2 ml-4">
