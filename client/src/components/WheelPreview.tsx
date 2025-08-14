@@ -55,13 +55,11 @@ const WheelPreview: React.FC<WheelPreviewProps> = ({ prizes, size = 300 }) => {
   const centerX = radius;
   const centerY = radius;
   
-  // Calculate angles for each prize based on probability
-  let currentAngle = 0;
+  // Calculate angles for each prize with equal spacing
   const prizeSegments = prizes.map((prize, index) => {
-    const segmentAngle = (prize.probability / 100) * 360;
-    const startAngle = currentAngle;
-    const endAngle = currentAngle + segmentAngle;
-    currentAngle = endAngle;
+    const segmentAngle = 360 / prizes.length;
+    const startAngle = index * segmentAngle;
+    const endAngle = (index + 1) * segmentAngle;
     
     return {
       ...prize,

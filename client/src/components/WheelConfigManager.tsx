@@ -274,7 +274,19 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
         ? `/api/wheel-config/save-for-user/${targetUserId}`
         : '/api/wheel-config/save';
       
-      await api.post(endpoint, { prizes });
+      // Wrap prizes in the expected request structure
+      const requestData = {
+        prizes: prizes.map(prize => ({
+          prizeName: prize.prizeName,
+          prizeDescription: prize.prizeDescription,
+          prizeType: prize.prizeType,
+          prizeValue: prize.prizeValue,
+          probability: prize.probability,
+          color: prize.color
+        }))
+      };
+      
+      await api.post(endpoint, requestData);
       
       showToast(
         targetUserId 
