@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getMemoriesForMonth } from '../utils/api';
+import api from '../utils/api';
 
 interface Memory {
   id: string;
@@ -34,10 +34,14 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
   const fetchMemoriesForMonth = async () => {
     setLoading(true);
     try {
-      const response = await getMemoriesForMonth(year, month + 1);
+      // For now, let's fetch all memories and filter on frontend
+      // since the backend month endpoint might have issues
+      const response = await api.get('/api/memories');
+      console.log('Total memories loaded:', response.data.length);
+      console.log('Sample memory:', response.data[0]);
       setMemories(response.data);
     } catch (error) {
-      console.error('Error fetching memories for month:', error);
+      console.error('Error fetching memories:', error);
       setMemories([]);
     } finally {
       setLoading(false);

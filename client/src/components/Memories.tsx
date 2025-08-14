@@ -263,7 +263,7 @@ function Memories() {
             className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
           >
             <ArrowUpDown className="h-4 w-4" />
-            <span>Sort by Date ({sortOrder === 'asc' ? 'Oldest First' : 'Newest First'})</span>
+            {/* <span>Sort by Date ({sortOrder === 'asc' ? 'Oldest First' : 'Newest First'})</span> */}
           </button>
         </div>
 
