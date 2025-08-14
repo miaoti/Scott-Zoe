@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -108,4 +109,9 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
      * Find all deleted photos by IDs
      */
     List<Photo> findByIdInAndIsDeletedTrue(List<Long> ids);
+    
+    /**
+     * Find deleted photos older than specified date for cleanup
+     */
+    List<Photo> findByIsDeletedTrueAndDeletedAtBefore(LocalDateTime deletedBefore);
 }

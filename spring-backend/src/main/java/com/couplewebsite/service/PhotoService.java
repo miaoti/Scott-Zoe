@@ -10,11 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -399,5 +401,40 @@ public class PhotoService {
      */
     public Photo savePhoto(Photo photo) {
         return photoRepository.save(photo);
+    }
+    
+    /**
+     * Scheduled task to automatically delete photos from recycle bin after 7 days
+     * Runs daily at 2:00 AM
+     */
+    @Scheduled(cron = "0 0 2 * * *")
+    public void cleanupOldDeletedPhotos() {
+        try {
+            LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
+            List<Photo> oldDeletedPhotos = photoRepository.findByIsDeletedTrueAndDeletedAtBefore(oneWeekAgo);
+            
+            int deletedCount = 0;
+            for (Photo photo : oldDeletedPhotos) {
+                try {
+                    // Delete file from storage
+                    fileStorageService.deleteFile(photo.getFilename());
+                    
+                    // Delete from database
+                    photoRepository.delete(photo);
+                    
+                    deletedCount++;
+                    logger.info("Auto-deleted old photo from recycle bin: {}", photo.getFilename());
+                } catch (Exception e) {
+                    logger.error("Error auto-deleting photo: {}", photo.getFilename(), e);
+                }
+            }
+            
+            if (deletedCount > 0) {
+                logger.info("Auto-cleanup completed: {} photos permanently deleted from recycle bin", deletedCount);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error during scheduled cleanup of old deleted photos", e);
+        }
     }
 }
