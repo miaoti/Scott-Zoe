@@ -161,9 +161,9 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
     const targetAngle = (prizeIndex * sectionAngle) + (sectionAngle / 2);
 
     // More spins for dramatic effect with random variation
-    const baseSpins = 5;
-    const extraSpins = Math.floor(Math.random() * 496) + 0; // 0-495 extra spins
-    const totalSpins = baseSpins + extraSpins; // Total: 5-500 spins
+    const baseSpins = 8;
+    const extraSpins = Math.floor(Math.random() * 12) + 0; // 0-11 extra spins
+    const totalSpins = baseSpins + extraSpins; // Total: 8-19 spins
 
     // Add some randomness to make it feel more natural
     const randomOffset = (Math.random() - 0.5) * 20; // ±10 degrees
@@ -232,7 +232,7 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
           setSavedOpportunities(newOpportunities);
         }
       }
-    }, 6500); // Match the CSS animation duration + small buffer (6 seconds + buffer)
+    }, 3200); // Match the CSS animation duration + small buffer (3 seconds + buffer)
   };
 
   const handleClaimPrize = async (e?: React.MouseEvent) => {
@@ -262,7 +262,9 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
       // If user closes without spinning and hasn't used today, save as opportunity
       if (!hasUsedToday && !showResult) {
         try {
-          await api.post('/api/opportunities/save');
+          await api.post('/api/opportunities/create', {
+            source: 'wheel_close_without_spin'
+          });
           console.log('✅ Opportunity saved for later use');
         } catch (error) {
           console.error('❌ Error saving opportunity:', error);
@@ -389,7 +391,7 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
             {/* Wheel */}
             <div
               ref={wheelRef}
-              className={`w-full h-full rounded-full border-4 border-white apple-shadow-lg transition-transform duration-[6000ms] ${
+              className={`w-full h-full rounded-full border-4 border-white apple-shadow-lg transition-transform duration-[3000ms] ${
                 isSpinning ? 'ease-out' : 'hover:scale-105 ease-in-out duration-200'
               }`}
               style={{
