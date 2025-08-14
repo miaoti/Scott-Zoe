@@ -128,19 +128,8 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
   };
 
   const handlePrizeWon = async (amount: number) => {
-    try {
-      // Record wheel prize in backend
-      await api.post('/api/wheel-prizes', {
-        prizeType: 'MONEY',
-        prizeValue: amount,
-        prizeDescription: `Won $${amount} from prize wheel`
-      });
-      
-      console.log('Prize recorded successfully:', amount);
-      
-    } catch (error) {
-      console.error('Error recording wheel prize:', error);
-    }
+    // Prize recording is now handled by PrizeWheel component's handleClaimPrize
+    console.log('Prize won:', amount);
   };
 
   const [clickQueue, setClickQueue] = useState(0);

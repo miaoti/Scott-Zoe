@@ -161,22 +161,16 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
     const targetAngle = (prizeIndex * sectionAngle) + (sectionAngle / 2);
 
     // More spins for dramatic effect with random variation
-    const baseSpins = 8;
-    const extraSpins = Math.floor(Math.random() * 12) + 0; // 0-11 extra spins
-    const totalSpins = baseSpins + extraSpins; // Total: 8-19 spins
+    const baseSpins = 5; // Reduced for better visual effect
+    const extraSpins = Math.floor(Math.random() * 3) + 2; // 2-4 extra spins
+    const totalSpins = baseSpins + extraSpins; // Total: 7-8 spins
 
-    // Add some randomness to make it feel more natural
-    const randomOffset = (Math.random() - 0.5) * 20; // ±10 degrees
-    const finalRotation = (totalSpins * 360) + (360 - targetAngle) + randomOffset;
+    // Calculate final rotation to land on the selected prize
+    // We want the wheel to stop with the prize at the top (12 o'clock position)
+    const finalRotation = (totalSpins * 360) + (360 - targetAngle);
 
     if (wheelRef.current) {
-      // Reset any previous transform first
-      wheelRef.current.style.transform = 'rotate(0deg)';
-
-      // Force a reflow to ensure the reset takes effect
-      wheelRef.current.offsetHeight;
-
-      // Apply the final rotation
+      // Apply the final rotation with CSS transition
       wheelRef.current.style.transform = `rotate(${finalRotation}deg)`;
     }
 
@@ -203,17 +197,7 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
         localStorage.setItem('wheelLastUsedWeek', weekKey);
       }
 
-      // Record the prize win
-      try {
-        await api.post('/api/wheel-prizes', {
-          prizeType: selectedPrize.prizeType,
-          prizeValue: selectedPrize.amount,
-          prizeDescription: selectedPrize.prizeDescription
-        });
-        console.log('✅ Prize recorded successfully');
-      } catch (error) {
-        console.error('❌ Error recording prize:', error);
-      }
+      // Note: Prize recording is handled in handleClaimPrize to avoid duplicates
 
       setHasUsedToday(true);
 
