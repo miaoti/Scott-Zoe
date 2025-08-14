@@ -286,15 +286,17 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
       // Always normalize to avoid any floating point issues
       const factor = 100 / currentTotal;
       normalizedPrizes.forEach(prize => {
-        prize.probability = parseFloat((prize.probability * factor).toFixed(8));
+        prize.probability = prize.probability * factor;
       });
       
-      // Final adjustment to ensure exact 100%
-      const finalTotal = normalizedPrizes.reduce((sum, prize) => sum + prize.probability, 0);
-      const difference = 100 - finalTotal;
-      if (Math.abs(difference) > 0.0000001) {
-        normalizedPrizes[0].probability = parseFloat((normalizedPrizes[0].probability + difference).toFixed(8));
+      // Round to reasonable precision and ensure exact 100%
+      let runningTotal = 0;
+      for (let i = 0; i < normalizedPrizes.length - 1; i++) {
+        normalizedPrizes[i].probability = Math.round(normalizedPrizes[i].probability * 100000000) / 100000000;
+        runningTotal += normalizedPrizes[i].probability;
       }
+      // Set the last prize to make total exactly 100
+      normalizedPrizes[normalizedPrizes.length - 1].probability = Math.round((100 - runningTotal) * 100000000) / 100000000;
       
       const verifyTotal = normalizedPrizes.reduce((sum, prize) => sum + prize.probability, 0);
       console.log('Normalized total probability:', verifyTotal);
