@@ -463,15 +463,28 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Color
                   </label>
-                  <div className="flex items-center space-x-2">
-                    <div 
-                      className="w-10 h-10 rounded-lg border-2 border-gray-300 cursor-pointer shadow-sm"
-                      style={{ backgroundColor: prize.color }}
-                    ></div>
+                  <div className="relative">
+                    <div className="flex items-center space-x-2 p-2 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors"
+                         onClick={() => {
+                           const colorSelect = document.getElementById(`color-select-${index}`);
+                           if (colorSelect) colorSelect.focus();
+                         }}>
+                      <div 
+                        className="w-6 h-6 rounded-full border-2 border-white shadow-sm"
+                        style={{ backgroundColor: prize.color }}
+                      ></div>
+                      <span className="text-sm text-gray-700">
+                        {colorOptions.find(c => c.value === prize.color)?.name || 'Custom Color'}
+                      </span>
+                      <svg className="w-4 h-4 text-gray-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
                     <select
+                      id={`color-select-${index}`}
                       value={prize.color}
                       onChange={(e) => updatePrize(index, 'color', e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     >
                       {colorOptions.map(color => (
                         <option key={color.value} value={color.value}>
@@ -479,6 +492,20 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
                         </option>
                       ))}
                     </select>
+                  </div>
+                  <div className="mt-2 grid grid-cols-8 gap-1">
+                    {colorOptions.map(color => (
+                      <button
+                        key={color.value}
+                        type="button"
+                        onClick={() => updatePrize(index, 'color', color.value)}
+                        className={`w-6 h-6 rounded-full border-2 hover:scale-110 transition-transform ${
+                          prize.color === color.value ? 'border-blue-500 ring-2 ring-blue-200' : 'border-white shadow-sm'
+                        }`}
+                        style={{ backgroundColor: color.value }}
+                        title={color.name}
+                      ></button>
+                    ))}
                   </div>
                 </div>
               </div>

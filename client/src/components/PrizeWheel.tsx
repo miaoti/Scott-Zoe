@@ -386,9 +386,17 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
               {prizes.map((prize, index) => {
                 const segmentAngle = 360 / prizes.length;
                 const angle = (index * segmentAngle) + (segmentAngle / 2);
-                // Adjust radius based on number of prizes for better centering
+                // Consistent radius adjustment matching preview component
                 const baseRadius = 80;
-                const radiusMultiplier = segmentAngle < 45 ? 0.75 : segmentAngle < 90 ? 0.85 : 1.0;
+                
+                let radiusMultiplier;
+                if (segmentAngle <= 30) radiusMultiplier = 0.6;      // 12+ prizes
+                else if (segmentAngle <= 45) radiusMultiplier = 0.65; // 8-11 prizes  
+                else if (segmentAngle <= 60) radiusMultiplier = 0.7;  // 6-7 prizes
+                else if (segmentAngle <= 90) radiusMultiplier = 0.75; // 4-5 prizes
+                else if (segmentAngle <= 120) radiusMultiplier = 0.8; // 3 prizes
+                else radiusMultiplier = 0.85;                         // 2 prizes
+                
                 const radius = baseRadius * radiusMultiplier;
                 const x = Math.cos((angle - 90) * Math.PI / 180) * radius;
                 const y = Math.sin((angle - 90) * Math.PI / 180) * radius;
