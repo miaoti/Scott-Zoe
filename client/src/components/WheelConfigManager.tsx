@@ -278,9 +278,26 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
         ? `/api/wheel-config/save-for-user/${targetUserId}`
         : '/api/wheel-config/save';
       
+      // Normalize probabilities to ensure exact 100% total
+      const normalizedPrizes = [...prizes];
+      const currentTotal = normalizedPrizes.reduce((sum, prize) => sum + prize.probability, 0);
+      if (Math.abs(currentTotal - 100) > 0.001) {
+        const factor = 100 / currentTotal;
+        normalizedPrizes.forEach(prize => {
+          prize.probability = parseFloat((prize.probability * factor).toFixed(6));
+        });
+        
+        // Final adjustment to ensure exact 100%
+        const finalTotal = normalizedPrizes.reduce((sum, prize) => sum + prize.probability, 0);
+        const difference = 100 - finalTotal;
+        if (Math.abs(difference) > 0.000001) {
+          normalizedPrizes[0].probability = parseFloat((normalizedPrizes[0].probability + difference).toFixed(6));
+        }
+      }
+      
       // Wrap prizes in the expected request structure
       const requestData = {
-        prizes: prizes.map(prize => ({
+        prizes: normalizedPrizes.map(prize => ({
           prizeName: prize.prizeName,
           prizeDescription: prize.prizeDescription,
           prizeType: prize.prizeType,

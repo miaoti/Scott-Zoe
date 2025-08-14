@@ -158,16 +158,16 @@ const WheelPreview: React.FC<WheelPreviewProps> = ({ prizes, size = 300 }) => {
           return (
             <div
               key={index}
-              className="absolute flex flex-col items-center justify-center text-center"
+              className="absolute flex flex-col items-center justify-center text-center pointer-events-none"
               style={{
-                left: textPos.x - 20,
-                top: textPos.y - 15,
-                width: 40,
-                height: 30,
-                color: textColor
+                left: textPos.x,
+                top: textPos.y,
+                transform: 'translate(-50%, -50%)',
+                color: textColor,
+                minWidth: 'max-content'
               }}
             >
-              <div className="flex flex-col items-center space-y-1">
+              <div className="flex flex-col items-center space-y-1 px-1">
                 {getIconForPrize(segment.prizeType, segment.prizeValue)}
                 <div className="text-xs font-medium whitespace-nowrap">
                   {segment.prizeName}
