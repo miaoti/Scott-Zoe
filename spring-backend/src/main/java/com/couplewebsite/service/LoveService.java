@@ -26,18 +26,18 @@ public class LoveService {
     private CustomUserDetailsService userDetailsService;
     
     /**
-     * Get current user's love count
+     * Get shared love count (always uses Zoe's count)
      */
     public Long getCurrentUserLoveCount() {
         try {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            User user = userDetailsService.getUserByUsername(username);
+            // Always use Zoe's love count for shared experience
+            User zoeUser = userDetailsService.getUserByUsername("zoe");
             
-            Optional<Love> loveOpt = loveRepository.findByUser(user);
+            Optional<Love> loveOpt = loveRepository.findByUser(zoeUser);
             return loveOpt.map(Love::getCountValue).orElse(0L);
             
         } catch (Exception e) {
-            logger.error("Error getting current user love count", e);
+            logger.error("Error getting shared love count", e);
             return 0L;
         }
     }
@@ -55,59 +55,61 @@ public class LoveService {
     }
     
     /**
-     * Increment current user's love count
+     * Increment shared love count (always uses Zoe's count)
      */
     public Love incrementLoveCount() {
         try {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            User user = userDetailsService.getUserByUsername(username);
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            // Always use Zoe's love count for shared experience
+            User zoeUser = userDetailsService.getUserByUsername("zoe");
             
-            Optional<Love> loveOpt = loveRepository.findByUser(user);
+            Optional<Love> loveOpt = loveRepository.findByUser(zoeUser);
             
             Love love;
             if (loveOpt.isPresent()) {
                 love = loveOpt.get();
                 love.incrementCount();
             } else {
-                love = new Love(user, 1L);
+                love = new Love(zoeUser, 1L);
             }
             
             Love savedLove = loveRepository.save(love);
-            logger.info("Love count incremented for user: {} to {}", username, savedLove.getCountValue());
+            logger.info("Shared love count incremented by user: {} to {}", currentUsername, savedLove.getCountValue());
             
             return savedLove;
             
         } catch (Exception e) {
-            logger.error("Error incrementing love count", e);
+            logger.error("Error incrementing shared love count", e);
             throw new RuntimeException("Failed to increment love count: " + e.getMessage());
         }
     }
     
     /**
-     * Set current user's love count to a specific value
+     * Set shared love count to a specific value (always uses Zoe's count)
      */
     public Love setLoveCount(Long count) {
         try {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            User user = userDetailsService.getUserByUsername(username);
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            // Always use Zoe's love count for shared experience
+            User zoeUser = userDetailsService.getUserByUsername("zoe");
             
-            Optional<Love> loveOpt = loveRepository.findByUser(user);
+            Optional<Love> loveOpt = loveRepository.findByUser(zoeUser);
             
             Love love;
             if (loveOpt.isPresent()) {
                 love = loveOpt.get();
                 love.setCountValue(count);
             } else {
-                love = new Love(user, count);
+                love = new Love(zoeUser, count);
             }
             
             Love savedLove = loveRepository.save(love);
-            logger.info("Love count set for user: {} to {}", username, savedLove.getCountValue());
+            logger.info("Shared love count set by user: {} to {}", currentUsername, savedLove.getCountValue());
             
             return savedLove;
             
         } catch (Exception e) {
-            logger.error("Error setting love count", e);
+            logger.error("Error setting shared love count", e);
             throw new RuntimeException("Failed to set love count: " + e.getMessage());
         }
     }

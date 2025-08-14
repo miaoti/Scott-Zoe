@@ -72,7 +72,7 @@ function Memories() {
     setFormData({
       title: memory.title,
       description: memory.description,
-      date: memory.date.split('T')[0], // Format for date input
+      date: memory.date.includes('T') ? memory.date.split('T')[0] : memory.date, // Format for date input
       type: memory.type,
     });
     setShowForm(true);

@@ -23,7 +23,7 @@ public class LoveController {
     private LoveService loveService;
     
     /**
-     * Get current user's love count and statistics
+     * Get shared love count and statistics (synchronized between Scott and Zoe)
      */
     @GetMapping
     public ResponseEntity<?> getLoveStats() {
@@ -50,7 +50,7 @@ public class LoveController {
     }
     
     /**
-     * Increment love count (share love)
+     * Increment shared love count (synchronized between Scott and Zoe)
      */
     @PostMapping("/increment")
     public ResponseEntity<?> incrementLove() {
@@ -80,7 +80,7 @@ public class LoveController {
     }
     
     /**
-     * Set love count to a specific value (for admin/testing purposes)
+     * Set shared love count to a specific value (for admin/testing purposes)
      */
     @PostMapping("/set")
     public ResponseEntity<?> setLoveCount(@Valid @RequestBody SetLoveCountRequest request) {

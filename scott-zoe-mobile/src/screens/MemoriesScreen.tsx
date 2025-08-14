@@ -140,12 +140,24 @@ function CreateMemoryModal({ visible, onClose, onSave, editingMemory }: CreateMe
     if (editingMemory) {
       setTitle(editingMemory.title);
       setDescription(editingMemory.description);
-      setDate(editingMemory.date);
+      const memoryDate = editingMemory.date;
+      if (memoryDate instanceof Date) {
+        const year = memoryDate.getFullYear();
+        const month = String(memoryDate.getMonth() + 1).padStart(2, '0');
+        const day = String(memoryDate.getDate()).padStart(2, '0');
+        setDate(`${year}-${month}-${day}`);
+      } else {
+        setDate(memoryDate);
+      }
       setType(editingMemory.type);
     } else {
       setTitle('');
       setDescription('');
-      setDate(new Date().toISOString().split('T')[0]);
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      setDate(`${year}-${month}-${day}`);
       setType('other');
     }
   }, [editingMemory, visible]);

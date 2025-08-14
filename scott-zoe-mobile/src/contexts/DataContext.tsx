@@ -215,7 +215,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         const data = await response.json();
         setMemories(data.map((memory: any) => ({
           ...memory,
-          date: new Date(memory.date),
+          date: new Date(memory.date + 'T00:00:00'),
         })));
       } else {
         const localMemories = await AsyncStorage.getItem('localMemories');
