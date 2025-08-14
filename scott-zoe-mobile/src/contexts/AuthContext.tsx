@@ -112,8 +112,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await response.json();
         setRelationshipInfo({
           coupleNames: data.coupleNames || 'Scott & Zoe',
-          startDate: new Date(data.startDate || '2023-01-01'),
-          daysTogether: data.daysTogether || calculateDaysTogether(new Date(data.startDate || '2023-01-01')),
+          startDate: new Date(data.startDate || '2020-06-08'),
+          daysTogether: data.daysTogether || calculateDaysTogether(new Date(data.startDate || '2020-06-08')),
         });
       }
     } catch (error) {
@@ -121,8 +121,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Set default values
       setRelationshipInfo({
         coupleNames: 'Scott & Zoe',
-        startDate: new Date('2023-01-01'),
-        daysTogether: calculateDaysTogether(new Date('2023-01-01')),
+        startDate: new Date('2020-06-08'),
+        daysTogether: calculateDaysTogether(new Date('2020-06-08')),
       });
     }
   };
