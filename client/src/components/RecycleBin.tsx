@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, RotateCcw, AlertTriangle, CheckSquare, Square } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { useToast } from "../contexts/ToastContext";
 
 interface Photo {
   id: number;
@@ -32,6 +32,7 @@ interface RecycleBinResponse {
 }
 
 function RecycleBin() {
+  const { showToast } = useToast();
   const [deletedPhotos, setDeletedPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(new Set());
@@ -58,11 +59,11 @@ function RecycleBin() {
         setTotalPages(data.totalPages);
         setTotalElements(data.totalElements);
       } else {
-        toast.error('Failed to fetch deleted photos');
-      }
-    } catch (error) {
-      console.error('Error fetching deleted photos:', error);
-      toast.error('Error loading recycle bin');
+          showToast('Failed to fetch deleted photos', 'general');
+        }
+      } catch (error) {
+        console.error('Error fetching deleted photos:', error);
+        showToast('Error loading recycle bin', 'general');
     } finally {
       setLoading(false);
     }
@@ -96,19 +97,19 @@ function RecycleBin() {
       });
 
       if (response.ok) {
-        toast.success('Photo recovered successfully');
-        fetchDeletedPhotos();
-        setSelectedPhotos(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(photoId);
-          return newSet;
-        });
-      } else {
-        toast.error('Failed to recover photo');
-      }
-    } catch (error) {
-      console.error('Error recovering photo:', error);
-      toast.error('Error recovering photo');
+          showToast('Photo recovered successfully', 'general');
+          fetchDeletedPhotos();
+          setSelectedPhotos(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(photoId);
+            return newSet;
+          });
+        } else {
+          showToast('Failed to recover photo', 'general');
+        }
+      } catch (error) {
+        console.error('Error recovering photo:', error);
+        showToast('Error recovering photo', 'general');
     }
   };
 
@@ -126,27 +127,27 @@ function RecycleBin() {
       });
 
       if (response.ok) {
-        toast.success('Photo permanently deleted');
-        fetchDeletedPhotos();
-        setSelectedPhotos(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(photoId);
-          return newSet;
-        });
-      } else {
-        toast.error('Failed to delete photo');
-      }
-    } catch (error) {
-      console.error('Error deleting photo:', error);
-      toast.error('Error deleting photo');
+          showToast('Photo permanently deleted', 'general');
+          fetchDeletedPhotos();
+          setSelectedPhotos(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(photoId);
+            return newSet;
+          });
+        } else {
+          showToast('Failed to delete photo', 'general');
+        }
+      } catch (error) {
+        console.error('Error deleting photo:', error);
+        showToast('Error deleting photo', 'general');
     }
   };
 
   const handleBulkRecover = async () => {
-    if (selectedPhotos.size === 0) {
-      toast.error('Please select photos to recover');
-      return;
-    }
+      if (selectedPhotos.size === 0) {
+        showToast('Please select photos to recover', 'general');
+        return;
+      }
 
     try {
       const response = await fetch('/api/photos/bulk/recover', {
@@ -161,24 +162,24 @@ function RecycleBin() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        toast.success(data.message);
-        fetchDeletedPhotos();
-        setSelectedPhotos(new Set());
-      } else {
-        toast.error('Failed to recover photos');
-      }
-    } catch (error) {
-      console.error('Error recovering photos:', error);
-      toast.error('Error recovering photos');
+          const data = await response.json();
+          showToast(data.message, 'general');
+          fetchDeletedPhotos();
+          setSelectedPhotos(new Set());
+        } else {
+          showToast('Failed to recover photos', 'general');
+        }
+      } catch (error) {
+        console.error('Error recovering photos:', error);
+        showToast('Error recovering photos', 'general');
     }
   };
 
   const handleBulkPermanentDelete = async () => {
-    if (selectedPhotos.size === 0) {
-      toast.error('Please select photos to delete');
-      return;
-    }
+      if (selectedPhotos.size === 0) {
+        showToast('Please select photos to delete', 'general');
+        return;
+      }
 
     if (!confirm(`Are you sure you want to permanently delete ${selectedPhotos.size} photo(s)? This action cannot be undone.`)) {
       return;
@@ -197,16 +198,16 @@ function RecycleBin() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        toast.success(data.message);
-        fetchDeletedPhotos();
-        setSelectedPhotos(new Set());
-      } else {
-        toast.error('Failed to delete photos');
-      }
-    } catch (error) {
-      console.error('Error deleting photos:', error);
-      toast.error('Error deleting photos');
+          const data = await response.json();
+          showToast(data.message, 'general');
+          fetchDeletedPhotos();
+          setSelectedPhotos(new Set());
+        } else {
+          showToast('Failed to delete photos', 'general');
+        }
+      } catch (error) {
+        console.error('Error deleting photos:', error);
+        showToast('Error deleting photos', 'general');
     }
   };
 
