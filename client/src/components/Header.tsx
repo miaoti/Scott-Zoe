@@ -237,11 +237,23 @@ function Header() {
               {showDropdown && (
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white/95 backdrop-blur-xl rounded-xl p-4 apple-shadow border border-apple-separator min-w-[200px] z-50">
                   <div className="text-center">
-                    <div className="text-2xl font-semibold text-apple-blue-light mb-1">
-                      {relationshipInfo.daysTogether}
-                    </div>
-                    <div className="text-sm text-apple-secondary-label mb-3">
-                      Days Together
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                      <div className="bg-apple-blue/5 rounded-lg p-2">
+                        <div className="text-lg font-bold text-apple-blue">{timeElapsed.days}</div>
+                        <div className="text-xs text-apple-secondary-label">Days</div>
+                      </div>
+                      <div className="bg-apple-blue/5 rounded-lg p-2">
+                        <div className="text-lg font-bold text-apple-blue">{timeElapsed.hours}</div>
+                        <div className="text-xs text-apple-secondary-label">Hours</div>
+                      </div>
+                      <div className="bg-apple-blue/5 rounded-lg p-2">
+                        <div className="text-lg font-bold text-apple-blue">{timeElapsed.minutes}</div>
+                        <div className="text-xs text-apple-secondary-label">Minutes</div>
+                      </div>
+                      <div className="bg-apple-blue/5 rounded-lg p-2">
+                        <div className="text-lg font-bold text-apple-blue">{timeElapsed.seconds}</div>
+                        <div className="text-xs text-apple-secondary-label">Seconds</div>
+                      </div>
                     </div>
                     <div className="text-apple-secondary-label border-t border-apple-separator pt-3">
                       <div className="text-xs">Since June 8th, 2020</div>
