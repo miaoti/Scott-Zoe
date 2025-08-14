@@ -386,17 +386,19 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
               {prizes.map((prize, index) => {
                 const segmentAngle = 360 / prizes.length;
                 const angle = (index * segmentAngle) + (segmentAngle / 2);
-                // Consistent radius adjustment matching preview component
+                // Dynamic radius calculation matching preview component
                 const baseRadius = 60; // Less margin from edge
                 
-                let radiusMultiplier;
-                if (segmentAngle <= 30) radiusMultiplier = 0.5;      // 12+ prizes
-                else if (segmentAngle <= 45) radiusMultiplier = 0.55; // 8-11 prizes  
-                else if (segmentAngle <= 52) radiusMultiplier = 0.65; // 7 prizes (51.4°)
-                else if (segmentAngle <= 60) radiusMultiplier = 0.6;  // 6 prizes
-                else if (segmentAngle <= 90) radiusMultiplier = 0.65; // 4-5 prizes
-                else if (segmentAngle <= 120) radiusMultiplier = 0.7; // 3 prizes
-                else radiusMultiplier = 0.75;                         // 2 prizes
+                // Dynamic radius calculation based on segment angle for optimal text positioning
+                // Formula: smaller segments need text closer to center, larger segments can have text further out
+                const minMultiplier = 0.45; // Minimum for very small segments (many prizes)
+                const maxMultiplier = 0.8;  // Maximum for large segments (few prizes)
+                
+                // Normalize segment angle to 0-1 range (0° to 180°)
+                const normalizedAngle = Math.min(segmentAngle / 180, 1);
+                
+                // Use a smooth curve: smaller angles get smaller multipliers
+                const radiusMultiplier = minMultiplier + (maxMultiplier - minMultiplier) * Math.sqrt(normalizedAngle);
                 
                 const radius = baseRadius * radiusMultiplier;
                 const x = Math.cos((angle - 90) * Math.PI / 180) * radius;

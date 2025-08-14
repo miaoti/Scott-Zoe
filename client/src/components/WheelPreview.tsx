@@ -94,15 +94,18 @@ const WheelPreview: React.FC<WheelPreviewProps> = ({ prizes, size = 300 }) => {
     const segmentAngle = endAngle - startAngle;
     const baseRadius = radius - 20; // Less margin from edge
     
-    // More aggressive radius adjustment for better centering
-    let radiusMultiplier;
-    if (segmentAngle <= 30) radiusMultiplier = 0.5;      // 12+ prizes
-    else if (segmentAngle <= 45) radiusMultiplier = 0.55; // 8-11 prizes  
-    else if (segmentAngle <= 52) radiusMultiplier = 0.65; // 7 prizes (51.4°)
-    else if (segmentAngle <= 60) radiusMultiplier = 0.6;  // 6 prizes
-    else if (segmentAngle <= 90) radiusMultiplier = 0.65; // 4-5 prizes
-    else if (segmentAngle <= 120) radiusMultiplier = 0.7; // 3 prizes
-    else radiusMultiplier = 0.75;                         // 2 prizes
+    // Dynamic radius calculation based on segment angle for optimal text positioning
+    // Formula: smaller segments need text closer to center, larger segments can have text further out
+    // Using a smooth curve that adapts to any number of prizes
+    const minMultiplier = 0.45; // Minimum for very small segments (many prizes)
+    const maxMultiplier = 0.8;  // Maximum for large segments (few prizes)
+    
+    // Normalize segment angle to 0-1 range (0° to 180°)
+    const normalizedAngle = Math.min(segmentAngle / 180, 1);
+    
+    // Use a smooth curve: smaller angles get smaller multipliers
+    // Apply square root for better distribution across the range
+    const radiusMultiplier = minMultiplier + (maxMultiplier - minMultiplier) * Math.sqrt(normalizedAngle);
     
     const textRadius = baseRadius * radiusMultiplier;
     const midAngleRad = (midAngle * Math.PI) / 180;
