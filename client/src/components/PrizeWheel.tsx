@@ -411,7 +411,7 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
                     style={{
                       left: `calc(50% + ${x}px)`,
                       top: `calc(50% + ${y}px)`,
-                      transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+                      transform: `translate(-50%, -50%)`,
                       transformOrigin: 'center',
                       textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
                       minWidth: 'max-content'

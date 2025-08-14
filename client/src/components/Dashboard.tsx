@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Camera, Calendar, Heart, Clock } from 'lucide-react';
 import api, { API_BASE_URL } from '../utils/api';
-import LoveCounter from './LoveCounter';
-import PartnerLoveCard from './PartnerLoveCard';
 import PrizeWheel from './PrizeWheel';
 
 interface CatPosition {
@@ -178,7 +176,7 @@ function Dashboard() {
   return (
     <div className="relative space-y-8 fade-in min-h-screen overflow-hidden bg-white">
       {/* Interactive Animated Cat Components */}
-      <div className="fixed inset-0 z-0 pointer-events-auto">
+      <div className={`fixed inset-0 z-0 pointer-events-auto ${showWheel ? 'opacity-20' : ''}`}>
         {catPositions.map((cat, index) => {
           const baseAnimations = ['animate-float', 'animate-float-slow', 'animate-pulse-glow'];
           const baseAnimation = baseAnimations[index % baseAnimations.length];
@@ -204,7 +202,7 @@ function Dashboard() {
         })}
       </div>
       
-      <div className="relative max-w-6xl mx-auto px-6 py-8 z-20 pointer-events-none">
+      <div className={`relative max-w-6xl mx-auto px-6 py-8 z-20 pointer-events-none ${showWheel ? 'opacity-30 pointer-events-none' : ''}`}>
         {/* Welcome Section */}
         <div className="text-center slide-up mb-12">
           <h1 className="font-heading text-5xl font-semibold text-apple-label mb-6">
@@ -216,7 +214,7 @@ function Dashboard() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Link
             to="/gallery"
             className="apple-card apple-card-hover p-6 apple-shadow transition-all duration-300 hover:scale-105 cursor-pointer group relative overflow-hidden bg-gradient-to-br from-pink-50 to-purple-50 border border-pink-100/50 pointer-events-auto"
@@ -302,14 +300,6 @@ function Dashboard() {
               Browse Memories →
             </div>
           </Link>
-          
-          <div className="relative z-20 pointer-events-auto">
-            <LoveCounter />
-          </div>
-          
-          <div className="relative z-20 pointer-events-auto">
-            <PartnerLoveCard />
-          </div>
         </div>
 
         {/* Quick Actions */}
