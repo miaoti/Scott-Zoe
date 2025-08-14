@@ -76,16 +76,48 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
   const [hasConfiguration, setHasConfiguration] = useState(false);
   const { showToast } = useToast();
 
-  // Color options for prizes
+  // Color options for prizes with descriptive names
   const colorOptions = [
-    '#F3F4F6', '#E5E7EB', '#D1D5DB', '#9CA3AF', '#6B7280',
-    '#4B5563', '#374151', '#1F2937', '#FEF3C7', '#FDE68A',
-    '#FCD34D', '#F59E0B', '#D97706', '#92400E', '#78350F',
-    '#FEE2E2', '#FECACA', '#FCA5A5', '#F87171', '#EF4444',
-    '#DC2626', '#B91C1C', '#991B1B', '#7F1D1D', '#DBEAFE',
-    '#BFDBFE', '#93C5FD', '#60A5FA', '#3B82F6', '#2563EB',
-    '#1D4ED8', '#1E40AF', '#1E3A8A', '#D1FAE5', '#A7F3D0',
-    '#6EE7B7', '#34D399', '#10B981', '#059669', '#047857'
+    { value: '#F3F4F6', name: 'Light Gray' },
+    { value: '#E5E7EB', name: 'Gray' },
+    { value: '#D1D5DB', name: 'Medium Gray' },
+    { value: '#9CA3AF', name: 'Dark Gray' },
+    { value: '#6B7280', name: 'Slate Gray' },
+    { value: '#4B5563', name: 'Charcoal' },
+    { value: '#374151', name: 'Dark Charcoal' },
+    { value: '#1F2937', name: 'Black' },
+    { value: '#FEF3C7', name: 'Light Yellow' },
+    { value: '#FDE68A', name: 'Pale Yellow' },
+    { value: '#FCD34D', name: 'Yellow' },
+    { value: '#F59E0B', name: 'Orange Yellow' },
+    { value: '#D97706', name: 'Orange' },
+    { value: '#92400E', name: 'Dark Orange' },
+    { value: '#78350F', name: 'Brown' },
+    { value: '#FEE2E2', name: 'Light Pink' },
+    { value: '#FECACA', name: 'Pale Pink' },
+    { value: '#FCA5A5', name: 'Pink' },
+    { value: '#F87171', name: 'Rose' },
+    { value: '#EF4444', name: 'Red' },
+    { value: '#DC2626', name: 'Dark Red' },
+    { value: '#B91C1C', name: 'Crimson' },
+    { value: '#991B1B', name: 'Maroon' },
+    { value: '#7F1D1D', name: 'Dark Maroon' },
+    { value: '#DBEAFE', name: 'Light Blue' },
+    { value: '#BFDBFE', name: 'Pale Blue' },
+    { value: '#93C5FD', name: 'Sky Blue' },
+    { value: '#60A5FA', name: 'Blue' },
+    { value: '#3B82F6', name: 'Royal Blue' },
+    { value: '#2563EB', name: 'Dark Blue' },
+    { value: '#1D4ED8', name: 'Navy Blue' },
+    { value: '#1E40AF', name: 'Deep Blue' },
+    { value: '#1E3A8A', name: 'Midnight Blue' },
+    { value: '#D1FAE5', name: 'Light Green' },
+    { value: '#A7F3D0', name: 'Pale Green' },
+    { value: '#6EE7B7', name: 'Mint Green' },
+    { value: '#34D399', name: 'Green' },
+    { value: '#10B981', name: 'Emerald' },
+    { value: '#059669', name: 'Dark Green' },
+    { value: '#047857', name: 'Forest Green' }
   ];
 
   useEffect(() => {
@@ -162,7 +194,7 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
       prizeType: 'MONEY',
       prizeValue: 1,
       probability: 1,
-      color: colorOptions[Math.floor(Math.random() * colorOptions.length)],
+      color: colorOptions[Math.floor(Math.random() * colorOptions.length)].value,
       displayOrder: prizes.length
     };
     const newPrizes = [...prizes, newPrize];
@@ -178,8 +210,7 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
       return;
     }
     const newPrizes = prizes.filter((_, i) => i !== index);
-    // Redistribute probabilities
-    redistributeProbabilities(newPrizes);
+    setPrizes(newPrizes);
     if (onPrizesChange) {
       onPrizesChange(newPrizes);
     }
@@ -196,51 +227,14 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
 
   const updateProbability = (index: number, newProbability: number) => {
     const newPrizes = [...prizes];
-    const oldProbability = newPrizes[index].probability;
-    const difference = newProbability - oldProbability;
-    
-    // Update the target prize
     newPrizes[index].probability = newProbability;
-    
-    // Distribute the difference among other prizes
-    const otherPrizes = newPrizes.filter((_, i) => i !== index);
-    const totalOtherProbability = otherPrizes.reduce((sum, prize) => sum + prize.probability, 0);
-    
-    if (totalOtherProbability > 0) {
-      otherPrizes.forEach((prize, i) => {
-        const prizeIndex = newPrizes.findIndex(p => p === prize);
-        const proportionalReduction = (difference * prize.probability) / totalOtherProbability;
-        newPrizes[prizeIndex].probability = Math.max(0.1, prize.probability - proportionalReduction);
-      });
-    }
-    
-    // Normalize to ensure total is 100
-    normalizeProbabilities(newPrizes);
+    setPrizes(newPrizes);
     if (onPrizesChange) {
       onPrizesChange(newPrizes);
     }
   };
 
-  const redistributeProbabilities = (prizeList: PrizeTemplate[]) => {
-    const totalProbability = prizeList.reduce((sum, prize) => sum + prize.probability, 0);
-    if (totalProbability > 0) {
-      prizeList.forEach(prize => {
-        prize.probability = (prize.probability / totalProbability) * 100;
-      });
-    }
-    setPrizes(prizeList);
-  };
 
-  const normalizeProbabilities = (prizeList: PrizeTemplate[]) => {
-    const total = prizeList.reduce((sum, prize) => sum + prize.probability, 0);
-    if (total !== 100) {
-      const factor = 100 / total;
-      prizeList.forEach(prize => {
-        prize.probability = prize.probability * factor;
-      });
-    }
-    setPrizes(prizeList);
-  };
 
   const resetToDefault = () => {
     const defaultPrizes = getDefaultPrizes();
@@ -470,8 +464,8 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     >
                       {colorOptions.map(color => (
-                        <option key={color} value={color}>
-                          {color}
+                        <option key={color.value} value={color.value}>
+                          {color.name}
                         </option>
                       ))}
                     </select>
@@ -523,6 +517,35 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
             >
               <RotateCcw className="w-5 h-5" />
               <span className="font-medium">Reset to Default</span>
+            </button>
+            
+            <button
+              onClick={() => {
+                const newPrizes = [...prizes];
+                const total = newPrizes.reduce((sum, prize) => sum + prize.probability, 0);
+                if (total > 0) {
+                  const factor = 100 / total;
+                  newPrizes.forEach(prize => {
+                    prize.probability = prize.probability * factor;
+                  });
+                  setPrizes(newPrizes);
+                  if (onPrizesChange) {
+                    onPrizesChange(newPrizes);
+                  }
+                  showToast('Probabilities normalized to 100%', 'general');
+                }
+              }}
+              disabled={Math.abs(totalProbability - 100) < 0.1}
+              className={`flex items-center justify-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-md transform ${
+                Math.abs(totalProbability - 100) < 0.1
+                  ? 'bg-gray-400 cursor-not-allowed text-white'
+                  : 'bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 hover:shadow-lg hover:-translate-y-0.5'
+              }`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              <span className="font-medium">Normalize to 100%</span>
             </button>
           </div>
           

@@ -21,11 +21,11 @@ const WheelPreview: React.FC<WheelPreviewProps> = ({ prizes, size = 300 }) => {
   const getIconForPrize = (prizeType: string, prizeValue: number) => {
     if (prizeType === 'MONEY') {
       if (prizeValue >= 500) {
-        return <Sparkles className="w-4 h-4 text-yellow-400" />;
+        return <DollarSign className="w-4 h-4 text-yellow-400" />;
       } else if (prizeValue >= 100) {
-        return <Sparkles className="w-4 h-4 text-white" />;
+        return <DollarSign className="w-4 h-4 text-white" />;
       } else if (prizeValue >= 50) {
-        return <Star className="w-4 h-4 text-white" />;
+        return <DollarSign className="w-4 h-4 text-white" />;
       } else if (prizeValue >= 25) {
         return <DollarSign className="w-4 h-4 text-white" />;
       } else if (prizeValue >= 10) {
