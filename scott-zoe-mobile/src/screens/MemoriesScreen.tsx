@@ -370,7 +370,7 @@ export default function MemoriesScreen() {
       return matchesSearch && matchesType;
     })
     .sort((a, b) => {
-      // Sort by oldest first (ascending order)
+      //  ort by oldest first (ascending order) 
       return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
 
