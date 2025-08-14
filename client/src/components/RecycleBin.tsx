@@ -242,7 +242,7 @@ function RecycleBin() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Recycle Bin</h1>
         <p className="text-gray-600">
-          {totalElements} deleted photo{totalElements !== 1 ? 's' : ''} • Photos will be permanently deleted after 30 days
+          {totalElements} deleted photo{totalElements !== 1 ? 's' : ''} • Photos will be permanently deleted after 7 days
         </p>
       </div>
 

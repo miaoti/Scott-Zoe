@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Upload, Heart, Settings, Camera } from 'lucide-react';
+import { Plus, Upload, Heart, Settings, Camera, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api, { API_BASE_URL } from '../utils/api';
 import PhotoDetailModal from './PhotoDetailModal';
@@ -206,6 +206,13 @@ function PhotoGallery() {
         </div>
         
         <div className="flex items-center space-x-2">
+          <Link
+            to="/recycle-bin"
+            className="bg-apple-gray-6 hover:bg-apple-gray-5 text-apple-label px-6 py-3 rounded-xl transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium border border-apple-separator"
+          >
+            <Trash2 className="w-5 h-5" />
+            <span>Recycle Bin</span>
+          </Link>
           <Link
             to="/categories"
             className="bg-apple-gray-6 hover:bg-apple-gray-5 text-apple-label px-6 py-3 rounded-xl transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium border border-apple-separator"

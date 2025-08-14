@@ -187,17 +187,7 @@ function Header() {
               <span className="hidden sm:inline font-medium">Gallery</span>
             </Link>
             
-            <Link
-              to="/recycle-bin"
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
-                isActive('/recycle-bin') 
-                  ? 'bg-apple-blue-light/10 text-apple-blue-light' 
-                  : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
-              }`}
-            >
-              <Trash2 className="h-4 w-4" />
-              <span className="hidden sm:inline font-medium">Recycle Bin</span>
-            </Link>
+
             
             <Link
               to="/memories"
