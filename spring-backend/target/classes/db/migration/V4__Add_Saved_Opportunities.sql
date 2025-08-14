@@ -1,5 +1,5 @@
 -- Create saved_opportunities table
-CREATE TABLE saved_opportunities (
+CREATE TABLE IF NOT EXISTS saved_opportunities (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL,
@@ -10,8 +10,8 @@ CREATE TABLE saved_opportunities (
 );
 
 -- Create indexes for better performance
-CREATE INDEX idx_saved_opportunities_user_id ON saved_opportunities(user_id);
-CREATE INDEX idx_saved_opportunities_is_used ON saved_opportunities(is_used);
-CREATE INDEX idx_saved_opportunities_created_at ON saved_opportunities(created_at);
-CREATE INDEX idx_saved_opportunities_source ON saved_opportunities(source);
-CREATE INDEX idx_saved_opportunities_user_unused ON saved_opportunities(user_id, is_used);
+CREATE INDEX IF NOT EXISTS idx_saved_opportunities_user_id ON saved_opportunities(user_id);
+CREATE INDEX IF NOT EXISTS idx_saved_opportunities_is_used ON saved_opportunities(is_used);
+CREATE INDEX IF NOT EXISTS idx_saved_opportunities_created_at ON saved_opportunities(created_at);
+CREATE INDEX IF NOT EXISTS idx_saved_opportunities_source ON saved_opportunities(source);
+CREATE INDEX IF NOT EXISTS idx_saved_opportunities_user_unused ON saved_opportunities(user_id, is_used);
