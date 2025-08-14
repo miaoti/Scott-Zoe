@@ -25,7 +25,7 @@ function Header() {
   const [timeElapsed, setTimeElapsed] = useState<TimeElapsed>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   const calculateTimeElapsed = useCallback(() => {
-    const startDate = new Date('2020-08-06T00:00:00');
+    const startDate = new Date('2020-06-08T00:00:00');
     const now = new Date();
     const diffMs = now.getTime() - startDate.getTime();
     
@@ -132,7 +132,7 @@ function Header() {
                       </div>
                     </div>
                     <div className="text-apple-secondary-label border-t border-apple-separator pt-3">
-                      <div className="text-xs">Since June 8th, 2024</div>
+                      <div className="text-xs">Since June 8th, 2020</div>
                       <div className="font-medium text-apple-label text-sm mt-1">
                         💕 Every second counts! 💕
                       </div>

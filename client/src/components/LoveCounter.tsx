@@ -323,7 +323,7 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
 
   return (
     <>
-      <div className="relative">
+      <div className="relative pointer-events-auto touch-manipulation">
         {/* Love Counter Card */}
         <div className="apple-card apple-card-hover p-6 text-center apple-shadow relative overflow-hidden">
           {/* Background Animation */}
@@ -350,9 +350,10 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
           <div className="relative z-10">
             <button
               onClick={handleLoveClick}
-              className={`group relative transition-all duration-300 ${
+              className={`group relative transition-all duration-300 touch-manipulation active:scale-95 ${
                 isAnimating ? 'scale-125' : 'hover:scale-110'
               }`}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <Heart 
                 className={`h-12 w-12 mx-auto mb-4 transition-all duration-300 ${
