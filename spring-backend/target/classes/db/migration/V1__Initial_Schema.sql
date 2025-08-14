@@ -63,7 +63,14 @@ CREATE TABLE IF NOT EXISTS love_stats (
 );
 
 -- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_photos_uploader_id ON photos(uploader_id);
+-- Only create index if uploader_id column exists
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.columns 
+               WHERE table_name = 'photos' AND column_name = 'uploader_id') THEN
+        CREATE INDEX IF NOT EXISTS idx_photos_uploader_id ON photos(uploader_id);
+    END IF;
+END $$;
 CREATE INDEX IF NOT EXISTS idx_photos_created_at ON photos(created_at);
 CREATE INDEX IF NOT EXISTS idx_notes_photo_id ON notes(photo_id);
 CREATE INDEX IF NOT EXISTS idx_notes_author_id ON notes(author_id);
