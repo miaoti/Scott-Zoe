@@ -59,6 +59,7 @@ com\couplewebsite\service\WheelPrizeService.class
 com\couplewebsite\config\MimeTypeConfig.class
 com\couplewebsite\service\EarningsService.class
 com\couplewebsite\config\StaticResourceFilter.class
+com\couplewebsite\controller\LoveUpdatesController.class
 com\couplewebsite\controller\WheelPrizeController.class
 com\couplewebsite\controller\FileController.class
 com\couplewebsite\config\ValidationConfig.class

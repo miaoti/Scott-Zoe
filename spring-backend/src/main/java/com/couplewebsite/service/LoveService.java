@@ -148,6 +148,20 @@ public class LoveService {
         return count > 0 && count % 520 == 0;
     }
     
+    /**
+     * Get love count by username
+     */
+    public Long getLoveCountByUsername(String username) {
+        try {
+            User user = userDetailsService.getUserByUsername(username);
+            Optional<Love> loveOpt = loveRepository.findByUser(user);
+            return loveOpt.map(Love::getCountValue).orElse(0L);
+        } catch (Exception e) {
+            logger.error("Error getting love count for user: " + username, e);
+            return 0L;
+        }
+    }
+    
     // Inner class for love statistics
     public static class LoveStats {
         private final Long currentUserCount;

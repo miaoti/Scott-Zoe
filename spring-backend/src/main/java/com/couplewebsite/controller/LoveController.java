@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -21,6 +22,9 @@ public class LoveController {
     
     @Autowired
     private LoveService loveService;
+    
+    @Autowired
+    private LoveUpdatesController loveUpdatesController;
     
     /**
      * Get shared love count and statistics (synchronized between Scott and Zoe)
@@ -68,6 +72,14 @@ public class LoveController {
             response.put("progressPercent", stats.getProgressPercent());
             response.put("isMilestoneReached", loveService.isMilestoneReached(love.getCountValue()));
             response.put("justReachedMilestone", loveService.isMilestoneReached(love.getCountValue()));
+            
+            // Notify partner about the love count update
+            try {
+                loveUpdatesController.notifyPartner();
+            } catch (Exception notifyException) {
+                logger.warn("Failed to notify partner about love count update", notifyException);
+                // Don't fail the main request if notification fails
+            }
             
             return ResponseEntity.ok(response);
             
@@ -122,6 +134,32 @@ public class LoveController {
             
         } catch (Exception e) {
             logger.error("Error getting total love count", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Get partner's love count (Scott sees Zoe's count, Zoe sees Scott's count)
+     */
+    @GetMapping("/partner")
+    public ResponseEntity<?> getPartnerLoveCount() {
+        try {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            String partnerUsername = "scott".equals(currentUsername) ? "zoe" : "scott";
+            
+            Long partnerLoveCount = loveService.getLoveCountByUsername(partnerUsername);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("partnerUsername", partnerUsername);
+            response.put("partnerLoveCount", partnerLoveCount);
+            response.put("partnerDisplayName", "scott".equals(partnerUsername) ? "Scott" : "Zoe");
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Error getting partner love count", e);
             Map<String, String> error = new HashMap<>();
             error.put("message", "Server error");
             return ResponseEntity.status(500).body(error);
