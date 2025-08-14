@@ -269,7 +269,7 @@ function Dashboard() {
 
           <Link
             to="/memories"
-            className="apple-card apple-card-hover p-6 text-center apple-shadow transition-all duration-200 hover:scale-105 cursor-pointer group pointer-events-auto"
+            className="apple-card apple-card-hover p-6 text-center apple-shadow transition-all duration-200 hover:scale-105 cursor-pointer group pointer-events-auto relative z-10"
           >
             <Calendar className="h-12 w-12 text-apple-blue-light mx-auto mb-4 group-hover:scale-110 transition-transform duration-200" />
             <div className="text-3xl font-semibold text-apple-label mb-2">{stats.memories}</div>
@@ -303,9 +303,13 @@ function Dashboard() {
             </div>
           </Link>
           
-          <LoveCounter />
+          <div className="relative z-20 pointer-events-auto">
+            <LoveCounter />
+          </div>
           
-          <WheelOpportunities onUseOpportunity={handleUseOpportunity} />
+          <div className="relative z-20 pointer-events-auto">
+            <WheelOpportunities onUseOpportunity={handleUseOpportunity} />
+          </div>
         </div>
 
         {/* Quick Actions */}

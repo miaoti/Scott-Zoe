@@ -328,7 +328,7 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
           <div className="relative z-10">
             <button
               onClick={(e) => handleLoveClick(e)}
-              className={`group relative transition-all duration-300 touch-manipulation active:scale-95 ${
+              className={`group relative z-30 pointer-events-auto transition-all duration-300 touch-manipulation active:scale-95 ${
                 isAnimating ? 'scale-125' : 'hover:scale-110'
               }`}
               style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -372,11 +372,12 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
                     <button
                       onClick={(e) => useSavedOpportunity(e)}
                       disabled={!canUseThisWeek}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                      className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors relative z-30 pointer-events-auto touch-manipulation ${
                         canUseThisWeek
-                          ? 'bg-blue-600 text-white hover:bg-blue-700'
+                          ? 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95'
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       }`}
+                      style={{ WebkitTapHighlightColor: 'transparent' }}
                     >
                       {canUseThisWeek ? 'Use Now' : 'Next Week'}
                     </button>
