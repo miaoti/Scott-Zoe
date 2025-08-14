@@ -108,7 +108,9 @@ const WheelPreview: React.FC<WheelPreviewProps> = ({ prizes, size = 300 }) => {
     const radiusMultiplier = minMultiplier + (maxMultiplier - minMultiplier) * Math.sqrt(normalizedAngle);
     
     const textRadius = baseRadius * radiusMultiplier;
-    const midAngleRad = (midAngle * Math.PI) / 180;
+    // Account for the -90 degree rotation of the SVG wheel
+    const adjustedMidAngle = midAngle - 90;
+    const midAngleRad = (adjustedMidAngle * Math.PI) / 180;
     
     return {
       x: centerX + textRadius * Math.cos(midAngleRad),
