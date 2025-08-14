@@ -31,35 +31,41 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
 
   // Helper function to get icon for prize type and value
   const getIconForPrize = (prizeType: string, prizeValue: number) => {
+    const iconSize = "w-5 h-5"; // Slightly larger for better visibility
+    
     if (prizeType === 'MONEY') {
       if (prizeValue >= 500) {
-        return <Sparkles className="w-4 h-4 text-yellow-400" />;
+        return <Sparkles className={`${iconSize} text-yellow-300 drop-shadow-lg`} />;
       } else if (prizeValue >= 100) {
-        return <Sparkles className="w-4 h-4 text-white" />;
+        return <Sparkles className={`${iconSize} text-yellow-200 drop-shadow-lg`} />;
       } else if (prizeValue >= 50) {
-        return <Star className="w-4 h-4 text-white" />;
+        return <Star className={`${iconSize} text-yellow-200 drop-shadow-lg`} />;
       } else if (prizeValue >= 25) {
-        return <DollarSign className="w-4 h-4 text-white" />;
+        return <DollarSign className={`${iconSize} text-green-200 drop-shadow-lg`} />;
       } else if (prizeValue >= 10) {
-        return <DollarSign className="w-4 h-4 text-gray-800" />;
+        return <DollarSign className={`${iconSize} text-green-600 drop-shadow-sm`} />;
       } else {
-        return <DollarSign className="w-4 h-4 text-gray-600" />;
+        return <DollarSign className={`${iconSize} text-green-700 drop-shadow-sm`} />;
       }
+    } else if (prizeType === 'GIFT') {
+      return <Gift className={`${iconSize} text-purple-200 drop-shadow-lg`} />;
+    } else if (prizeType === 'EXPERIENCE') {
+      return <Star className={`${iconSize} text-blue-200 drop-shadow-lg`} />;
     } else {
-      return <Gift className="w-4 h-4 text-white" />;
+      return <Gift className={`${iconSize} text-white drop-shadow-lg`} />;
     }
   };
 
   // Default prizes fallback
   const getDefaultPrizes = (): Prize[] => [
-    { id: 1, amount: 1, color: '#F3F4F6', probability: 45, prizeName: '$1', prizeDescription: 'Win $1 love points', prizeType: 'MONEY', icon: <DollarSign className="w-4 h-4 text-gray-600" /> },
-    { id: 2, amount: 5, color: '#E5E7EB', probability: 25, prizeName: '$5', prizeDescription: 'Win $5 love points', prizeType: 'MONEY', icon: <DollarSign className="w-4 h-4 text-gray-700" /> },
-    { id: 3, amount: 10, color: '#D1D5DB', probability: 15, prizeName: '$10', prizeDescription: 'Win $10 love points', prizeType: 'MONEY', icon: <DollarSign className="w-4 h-4 text-gray-800" /> },
-    { id: 4, amount: 25, color: '#9CA3AF', probability: 10, prizeName: '$25', prizeDescription: 'Win $25 love points', prizeType: 'MONEY', icon: <DollarSign className="w-4 h-4 text-white" /> },
-    { id: 5, amount: 77, color: '#6B7280', probability: 2.5, prizeName: '$77', prizeDescription: 'Win $77 love points', prizeType: 'MONEY', icon: <Star className="w-4 h-4 text-white" /> },
-    { id: 6, amount: 100, color: '#4B5563', probability: 1.5, prizeName: '$100', prizeDescription: 'Win $100 love points', prizeType: 'MONEY', icon: <Star className="w-4 h-4 text-white" /> },
-    { id: 7, amount: 500, color: '#374151', probability: 0.5, prizeName: '$500', prizeDescription: 'Win $500 love points', prizeType: 'MONEY', icon: <Sparkles className="w-4 h-4 text-white" /> },
-    { id: 8, amount: 1000, color: '#1F2937', probability: 0.5, prizeName: '$1000', prizeDescription: 'Win $1000 love points', prizeType: 'MONEY', icon: <Sparkles className="w-4 h-4 text-yellow-400" /> },
+    { id: 1, amount: 1, color: '#F3F4F6', probability: 45, prizeName: '$1', prizeDescription: 'Win $1 love points', prizeType: 'MONEY', icon: getIconForPrize('MONEY', 1) },
+    { id: 2, amount: 5, color: '#E5E7EB', probability: 25, prizeName: '$5', prizeDescription: 'Win $5 love points', prizeType: 'MONEY', icon: getIconForPrize('MONEY', 5) },
+    { id: 3, amount: 10, color: '#D1D5DB', probability: 15, prizeName: '$10', prizeDescription: 'Win $10 love points', prizeType: 'MONEY', icon: getIconForPrize('MONEY', 10) },
+    { id: 4, amount: 25, color: '#9CA3AF', probability: 10, prizeName: '$25', prizeDescription: 'Win $25 love points', prizeType: 'MONEY', icon: getIconForPrize('MONEY', 25) },
+    { id: 5, amount: 77, color: '#6B7280', probability: 2.5, prizeName: '$77', prizeDescription: 'Win $77 love points', prizeType: 'MONEY', icon: getIconForPrize('MONEY', 77) },
+    { id: 6, amount: 100, color: '#4B5563', probability: 1.5, prizeName: '$100', prizeDescription: 'Win $100 love points', prizeType: 'MONEY', icon: getIconForPrize('MONEY', 100) },
+    { id: 7, amount: 500, color: '#374151', probability: 0.5, prizeName: '$500', prizeDescription: 'Win $500 love points', prizeType: 'MONEY', icon: getIconForPrize('MONEY', 500) },
+    { id: 8, amount: 1000, color: '#1F2937', probability: 0.5, prizeName: '$1000', prizeDescription: 'Win $1000 love points', prizeType: 'MONEY', icon: getIconForPrize('MONEY', 1000) },
   ];
 
   // Check if user has used wheel this week and load saved opportunities and wheel configuration
@@ -246,13 +252,25 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
     }
   };
 
-  const handleClose = (e?: React.MouseEvent) => {
+  const handleClose = async (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     
     if (!isSpinning) {
+      // If user closes without spinning and hasn't used today, save as opportunity
+      if (!hasUsedToday && !showResult) {
+        try {
+          await api.post('/api/opportunities/save');
+          console.log('✅ Opportunity saved for later use');
+        } catch (error) {
+          console.error('❌ Error saving opportunity:', error);
+          // Fallback to localStorage
+          const currentOpportunities = parseInt(localStorage.getItem('wheelOpportunities') || '0');
+          localStorage.setItem('wheelOpportunities', (currentOpportunities + 1).toString());
+        }
+      }
       onClose();
     }
   };
@@ -303,17 +321,17 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
 
   return (
     <div 
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (e.target === e.currentTarget) {
+        if (e.target === e.currentTarget && !isSpinning) {
           handleClose();
         }
       }}
     >
       <div 
-        className="bg-white rounded-3xl max-w-md w-full p-8 apple-shadow-lg relative overflow-hidden"
+        className="bg-white rounded-3xl max-w-md w-full p-8 apple-shadow-lg relative overflow-hidden pointer-events-auto"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -347,10 +365,10 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleClose();
+                handleClose(e);
               }}
               disabled={isSpinning}
-              className="w-8 h-8 rounded-full bg-apple-gray-6/10 hover:bg-apple-gray-6/20 flex items-center justify-center transition-colors disabled:opacity-50"
+              className="w-8 h-8 rounded-full bg-apple-gray-6/10 hover:bg-apple-gray-6/20 flex items-center justify-center transition-colors disabled:opacity-50 pointer-events-auto z-[10000]"
             >
               <X className="w-4 h-4 text-apple-secondary-label" />
             </button>
@@ -386,40 +404,36 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
               {prizes.map((prize, index) => {
                 const segmentAngle = 360 / prizes.length;
                 const angle = (index * segmentAngle) + (segmentAngle / 2);
-                // Dynamic radius calculation matching preview component
-                const baseRadius = 60; // Less margin from edge
                 
-                // Dynamic radius calculation based on segment angle for optimal text positioning
-                // Formula: smaller segments need text closer to center, larger segments can have text further out
-                const minMultiplier = 0.45; // Minimum for very small segments (many prizes)
-                const maxMultiplier = 0.8;  // Maximum for large segments (few prizes)
-                
-                // Normalize segment angle to 0-1 range (0° to 180°)
-                const normalizedAngle = Math.min(segmentAngle / 180, 1);
-                
-                // Use a smooth curve: smaller angles get smaller multipliers
-                const radiusMultiplier = minMultiplier + (maxMultiplier - minMultiplier) * Math.sqrt(normalizedAngle);
-                
-                const radius = baseRadius * radiusMultiplier;
+                // Simplified radius calculation for better text positioning
+                const radius = prizes.length > 6 ? 50 : 65; // Closer to center for many prizes
                 const x = Math.cos((angle - 90) * Math.PI / 180) * radius;
                 const y = Math.sin((angle - 90) * Math.PI / 180) * radius;
+                
+                // Determine text color based on background
+                const isLightBackground = prize.color === '#F3F4F6' || prize.color === '#E5E7EB' || prize.color === '#D1D5DB';
+                const textColor = isLightBackground ? 'text-gray-800' : 'text-white';
                 
                 return (
                   <div
                     key={prize.id}
-                    className="absolute flex flex-col items-center justify-center text-white font-bold text-xs pointer-events-none"
+                    className="absolute flex flex-col items-center justify-center font-bold pointer-events-none text-white"
                     style={{
                       left: `calc(50% + ${x}px)`,
                       top: `calc(50% + ${y}px)`,
-                      transform: `translate(-50%, -50%)`,
+                      transform: `translate(-50%, -50%) rotate(${angle}deg)`,
                       transformOrigin: 'center',
-                      textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
-                      minWidth: 'max-content'
+                      textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                      fontSize: prizes.length > 8 ? '9px' : '11px'
                     }}
                   >
-                    <div className="flex items-center space-x-1 whitespace-nowrap px-1">
-                      {prize.icon}
-                      <span>{prize.prizeName}</span>
+                    <div className="flex flex-col items-center space-y-0.5" style={{ transform: `rotate(-${angle}deg)` }}>
+                      <div className="flex items-center justify-center mb-0.5">
+                        <span className="text-base">{prize.prizeType === 'MONEY' ? '💰' : prize.prizeType === 'GIFT' ? '🎁' : '✨'}</span>
+                      </div>
+                      <span className="whitespace-nowrap text-center leading-tight font-bold" style={{ fontSize: prizes.length > 8 ? '8px' : '10px' }}>
+                        {prize.prizeName}
+                      </span>
                     </div>
                   </div>
                 );
@@ -440,17 +454,22 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
                 e.stopPropagation();
                 spinWheel();
               }}
-              disabled={isSpinning}
-              className={`px-8 py-4 bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-800 rounded-xl font-semibold transition-all duration-200 shadow-sm ${
-                isSpinning
+              disabled={isSpinning || (hasUsedToday && savedOpportunities === 0)}
+              className={`px-8 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg pointer-events-auto z-[10000] relative ${
+                isSpinning || (hasUsedToday && savedOpportunities === 0)
                   ? 'opacity-50 cursor-not-allowed'
-                  : 'hover:bg-gray-50 hover:scale-105'
+                  : 'hover:shadow-xl hover:scale-105'
               }`}
             >
               {isSpinning ? (
                 <div className="flex items-center space-x-2">
-                  <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>Spinning... 🎰</span>
+                </div>
+              ) : (hasUsedToday && savedOpportunities === 0) ? (
+                <div className="flex items-center space-x-2">
+                  <span>Used This Week</span>
+                  <span className="text-xl">⏰</span>
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">
