@@ -244,9 +244,9 @@ function Header() {
                       Days Together
                     </div>
                     <div className="text-apple-secondary-label border-t border-apple-separator pt-3">
-                      <div className="text-xs">Since</div>
-                      <div className="font-medium text-apple-label">
-                        {new Date(relationshipInfo.startDate).toLocaleDateString()}
+                      <div className="text-xs">Since June 8th, 2020</div>
+                      <div className="font-medium text-apple-label text-sm mt-1">
+                        💕 Every second counts! 💕
                       </div>
                     </div>
                   </div>
