@@ -7,7 +7,7 @@ interface Photo {
   filename: string;
   originalName: string;
   caption?: string;
-  createdAt: string;
+  createdAt: string | number[];
   uploader: { name: string };
   categories: { id: number; name: string; color: string }[];
   noteCount: number;
@@ -125,7 +125,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this photo? This action cannot be undone.')) {
+    if (window.confirm('Are you sure you want to delete this photo?')) {
       try {
         setLoading(true);
         await api.delete(`/api/photos/${photo.id}`);
@@ -171,8 +171,19 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (dateInput: string | number[]) => {
+    let date: Date;
+    
+    if (Array.isArray(dateInput)) {
+      // Handle array format: [year, month, day, hour, minute, second, nanoseconds]
+      const [year, month, day, hour = 0, minute = 0, second = 0] = dateInput;
+      date = new Date(year, month - 1, day, hour, minute, second); // month is 0-indexed in Date constructor
+    } else {
+      // Handle string format
+      date = new Date(dateInput);
+    }
+    
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',

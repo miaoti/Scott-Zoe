@@ -8,7 +8,7 @@ interface Photo {
   filename: string;
   originalName: string;
   caption?: string;
-  createdAt: string;
+  createdAt: string | number[];
   uploader: { name: string };
   categories: Category[];
 }
@@ -22,7 +22,7 @@ interface Category {
 interface Note {
   id: number;
   content: string;
-  createdAt: string;
+  createdAt: string | number[];
   author: { name: string };
 }
 
@@ -37,6 +37,21 @@ function PhotoDetail() {
   const [addingNote, setAddingNote] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+
+  const formatDate = (dateInput: string | number[]) => {
+    let date: Date;
+    
+    if (Array.isArray(dateInput)) {
+      // Handle array format: [year, month, day, hour, minute, second, nanoseconds]
+      const [year, month, day, hour = 0, minute = 0, second = 0] = dateInput;
+      date = new Date(year, month - 1, day, hour, minute, second); // month is 0-indexed in Date constructor
+    } else {
+      // Handle string format
+      date = new Date(dateInput);
+    }
+    
+    return date.toLocaleDateString();
+  };
 
   useEffect(() => {
     if (id) {
@@ -205,7 +220,7 @@ function PhotoDetail() {
               </div>
               <div className="flex items-center">
                 <Calendar className="h-4 w-4 mr-2" />
-                <span>{new Date(photo.createdAt).toLocaleDateString()}</span>
+                <span>{formatDate(photo.createdAt)}</span>
               </div>
             </div>
           </div>
@@ -274,7 +289,7 @@ function PhotoDetail() {
                     <p className="text-gray-800 mb-2">{note.content}</p>
                     <div className="flex items-center justify-between text-xs text-gray-500">
                       <span>By {note.author.name}</span>
-                      <span>{new Date(note.createdAt).toLocaleDateString()}</span>
+                      <span>{formatDate(note.createdAt)}</span>
                     </div>
                   </div>
                 ))

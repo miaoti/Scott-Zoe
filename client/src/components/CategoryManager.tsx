@@ -49,8 +49,11 @@ function CategoryManager({ category, onClose, onCategoryUpdated }: CategoryManag
         color: category.color
       });
       setShowCreateForm(true);
+    } else if (onClose) {
+      // If onClose is provided, this is being used as a modal, so show the create form
+      setShowCreateForm(true);
     }
-  }, [category]);
+  }, [category, onClose]);
 
   const fetchCategories = async () => {
     try {
@@ -122,24 +125,28 @@ function CategoryManager({ category, onClose, onCategoryUpdated }: CategoryManag
 
   return (
     <div className="space-y-6 fade-in">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="font-heading text-4xl text-gray-800 mb-4">Photo Categories</h1>
-        <p className="text-lg text-gray-600">
-          Organize your memories into meaningful collections
-        </p>
-      </div>
+      {/* Header - only show when not used as modal */}
+      {!onClose && (
+        <div className="text-center">
+          <h1 className="font-heading text-4xl text-gray-800 mb-4">Photo Categories</h1>
+          <p className="text-lg text-gray-600">
+            Organize your memories into meaningful collections
+          </p>
+        </div>
+      )}
 
-      {/* Create Category Button */}
-      <div className="flex justify-center">
-        <button
-          onClick={() => setShowCreateForm(true)}
-          className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded-lg transition-colors font-medium"
-        >
-          <Plus className="h-5 w-5" />
-          <span>Create New Category</span>
-        </button>
-      </div>
+      {/* Create Category Button - only show when not used as modal */}
+      {!onClose && (
+        <div className="flex justify-center">
+          <button
+            onClick={() => setShowCreateForm(true)}
+            className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded-lg transition-colors font-medium"
+          >
+            <Plus className="h-5 w-5" />
+            <span>Create New Category</span>
+          </button>
+        </div>
+      )}
 
       {/* Create/Edit Form */}
       {showCreateForm && (
@@ -229,7 +236,8 @@ function CategoryManager({ category, onClose, onCategoryUpdated }: CategoryManag
         </div>
       )}
 
-      {/* Categories Grid */}
+      {/* Categories Grid - only show when not used as modal */}
+      {!onClose && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {categories.map((category) => (
           <div key={category.id} className="glass-effect rounded-xl p-6 love-shadow">
@@ -276,6 +284,7 @@ function CategoryManager({ category, onClose, onCategoryUpdated }: CategoryManag
           </div>
         ))}
       </div>
+      )}
 
       {categories.length === 0 && (
         <div className="text-center py-12">
