@@ -162,6 +162,51 @@ public class MemoryController {
             return ResponseEntity.status(500).body(error);
         }
     }
+
+    /**
+     * Get memories by specific date
+     */
+    @GetMapping("/date/{date}")
+    public ResponseEntity<?> getMemoriesByDate(@PathVariable String date) {
+        try {
+            LocalDate targetDate = LocalDate.parse(date);
+            List<Memory> memories = memoryService.getMemoriesByDate(targetDate);
+            
+            List<Map<String, Object>> memoryResponses = memories.stream()
+                    .map(this::createMemoryResponse)
+                    .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(memoryResponses);
+            
+        } catch (Exception e) {
+            logger.error("Error fetching memories for date: {}", date, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+
+    /**
+     * Get memories for a specific month
+     */
+    @GetMapping("/month/{year}/{month}")
+    public ResponseEntity<?> getMemoriesForMonth(@PathVariable int year, @PathVariable int month) {
+        try {
+            List<Memory> memories = memoryService.getMemoriesForMonth(year, month);
+            
+            List<Map<String, Object>> memoryResponses = memories.stream()
+                    .map(this::createMemoryResponse)
+                    .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(memoryResponses);
+            
+        } catch (Exception e) {
+            logger.error("Error fetching memories for month: {}/{}", year, month, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
     
     /**
      * Get anniversary information

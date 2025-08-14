@@ -277,6 +277,40 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const getMemoriesByDate = async (date: string): Promise<Memory[]> => {
+    try {
+      const response = await apiCall(`/api/memories/date/${date}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.map((memory: any) => ({
+          ...memory,
+          date: new Date(memory.date + 'T00:00:00'),
+        }));
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching memories by date:', error);
+      return [];
+    }
+  };
+
+  const getMemoriesForMonth = async (year: number, month: number): Promise<Memory[]> => {
+    try {
+      const response = await apiCall(`/api/memories/month/${year}/${month}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.map((memory: any) => ({
+          ...memory,
+          date: new Date(memory.date + 'T00:00:00'),
+        }));
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching memories for month:', error);
+      return [];
+    }
+  };
+
   // Category methods
   const fetchCategories = async () => {
     try {
@@ -405,6 +439,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     createMemory,
     updateMemory,
     deleteMemory,
+    getMemoriesByDate,
+    getMemoriesForMonth,
     fetchCategories,
     fetchLoveStats,
     incrementLove,

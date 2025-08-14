@@ -142,6 +142,32 @@ public class MemoryService {
         return memoryRepository.findByTypeOrderByDateDesc(type);
     }
     
+    /**
+     * Get memories by specific date
+     */
+    public List<Memory> getMemoriesByDate(LocalDate date) {
+        try {
+            return memoryRepository.findByDate(date);
+        } catch (Exception e) {
+            logger.error("Error fetching memories for date: {}", date, e);
+            throw new RuntimeException("Failed to fetch memories for date: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Get memories for a specific month
+     */
+    public List<Memory> getMemoriesForMonth(int year, int month) {
+        try {
+            LocalDate startDate = LocalDate.of(year, month, 1);
+            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+            return memoryRepository.findByDateBetween(startDate, endDate);
+        } catch (Exception e) {
+            logger.error("Error fetching memories for month: {}/{}", year, month, e);
+            throw new RuntimeException("Failed to fetch memories for month: " + e.getMessage());
+        }
+    }
+    
     // Inner class for anniversary information
     public static class AnniversaryInfo {
         private final long totalDays;

@@ -47,4 +47,14 @@ public interface MemoryRepository extends JpaRepository<Memory, Long> {
      * Count memories by creator
      */
     long countByCreatorId(Long creatorId);
+    
+    /**
+     * Find memories by specific date
+     */
+    List<Memory> findByDate(LocalDate date);
+    
+    /**
+     * Find memories between date range
+     */
+    List<Memory> findByDateBetween(LocalDate startDate, LocalDate endDate);
 }

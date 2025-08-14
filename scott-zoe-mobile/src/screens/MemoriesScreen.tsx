@@ -358,16 +358,38 @@ export default function MemoriesScreen() {
     );
   };
 
-  const filteredMemories = memories.filter((memory) => {
-    const matchesSearch = memory.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase()) ||
-      memory.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesType = selectedType === 'all' || memory.type === selectedType;
-    
-    return matchesSearch && matchesType;
-  });
+  const filteredMemories = memories
+    .filter((memory) => {
+      const matchesSearch = memory.title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+        memory.description.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesType = selectedType === 'all' || memory.type === selectedType;
+      
+      return matchesSearch && matchesType;
+    })
+    .sort((a, b) => {
+      // Sort by oldest first (ascending order)
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+
+  const upcomingMemories = memories
+    .map((memory) => {
+      const memoryDate = new Date(memory.date);
+      const today = new Date();
+      const thisYear = today.getFullYear();
+      const anniversaryThisYear = new Date(thisYear, memoryDate.getMonth(), memoryDate.getDate());
+      const nextAnniversary = anniversaryThisYear >= today ? anniversaryThisYear : new Date(thisYear + 1, memoryDate.getMonth(), memoryDate.getDate());
+      
+      return {
+        ...memory,
+        nextAnniversaryDate: nextAnniversary,
+        daysUntil: Math.ceil((nextAnniversary.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+      };
+    })
+    .sort((a, b) => a.daysUntil - b.daysUntil)
+    .slice(0, 3);
 
   const memoryTypes = [
     { value: 'all', label: 'All' },
@@ -452,6 +474,26 @@ export default function MemoriesScreen() {
           </TouchableOpacity>
         ))}
       </ScrollView>
+
+      {/* Upcoming Anniversaries */}
+      {upcomingMemories.length > 0 && (
+        <View style={styles.upcomingSection}>
+          <Text style={styles.sectionTitle}>Upcoming Anniversaries</Text>
+          {upcomingMemories.map((memory) => (
+            <View key={memory.id} style={styles.upcomingItem}>
+              <View style={styles.upcomingContent}>
+                <Text style={styles.upcomingTitle}>{memory.title}</Text>
+                <Text style={styles.upcomingDescription} numberOfLines={2}>
+                  {memory.description}
+                </Text>
+                <Text style={styles.upcomingDate}>
+                  {memory.nextAnniversaryDate.toLocaleDateString()} • {memory.daysUntil} days
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
 
       {/* Memories List */}
       <FlatList
@@ -770,5 +812,51 @@ const styles = StyleSheet.create({
   },
   typeOptionTextSelected: {
     color: 'white',
+  },
+  upcomingSection: {
+    backgroundColor: 'white',
+    marginHorizontal: 16,
+    marginVertical: 8,
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  upcomingItem: {
+    marginBottom: 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  upcomingContent: {
+    flex: 1,
+  },
+  upcomingTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  upcomingDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 6,
+  },
+  upcomingDate: {
+    fontSize: 12,
+    color: '#FF6B9D',
+    fontWeight: '500',
   },
 });

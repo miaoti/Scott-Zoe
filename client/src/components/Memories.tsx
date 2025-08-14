@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Plus, Edit2, Trash2, Heart, Star, Gift, Clock } from 'lucide-react';
 import api from '../utils/api';
+import CalendarComponent from './Calendar';
+import DayMemoriesModal from './DayMemoriesModal';
 
 interface Memory {
   id: number;
@@ -31,6 +33,9 @@ function Memories() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [filter, setFilter] = useState<string>('all');
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedDayMemories, setSelectedDayMemories] = useState<Memory[]>([]);
+  const [showDayModal, setShowDayModal] = useState(false);
 
   useEffect(() => {
     fetchMemories();
@@ -101,6 +106,12 @@ function Memories() {
     setShowForm(false);
   };
 
+  const handleDayClick = (date: string, memories: Memory[]) => {
+    setSelectedDate(date);
+    setSelectedDayMemories(memories);
+    setShowDayModal(true);
+  };
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'anniversary':
@@ -129,19 +140,24 @@ function Memories() {
   });
 
   const sortedMemories = filteredMemories.sort((a, b) => {
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
+    return new Date(a.date).getTime() - new Date(b.date).getTime();
   });
 
   const upcomingMemories = memories
-    .filter((memory) => {
+    .map((memory) => {
       const memoryDate = new Date(memory.date);
       const today = new Date();
       const thisYear = today.getFullYear();
       const anniversaryThisYear = new Date(thisYear, memoryDate.getMonth(), memoryDate.getDate());
-      const anniversaryNextYear = new Date(thisYear + 1, memoryDate.getMonth(), memoryDate.getDate());
+      const nextAnniversary = anniversaryThisYear >= today ? anniversaryThisYear : new Date(thisYear + 1, memoryDate.getMonth(), memoryDate.getDate());
       
-      return anniversaryThisYear >= today || anniversaryNextYear >= today;
+      return {
+        ...memory,
+        nextAnniversaryDate: nextAnniversary,
+        daysUntil: Math.ceil((nextAnniversary.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+      };
     })
+    .sort((a, b) => a.daysUntil - b.daysUntil)
     .slice(0, 3);
 
   return (
@@ -175,27 +191,28 @@ function Memories() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {upcomingMemories.map((memory) => {
               const memoryDate = new Date(memory.date);
-              const today = new Date();
-              const thisYear = today.getFullYear();
-              const anniversaryThisYear = new Date(thisYear, memoryDate.getMonth(), memoryDate.getDate());
-              const nextAnniversary = anniversaryThisYear >= today ? anniversaryThisYear : new Date(thisYear + 1, memoryDate.getMonth(), memoryDate.getDate());
-              const yearsAgo = nextAnniversary.getFullYear() - memoryDate.getFullYear();
+              const yearsAgo = memory.nextAnniversaryDate.getFullYear() - memoryDate.getFullYear();
               
               return (
                 <div key={memory.id} className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-lg p-4 border border-pink-200">
                   <div className="flex items-start justify-between mb-2">
                     {getTypeIcon(memory.type)}
                     <span className="text-xs text-gray-500">
-                      {nextAnniversary.toLocaleDateString()}
+                      {memory.nextAnniversaryDate.toLocaleDateString()}
                     </span>
                   </div>
                   <h3 className="font-semibold text-gray-800 mb-1">{memory.title}</h3>
                   <p className="text-sm text-gray-600 mb-2">{memory.description}</p>
-                  {yearsAgo > 0 && (
-                    <p className="text-xs text-purple-600 font-medium">
-                      {yearsAgo} year{yearsAgo !== 1 ? 's' : ''} anniversary
+                  <div className="flex items-center justify-between">
+                    {yearsAgo > 0 && (
+                      <p className="text-xs text-purple-600 font-medium">
+                        {yearsAgo} year{yearsAgo !== 1 ? 's' : ''} anniversary
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-500">
+                      {memory.daysUntil === 0 ? 'Today!' : `${memory.daysUntil} days`}
                     </p>
-                  )}
+                  </div>
                 </div>
               );
             })}
@@ -203,23 +220,35 @@ function Memories() {
         </div>
       )}
 
-      {/* Filters */}
-      <div className="flex items-center space-x-4">
-        <span className="text-gray-600 font-medium">Filter by type:</span>
-        {['all', 'anniversary', 'milestone', 'special_moment'].map((type) => (
-          <button
-            key={type}
-            onClick={() => setFilter(type)}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              filter === type
-                ? 'romantic-gradient text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {type === 'all' ? 'All' : getTypeLabel(type)}
-          </button>
-        ))}
-      </div>
+      {/* Calendar */}
+      <CalendarComponent
+          onDayClick={handleDayClick}
+        />
+
+      {/* Memories List */}
+      <div className="glass-effect rounded-xl p-6 love-shadow">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <Calendar className="h-5 w-5 mr-2 text-purple-500" />
+          All Memories
+        </h2>
+        
+        {/* Filters */}
+        <div className="flex items-center space-x-4 mb-6">
+          <span className="text-gray-600 font-medium">Filter by type:</span>
+          {['all', 'anniversary', 'milestone', 'special_moment'].map((type) => (
+            <button
+              key={type}
+              onClick={() => setFilter(type)}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                filter === type
+                  ? 'romantic-gradient text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {type === 'all' ? 'All' : getTypeLabel(type)}
+            </button>
+          ))}
+        </div>
 
       {/* Memory Form Modal */}
       {showForm && (
@@ -305,71 +334,82 @@ function Memories() {
         </div>
       )}
 
-      {/* Memories List */}
-      {sortedMemories.length > 0 ? (
-        <div className="space-y-4">
-          {sortedMemories.map((memory) => (
-            <div key={memory.id} className="glass-effect rounded-xl p-6 love-shadow">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    {getTypeIcon(memory.type)}
-                    <h3 className="text-xl font-semibold text-gray-800">{memory.title}</h3>
-                    <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                      {getTypeLabel(memory.type)}
-                    </span>
-                  </div>
-                  
-                  <p className="text-gray-600 mb-3">{memory.description}</p>
-                  
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
-                    <div className="flex items-center space-x-1">
-                      <Calendar className="h-4 w-4" />
-                      <span>{new Date(memory.date).toLocaleDateString()}</span>
+        {/* Memory Items */}
+        {sortedMemories.length > 0 ? (
+          <div className="space-y-4">
+            {sortedMemories.map((memory) => (
+              <div key={memory.id} className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      {getTypeIcon(memory.type)}
+                      <h3 className="text-lg font-semibold text-gray-800">{memory.title}</h3>
+                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                        {getTypeLabel(memory.type)}
+                      </span>
                     </div>
-                    <span>•</span>
-                    <span>Added by {memory.creator.name}</span>
-                    <span>•</span>
-                    <span>{new Date(memory.createdAt).toLocaleDateString()}</span>
+                    
+                    <p className="text-gray-600 mb-3">{memory.description}</p>
+                    
+                    <div className="flex items-center space-x-4 text-sm text-gray-500">
+                      <div className="flex items-center space-x-1">
+                        <Calendar className="h-4 w-4" />
+                        <span>{new Date(memory.date).toLocaleDateString()}</span>
+                      </div>
+                      <span>•</span>
+                      <span>Added by {memory.creator.name}</span>
+                      <span>•</span>
+                      <span>{new Date(memory.createdAt).toLocaleDateString()}</span>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex items-center space-x-2 ml-4">
-                  <button
-                    onClick={() => handleEdit(memory)}
-                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(memory.id)}
-                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  
+                  <div className="flex items-center space-x-2 ml-4">
+                    <button
+                      onClick={() => handleEdit(memory)}
+                      className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(memory.id)}
+                      className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <Calendar className="h-16 w-16 text-pink-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-600 mb-2">
-            {filter === 'all' ? 'No memories yet' : `No ${getTypeLabel(filter).toLowerCase()}s yet`}
-          </h3>
-          <p className="text-gray-500 mb-6">
-            Start documenting your special moments and milestones!
-          </p>
-          <button
-            onClick={() => setShowForm(true)}
-            className="inline-flex items-center px-6 py-3 romantic-gradient text-white rounded-lg hover:opacity-90 transition-opacity"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            Add First Memory
-          </button>
-        </div>
-      )}
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <Calendar className="h-16 w-16 text-pink-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">
+              {filter === 'all' ? 'No memories yet' : `No ${getTypeLabel(filter).toLowerCase()}s yet`}
+            </h3>
+            <p className="text-gray-500 mb-6">
+              Start documenting your special moments and milestones!
+            </p>
+            <button
+              onClick={() => setShowForm(true)}
+              className="inline-flex items-center px-6 py-3 romantic-gradient text-white rounded-lg hover:opacity-90 transition-opacity"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Add First Memory
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Day Memories Modal */}
+      <DayMemoriesModal
+        isOpen={showDayModal}
+        onClose={() => setShowDayModal(false)}
+        date={selectedDate}
+        memories={selectedDayMemories}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
     </div>
   );
 }

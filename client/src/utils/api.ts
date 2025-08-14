@@ -53,6 +53,15 @@ api.interceptors.response.use(
   }
 );
 
+// Calendar API functions
+export const getMemoriesByDate = (date: string) => {
+  return api.get(`/api/memories/date/${date}`);
+};
+
+export const getMemoriesForMonth = (year: number, month: number) => {
+  return api.get(`/api/memories/month/${year}/${month}`);
+};
+
 // Export the API URL for use in image sources
 export const API_BASE_URL = apiUrl;
 
