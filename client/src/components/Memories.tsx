@@ -88,7 +88,7 @@ function Memories() {
     if (!confirm('Are you sure you want to delete this memory?')) return;
 
     try {
-      await api.delete(`/memories/${id}`);
+      await api.delete(`/api/memories/${id}`);
       await fetchMemories();
     } catch (error) {
       console.error('Error deleting memory:', error);

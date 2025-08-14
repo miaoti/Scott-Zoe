@@ -37,6 +37,11 @@ const PartnerLoveCard: React.FC = () => {
 
   const setupSSE = () => {
     try {
+      // Close existing connection if any
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+      
       // Get JWT token from localStorage
       const token = localStorage.getItem('token');
       if (!token) {
@@ -63,7 +68,19 @@ const PartnerLoveCard: React.FC = () => {
         console.error('SSE connection error:', error);
         setError('Real-time connection lost');
         
-        // Fallback to polling if SSE fails
+        // Close the failed connection
+        if (eventSourceRef.current) {
+          eventSourceRef.current.close();
+          eventSourceRef.current = null;
+        }
+        
+        // Attempt to reconnect after a delay
+        setTimeout(() => {
+          console.log('Attempting to reconnect SSE...');
+          setupSSE();
+        }, 3000);
+        
+        // Fallback to polling in the meantime
         setTimeout(() => {
           fetchPartnerLoveCount();
         }, 1000);
@@ -80,10 +97,20 @@ const PartnerLoveCard: React.FC = () => {
       console.error('Error setting up SSE:', err);
       // Fallback to initial fetch
       fetchPartnerLoveCount();
+      
+      // Retry SSE setup after a delay
+      setTimeout(() => {
+        setupSSE();
+      }, 5000);
     }
   };
 
   useEffect(() => {
+    // Only setup if user is authenticated
+    if (!isAuthenticated || !user) {
+      return;
+    }
+    
     // Initial fetch
     fetchPartnerLoveCount();
     
@@ -95,7 +122,7 @@ const PartnerLoveCard: React.FC = () => {
         eventSourceRef.current.close();
       }
     };
-  }, []);
+  }, [isAuthenticated, user]); // Re-run when authentication state changes
 
   if (loading && !partnerData) {
     return (
