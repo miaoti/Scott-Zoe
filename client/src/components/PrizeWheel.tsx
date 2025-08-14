@@ -27,6 +27,7 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
   const [savedOpportunities, setSavedOpportunities] = useState(0);
   const [prizes, setPrizes] = useState<Prize[]>([]);
   const [loadingPrizes, setLoadingPrizes] = useState(true);
+  const [rotation, setRotation] = useState(0);
   const wheelRef = useRef<HTMLDivElement>(null);
 
   // Helper function to get icon for prize type and value
@@ -169,10 +170,8 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
     // We want the wheel to stop with the prize at the top (12 o'clock position)
     const finalRotation = (totalSpins * 360) + (360 - targetAngle);
 
-    if (wheelRef.current) {
-      // Apply the final rotation with CSS transition
-      wheelRef.current.style.transform = `rotate(${finalRotation}deg)`;
-    }
+    // Set the rotation state to trigger CSS transition
+    setRotation(finalRotation);
 
     // Show result after animation completes
     setTimeout(async () => {
@@ -391,6 +390,7 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
                 isSpinning ? 'ease-out' : 'hover:scale-105 ease-in-out duration-200'
               }`}
               style={{
+                transform: `rotate(${rotation}deg)`,
                 background: `conic-gradient(${prizes.map((prize, index) => {
                   const startAngle = (index / prizes.length) * 360;
                   const endAngle = ((index + 1) / prizes.length) * 360;
