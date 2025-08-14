@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Plus, Trash2, Save, RotateCcw, Palette, DollarSign, Gift } from 'lucide-react';
+import { Settings, Plus, Trash2, Save, RotateCcw, Palette, DollarSign, Gift, Lock, Unlock } from 'lucide-react';
 import api from '../utils/api';
 import { useToast } from '../contexts/ToastContext';
 import WheelPreview from './WheelPreview';
@@ -61,6 +61,7 @@ interface PrizeTemplate {
   probability: number;
   color: string;
   displayOrder: number;
+  locked?: boolean;
 }
 
 interface WheelConfigManagerProps {
@@ -228,6 +229,15 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
   const updateProbability = (index: number, newProbability: number) => {
     const newPrizes = [...prizes];
     newPrizes[index].probability = newProbability;
+    setPrizes(newPrizes);
+    if (onPrizesChange) {
+      onPrizesChange(newPrizes);
+    }
+  };
+
+  const toggleLock = (index: number) => {
+    const newPrizes = [...prizes];
+    newPrizes[index].locked = !newPrizes[index].locked;
     setPrizes(newPrizes);
     if (onPrizesChange) {
       onPrizesChange(newPrizes);
@@ -479,9 +489,22 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
                   <label className="text-sm font-medium text-gray-700">
                     Probability
                   </label>
-                  <span className="text-sm font-semibold text-blue-600">
-                    {prize.probability.toFixed(1)}%
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => toggleLock(index)}
+                      className={`p-1 rounded transition-colors ${
+                        prize.locked 
+                          ? 'text-yellow-600 hover:text-yellow-700 bg-yellow-50 hover:bg-yellow-100' 
+                          : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+                      }`}
+                      title={prize.locked ? 'Unlock probability' : 'Lock probability'}
+                    >
+                      {prize.locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                    </button>
+                    <span className="text-sm font-semibold text-blue-600">
+                      {prize.probability.toFixed(1)}%
+                    </span>
+                  </div>
                 </div>
                 <input
                   type="range"
@@ -490,7 +513,10 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
                   step="0.1"
                   value={prize.probability}
                   onChange={(e) => updateProbability(index, parseFloat(e.target.value))}
-                  className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                  disabled={prize.locked}
+                  className={`w-full h-3 bg-gray-200 rounded-lg appearance-none slider ${
+                    prize.locked ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                  }`}
                   style={{
                     background: `linear-gradient(to right, ${prize.color} 0%, ${prize.color} ${prize.probability}%, #e5e7eb ${prize.probability}%, #e5e7eb 100%)`
                   }}
@@ -501,66 +527,85 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-          <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap gap-2 justify-center">
             <button
               onClick={addPrize}
-              className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              className="flex items-center justify-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-sm"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4" />
               <span className="font-medium">Add Prize</span>
             </button>
             
             <button
               onClick={resetToDefault}
-              className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              className="flex items-center justify-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-sm"
             >
-              <RotateCcw className="w-5 h-5" />
-              <span className="font-medium">Reset to Default</span>
+              <RotateCcw className="w-4 h-4" />
+              <span className="font-medium">Reset</span>
             </button>
             
             <button
               onClick={() => {
                 const newPrizes = [...prizes];
-                const total = newPrizes.reduce((sum, prize) => sum + prize.probability, 0);
-                if (total > 0) {
-                  const factor = 100 / total;
-                  newPrizes.forEach(prize => {
+                const lockedPrizes = newPrizes.filter(prize => prize.locked);
+                const unlockedPrizes = newPrizes.filter(prize => !prize.locked);
+                
+                if (unlockedPrizes.length === 0) {
+                  showToast('Cannot normalize: all probabilities are locked', 'general');
+                  return;
+                }
+                
+                const lockedTotal = lockedPrizes.reduce((sum, prize) => sum + prize.probability, 0);
+                const remainingTotal = 100 - lockedTotal;
+                
+                if (remainingTotal <= 0) {
+                  showToast('Cannot normalize: locked probabilities exceed 100%', 'general');
+                  return;
+                }
+                
+                const unlockedTotal = unlockedPrizes.reduce((sum, prize) => sum + prize.probability, 0);
+                if (unlockedTotal > 0) {
+                  const factor = remainingTotal / unlockedTotal;
+                  unlockedPrizes.forEach(prize => {
                     prize.probability = prize.probability * factor;
                   });
-                  setPrizes(newPrizes);
-                  if (onPrizesChange) {
-                    onPrizesChange(newPrizes);
-                  }
-                  showToast('Probabilities normalized to 100%', 'general');
                 }
+                
+                setPrizes(newPrizes);
+                if (onPrizesChange) {
+                  onPrizesChange(newPrizes);
+                }
+                showToast('Probabilities normalized to 100%', 'general');
               }}
               disabled={Math.abs(totalProbability - 100) < 0.1}
-              className={`flex items-center justify-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-md transform ${
+              className={`flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 shadow-md transform text-sm ${
                 Math.abs(totalProbability - 100) < 0.1
                   ? 'bg-gray-400 cursor-not-allowed text-white'
                   : 'bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 hover:shadow-lg hover:-translate-y-0.5'
               }`}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
               </svg>
-              <span className="font-medium">Normalize to 100%</span>
+              <span className="font-medium">Normalize</span>
             </button>
           </div>
           
-          <button
-            onClick={saveConfiguration}
-            disabled={saving || Math.abs(totalProbability - 100) > 0.1}
-            className={`flex items-center justify-center space-x-2 px-8 py-3 rounded-xl font-medium transition-all duration-200 shadow-md transform ${
-              saving || Math.abs(totalProbability - 100) > 0.1
-                ? 'bg-gray-400 cursor-not-allowed text-white'
-                : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 hover:shadow-lg hover:-translate-y-0.5'
-            }`}
-          >
-            <Save className="w-5 h-5" />
-            <span>{saving ? 'Saving...' : 'Save Configuration'}</span>
-          </button>
+          <div className="flex justify-center">
+            <button
+              onClick={saveConfiguration}
+              disabled={saving || Math.abs(totalProbability - 100) > 0.1}
+              className={`flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-md transform ${
+                saving || Math.abs(totalProbability - 100) > 0.1
+                  ? 'bg-gray-400 cursor-not-allowed text-white'
+                  : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 hover:shadow-lg hover:-translate-y-0.5'
+              }`}
+            >
+              <Save className="w-5 h-5" />
+              <span>{saving ? 'Saving...' : 'Save Configuration'}</span>
+            </button>
+          </div>
         </div>
         
         {/* Warning Message */}

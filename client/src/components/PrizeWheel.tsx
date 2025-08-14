@@ -384,24 +384,29 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
             >
               {/* Prize Labels */}
               {prizes.map((prize, index) => {
-                const angle = (index / prizes.length) * 360 + (360 / prizes.length / 2);
-                const radius = 80;
+                const segmentAngle = 360 / prizes.length;
+                const angle = (index * segmentAngle) + (segmentAngle / 2);
+                // Adjust radius based on number of prizes for better centering
+                const baseRadius = 80;
+                const radiusMultiplier = segmentAngle < 45 ? 0.75 : segmentAngle < 90 ? 0.85 : 1.0;
+                const radius = baseRadius * radiusMultiplier;
                 const x = Math.cos((angle - 90) * Math.PI / 180) * radius;
                 const y = Math.sin((angle - 90) * Math.PI / 180) * radius;
                 
                 return (
                   <div
                     key={prize.id}
-                    className="absolute flex flex-col items-center justify-center text-white font-bold text-sm"
+                    className="absolute flex items-center justify-center text-white font-bold text-xs"
                     style={{
-                      left: `calc(50% + ${x}px - 20px)`,
-                      top: `calc(50% + ${y}px - 15px)`,
-                      width: '40px',
-                      height: '30px',
-                      transform: `rotate(${angle}deg)`
+                      left: `calc(50% + ${x}px)`,
+                      top: `calc(50% + ${y}px)`,
+                      transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+                      transformOrigin: 'center',
+                      minWidth: 'max-content',
+                      textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
                     }}
                   >
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1 whitespace-nowrap">
                       {prize.icon}
                       <span>{prize.prizeName}</span>
                     </div>

@@ -184,14 +184,14 @@ public class WheelConfigurationController {
             logger.info("Total probability calculated: {}", totalProbability);
             
             // Use tolerance for floating-point precision issues
-            BigDecimal tolerance = new BigDecimal("0.01");
+            BigDecimal tolerance = new BigDecimal("0.1");
             BigDecimal target = new BigDecimal("100.00");
             BigDecimal difference = totalProbability.subtract(target).abs();
             
             if (difference.compareTo(tolerance) > 0) {
                 logger.warn("Probability validation failed. Total: {}, difference: {}", totalProbability, difference);
                 Map<String, String> error = new HashMap<>();
-                error.put("message", "Total probability must equal 100% (±0.01%). Current total: " + totalProbability + "%");
+                error.put("message", "Total probability must equal 100% (±0.1%). Current total: " + totalProbability + "%");
                 return ResponseEntity.badRequest().body(error);
             }
             
