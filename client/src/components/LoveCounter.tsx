@@ -134,6 +134,12 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
 
   const [clickQueue, setClickQueue] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Fire effect states for rapid clicking
+  const [isBurning, setIsBurning] = useState(false);
+  const [fireParticles, setFireParticles] = useState<Array<{id: number, x: number, y: number}>>([]);
+  const [clickTimes, setClickTimes] = useState<number[]>([]);
+  const [rapidClickCount, setRapidClickCount] = useState(0);
 
   // Process queued clicks with debouncing
   useEffect(() => {
@@ -259,6 +265,21 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
       event.stopPropagation();
     }
     
+    const currentTime = Date.now();
+    
+    // Update click times for rapid click detection
+    setClickTimes(prev => {
+      const newTimes = [...prev, currentTime].filter(time => currentTime - time < 2000); // Keep clicks from last 2 seconds
+      
+      // Check for rapid clicking (5+ clicks in 2 seconds)
+      if (newTimes.length >= 5) {
+        triggerBurningEffect();
+        setRapidClickCount(prev => prev + 1);
+      }
+      
+      return newTimes;
+    });
+    
     // Trigger visual feedback immediately
     setIsAnimating(true);
     setShowHearts(true);
@@ -273,6 +294,25 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
     setClickQueue(prev => prev + 1);
 
     onLoveClick?.();
+  };
+  
+  const triggerBurningEffect = () => {
+    setIsBurning(true);
+    
+    // Create fire particles
+    const particles = Array.from({ length: 8 }, (_, i) => ({
+      id: Date.now() + i,
+      x: 30 + Math.random() * 40, // Random position around the heart
+      y: 40 + Math.random() * 20
+    }));
+    
+    setFireParticles(particles);
+    
+    // Reset burning effect after animation
+    setTimeout(() => {
+      setIsBurning(false);
+      setFireParticles([]);
+    }, 2000);
   };
 
   // Loading state
@@ -296,36 +336,41 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
           {/* Background Animation */}
           <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-red-50 opacity-50" />
           
-          {/* Enhanced Floating Hearts Animation */}
+          {/* Simplified Floating Hearts Animation - contained within card */}
           {showHearts && (
-            <div className="absolute inset-0 pointer-events-none">
-              {[...Array(8)].map((_, i) => (
+            <div className="absolute inset-4 pointer-events-none">
+              {[...Array(4)].map((_, i) => (
                 <Heart
                   key={i}
-                  className={`absolute w-4 h-4 text-red-500 fill-current animate-float-up`}
+                  className={`absolute w-3 h-3 fill-current animate-float-up ${
+                    isBurning ? 'text-orange-400' : 'text-red-400'
+                  }`}
                   style={{
-                    left: `${15 + i * 8 + Math.random() * 10}%`,
-                    animationDelay: `${i * 0.08}s`,
-                    animationDuration: `${1.2 + Math.random() * 0.6}s`,
-                    filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))',
-                    fontSize: `${12 + Math.random() * 8}px`
+                    left: `${20 + i * 15}%`,
+                    top: '80%',
+                    animationDelay: `${i * 0.2}s`,
+                    animationDuration: '1.5s'
                   }}
                 />
               ))}
-              {/* Add some sparkle emojis */}
-              {[...Array(4)].map((_, i) => (
+            </div>
+          )}
+          
+          {/* Simplified Fire Effects when burning - contained within card */}
+          {isBurning && (
+            <div className="absolute inset-4 pointer-events-none">
+              {[...Array(3)].map((_, i) => (
                 <span
-                  key={`sparkle-${i}`}
-                  className="absolute animate-float-up"
+                  key={`fire-${i}`}
+                  className="absolute animate-fire-particles text-sm"
                   style={{
-                    left: `${25 + i * 15}%`,
-                    animationDelay: `${i * 0.15}s`,
-                    animationDuration: '1.5s',
-                    fontSize: '12px',
-                    filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.8))'
+                    left: `${25 + i * 20}%`,
+                    top: '75%',
+                    animationDelay: `${i * 0.3}s`,
+                    animationDuration: '1.2s'
                   }}
                 >
-                  ✨
+                  🔥
                 </span>
               ))}
             </div>
@@ -337,25 +382,54 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
               onClick={(e) => handleLoveClick(e)}
               className={`group relative z-30 pointer-events-auto transition-all duration-500 touch-manipulation hover-bounce ${
                 isAnimating ? 'animate-cute-squish' : ''
+              } ${
+                isBurning ? 'animate-fire-glow' : ''
               }`}
               style={{ 
                 WebkitTapHighlightColor: 'transparent',
-                filter: 'drop-shadow(0 4px 12px rgba(239, 68, 68, 0.2))'
+                filter: isBurning 
+                  ? 'drop-shadow(0 2px 8px rgba(255, 69, 0, 0.4))'
+                  : 'drop-shadow(0 2px 6px rgba(239, 68, 68, 0.2))'
               }}
             >
               <Heart 
                 className={`h-12 w-12 mx-auto mb-4 transition-all duration-500 ${
-                  isAnimating 
-                    ? 'text-red-500 fill-current animate-heart-bounce' 
-                    : 'text-gradient fill-current group-hover:text-red-500 hover-glow'
+                  isBurning
+                    ? 'text-orange-500 fill-current animate-fire-flicker'
+                    : isAnimating 
+                      ? 'text-red-500 fill-current animate-heart-bounce' 
+                      : 'text-gradient fill-current group-hover:text-red-500 hover-glow'
                 }`}
                 style={{
-                  filter: isAnimating 
-                    ? 'drop-shadow(0 0 20px rgba(239, 68, 68, 0.8))' 
-                    : 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.3))'
+                  filter: isBurning
+                    ? 'drop-shadow(0 0 12px rgba(255, 69, 0, 0.6))'
+                    : isAnimating 
+                      ? 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))' 
+                      : 'drop-shadow(0 0 4px rgba(239, 68, 68, 0.3))'
                 }}
               />
-              <div className="absolute -inset-3 bg-gradient-to-r from-red-400/20 to-pink-400/20 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 animate-pulse-glow" />
+              
+              {/* Simplified Fire Particles - contained within button area */}
+              {isBurning && fireParticles.slice(0, 3).map(particle => (
+                <div
+                  key={particle.id}
+                  className="absolute animate-fire-particles pointer-events-none"
+                  style={{
+                    left: `${Math.max(10, Math.min(90, particle.x))}%`,
+                    top: `${Math.max(10, Math.min(90, particle.y))}%`,
+                    fontSize: '12px',
+                    zIndex: 40
+                  }}
+                >
+                  🔥
+                </div>
+              ))}
+              
+              <div className={`absolute -inset-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 ${
+                isBurning 
+                  ? 'bg-gradient-to-r from-orange-400/20 to-red-400/20'
+                  : 'bg-gradient-to-r from-red-400/15 to-pink-400/15'
+              }`} />
             </button>
             
             <div className="text-3xl font-semibold text-apple-label mb-2">

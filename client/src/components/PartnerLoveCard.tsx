@@ -154,29 +154,26 @@ const PartnerLoveCard: React.FC = () => {
   const borderColor = partnerData.partnerUsername === 'scott' ? 'border-blue-200' : 'border-pink-200';
 
   return (
-    <div className={`apple-card apple-shadow p-6 text-center transition-all duration-500 hover-bounce cursor-pointer group pointer-events-auto relative z-10 ${bgColor} ${borderColor} border overflow-hidden`}>
+    <div className={`apple-card apple-shadow p-6 text-center transition-all duration-300 cursor-pointer group pointer-events-auto relative ${bgColor} ${borderColor} border group-hover:shadow-lg`}>
       <div className="flex items-center justify-center mb-4">
-        <div className={`p-3 rounded-full ${partnerData.partnerUsername === 'scott' ? 'bg-blue-100' : 'bg-pink-100'} transition-all duration-500 group-hover:animate-cute-squish`}>
+        <div className={`p-3 rounded-full ${partnerData.partnerUsername === 'scott' ? 'bg-blue-100' : 'bg-pink-100'} transition-all duration-300 group-hover:scale-105`}>
           <Heart 
-            className={`h-8 w-8 ${heartColor} animate-heart-bounce hover-glow transition-all duration-500`} 
+            className={`h-8 w-8 ${heartColor} transition-all duration-300 group-hover:scale-110`} 
             fill="currentColor"
-            style={{
-              filter: `drop-shadow(0 0 12px ${partnerData.partnerUsername === 'scott' ? 'rgba(59, 130, 246, 0.6)' : 'rgba(236, 72, 153, 0.6)'})`
-            }}
           />
         </div>
       </div>
       
-      <div className="text-3xl font-semibold text-apple-label mb-2">
+      <div className="text-3xl font-semibold text-apple-label mb-2 transition-all duration-300 group-hover:scale-105">
         {partnerData.partnerLoveCount.toLocaleString()}
       </div>
       
-      <div className="text-apple-secondary-label group-hover:text-apple-blue-light transition-colors duration-200 mb-3">
+      <div className="text-apple-secondary-label transition-colors duration-300 group-hover:text-apple-blue-light mb-3">
         {partnerData.partnerDisplayName}'s Love
       </div>
       
-      <div className="text-xs text-apple-tertiary-label mb-2 hover-wiggle">
-        💕 Love shared by {partnerData.partnerDisplayName} ✨
+      <div className="text-xs text-apple-tertiary-label mb-2">
+        💕 Love shared by {partnerData.partnerDisplayName}
       </div>
       
       {loading && (
@@ -185,15 +182,8 @@ const PartnerLoveCard: React.FC = () => {
         </div>
       )}
       
-      <div className="mt-2 text-xs text-apple-blue-light font-medium opacity-0 group-hover:opacity-100 transition-all duration-500 animate-playful-spin">
-        Real-time sync ✨💫
-      </div>
-      
-      {/* Floating sparkles on hover */}
-      <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <span className="absolute top-2 right-2 animate-float text-yellow-400">✨</span>
-        <span className="absolute bottom-2 left-2 animate-float-slow text-pink-400">💖</span>
-        <span className="absolute top-1/2 left-2 animate-wiggle text-blue-400">💫</span>
+      <div className="mt-2 text-xs text-apple-blue-light font-medium opacity-0 group-hover:opacity-100 transition-all duration-300">
+        Real-time sync ✨
       </div>
     </div>
   );
