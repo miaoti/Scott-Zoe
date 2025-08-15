@@ -201,7 +201,7 @@ public class LoveService {
         try {
             // Use native SQL query to avoid any JPA transactional context
             Query query = entityManager.createNativeQuery(
-                "SELECT l.count_value FROM love l " +
+                "SELECT l.count_value FROM love_counter l " +
                 "JOIN users u ON l.user_id = u.id " +
                 "WHERE u.username = ?"
             );
@@ -229,7 +229,7 @@ public class LoveService {
             
             // Use native SQL query to avoid any JPA transactional context
             Query query = entityManager.createNativeQuery(
-                "SELECT l.count_value FROM love l " +
+                "SELECT l.count_value FROM love_counter l " +
                 "JOIN users u ON l.user_id = u.id " +
                 "WHERE u.username = ?"
             );
