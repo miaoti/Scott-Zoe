@@ -135,11 +135,28 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
   const [clickQueue, setClickQueue] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   
-  // Fire effect states for rapid clicking
+  // Advanced Fire Spreading System for rapid clicking
   const [isBurning, setIsBurning] = useState(false);
   const [fireParticles, setFireParticles] = useState<Array<{id: number, x: number, y: number}>>([]);
   const [clickTimes, setClickTimes] = useState<number[]>([]);
   const [rapidClickCount, setRapidClickCount] = useState(0);
+  const [burningTimeoutId, setBurningTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  
+  // Advanced fire spreading states
+  const [fireIntensity, setFireIntensity] = useState(0); // 0-100 intensity level
+  const [isFireSpreading, setIsFireSpreading] = useState(false);
+  const [spreadingParticles, setSpreadingParticles] = useState<Array<{
+    id: number;
+    x: number;
+    y: number;
+    targetX: number;
+    targetY: number;
+    size: number;
+    opacity: number;
+    speed: number;
+    type: 'ember' | 'flame' | 'spark';
+  }>>([]);
+  const [dashboardFireLevel, setDashboardFireLevel] = useState(0); // 0-3 levels of fire spread
 
   // Process queued clicks with debouncing
   useEffect(() => {
@@ -151,6 +168,15 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
       processLoveClicks(clicksToProcess);
     }
   }, [clickQueue, isProcessing]);
+
+  // Cleanup burning timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (burningTimeoutId) {
+        clearTimeout(burningTimeoutId);
+      }
+    };
+  }, [burningTimeoutId]);
 
   const processLoveClicks = async (clickCount: number) => {
     try {
@@ -299,20 +325,130 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
   const triggerBurningEffect = () => {
     setIsBurning(true);
     
-    // Create fire particles
-    const particles = Array.from({ length: 8 }, (_, i) => ({
+    // Clear existing timeout if user continues rapid clicking
+    if (burningTimeoutId) {
+      clearTimeout(burningTimeoutId);
+    }
+    
+    // Increase fire intensity based on rapid clicking
+    setFireIntensity(prev => {
+      const newIntensity = Math.min(100, prev + 15);
+      
+      // Trigger fire spreading at different intensity levels
+      if (newIntensity >= 30 && !isFireSpreading) {
+        triggerFireSpreading(newIntensity);
+      } else if (newIntensity >= 60) {
+        escalateFireSpreading(newIntensity);
+      }
+      
+      return newIntensity;
+    });
+    
+    // Create enhanced fire particles based on intensity
+    const particleCount = Math.min(12, 4 + Math.floor(fireIntensity / 10));
+    const particles = Array.from({ length: particleCount }, (_, i) => ({
       id: Date.now() + i,
-      x: 30 + Math.random() * 40, // Random position around the heart
+      x: 30 + Math.random() * 40,
       y: 40 + Math.random() * 20
     }));
     
     setFireParticles(particles);
     
-    // Reset burning effect after animation
-    setTimeout(() => {
-      setIsBurning(false);
-      setFireParticles([]);
-    }, 2000);
+    // Extended burning effect duration for more fancy feel
+    const timeoutId = setTimeout(() => {
+      // Gradual cooldown instead of instant stop
+      cooldownFireEffect();
+    }, 4000);
+    
+    setBurningTimeoutId(timeoutId);
+  };
+  
+  const triggerFireSpreading = (intensity: number) => {
+    setIsFireSpreading(true);
+    
+    // Generate spreading particles that move beyond the card
+    const spreadCount = Math.floor(intensity / 10) * 3;
+    const newSpreadingParticles = Array.from({ length: spreadCount }, (_, i) => {
+      const angle = (Math.PI * 2 * i) / spreadCount + Math.random() * 0.5;
+      const distance = 200 + Math.random() * 300;
+      
+      return {
+        id: Date.now() + i + 1000,
+        x: 50, // Start from heart center
+        y: 50,
+        targetX: 50 + Math.cos(angle) * distance,
+        targetY: 50 + Math.sin(angle) * distance,
+        size: 8 + Math.random() * 12,
+        opacity: 0.8 + Math.random() * 0.2,
+        speed: 2 + Math.random() * 3,
+        type: ['ember', 'flame', 'spark'][Math.floor(Math.random() * 3)] as 'ember' | 'flame' | 'spark'
+      };
+    });
+    
+    setSpreadingParticles(prev => [...prev, ...newSpreadingParticles]);
+    
+    // Set dashboard fire level based on intensity
+    if (intensity >= 80) {
+      setDashboardFireLevel(3); // Full dashboard fire
+    } else if (intensity >= 60) {
+      setDashboardFireLevel(2); // Spread to adjacent cards
+    } else {
+      setDashboardFireLevel(1); // Spread beyond current card
+    }
+  };
+  
+  const escalateFireSpreading = (intensity: number) => {
+    // Add more particles for higher intensity
+    const additionalParticles = Array.from({ length: 5 }, (_, i) => {
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 150 + Math.random() * 400;
+      
+      return {
+        id: Date.now() + i + 2000,
+        x: 50,
+        y: 50,
+        targetX: 50 + Math.cos(angle) * distance,
+        targetY: 50 + Math.sin(angle) * distance,
+        size: 12 + Math.random() * 16,
+        opacity: 0.9,
+        speed: 3 + Math.random() * 4,
+        type: 'flame' as const
+      };
+    });
+    
+    setSpreadingParticles(prev => [...prev, ...additionalParticles]);
+    
+    // Update dashboard fire level
+    if (intensity >= 90) {
+      setDashboardFireLevel(3);
+    } else if (intensity >= 70) {
+      setDashboardFireLevel(2);
+    }
+  };
+  
+  const cooldownFireEffect = () => {
+    // Gradual cooldown animation
+    const cooldownInterval = setInterval(() => {
+      setFireIntensity(prev => {
+        const newIntensity = Math.max(0, prev - 8);
+        
+        if (newIntensity <= 0) {
+          clearInterval(cooldownInterval);
+          setIsBurning(false);
+          setIsFireSpreading(false);
+          setFireParticles([]);
+          setSpreadingParticles([]);
+          setDashboardFireLevel(0);
+          setBurningTimeoutId(null);
+        } else if (newIntensity < 30) {
+          setDashboardFireLevel(0);
+        } else if (newIntensity < 60) {
+          setDashboardFireLevel(1);
+        }
+        
+        return newIntensity;
+      });
+    }, 200);
   };
 
   // Loading state
@@ -330,9 +466,73 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
 
   return (
     <>
+      {/* Dashboard-wide Fire Overlay */}
+      {isFireSpreading && (
+        <div 
+          className="fixed inset-0 pointer-events-none z-50"
+          style={{
+            background: dashboardFireLevel >= 3 
+              ? 'radial-gradient(circle at center, rgba(255, 69, 0, 0.1) 0%, rgba(255, 140, 0, 0.05) 50%, transparent 100%)'
+              : dashboardFireLevel >= 2
+              ? 'radial-gradient(circle at 50% 50%, rgba(255, 69, 0, 0.05) 0%, transparent 60%)'
+              : 'transparent',
+            transition: 'all 0.5s ease-out'
+          }}
+        >
+          {/* Spreading Fire Particles */}
+          {spreadingParticles.map(particle => {
+            const emoji = particle.type === 'flame' ? '🔥' : particle.type === 'ember' ? '✨' : '💥';
+            const animationDuration = 2 + Math.random() * 3;
+            
+            return (
+              <div
+                key={particle.id}
+                className="absolute animate-fire-spread"
+                style={{
+                  left: `${particle.x}%`,
+                  top: `${particle.y}%`,
+                  fontSize: `${particle.size}px`,
+                  opacity: particle.opacity,
+                  animation: `fire-spread-move ${animationDuration}s ease-out forwards`,
+                  '--target-x': `${particle.targetX}%`,
+                  '--target-y': `${particle.targetY}%`,
+                  zIndex: 60
+                } as React.CSSProperties}
+              >
+                {emoji}
+              </div>
+            );
+          })}
+          
+          {/* Dashboard Fire Glow Effect */}
+          {dashboardFireLevel >= 2 && (
+            <div 
+              className="absolute inset-0 animate-dashboard-fire-glow"
+              style={{
+                background: `radial-gradient(circle at center, 
+                  rgba(255, 69, 0, ${dashboardFireLevel >= 3 ? '0.15' : '0.08'}) 0%, 
+                  rgba(255, 140, 0, ${dashboardFireLevel >= 3 ? '0.1' : '0.05'}) 40%, 
+                  transparent 70%)`,
+                animation: `dashboard-fire-pulse ${dashboardFireLevel >= 3 ? '1s' : '1.5s'} ease-in-out infinite`
+              }}
+            />
+          )}
+        </div>
+      )}
+      
       <div className="relative pointer-events-auto touch-manipulation">
         {/* Love Counter Card */}
-        <div className="apple-card apple-card-hover p-6 text-center apple-shadow relative overflow-hidden">
+        <div className={`apple-card apple-card-hover p-6 text-center apple-shadow relative overflow-hidden transition-all duration-500 ${
+          dashboardFireLevel >= 1 ? 'ring-2 ring-orange-400/50 shadow-orange-400/20' : ''
+        } ${
+          fireIntensity >= 80 ? 'ring-4 ring-yellow-400/70 shadow-yellow-400/40' :
+          fireIntensity >= 60 ? 'ring-3 ring-orange-400/60 shadow-orange-400/30' :
+          fireIntensity >= 40 ? 'ring-2 ring-red-400/50 shadow-red-400/20' : ''
+        }`} style={{
+          backgroundColor: fireIntensity >= 80 ? 'rgba(255, 248, 220, 0.3)' :
+                          fireIntensity >= 60 ? 'rgba(255, 237, 213, 0.2)' :
+                          fireIntensity >= 40 ? 'rgba(254, 226, 226, 0.1)' : 'transparent'
+        }}>
           {/* Background Animation */}
           <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-red-50 opacity-50" />
           
@@ -384,28 +584,44 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
                 isAnimating ? 'animate-cute-squish' : ''
               } ${
                 isBurning ? 'animate-fire-glow' : ''
+              } ${
+                fireIntensity >= 70 ? 'animate-card-fire-expansion' : ''
               }`}
               style={{ 
                 WebkitTapHighlightColor: 'transparent',
                 filter: isBurning 
-                  ? 'drop-shadow(0 2px 8px rgba(255, 69, 0, 0.4))'
-                  : 'drop-shadow(0 2px 6px rgba(239, 68, 68, 0.2))'
+                  ? fireIntensity >= 80
+                    ? 'drop-shadow(0 4px 16px rgba(255, 69, 0, 0.8)) drop-shadow(0 0 32px rgba(255, 140, 0, 0.6))'
+                    : fireIntensity >= 60
+                    ? 'drop-shadow(0 3px 12px rgba(255, 69, 0, 0.6)) drop-shadow(0 0 24px rgba(255, 140, 0, 0.4))'
+                    : 'drop-shadow(0 2px 8px rgba(255, 69, 0, 0.4))'
+                  : 'drop-shadow(0 2px 6px rgba(239, 68, 68, 0.2))',
+                transform: fireIntensity >= 70 ? 'scale(1.05)' : 'scale(1)'
               }}
             >
               <Heart 
                 className={`h-12 w-12 mx-auto mb-4 transition-all duration-500 ${
                   isBurning
-                    ? 'text-orange-500 fill-current animate-fire-flicker'
+                    ? fireIntensity >= 80
+                      ? 'text-yellow-400 fill-current animate-fire-flicker'
+                      : fireIntensity >= 60
+                      ? 'text-orange-400 fill-current animate-fire-flicker'
+                      : 'text-orange-500 fill-current animate-fire-flicker'
                     : isAnimating 
                       ? 'text-red-500 fill-current animate-heart-bounce' 
                       : 'text-gradient fill-current group-hover:text-red-500 hover-glow'
                 }`}
                 style={{
                   filter: isBurning
-                    ? 'drop-shadow(0 0 12px rgba(255, 69, 0, 0.6))'
+                    ? fireIntensity >= 80
+                      ? 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 40px rgba(255, 69, 0, 0.6))'
+                      : fireIntensity >= 60
+                      ? 'drop-shadow(0 0 16px rgba(255, 140, 0, 0.7)) drop-shadow(0 0 32px rgba(255, 69, 0, 0.5))'
+                      : 'drop-shadow(0 0 12px rgba(255, 69, 0, 0.6))'
                     : isAnimating 
                       ? 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))' 
-                      : 'drop-shadow(0 0 4px rgba(239, 68, 68, 0.3))'
+                      : 'drop-shadow(0 0 4px rgba(239, 68, 68, 0.3))',
+                  fontSize: fireIntensity >= 70 ? '3.5rem' : '3rem'
                 }}
               />
               

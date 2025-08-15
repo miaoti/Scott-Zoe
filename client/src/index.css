@@ -366,6 +366,84 @@
   }
 }
 
+/* Advanced Fire Spreading Animations */
+@keyframes fire-spread-move {
+  0% {
+    transform: translate(0, 0) scale(0.5) rotate(0deg);
+    opacity: 0.8;
+  }
+  25% {
+    transform: translate(calc(var(--target-x) * 0.3), calc(var(--target-y) * 0.3)) scale(0.8) rotate(90deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(calc(var(--target-x) * 0.6), calc(var(--target-y) * 0.6)) scale(1.2) rotate(180deg);
+    opacity: 0.9;
+  }
+  75% {
+    transform: translate(calc(var(--target-x) * 0.8), calc(var(--target-y) * 0.8)) scale(1.5) rotate(270deg);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(var(--target-x), var(--target-y)) scale(2) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes dashboard-fire-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  25% {
+    opacity: 0.6;
+    transform: scale(1.02);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+  75% {
+    opacity: 0.6;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes fire-intensity-glow {
+  0% {
+    box-shadow: 0 0 20px rgba(255, 69, 0, 0.3), 0 0 40px rgba(255, 140, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 69, 0, 0.6), 0 0 80px rgba(255, 140, 0, 0.4), 0 0 120px rgba(255, 200, 0, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(255, 69, 0, 0.3), 0 0 40px rgba(255, 140, 0, 0.2);
+  }
+}
+
+@keyframes card-fire-expansion {
+  0% {
+    transform: scale(1);
+    filter: brightness(1) saturate(1);
+  }
+  25% {
+    transform: scale(1.02);
+    filter: brightness(1.1) saturate(1.2);
+  }
+  50% {
+    transform: scale(1.05);
+    filter: brightness(1.2) saturate(1.4);
+  }
+  75% {
+    transform: scale(1.02);
+    filter: brightness(1.1) saturate(1.2);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1) saturate(1);
+  }
+}
+
 .animate-jump-bounce {
   animation: jump-bounce 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
 }
@@ -392,7 +470,24 @@
 }
 
 .animate-fire-glow {
-  animation: fire-glow-pulse 0.4s ease-in-out infinite;
+  animation: fire-glow-pulse 1.5s ease-in-out infinite;
+}
+
+/* Advanced Fire Spreading Animation Classes */
+.animate-fire-spread {
+  animation: fire-spread-move 3s ease-out forwards;
+}
+
+.animate-dashboard-fire-glow {
+  animation: dashboard-fire-pulse 1.5s ease-in-out infinite;
+}
+
+.animate-fire-intensity-glow {
+  animation: fire-intensity-glow 2s ease-in-out infinite;
+}
+
+.animate-card-fire-expansion {
+  animation: card-fire-expansion 1s ease-in-out infinite;
 }
 
 body {
