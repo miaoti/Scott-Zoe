@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -31,10 +32,11 @@ public class LoveUpdatesController {
      * Subscribe to love count updates via Server-Sent Events
      */
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Transactional(readOnly = true)
     public SseEmitter subscribe() {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
         
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        SseEmitter emitter = new SseEmitter(300000L); // 5 minutes timeout
         
         // Add emitter to user's list
         userEmitters.computeIfAbsent(currentUsername, k -> new CopyOnWriteArrayList<>()).add(emitter);
@@ -73,6 +75,7 @@ public class LoveUpdatesController {
      * Notify partner about love count update
      */
     @PostMapping("/notify-partner")
+    @Transactional(readOnly = true)
     public ResponseEntity<?> notifyPartner() {
         try {
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -120,6 +123,7 @@ public class LoveUpdatesController {
         logger.info("SSE emitter removed for user: {}", username);
     }
     
+    @Transactional(readOnly = true)
     private Long getPartnerLoveCount(String currentUsername) {
         String partnerUsername = "scott".equals(currentUsername) ? "zoe" : "scott";
         return loveService.getLoveCountByUsername(partnerUsername);
