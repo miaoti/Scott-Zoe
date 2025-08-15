@@ -46,11 +46,27 @@ public class LoveUpdatesController {
         userEmitters.computeIfAbsent(currentUsername, k -> new CopyOnWriteArrayList<>()).add(emitter);
         
         // Remove emitter when connection is closed
-        emitter.onCompletion(() -> removeEmitter(currentUsername, emitter));
-        emitter.onTimeout(() -> removeEmitter(currentUsername, emitter));
+        emitter.onCompletion(() -> {
+            try {
+                removeEmitter(currentUsername, emitter);
+            } catch (Exception e) {
+                logger.warn("Error during emitter completion cleanup: {}", e.getMessage());
+            }
+        });
+        emitter.onTimeout(() -> {
+            try {
+                removeEmitter(currentUsername, emitter);
+            } catch (Exception e) {
+                logger.warn("Error during emitter timeout cleanup: {}", e.getMessage());
+            }
+        });
         emitter.onError((ex) -> {
-            logger.error("SSE error for user: " + currentUsername, ex);
-            removeEmitter(currentUsername, emitter);
+            try {
+                logger.error("SSE error for user: " + currentUsername, ex);
+                removeEmitter(currentUsername, emitter);
+            } catch (Exception e) {
+                logger.warn("Error during emitter error cleanup: {}", e.getMessage());
+            }
         });
         
         // Send initial data (no transaction context here)
@@ -112,14 +128,19 @@ public class LoveUpdatesController {
     }
     
     private void removeEmitter(String username, SseEmitter emitter) {
-        CopyOnWriteArrayList<SseEmitter> emitters = userEmitters.get(username);
-        if (emitters != null) {
-            emitters.remove(emitter);
-            if (emitters.isEmpty()) {
-                userEmitters.remove(username);
+        try {
+            CopyOnWriteArrayList<SseEmitter> emitters = userEmitters.get(username);
+            if (emitters != null) {
+                emitters.remove(emitter);
+                if (emitters.isEmpty()) {
+                    userEmitters.remove(username);
+                }
             }
+            logger.info("SSE emitter removed for user: {}", username);
+        } catch (Exception e) {
+            // Handle any security context issues during cleanup
+            logger.warn("Error during emitter removal for user {}: {}", username, e.getMessage());
         }
-        logger.info("SSE emitter removed for user: {}", username);
     }
     
     private Long getPartnerLoveCount(String currentUsername) {
