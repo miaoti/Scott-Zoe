@@ -12,6 +12,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import java.util.Optional;
 
 @Service
@@ -24,6 +28,9 @@ public class LoveService {
     
     @Autowired
     private UserRepository userRepository;
+    
+    @PersistenceContext
+    private EntityManager entityManager;
     
 
     
@@ -188,20 +195,24 @@ public class LoveService {
     
     /**
      * Non-transactional version for SSE usage to avoid connection leaks
-     * Uses direct repository access without going through transactional services
+     * Uses native SQL queries to completely avoid JPA transactional context
      */
-    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED)
     public Long getLoveCountByUsernameNonTransactional(String username) {
         try {
-            // Direct repository access to avoid transactional UserService
-            Optional<User> userOpt = userRepository.findByUsername(username);
-            if (userOpt.isEmpty()) {
-                logger.warn("User not found: " + username);
-                return 0L;
-            }
+            // Use native SQL query to avoid any JPA transactional context
+            Query query = entityManager.createNativeQuery(
+                "SELECT l.count_value FROM love l " +
+                "JOIN users u ON l.user_id = u.id " +
+                "WHERE u.username = ?"
+            );
+            query.setParameter(1, username);
             
-            Optional<Love> loveOpt = loveRepository.findByUser(userOpt.get());
-            return loveOpt.map(Love::getCountValue).orElse(0L);
+            Object result = query.getSingleResult();
+            return result != null ? ((Number) result).longValue() : 0L;
+            
+        } catch (NoResultException e) {
+            logger.debug("No love count found for user: " + username);
+            return 0L;
         } catch (Exception e) {
             logger.error("Error getting love count for user: " + username, e);
             return 0L;
@@ -210,23 +221,26 @@ public class LoveService {
     
     /**
      * Non-transactional version of getCurrentUserLoveCount for SSE usage
-     * Uses direct repository access without going through transactional services
+     * Uses native SQL queries to completely avoid JPA transactional context
      */
-    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED)
     public Long getCurrentUserLoveCountNonTransactional() {
         try {
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
             
-            // Direct repository access to avoid transactional UserService
-            Optional<User> userOpt = userRepository.findByUsername(currentUsername);
-            if (userOpt.isEmpty()) {
-                logger.warn("Current user not found: " + currentUsername);
-                return 0L;
-            }
+            // Use native SQL query to avoid any JPA transactional context
+            Query query = entityManager.createNativeQuery(
+                "SELECT l.count_value FROM love l " +
+                "JOIN users u ON l.user_id = u.id " +
+                "WHERE u.username = ?"
+            );
+            query.setParameter(1, currentUsername);
             
-            Optional<Love> loveOpt = loveRepository.findByUser(userOpt.get());
-            return loveOpt.map(Love::getCountValue).orElse(0L);
+            Object result = query.getSingleResult();
+            return result != null ? ((Number) result).longValue() : 0L;
             
+        } catch (NoResultException e) {
+            logger.debug("No love count found for current user");
+            return 0L;
         } catch (Exception e) {
             logger.error("Error getting current user love count", e);
             return 0L;
