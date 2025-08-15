@@ -3,6 +3,7 @@ package com.couplewebsite.service;
 import com.couplewebsite.entity.Love;
 import com.couplewebsite.entity.User;
 import com.couplewebsite.repository.LoveRepository;
+import com.couplewebsite.repository.UserRepository;
 import com.couplewebsite.security.CustomUserDetailsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,9 @@ public class LoveService {
     
     @Autowired
     private LoveRepository loveRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
     
     @Autowired
     private CustomUserDetailsService userDetailsService;
@@ -167,12 +171,19 @@ public class LoveService {
     
     /**
      * Non-transactional version for SSE usage to avoid connection leaks
+     * Uses direct repository access without going through transactional services
      */
     @Transactional(propagation = org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED)
     public Long getLoveCountByUsernameNonTransactional(String username) {
         try {
-            User user = userDetailsService.getUserByUsername(username);
-            Optional<Love> loveOpt = loveRepository.findByUser(user);
+            // Direct repository access to avoid transactional UserService
+            Optional<User> userOpt = userRepository.findByUsername(username);
+            if (userOpt.isEmpty()) {
+                logger.warn("User not found: " + username);
+                return 0L;
+            }
+            
+            Optional<Love> loveOpt = loveRepository.findByUser(userOpt.get());
             return loveOpt.map(Love::getCountValue).orElse(0L);
         } catch (Exception e) {
             logger.error("Error getting love count for user: " + username, e);
@@ -182,14 +193,21 @@ public class LoveService {
     
     /**
      * Non-transactional version of getCurrentUserLoveCount for SSE usage
+     * Uses direct repository access without going through transactional services
      */
     @Transactional(propagation = org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED)
     public Long getCurrentUserLoveCountNonTransactional() {
         try {
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-            User currentUser = userDetailsService.getUserByUsername(currentUsername);
             
-            Optional<Love> loveOpt = loveRepository.findByUser(currentUser);
+            // Direct repository access to avoid transactional UserService
+            Optional<User> userOpt = userRepository.findByUsername(currentUsername);
+            if (userOpt.isEmpty()) {
+                logger.warn("Current user not found: " + currentUsername);
+                return 0L;
+            }
+            
+            Optional<Love> loveOpt = loveRepository.findByUser(userOpt.get());
             return loveOpt.map(Love::getCountValue).orElse(0L);
             
         } catch (Exception e) {
