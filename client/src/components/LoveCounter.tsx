@@ -135,28 +135,11 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
   const [clickQueue, setClickQueue] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   
-  // Advanced Fire Spreading System for rapid clicking
-  const [isBurning, setIsBurning] = useState(false);
-  const [fireParticles, setFireParticles] = useState<Array<{id: number, x: number, y: number}>>([]);
+  // Fast clicking detection for heart animation
   const [clickTimes, setClickTimes] = useState<number[]>([]);
   const [rapidClickCount, setRapidClickCount] = useState(0);
-  const [burningTimeoutId, setBurningTimeoutId] = useState<NodeJS.Timeout | null>(null);
-  
-  // Advanced fire spreading states
-  const [fireIntensity, setFireIntensity] = useState(0); // 0-100 intensity level
-  const [isFireSpreading, setIsFireSpreading] = useState(false);
-  const [spreadingParticles, setSpreadingParticles] = useState<Array<{
-    id: number;
-    x: number;
-    y: number;
-    targetX: number;
-    targetY: number;
-    size: number;
-    opacity: number;
-    speed: number;
-    type: 'ember' | 'flame' | 'spark';
-  }>>([]);
-  const [dashboardFireLevel, setDashboardFireLevel] = useState(0); // 0-3 levels of fire spread
+  const [isRapidClicking, setIsRapidClicking] = useState(false);
+  const [rapidClickTimeoutId, setRapidClickTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   // Process queued clicks with debouncing
   useEffect(() => {
@@ -169,14 +152,14 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
     }
   }, [clickQueue, isProcessing]);
 
-  // Cleanup burning timeout on unmount
+  // Cleanup rapid clicking timeout on unmount
   useEffect(() => {
     return () => {
-      if (burningTimeoutId) {
-        clearTimeout(burningTimeoutId);
+      if (rapidClickTimeoutId) {
+        clearTimeout(rapidClickTimeoutId);
       }
     };
-  }, [burningTimeoutId]);
+  }, [rapidClickTimeoutId]);
 
   const processLoveClicks = async (clickCount: number) => {
     try {
@@ -299,24 +282,35 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
       
       // Check for rapid clicking (5+ clicks in 2 seconds)
       if (newTimes.length >= 5) {
-        triggerBurningEffect();
         setRapidClickCount(prev => prev + 1);
+        setIsRapidClicking(true);
+        
+        // Clear existing timeout
+        if (rapidClickTimeoutId) {
+          clearTimeout(rapidClickTimeoutId);
+        }
+        
+        // Set timeout to stop rapid clicking effect
+        const timeoutId = setTimeout(() => {
+          setIsRapidClicking(false);
+          setRapidClickTimeoutId(null);
+        }, 2000);
+        
+        setRapidClickTimeoutId(timeoutId);
       }
       
       return newTimes;
     });
     
-    // Trigger visual feedback immediately, but only if not burning
-    if (!isBurning) {
-      setIsAnimating(true);
-      setShowHearts(true);
+    // Always trigger visual feedback
+    setIsAnimating(true);
+    setShowHearts(true);
 
-      // Reset animations quickly to allow rapid clicking
-      setTimeout(() => {
-        setIsAnimating(false);
-        setShowHearts(false);
-      }, 300);
-    }
+    // Reset animations quickly to allow rapid clicking
+    setTimeout(() => {
+      setIsAnimating(false);
+      setShowHearts(false);
+    }, 300);
 
     // Queue the click for processing
     setClickQueue(prev => prev + 1);
@@ -324,141 +318,13 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
     onLoveClick?.();
   };
   
-  const triggerBurningEffect = () => {
-    setIsBurning(true);
-    
-    // Clear existing timeout if user continues rapid clicking
-    if (burningTimeoutId) {
-      clearTimeout(burningTimeoutId);
-    }
-    
-    // Increase fire intensity based on rapid clicking
-    setFireIntensity(prev => {
-      const newIntensity = Math.min(100, prev + 15);
-      
-      // Trigger fire spreading at different intensity levels
-      if (newIntensity >= 30 && !isFireSpreading) {
-        triggerFireSpreading(newIntensity);
-      } else if (newIntensity >= 60) {
-        escalateFireSpreading(newIntensity);
-      }
-      
-      return newIntensity;
-    });
-    
-    // Only create new particles if we don't have enough or if intensity is very low
-    setFireParticles(prev => {
-      if (prev.length < 3 || fireIntensity < 20) {
-        const particleCount = Math.min(12, 4 + Math.floor(fireIntensity / 10));
-        const newParticles = Array.from({ length: particleCount }, (_, i) => ({
-          id: Date.now() + i + Math.random() * 1000,
-          x: 30 + Math.random() * 40,
-          y: 40 + Math.random() * 20
-        }));
-        return newParticles;
-      }
-      return prev;
-    });
-    
-    // Extended burning effect duration for more fancy feel
-    const timeoutId = setTimeout(() => {
-      // Gradual cooldown instead of instant stop
-      cooldownFireEffect();
-    }, 4000);
-    
-    setBurningTimeoutId(timeoutId);
-  };
+  // Removed fire effect functions - keeping only rapid clicking detection
   
-  const triggerFireSpreading = (intensity: number) => {
-    setIsFireSpreading(true);
-    
-    // Generate spreading particles that move beyond the card
-    const spreadCount = Math.floor(intensity / 10) * 3;
-    const newSpreadingParticles = Array.from({ length: spreadCount }, (_, i) => {
-      const angle = (Math.PI * 2 * i) / spreadCount + Math.random() * 0.5;
-      const distance = 200 + Math.random() * 300;
-      
-      return {
-        id: Date.now() + i + 1000,
-        x: 50, // Start from heart center
-        y: 50,
-        targetX: 50 + Math.cos(angle) * distance,
-        targetY: 50 + Math.sin(angle) * distance,
-        size: 8 + Math.random() * 12,
-        opacity: 0.8 + Math.random() * 0.2,
-        speed: 2 + Math.random() * 3,
-        type: ['ember', 'flame', 'spark'][Math.floor(Math.random() * 3)] as 'ember' | 'flame' | 'spark'
-      };
-    });
-    
-    setSpreadingParticles(prev => [...prev, ...newSpreadingParticles]);
-    
-    // Set dashboard fire level based on intensity
-    if (intensity >= 80) {
-      setDashboardFireLevel(3); // Full dashboard fire
-    } else if (intensity >= 60) {
-      setDashboardFireLevel(2); // Spread to adjacent cards
-    } else {
-      setDashboardFireLevel(1); // Spread beyond current card
-    }
-  };
+  // Fire spreading function removed
   
-  const escalateFireSpreading = (intensity: number) => {
-    // Add more particles for higher intensity
-    const additionalParticles = Array.from({ length: 5 }, (_, i) => {
-      const angle = Math.random() * Math.PI * 2;
-      const distance = 150 + Math.random() * 400;
-      
-      return {
-        id: Date.now() + i + 2000,
-        x: 50,
-        y: 50,
-        targetX: 50 + Math.cos(angle) * distance,
-        targetY: 50 + Math.sin(angle) * distance,
-        size: 12 + Math.random() * 16,
-        opacity: 0.9,
-        speed: 3 + Math.random() * 4,
-        type: 'flame' as const
-      };
-    });
-    
-    setSpreadingParticles(prev => [...prev, ...additionalParticles]);
-    
-    // Update dashboard fire level
-    if (intensity >= 90) {
-      setDashboardFireLevel(3);
-    } else if (intensity >= 70) {
-      setDashboardFireLevel(2);
-    }
-  };
+  // Fire escalation function removed
   
-  const cooldownFireEffect = () => {
-    // Gradual cooldown animation
-    const cooldownInterval = setInterval(() => {
-      setFireIntensity(prev => {
-        const newIntensity = Math.max(0, prev - 8);
-        
-        if (newIntensity <= 0) {
-          clearInterval(cooldownInterval);
-          // Delay the state reset to ensure smooth transition
-          setTimeout(() => {
-            setIsBurning(false);
-            setIsFireSpreading(false);
-            setFireParticles([]);
-            setSpreadingParticles([]);
-            setDashboardFireLevel(0);
-            setBurningTimeoutId(null);
-          }, 100);
-        } else if (newIntensity < 30) {
-          setDashboardFireLevel(0);
-        } else if (newIntensity < 60) {
-          setDashboardFireLevel(1);
-        }
-        
-        return newIntensity;
-      });
-    }, 200);
-  };
+  // Fire cooldown function removed
 
   // Loading state
   if (loading) {
@@ -475,85 +341,19 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
 
   return (
     <>
-      {/* Dashboard-wide Fire Overlay */}
-      {isFireSpreading && (
-        <div 
-          className="fixed inset-0 pointer-events-none z-50"
-          style={{
-            background: dashboardFireLevel >= 3 
-              ? 'radial-gradient(circle at center, rgba(255, 69, 0, 0.1) 0%, rgba(255, 140, 0, 0.05) 50%, transparent 100%)'
-              : dashboardFireLevel >= 2
-              ? 'radial-gradient(circle at 50% 50%, rgba(255, 69, 0, 0.05) 0%, transparent 60%)'
-              : 'transparent',
-            transition: 'all 0.5s ease-out'
-          }}
-        >
-          {/* Spreading Fire Particles */}
-          {spreadingParticles.map(particle => {
-            const emoji = particle.type === 'flame' ? '🔥' : particle.type === 'ember' ? '✨' : '💥';
-            const animationDuration = 2 + Math.random() * 3;
-            
-            return (
-              <div
-                key={particle.id}
-                className="absolute animate-fire-spread"
-                style={{
-                  left: `${particle.x}%`,
-                  top: `${particle.y}%`,
-                  fontSize: `${particle.size}px`,
-                  opacity: particle.opacity,
-                  animation: `fire-spread-move ${animationDuration}s ease-out forwards`,
-                  '--target-x': `${particle.targetX}%`,
-                  '--target-y': `${particle.targetY}%`,
-                  zIndex: 60
-                } as React.CSSProperties}
-              >
-                {emoji}
-              </div>
-            );
-          })}
-          
-          {/* Dashboard Fire Glow Effect */}
-          {dashboardFireLevel >= 2 && (
-            <div 
-              className="absolute inset-0 animate-dashboard-fire-glow"
-              style={{
-                background: `radial-gradient(circle at center, 
-                  rgba(255, 69, 0, ${dashboardFireLevel >= 3 ? '0.15' : '0.08'}) 0%, 
-                  rgba(255, 140, 0, ${dashboardFireLevel >= 3 ? '0.1' : '0.05'}) 40%, 
-                  transparent 70%)`,
-                animation: `dashboard-fire-pulse ${dashboardFireLevel >= 3 ? '1s' : '1.5s'} ease-in-out infinite`
-              }}
-            />
-          )}
-        </div>
-      )}
-      
       <div className="relative pointer-events-auto touch-manipulation">
         {/* Love Counter Card */}
-        <div className={`apple-card apple-card-hover p-6 text-center apple-shadow relative overflow-hidden transition-all duration-500 ${
-          dashboardFireLevel >= 1 ? 'ring-2 ring-orange-400/50 shadow-orange-400/20' : ''
-        } ${
-          fireIntensity >= 80 ? 'ring-4 ring-yellow-400/70 shadow-yellow-400/40' :
-          fireIntensity >= 60 ? 'ring-3 ring-orange-400/60 shadow-orange-400/30' :
-          fireIntensity >= 40 ? 'ring-2 ring-red-400/50 shadow-red-400/20' : ''
-        }`} style={{
-          backgroundColor: fireIntensity >= 80 ? 'rgba(255, 248, 220, 0.3)' :
-                          fireIntensity >= 60 ? 'rgba(255, 237, 213, 0.2)' :
-                          fireIntensity >= 40 ? 'rgba(254, 226, 226, 0.1)' : 'transparent'
-        }}>
+        <div className="apple-card apple-card-hover p-6 text-center apple-shadow relative overflow-hidden transition-all duration-500">
           {/* Background Animation */}
           <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-red-50 opacity-50" />
           
-          {/* Simplified Floating Hearts Animation - contained within card */}
+          {/* Floating Hearts Animation - contained within card */}
           {showHearts && (
             <div className="absolute inset-4 pointer-events-none">
               {[...Array(4)].map((_, i) => (
                 <Heart
                   key={i}
-                  className={`absolute w-3 h-3 fill-current animate-float-up ${
-                    isBurning ? 'text-orange-400' : 'text-red-400'
-                  }`}
+                  className="absolute w-3 h-3 fill-current animate-float-up text-red-400"
                   style={{
                     left: `${20 + i * 15}%`,
                     top: '80%',
@@ -565,26 +365,6 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
             </div>
           )}
           
-          {/* Simplified Fire Effects when burning - contained within card */}
-          {isBurning && (
-            <div className="absolute inset-4 pointer-events-none">
-              {[...Array(3)].map((_, i) => (
-                <span
-                  key={`fire-${i}`}
-                  className="absolute animate-fire-particles text-sm"
-                  style={{
-                    left: `${25 + i * 20}%`,
-                    top: '75%',
-                    animationDelay: `${i * 0.3}s`,
-                    animationDuration: '1.2s'
-                  }}
-                >
-                  🔥
-                </span>
-              ))}
-            </div>
-          )}
-          
           {/* Main Content */}
           <div className="relative z-10">
             <button
@@ -592,69 +372,31 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
               className={`group relative z-30 pointer-events-auto transition-all duration-500 touch-manipulation hover-bounce focus:outline-none ${
                 isAnimating ? 'animate-cute-squish' : ''
               } ${
-                isBurning ? 'animate-fire-glow' : ''
-              } ${
-                fireIntensity >= 70 ? 'animate-card-fire-expansion' : ''
+                isRapidClicking ? 'animate-heart-bounce' : ''
               }`}
               style={{ 
                 WebkitTapHighlightColor: 'transparent',
-                filter: isBurning 
-                  ? fireIntensity >= 80
-                    ? 'drop-shadow(0 4px 16px rgba(255, 69, 0, 0.8)) drop-shadow(0 0 32px rgba(255, 140, 0, 0.6))'
-                    : fireIntensity >= 60
-                    ? 'drop-shadow(0 3px 12px rgba(255, 69, 0, 0.6)) drop-shadow(0 0 24px rgba(255, 140, 0, 0.4))'
-                    : 'drop-shadow(0 2px 8px rgba(255, 69, 0, 0.4))'
-                  : 'drop-shadow(0 2px 6px rgba(239, 68, 68, 0.2))',
-                transform: fireIntensity >= 70 ? 'scale(1.05)' : 'scale(1)'
+                filter: isAnimating 
+                  ? 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))' 
+                  : 'drop-shadow(0 2px 6px rgba(239, 68, 68, 0.2))'
               }}
             >
               <Heart 
                 className={`h-12 w-12 mx-auto mb-4 transition-all duration-500 ${
-                  isBurning
-                    ? fireIntensity >= 80
-                      ? 'text-yellow-400 fill-current animate-fire-flicker'
-                      : fireIntensity >= 60
-                      ? 'text-orange-400 fill-current animate-fire-flicker'
-                      : 'text-orange-500 fill-current animate-fire-flicker'
-                    : isAnimating && !isBurning
+                  isRapidClicking
+                    ? 'text-red-500 fill-current animate-heart-bounce'
+                    : isAnimating
                       ? 'text-red-500 fill-current animate-heart-bounce' 
                       : 'text-gradient fill-current group-hover:text-red-500 hover-glow'
                 }`}
                 style={{
-                  filter: isBurning
-                    ? fireIntensity >= 80
-                      ? 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 40px rgba(255, 69, 0, 0.6))'
-                      : fireIntensity >= 60
-                      ? 'drop-shadow(0 0 16px rgba(255, 140, 0, 0.7)) drop-shadow(0 0 32px rgba(255, 69, 0, 0.5))'
-                      : 'drop-shadow(0 0 12px rgba(255, 69, 0, 0.6))'
-                    : isAnimating 
-                      ? 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))' 
-                      : 'drop-shadow(0 0 4px rgba(239, 68, 68, 0.3))',
-                  fontSize: fireIntensity >= 70 ? '3.5rem' : '3rem'
+                  filter: isAnimating || isRapidClicking
+                    ? 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))' 
+                    : 'drop-shadow(0 0 4px rgba(239, 68, 68, 0.3))'
                 }}
               />
               
-              {/* Simplified Fire Particles - contained within button area */}
-              {isBurning && fireParticles.slice(0, 3).map(particle => (
-                <div
-                  key={particle.id}
-                  className="absolute animate-fire-particles pointer-events-none"
-                  style={{
-                    left: `${Math.max(10, Math.min(90, particle.x))}%`,
-                    top: `${Math.max(10, Math.min(90, particle.y))}%`,
-                    fontSize: '12px',
-                    zIndex: 40
-                  }}
-                >
-                  🔥
-                </div>
-              ))}
-              
-              <div className={`absolute -inset-2 rounded-full opacity-0 group-hover:opacity-30 transition-all duration-300 pointer-events-none ${
-                isBurning 
-                  ? 'bg-gradient-to-r from-orange-400/10 to-red-400/10'
-                  : 'bg-gradient-to-r from-red-400/8 to-pink-400/8'
-              }`} />
+              <div className="absolute -inset-2 rounded-full opacity-0 group-hover:opacity-30 transition-all duration-300 pointer-events-none bg-gradient-to-r from-red-400/8 to-pink-400/8" />
             </button>
             
             <div className="text-3xl font-semibold text-apple-label mb-2">
