@@ -75,7 +75,7 @@ logging:
     org.springframework.security: DEBUG
     org.hibernate.SQL: INFO
     org.hibernate.type.descriptor.sql.BasicBinder: INFO
-    com.zaxxer.hikari: DEBUG
+    com.zaxxer.hikari: WARN
     org.springframework.transaction: DEBUG
     org.hibernate.engine.transaction: DEBUG
 
