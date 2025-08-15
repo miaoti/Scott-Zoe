@@ -165,6 +165,39 @@ public class LoveService {
         }
     }
     
+    /**
+     * Non-transactional version for SSE usage to avoid connection leaks
+     */
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED)
+    public Long getLoveCountByUsernameNonTransactional(String username) {
+        try {
+            User user = userDetailsService.getUserByUsername(username);
+            Optional<Love> loveOpt = loveRepository.findByUser(user);
+            return loveOpt.map(Love::getCountValue).orElse(0L);
+        } catch (Exception e) {
+            logger.error("Error getting love count for user: " + username, e);
+            return 0L;
+        }
+    }
+    
+    /**
+     * Non-transactional version of getCurrentUserLoveCount for SSE usage
+     */
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED)
+    public Long getCurrentUserLoveCountNonTransactional() {
+        try {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            User currentUser = userDetailsService.getUserByUsername(currentUsername);
+            
+            Optional<Love> loveOpt = loveRepository.findByUser(currentUser);
+            return loveOpt.map(Love::getCountValue).orElse(0L);
+            
+        } catch (Exception e) {
+            logger.error("Error getting current user love count", e);
+            return 0L;
+        }
+    }
+    
     // Inner class for love statistics
     public static class LoveStats {
         private final Long currentUserCount;

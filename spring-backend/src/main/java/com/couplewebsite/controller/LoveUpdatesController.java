@@ -80,8 +80,8 @@ public class LoveUpdatesController {
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
             String partnerUsername = "scott".equals(currentUsername) ? "zoe" : "scott";
             
-            // Get current user's love count in a separate transaction
-            Long currentUserLoveCount = loveService.getCurrentUserLoveCount();
+            // Get current user's love count without transaction to avoid connection leaks
+            Long currentUserLoveCount = loveService.getCurrentUserLoveCountNonTransactional();
             String currentDisplayName = "scott".equals(currentUsername) ? "Scott" : "Zoe";
             
             // Send update to partner's SSE connections
@@ -124,6 +124,6 @@ public class LoveUpdatesController {
     
     private Long getPartnerLoveCount(String currentUsername) {
         String partnerUsername = "scott".equals(currentUsername) ? "zoe" : "scott";
-        return loveService.getLoveCountByUsername(partnerUsername);
+        return loveService.getLoveCountByUsernameNonTransactional(partnerUsername);
     }
 }
