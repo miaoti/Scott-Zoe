@@ -580,7 +580,7 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
           <div className="relative z-10">
             <button
               onClick={(e) => handleLoveClick(e)}
-              className={`group relative z-30 pointer-events-auto transition-all duration-500 touch-manipulation hover-bounce ${
+              className={`group relative z-30 pointer-events-auto transition-all duration-500 touch-manipulation hover-bounce focus:outline-none ${
                 isAnimating ? 'animate-cute-squish' : ''
               } ${
                 isBurning ? 'animate-fire-glow' : ''
@@ -641,10 +641,10 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
                 </div>
               ))}
               
-              <div className={`absolute -inset-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 ${
+              <div className={`absolute -inset-2 rounded-full opacity-0 group-hover:opacity-30 transition-all duration-300 pointer-events-none ${
                 isBurning 
-                  ? 'bg-gradient-to-r from-orange-400/20 to-red-400/20'
-                  : 'bg-gradient-to-r from-red-400/15 to-pink-400/15'
+                  ? 'bg-gradient-to-r from-orange-400/10 to-red-400/10'
+                  : 'bg-gradient-to-r from-red-400/8 to-pink-400/8'
               }`} />
             </button>
             

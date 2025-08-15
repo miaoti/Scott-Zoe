@@ -112,14 +112,18 @@ spring:
     password: ${PGPASSWORD:}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
-      validation-timeout: 5000
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 900000
+      validation-timeout: 3000
       initialization-fail-timeout: 1
       leak-detection-threshold: 60000
+      connection-test-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: true
+      test-on-return: false
 
   jpa:
     # Use PostgreSQL dialect for Railway deployment
