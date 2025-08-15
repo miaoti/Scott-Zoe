@@ -122,7 +122,6 @@ public class LoveUpdatesController {
         logger.info("SSE emitter removed for user: {}", username);
     }
     
-    @Transactional(readOnly = true)
     private Long getPartnerLoveCount(String currentUsername) {
         String partnerUsername = "scott".equals(currentUsername) ? "zoe" : "scott";
         return loveService.getLoveCountByUsername(partnerUsername);
