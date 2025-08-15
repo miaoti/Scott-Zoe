@@ -4,7 +4,7 @@ import com.couplewebsite.entity.Love;
 import com.couplewebsite.entity.User;
 import com.couplewebsite.repository.LoveRepository;
 import com.couplewebsite.repository.UserRepository;
-import com.couplewebsite.security.CustomUserDetailsService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +25,7 @@ public class LoveService {
     @Autowired
     private UserRepository userRepository;
     
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
+
     
     /**
      * Get current user's love count (user-based)
@@ -35,9 +34,13 @@ public class LoveService {
     public Long getCurrentUserLoveCount() {
         try {
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-            User currentUser = userDetailsService.getUserByUsername(currentUsername);
+            Optional<User> userOpt = userRepository.findByUsername(currentUsername);
+            if (userOpt.isEmpty()) {
+                logger.warn("Current user not found: " + currentUsername);
+                return 0L;
+            }
             
-            Optional<Love> loveOpt = loveRepository.findByUser(currentUser);
+            Optional<Love> loveOpt = loveRepository.findByUser(userOpt.get());
             return loveOpt.map(Love::getCountValue).orElse(0L);
             
         } catch (Exception e) {
@@ -66,7 +69,11 @@ public class LoveService {
     public Love incrementLoveCount() {
         try {
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-            User currentUser = userDetailsService.getUserByUsername(currentUsername);
+            Optional<User> userOpt = userRepository.findByUsername(currentUsername);
+            if (userOpt.isEmpty()) {
+                throw new RuntimeException("Current user not found: " + currentUsername);
+            }
+            User currentUser = userOpt.get();
             
             Optional<Love> loveOpt = loveRepository.findByUser(currentUser);
             
@@ -96,7 +103,11 @@ public class LoveService {
     public Love setLoveCount(Long count) {
         try {
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-            User currentUser = userDetailsService.getUserByUsername(currentUsername);
+            Optional<User> userOpt = userRepository.findByUsername(currentUsername);
+            if (userOpt.isEmpty()) {
+                throw new RuntimeException("Current user not found: " + currentUsername);
+            }
+            User currentUser = userOpt.get();
             
             Optional<Love> loveOpt = loveRepository.findByUser(currentUser);
             
@@ -162,8 +173,12 @@ public class LoveService {
     @Transactional(readOnly = true)
     public Long getLoveCountByUsername(String username) {
         try {
-            User user = userDetailsService.getUserByUsername(username);
-            Optional<Love> loveOpt = loveRepository.findByUser(user);
+            Optional<User> userOpt = userRepository.findByUsername(username);
+            if (userOpt.isEmpty()) {
+                logger.warn("User not found: " + username);
+                return 0L;
+            }
+            Optional<Love> loveOpt = loveRepository.findByUser(userOpt.get());
             return loveOpt.map(Love::getCountValue).orElse(0L);
         } catch (Exception e) {
             logger.error("Error getting love count for user: " + username, e);
