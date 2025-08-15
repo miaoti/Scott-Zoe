@@ -306,15 +306,17 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
       return newTimes;
     });
     
-    // Trigger visual feedback immediately
-    setIsAnimating(true);
-    setShowHearts(true);
+    // Trigger visual feedback immediately, but only if not burning
+    if (!isBurning) {
+      setIsAnimating(true);
+      setShowHearts(true);
 
-    // Reset animations quickly to allow rapid clicking
-    setTimeout(() => {
-      setIsAnimating(false);
-      setShowHearts(false);
-    }, 300);
+      // Reset animations quickly to allow rapid clicking
+      setTimeout(() => {
+        setIsAnimating(false);
+        setShowHearts(false);
+      }, 300);
+    }
 
     // Queue the click for processing
     setClickQueue(prev => prev + 1);
@@ -344,15 +346,19 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
       return newIntensity;
     });
     
-    // Create enhanced fire particles based on intensity
-    const particleCount = Math.min(12, 4 + Math.floor(fireIntensity / 10));
-    const particles = Array.from({ length: particleCount }, (_, i) => ({
-      id: Date.now() + i,
-      x: 30 + Math.random() * 40,
-      y: 40 + Math.random() * 20
-    }));
-    
-    setFireParticles(particles);
+    // Only create new particles if we don't have enough or if intensity is very low
+    setFireParticles(prev => {
+      if (prev.length < 3 || fireIntensity < 20) {
+        const particleCount = Math.min(12, 4 + Math.floor(fireIntensity / 10));
+        const newParticles = Array.from({ length: particleCount }, (_, i) => ({
+          id: Date.now() + i + Math.random() * 1000,
+          x: 30 + Math.random() * 40,
+          y: 40 + Math.random() * 20
+        }));
+        return newParticles;
+      }
+      return prev;
+    });
     
     // Extended burning effect duration for more fancy feel
     const timeoutId = setTimeout(() => {
@@ -434,12 +440,15 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
         
         if (newIntensity <= 0) {
           clearInterval(cooldownInterval);
-          setIsBurning(false);
-          setIsFireSpreading(false);
-          setFireParticles([]);
-          setSpreadingParticles([]);
-          setDashboardFireLevel(0);
-          setBurningTimeoutId(null);
+          // Delay the state reset to ensure smooth transition
+          setTimeout(() => {
+            setIsBurning(false);
+            setIsFireSpreading(false);
+            setFireParticles([]);
+            setSpreadingParticles([]);
+            setDashboardFireLevel(0);
+            setBurningTimeoutId(null);
+          }, 100);
         } else if (newIntensity < 30) {
           setDashboardFireLevel(0);
         } else if (newIntensity < 60) {
@@ -607,7 +616,7 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
                       : fireIntensity >= 60
                       ? 'text-orange-400 fill-current animate-fire-flicker'
                       : 'text-orange-500 fill-current animate-fire-flicker'
-                    : isAnimating 
+                    : isAnimating && !isBurning
                       ? 'text-red-500 fill-current animate-heart-bounce' 
                       : 'text-gradient fill-current group-hover:text-red-500 hover-glow'
                 }`}
