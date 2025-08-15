@@ -138,8 +138,6 @@ spring:
     show-sql: false
     properties:
       hibernate:
-        connection:
-          provider_disables_autocommit: true
         jdbc:
           time_zone: UTC
           batch_size: 20
