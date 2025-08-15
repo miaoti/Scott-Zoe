@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Service
-@Transactional
 public class LoveService {
     
     private static final Logger logger = LoggerFactory.getLogger(LoveService.class);
@@ -63,6 +62,7 @@ public class LoveService {
     /**
      * Increment current user's love count (user-based)
      */
+    @Transactional
     public Love incrementLoveCount() {
         try {
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -92,6 +92,7 @@ public class LoveService {
     /**
      * Set current user's love count to a specific value (user-based)
      */
+    @Transactional
     public Love setLoveCount(Long count) {
         try {
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -121,6 +122,7 @@ public class LoveService {
     /**
      * Get love statistics
      */
+    @Transactional(readOnly = true)
     public LoveStats getLoveStats() {
         try {
             Long currentUserCount = getCurrentUserLoveCount();
