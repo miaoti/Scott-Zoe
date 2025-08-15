@@ -28,6 +28,7 @@ public class LoveService {
     /**
      * Get current user's love count (user-based)
      */
+    @Transactional(readOnly = true)
     public Long getCurrentUserLoveCount() {
         try {
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -45,6 +46,7 @@ public class LoveService {
     /**
      * Get total love count across all users
      */
+    @Transactional(readOnly = true)
     public Long getTotalLoveCount() {
         try {
             return loveRepository.getTotalLoveCount();
@@ -151,6 +153,7 @@ public class LoveService {
     /**
      * Get love count by username
      */
+    @Transactional(readOnly = true)
     public Long getLoveCountByUsername(String username) {
         try {
             User user = userDetailsService.getUserByUsername(username);

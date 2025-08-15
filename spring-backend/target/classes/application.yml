@@ -75,6 +75,9 @@ logging:
     org.springframework.security: DEBUG
     org.hibernate.SQL: INFO
     org.hibernate.type.descriptor.sql.BasicBinder: INFO
+    com.zaxxer.hikari: DEBUG
+    org.springframework.transaction: DEBUG
+    org.hibernate.engine.transaction: DEBUG
 
 ---
 # Development Profile
@@ -120,6 +123,12 @@ spring:
       validation-timeout: 5000
       initialization-fail-timeout: 1
       leak-detection-threshold: 60000
+      connection-test-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: true
+      test-on-return: false
+      pool-name: HikariCP-Railway
+      register-mbeans: true
 
   jpa:
     # Use PostgreSQL dialect for Railway deployment
@@ -127,6 +136,19 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: false
+    properties:
+      hibernate:
+        connection:
+          provider_disables_autocommit: true
+        jdbc:
+          time_zone: UTC
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+        batch_versioned_data: true
+    transaction:
+      default-timeout: 30
+      rollback-on-commit-failure: true
   
   flyway:
     enabled: true
