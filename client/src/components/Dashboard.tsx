@@ -180,7 +180,14 @@ function Dashboard() {
       {/* Interactive Animated Cat Components */}
       <div className={`fixed inset-0 z-0 pointer-events-auto ${showWheel ? 'opacity-20' : ''}`}>
         {catPositions.map((cat, index) => {
-          const baseAnimations = ['animate-float', 'animate-float-slow', 'animate-pulse-glow'];
+          const baseAnimations = [
+            'animate-float hover-bounce', 
+            'animate-float-slow hover-wiggle', 
+            'animate-pulse-glow hover-glow',
+            'animate-wiggle hover-bounce',
+            'animate-playful-spin hover-glow',
+            'animate-heart-bounce hover-wiggle'
+          ];
           const baseAnimation = baseAnimations[index % baseAnimations.length];
           const textSizes = ['text-3xl', 'text-4xl', 'text-5xl', 'text-6xl', 'text-2xl', 'text-xl', 'text-lg'];
           const textSize = textSizes[index % textSizes.length];
@@ -188,15 +195,24 @@ function Dashboard() {
           return (
             <div
               key={cat.id}
-              className={`absolute ${textSize} ${cat.isJumping ? 'animate-jump-bounce' : baseAnimation} cursor-pointer hover:scale-150 hover:rotate-12 transition-all duration-300 select-none`}
+              className={`absolute ${textSize} ${cat.isJumping ? 'animate-jump-bounce' : baseAnimation} cursor-pointer select-none transition-all duration-500 ease-out`}
               style={{
                 top: cat.top,
                 left: cat.left,
-                animationDelay: `${index * 0.5}s`,
-                zIndex: cat.isJumping ? 10 : 1
+                animationDelay: `${index * 0.8}s`,
+                zIndex: cat.isJumping ? 10 : 1,
+                filter: 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1))'
               }}
               title={cat.title}
               onClick={() => handleCatClick(cat.id)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.3) rotate(10deg)';
+                e.currentTarget.style.filter = 'drop-shadow(0 4px 16px rgba(255, 182, 193, 0.6))';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = '';
+                e.currentTarget.style.filter = 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1))';
+              }}
             >
               {cat.emoji}
             </div>

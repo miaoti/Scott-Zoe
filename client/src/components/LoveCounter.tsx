@@ -296,19 +296,37 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
           {/* Background Animation */}
           <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-red-50 opacity-50" />
           
-          {/* Floating Hearts Animation */}
+          {/* Enhanced Floating Hearts Animation */}
           {showHearts && (
             <div className="absolute inset-0 pointer-events-none">
-              {[...Array(6)].map((_, i) => (
+              {[...Array(8)].map((_, i) => (
                 <Heart
                   key={i}
                   className={`absolute w-4 h-4 text-red-500 fill-current animate-float-up`}
                   style={{
-                    left: `${20 + i * 10}%`,
-                    animationDelay: `${i * 0.1}s`,
-                    animationDuration: '1s'
+                    left: `${15 + i * 8 + Math.random() * 10}%`,
+                    animationDelay: `${i * 0.08}s`,
+                    animationDuration: `${1.2 + Math.random() * 0.6}s`,
+                    filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))',
+                    fontSize: `${12 + Math.random() * 8}px`
                   }}
                 />
+              ))}
+              {/* Add some sparkle emojis */}
+              {[...Array(4)].map((_, i) => (
+                <span
+                  key={`sparkle-${i}`}
+                  className="absolute animate-float-up"
+                  style={{
+                    left: `${25 + i * 15}%`,
+                    animationDelay: `${i * 0.15}s`,
+                    animationDuration: '1.5s',
+                    fontSize: '12px',
+                    filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.8))'
+                  }}
+                >
+                  ✨
+                </span>
               ))}
             </div>
           )}
@@ -317,19 +335,27 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
           <div className="relative z-10">
             <button
               onClick={(e) => handleLoveClick(e)}
-              className={`group relative z-30 pointer-events-auto transition-all duration-300 touch-manipulation active:scale-95 ${
-                isAnimating ? 'scale-125' : 'hover:scale-110'
+              className={`group relative z-30 pointer-events-auto transition-all duration-500 touch-manipulation hover-bounce ${
+                isAnimating ? 'animate-cute-squish' : ''
               }`}
-              style={{ WebkitTapHighlightColor: 'transparent' }}
+              style={{ 
+                WebkitTapHighlightColor: 'transparent',
+                filter: 'drop-shadow(0 4px 12px rgba(239, 68, 68, 0.2))'
+              }}
             >
               <Heart 
-                className={`h-12 w-12 mx-auto mb-4 transition-all duration-300 ${
+                className={`h-12 w-12 mx-auto mb-4 transition-all duration-500 ${
                   isAnimating 
-                    ? 'text-red-500 fill-current animate-pulse' 
-                    : 'text-gradient fill-current group-hover:text-red-500'
+                    ? 'text-red-500 fill-current animate-heart-bounce' 
+                    : 'text-gradient fill-current group-hover:text-red-500 hover-glow'
                 }`}
+                style={{
+                  filter: isAnimating 
+                    ? 'drop-shadow(0 0 20px rgba(239, 68, 68, 0.8))' 
+                    : 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.3))'
+                }}
               />
-              <div className="absolute -inset-2 bg-red-500/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute -inset-3 bg-gradient-to-r from-red-400/20 to-pink-400/20 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 animate-pulse-glow" />
             </button>
             
             <div className="text-3xl font-semibold text-apple-label mb-2">

@@ -154,10 +154,16 @@ const PartnerLoveCard: React.FC = () => {
   const borderColor = partnerData.partnerUsername === 'scott' ? 'border-blue-200' : 'border-pink-200';
 
   return (
-    <div className={`apple-card apple-shadow p-6 text-center transition-all duration-300 hover:scale-105 cursor-pointer group pointer-events-auto relative z-10 ${bgColor} ${borderColor} border`}>
+    <div className={`apple-card apple-shadow p-6 text-center transition-all duration-500 hover-bounce cursor-pointer group pointer-events-auto relative z-10 ${bgColor} ${borderColor} border overflow-hidden`}>
       <div className="flex items-center justify-center mb-4">
-        <div className={`p-3 rounded-full ${partnerData.partnerUsername === 'scott' ? 'bg-blue-100' : 'bg-pink-100'}`}>
-          <Heart className={`h-8 w-8 ${heartColor} group-hover:scale-110 transition-transform duration-200`} fill="currentColor" />
+        <div className={`p-3 rounded-full ${partnerData.partnerUsername === 'scott' ? 'bg-blue-100' : 'bg-pink-100'} transition-all duration-500 group-hover:animate-cute-squish`}>
+          <Heart 
+            className={`h-8 w-8 ${heartColor} animate-heart-bounce hover-glow transition-all duration-500`} 
+            fill="currentColor"
+            style={{
+              filter: `drop-shadow(0 0 12px ${partnerData.partnerUsername === 'scott' ? 'rgba(59, 130, 246, 0.6)' : 'rgba(236, 72, 153, 0.6)'})`
+            }}
+          />
         </div>
       </div>
       
@@ -169,8 +175,8 @@ const PartnerLoveCard: React.FC = () => {
         {partnerData.partnerDisplayName}'s Love
       </div>
       
-      <div className="text-xs text-apple-tertiary-label mb-2">
-        💕 Love shared by {partnerData.partnerDisplayName}
+      <div className="text-xs text-apple-tertiary-label mb-2 hover-wiggle">
+        💕 Love shared by {partnerData.partnerDisplayName} ✨
       </div>
       
       {loading && (
@@ -179,8 +185,15 @@ const PartnerLoveCard: React.FC = () => {
         </div>
       )}
       
-      <div className="mt-2 text-xs text-apple-blue-light font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        Real-time sync ✨
+      <div className="mt-2 text-xs text-apple-blue-light font-medium opacity-0 group-hover:opacity-100 transition-all duration-500 animate-playful-spin">
+        Real-time sync ✨💫
+      </div>
+      
+      {/* Floating sparkles on hover */}
+      <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        <span className="absolute top-2 right-2 animate-float text-yellow-400">✨</span>
+        <span className="absolute bottom-2 left-2 animate-float-slow text-pink-400">💖</span>
+        <span className="absolute top-1/2 left-2 animate-wiggle text-blue-400">💫</span>
       </div>
     </div>
   );

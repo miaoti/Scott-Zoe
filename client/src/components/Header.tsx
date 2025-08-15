@@ -109,9 +109,15 @@ function Header() {
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
-            <Heart className="h-7 w-7 text-apple-blue-light floating" fill="currentColor" />
-            <span className="font-semibold text-xl text-apple-label">
+          <Link to="/" className="flex items-center space-x-3 group">
+            <Heart 
+              className="h-7 w-7 text-apple-blue-light animate-heart-bounce hover-glow transition-all duration-500" 
+              fill="currentColor"
+              style={{
+                filter: 'drop-shadow(0 0 12px rgba(59, 130, 246, 0.4))'
+              }}
+            />
+            <span className="font-semibold text-xl text-apple-label group-hover:text-apple-blue-light transition-colors duration-300">
               Scott &amp; Zoe
             </span>
           </Link>
