@@ -32,9 +32,13 @@ public class LoveUpdatesController {
      * Subscribe to love count updates via Server-Sent Events
      */
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    @Transactional(readOnly = true)
     public SseEmitter subscribe() {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        
+        // Fetch initial data in a separate transaction
+        Long partnerLoveCount = getPartnerLoveCount(currentUsername);
+        String partnerUsername = "scott".equals(currentUsername) ? "zoe" : "scott";
+        String partnerDisplayName = "scott".equals(partnerUsername) ? "Scott" : "Zoe";
         
         SseEmitter emitter = new SseEmitter(300000L); // 5 minutes timeout
         
@@ -49,12 +53,8 @@ public class LoveUpdatesController {
             removeEmitter(currentUsername, emitter);
         });
         
-        // Send initial data
+        // Send initial data (no transaction context here)
         try {
-            Long partnerLoveCount = getPartnerLoveCount(currentUsername);
-            String partnerUsername = "scott".equals(currentUsername) ? "zoe" : "scott";
-            String partnerDisplayName = "scott".equals(partnerUsername) ? "Scott" : "Zoe";
-            
             emitter.send(SseEmitter.event()
                 .name("partner-love-update")
                 .data(Map.of(
@@ -75,13 +75,12 @@ public class LoveUpdatesController {
      * Notify partner about love count update
      */
     @PostMapping("/notify-partner")
-    @Transactional(readOnly = true)
     public ResponseEntity<?> notifyPartner() {
         try {
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
             String partnerUsername = "scott".equals(currentUsername) ? "zoe" : "scott";
             
-            // Get current user's love count
+            // Get current user's love count in a separate transaction
             Long currentUserLoveCount = loveService.getCurrentUserLoveCount();
             String currentDisplayName = "scott".equals(currentUsername) ? "Scott" : "Zoe";
             
