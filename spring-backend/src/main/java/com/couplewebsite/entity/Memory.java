@@ -52,12 +52,13 @@ public class Memory {
     private User creator;
     
     // Many-to-many relationship with photos (only for EVENT type)
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "memory_photos",
         joinColumns = @JoinColumn(name = "memory_id"),
         inverseJoinColumns = @JoinColumn(name = "photo_id")
     )
+    @JsonIgnore
     private Set<Photo> photos = new HashSet<>();
     
     // Enum for memory types

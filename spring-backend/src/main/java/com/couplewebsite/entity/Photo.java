@@ -82,6 +82,11 @@ public class Photo {
     )
     private Set<Category> categories = new HashSet<>();
     
+    // Many-to-many relationship with memories (inverse side)
+    @ManyToMany(mappedBy = "photos", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Set<Memory> memories = new HashSet<>();
+    
     // Constructors
     public Photo() {}
     
@@ -213,6 +218,14 @@ public class Photo {
 
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
+    }
+    
+    public Set<Memory> getMemories() {
+        return memories;
+    }
+    
+    public void setMemories(Set<Memory> memories) {
+        this.memories = memories;
     }
 
     // Helper methods
