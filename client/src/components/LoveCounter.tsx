@@ -418,7 +418,7 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
                       <div className="text-sm text-purple-700 font-medium">
                         🎰 {savedOpportunities} Saved Spin{savedOpportunities > 1 ? 's' : ''}
                       </div>
-                      <div className="text-xs text-purple-600 mt-1">
+                      <div className="text-xs text-purple-500 mt-1">
                         {canUseThisWeek
                           ? 'Ready to use this week!'
                           : 'Available next week!'
@@ -430,7 +430,7 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
                       disabled={!canUseThisWeek}
                       className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors relative z-30 pointer-events-auto touch-manipulation ${
                         canUseThisWeek
-                          ? 'bg-purple-600 text-white hover:bg-purple-700 active:scale-95'
+                          ? 'bg-purple-500 text-white hover:bg-purple-600 active:scale-95'
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       }`}
                       style={{ WebkitTapHighlightColor: 'transparent' }}

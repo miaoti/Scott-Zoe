@@ -265,7 +265,7 @@ function Settings() {
                   user?.username === 'scott' ? 'bg-purple-100' : 'bg-pink-100'
                 }`}>
                   <BarChart3 className={`h-6 w-6 ${
-                    user?.username === 'scott' ? 'text-purple-600' : 'text-pink-600'
+                    user?.username === 'scott' ? 'text-purple-400' : 'text-pink-600'
                   }`} />
                 </div>
                 <div className="text-left">
@@ -292,7 +292,7 @@ function Settings() {
               <div className="px-6 pb-6">
                 {loadingUserData ? (
                   <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-2"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400 mx-auto mb-2"></div>
                     <div className="text-sm text-apple-secondary-label">Loading your stats...</div>
                   </div>
                 ) : (
@@ -322,7 +322,7 @@ function Settings() {
             >
               <div className="flex items-center">
                 <div className="bg-purple-100 p-3 rounded-xl mr-4">
-                  <Trophy className="h-6 w-6 text-purple-600" />
+                  <Trophy className="h-6 w-6 text-purple-400" />
                 </div>
                 <div className="text-left">
                   <h2 className="font-heading text-xl font-semibold text-apple-label">
@@ -349,7 +349,7 @@ function Settings() {
                 {/* Prize Stats */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
-                    <div className="text-2xl font-bold text-purple-600 mb-1">
+                    <div className="text-2xl font-bold text-purple-400 mb-1">
                       {prizeStats.totalPrizes}
                     </div>
                     <div className="text-sm text-purple-700">
@@ -434,7 +434,7 @@ function Settings() {
             >
               <div className="flex items-center">
                 <div className="bg-purple-100 p-3 rounded-xl mr-4">
-                  <Cog className="h-6 w-6 text-purple-600" />
+                  <Cog className="h-6 w-6 text-purple-400" />
                 </div>
                 <div className="text-left">
                   <h2 className="font-heading text-xl font-semibold text-apple-label">

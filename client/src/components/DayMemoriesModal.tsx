@@ -37,7 +37,7 @@ const DayMemoriesModal: React.FC<DayMemoriesModalProps> = ({
       case 'milestone':
         return <Star className="h-5 w-5 text-yellow-500" />;
       case 'special_moment':
-        return <Gift className="h-5 w-5 text-purple-500" />;
+        return <Gift className="h-5 w-5 text-purple-400" />;
       default:
         return <Calendar className="h-5 w-5 text-blue-500" />;
     }

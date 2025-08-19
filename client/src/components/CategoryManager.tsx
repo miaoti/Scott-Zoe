@@ -172,7 +172,7 @@ function CategoryManager({ category, onClose, onCategoryUpdated }: CategoryManag
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                 placeholder="Enter category name"
                 required
               />
@@ -185,7 +185,7 @@ function CategoryManager({ category, onClose, onCategoryUpdated }: CategoryManag
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                 placeholder="Describe this category"
                 rows={3}
               />
@@ -252,7 +252,7 @@ function CategoryManager({ category, onClose, onCategoryUpdated }: CategoryManag
               <div className="flex space-x-2">
                 <button
                   onClick={() => startEdit(category)}
-                  className="text-gray-500 hover:text-purple-600 transition-colors"
+                  className="text-gray-500 hover:text-purple-500 transition-colors"
                 >
                   <Edit2 className="h-4 w-4" />
                 </button>

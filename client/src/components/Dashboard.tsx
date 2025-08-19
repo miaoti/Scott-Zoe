@@ -249,10 +249,10 @@ function Dashboard() {
             
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
-                <div className="bg-gradient-to-r from-pink-500 to-purple-500 p-2 rounded-xl group-hover:scale-110 transition-transform duration-200">
+                <div className="bg-gradient-to-r from-pink-500 to-purple-400 p-2 rounded-xl group-hover:scale-110 transition-transform duration-200">
                   <Camera className="h-6 w-6 text-white" />
                 </div>
-                <div className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">{stats.photos}</div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-500 bg-clip-text text-transparent">{stats.photos}</div>
               </div>
               
               <div className="text-lg font-semibold text-gray-800 group-hover:text-pink-600 transition-colors duration-200 mb-4 text-left flex items-center">

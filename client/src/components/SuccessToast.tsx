@@ -43,7 +43,7 @@ const SuccessToast: React.FC<SuccessToastProps> = ({
   const getColors = () => {
     switch (type) {
       case 'photo':
-        return 'from-purple-500 to-purple-600';
+        return 'from-purple-400 to-purple-500';
       case 'love':
         return 'from-pink-500 to-red-500';
       default:

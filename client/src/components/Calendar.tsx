@@ -159,7 +159,7 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
                 </div>
               ))}
               {dayMemories.length > 2 && (
-                <span className="text-xs text-purple-600">
+                <span className="text-xs text-purple-500">
                   +{dayMemories.length - 2} more
                 </span>
               )}

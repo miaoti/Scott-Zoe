@@ -245,7 +245,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                   <h3 className="font-medium text-apple-label">Caption</h3>
                   <button
                     onClick={() => setIsEditing(!isEditing)}
-                    className="text-purple-500 hover:text-purple-600 transition-colors"
+                    className="text-purple-400 hover:text-purple-500 transition-colors"
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
@@ -256,7 +256,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
                     placeholder="Add a caption..."
-                    className="w-full p-3 border border-apple-separator rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 resize-none"
+                    className="w-full p-3 border border-apple-separator rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400/20 focus:border-purple-400 resize-none"
                     rows={3}
                   />
                 ) : (
@@ -287,7 +287,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                         type="checkbox"
                         checked={selectedCategories.includes(category.id)}
                         onChange={() => toggleCategory(category.id)}
-                        className="w-4 h-4 text-purple-600 bg-white border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+                        className="w-4 h-4 text-purple-500 bg-white border-gray-300 rounded focus:ring-purple-400 focus:ring-2"
                       />
                       <div
                         className="w-3 h-3 rounded-full flex-shrink-0"
@@ -317,7 +317,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                   <button
                     onClick={handleSave}
                     disabled={loading}
-                    className="flex-1 px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
+                    className="flex-1 px-4 py-3 bg-purple-400 hover:bg-purple-500 text-white rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
                   >
                     <Save className="w-4 h-4" />
                     {loading ? 'Saving...' : 'Save'}

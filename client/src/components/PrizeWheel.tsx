@@ -502,7 +502,7 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
                     e.stopPropagation();
                     handleClaimPrize();
                   }}
-                  className="px-8 py-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="px-8 py-4 bg-gradient-to-r from-purple-400 to-purple-500 hover:from-purple-500 hover:to-purple-600 text-white rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   💰 Claim ${wonPrize.amount} Prize
                 </button>

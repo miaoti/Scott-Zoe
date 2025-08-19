@@ -11,9 +11,9 @@ export default {
         'body': ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'system-ui', 'sans-serif'],
       },
       colors: {
-        'apple-purple': '#8B5CF6',
-        'apple-purple-light': '#A78BFA',
-        'apple-purple-dark': '#7C3AED',
+        'apple-purple': '#C084FC',
+        'apple-purple-light': '#DDD6FE',
+        'apple-purple-dark': '#A855F7',
         'apple-gray': {
           1: '#8E8E93',
           2: '#AEAEB2',

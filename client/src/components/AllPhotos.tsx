@@ -289,7 +289,7 @@ function AllPhotos() {
           <select
             value={imageSize}
             onChange={(e) => setImageSize(e.target.value as ImageSize)}
-            className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
           >
             <option value="small">Small</option>
             <option value="medium">Medium</option>
@@ -365,7 +365,7 @@ function AllPhotos() {
           </p>
           <button
             onClick={() => setShowUploadModal(true)}
-            className="inline-flex items-center px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
+            className="inline-flex items-center px-6 py-3 bg-purple-400 hover:bg-purple-500 text-white rounded-lg transition-colors"
           >
             <Plus className="w-5 h-5 mr-2" />
             Add Your First Photo

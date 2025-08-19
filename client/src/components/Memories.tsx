@@ -120,7 +120,7 @@ function Memories() {
       case 'milestone':
         return <Star className="h-5 w-5 text-yellow-500" fill="currentColor" />;
       default:
-        return <Gift className="h-5 w-5 text-purple-500" />;
+        return <Gift className="h-5 w-5 text-purple-400" />;
     }
   };
 
@@ -191,7 +191,7 @@ function Memories() {
       {upcomingMemories.length > 0 && (
         <div className="glass-effect rounded-xl p-6 love-shadow">
           <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <Clock className="h-5 w-5 mr-2 text-purple-500" />
+            <Clock className="h-5 w-5 mr-2 text-purple-400" />
             Upcoming Anniversaries
           </h2>
           
@@ -212,7 +212,7 @@ function Memories() {
                   <p className="text-sm text-gray-600 mb-2">{memory.description}</p>
                   <div className="flex items-center justify-between">
                     {yearsAgo > 0 && (
-                      <p className="text-xs text-purple-600 font-medium">
+                      <p className="text-xs text-purple-500 font-medium">
                         {yearsAgo} year{yearsAgo !== 1 ? 's' : ''} anniversary
                       </p>
                     )}
@@ -235,7 +235,7 @@ function Memories() {
       {/* Memories List */}
       <div className="glass-effect rounded-xl p-6 love-shadow">
         <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-          <Calendar className="h-5 w-5 mr-2 text-purple-500" />
+          <Calendar className="h-5 w-5 mr-2 text-purple-400" />
           All Memories
         </h2>
         

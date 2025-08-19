@@ -67,15 +67,15 @@ function Login() {
                   onClick={() => setUsername('scott')}
                   className={`relative p-4 rounded-2xl border-2 transition-all duration-300 group ${
                     username === 'scott'
-                      ? 'border-purple-500 bg-purple-50/80 shadow-lg shadow-purple-500/20'
+                      ? 'border-purple-400 bg-purple-50/80 shadow-lg shadow-purple-400/20'
                       : 'border-gray-200 bg-gray-50/50 hover:border-gray-300 hover:bg-gray-50/80'
                   }`}
                 >
                   <div className="flex flex-col items-center space-y-2">
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg transition-all duration-300 ${
                       username === 'scott'
-                        ? 'bg-gradient-to-br from-purple-500 to-purple-600 scale-110'
-                        : 'bg-gradient-to-br from-gray-400 to-gray-500 group-hover:from-purple-400 group-hover:to-purple-500'
+                        ? 'bg-gradient-to-br from-purple-400 to-purple-500 scale-110'
+                        : 'bg-gradient-to-br from-gray-400 to-gray-500 group-hover:from-purple-300 group-hover:to-purple-400'
                     }`}>
                       S
                     </div>
@@ -86,7 +86,7 @@ function Login() {
                     </span>
                   </div>
                   {username === 'scott' && (
-                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-purple-400 rounded-full flex items-center justify-center">
                       <Check className="w-3 h-3 text-white" />
                     </div>
                   )}
@@ -136,7 +136,7 @@ function Login() {
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-12 py-4 bg-gray-50/80 border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 transition-all duration-300 text-center font-medium backdrop-blur-sm"
+                  className="w-full pl-12 pr-12 py-4 bg-gray-50/80 border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400/30 focus:border-purple-400 transition-all duration-300 text-center font-medium backdrop-blur-sm"
                   placeholder="Enter password"
                   required
                 />
@@ -154,7 +154,7 @@ function Login() {
               disabled={loading || !username}
               className={`w-full py-4 px-6 rounded-2xl font-semibold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transform ${
                 username === 'scott'
-                  ? 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white hover:shadow-xl hover:shadow-purple-500/25'
+                  ? 'bg-gradient-to-r from-purple-400 to-purple-500 hover:from-purple-500 hover:to-purple-600 text-white hover:shadow-xl hover:shadow-purple-400/25'
                   : username === 'zoe'
                   ? 'bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white hover:shadow-xl hover:shadow-pink-500/25'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'

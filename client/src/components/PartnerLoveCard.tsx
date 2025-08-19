@@ -149,7 +149,7 @@ const PartnerLoveCard: React.FC = () => {
 
   const isScott = user?.username === 'scott';
   const partnerColor = partnerData.partnerUsername === 'scott' ? 'blue' : 'pink';
-  const heartColor = partnerData.partnerUsername === 'scott' ? 'text-purple-500' : 'text-pink-500';
+  const heartColor = partnerData.partnerUsername === 'scott' ? 'text-purple-400' : 'text-pink-500';
   const bgColor = partnerData.partnerUsername === 'scott' ? 'bg-purple-50' : 'bg-pink-50';
   const borderColor = partnerData.partnerUsername === 'scott' ? 'border-purple-200' : 'border-pink-200';
 
