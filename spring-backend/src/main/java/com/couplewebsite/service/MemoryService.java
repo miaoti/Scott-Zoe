@@ -1,8 +1,10 @@
 package com.couplewebsite.service;
 
 import com.couplewebsite.entity.Memory;
+import com.couplewebsite.entity.Photo;
 import com.couplewebsite.entity.User;
 import com.couplewebsite.repository.MemoryRepository;
+import com.couplewebsite.repository.PhotoRepository;
 import com.couplewebsite.security.CustomUserDetailsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,9 @@ public class MemoryService {
     
     @Autowired
     private MemoryRepository memoryRepository;
+    
+    @Autowired
+    private PhotoRepository photoRepository;
     
     @Autowired
     private CustomUserDetailsService userDetailsService;
@@ -186,7 +191,53 @@ public class MemoryService {
         }
     }
     
-    // Inner class for anniversary information
+    /**
+     * Add photos to an EVENT memory
+     */
+    public Memory addPhotosToMemory(Long memoryId, List<Long> photoIds) {
+        Memory memory = memoryRepository.findById(memoryId)
+            .orElseThrow(() -> new RuntimeException("Memory not found"));
+        
+        // Only allow photo associations for EVENT type memories
+        if (memory.getType() != Memory.MemoryType.EVENT) {
+            throw new RuntimeException("Photos can only be associated with EVENT type memories");
+        }
+        
+        // Fetch photos and add them to the memory
+        List<Photo> photos = photoRepository.findAllById(photoIds);
+        if (photos.size() != photoIds.size()) {
+            throw new RuntimeException("Some photos were not found");
+        }
+        
+        for (Photo photo : photos) {
+            memory.addPhoto(photo);
+        }
+        
+        return memoryRepository.save(memory);
+    }
+    
+    /**
+     * Remove photos from an EVENT memory
+     */
+    public Memory removePhotosFromMemory(Long memoryId, List<Long> photoIds) {
+        Memory memory = memoryRepository.findById(memoryId)
+            .orElseThrow(() -> new RuntimeException("Memory not found"));
+        
+        // Only allow photo associations for EVENT type memories
+        if (memory.getType() != Memory.MemoryType.EVENT) {
+            throw new RuntimeException("Photos can only be associated with EVENT type memories");
+        }
+        
+        // Fetch photos and remove them from the memory
+        List<Photo> photos = photoRepository.findAllById(photoIds);
+        for (Photo photo : photos) {
+            memory.removePhoto(photo);
+        }
+        
+        return memoryRepository.save(memory);
+    }
+    
+    // Helper class for anniversary information
     public static class AnniversaryInfo {
         private final long totalDays;
         private final long years;

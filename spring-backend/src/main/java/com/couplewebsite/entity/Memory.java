@@ -9,6 +9,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "memories")
@@ -49,11 +51,21 @@ public class Memory {
     @NotNull(message = "Creator is required")
     private User creator;
     
+    // Many-to-many relationship with photos (only for EVENT type)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "memory_photos",
+        joinColumns = @JoinColumn(name = "memory_id"),
+        inverseJoinColumns = @JoinColumn(name = "photo_id")
+    )
+    private Set<Photo> photos = new HashSet<>();
+    
     // Enum for memory types
     public enum MemoryType {
         ANNIVERSARY("anniversary"),
         SPECIAL_MOMENT("special_moment"),
-        MILESTONE("milestone");
+        MILESTONE("milestone"),
+        EVENT("event");
         
         private final String value;
         
@@ -149,6 +161,22 @@ public class Memory {
     
     public void setCreator(User creator) {
         this.creator = creator;
+    }
+    
+    public Set<Photo> getPhotos() {
+        return photos;
+    }
+    
+    public void setPhotos(Set<Photo> photos) {
+        this.photos = photos;
+    }
+    
+    public void addPhoto(Photo photo) {
+        this.photos.add(photo);
+    }
+    
+    public void removePhoto(Photo photo) {
+        this.photos.remove(photo);
     }
     
     @Override

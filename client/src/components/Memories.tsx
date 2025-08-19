@@ -9,16 +9,23 @@ interface Memory {
   title: string;
   description: string;
   date: string;
-  type: 'anniversary' | 'special_moment' | 'milestone';
+  type: 'anniversary' | 'special_moment' | 'milestone' | 'event';
   createdAt: string;
   creator: { name: string };
+  photos?: Array<{
+    id: number;
+    filename: string;
+    originalName: string;
+    caption: string;
+  }>;
 }
 
 type MemoryFormData = {
   title: string;
   description: string;
   date: string;
-  type: 'anniversary' | 'special_moment' | 'milestone';
+  type: 'anniversary' | 'special_moment' | 'milestone' | 'event';
+  selectedPhotos?: number[];
 };
 
 function Memories() {
@@ -37,9 +44,16 @@ function Memories() {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedDayMemories, setSelectedDayMemories] = useState<Memory[]>([]);
   const [showDayModal, setShowDayModal] = useState(false);
+  const [availablePhotos, setAvailablePhotos] = useState<Array<{
+    id: number;
+    filename: string;
+    originalName: string;
+    caption?: string;
+  }>>([]);
 
   useEffect(() => {
     fetchMemories();
+    fetchPhotos();
   }, []);
 
   const fetchMemories = async () => {
@@ -51,16 +65,34 @@ function Memories() {
     }
   };
 
+  const fetchPhotos = async () => {
+    try {
+      const response = await api.get('/api/photos?limit=100');
+      setAvailablePhotos(response.data.photos || []);
+    } catch (error) {
+      console.error('Error fetching photos:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
 
     setSubmitting(true);
     try {
+      let memoryResponse;
       if (editingMemory) {
-        await api.put(`/api/memories/${editingMemory.id}`, formData);
+        memoryResponse = await api.put(`/api/memories/${editingMemory.id}`, formData);
       } else {
-        await api.post('/api/memories', formData);
+        memoryResponse = await api.post('/api/memories', formData);
+      }
+      
+      // Handle photo associations for event type memories
+      if (formData.type === 'event' && formData.selectedPhotos && formData.selectedPhotos.length > 0) {
+        const memoryId = editingMemory ? editingMemory.id : memoryResponse.data.id;
+        await api.post(`/api/memories/${memoryId}/photos`, {
+          photoIds: formData.selectedPhotos
+        });
       }
       
       await fetchMemories();
@@ -80,6 +112,7 @@ function Memories() {
       description: memory.description,
       date: memory.date.includes('T') ? memory.date.split('T')[0] : memory.date, // Format for date input
       type: memory.type,
+      selectedPhotos: memory.photos ? memory.photos.map(photo => photo.id) : [],
     });
     setShowForm(true);
   };
@@ -102,6 +135,7 @@ function Memories() {
       description: '',
       date: '',
       type: 'special_moment',
+      selectedPhotos: [],
     });
     setEditingMemory(null);
     setShowForm(false);
@@ -119,6 +153,8 @@ function Memories() {
         return <Heart className="h-5 w-5 text-red-500" fill="currentColor" />;
       case 'milestone':
         return <Star className="h-5 w-5 text-yellow-500" fill="currentColor" />;
+      case 'event':
+        return <Calendar className="h-5 w-5 text-blue-500" />;
       default:
         return <Gift className="h-5 w-5 text-purple-400" />;
     }
@@ -130,6 +166,8 @@ function Memories() {
         return 'Anniversary';
       case 'milestone':
         return 'Milestone';
+      case 'event':
+        return 'Event';
       default:
         return 'Special Moment';
     }
@@ -243,7 +281,7 @@ function Memories() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <span className="text-gray-600 font-medium">Filter by type:</span>
-            {['all', 'anniversary', 'milestone', 'special_moment'].map((type) => (
+            {['all', 'anniversary', 'milestone', 'special_moment', 'event'].map((type) => (
               <button
                 key={type}
                 onClick={() => setFilter(type)}
@@ -329,8 +367,68 @@ function Memories() {
                   <option value="special_moment">Special Moment</option>
                   <option value="anniversary">Anniversary</option>
                   <option value="milestone">Milestone</option>
+                  <option value="event">Event</option>
                 </select>
               </div>
+              
+              {/* Photo Selection for Event Type */}
+              {formData.type === 'event' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Photos (Optional)
+                  </label>
+                  <div className="max-h-40 overflow-y-auto border border-gray-300 rounded-lg p-3 bg-gray-50">
+                    {availablePhotos.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        {availablePhotos.map((photo) => (
+                          <div
+                            key={photo.id}
+                            className={`relative cursor-pointer rounded-lg border-2 transition-all ${
+                              formData.selectedPhotos?.includes(photo.id)
+                                ? 'border-pink-500 bg-pink-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                            onClick={() => {
+                              const currentSelected = formData.selectedPhotos || [];
+                              const isSelected = currentSelected.includes(photo.id);
+                              const newSelected = isSelected
+                                ? currentSelected.filter(id => id !== photo.id)
+                                : [...currentSelected, photo.id];
+                              setFormData({ ...formData, selectedPhotos: newSelected });
+                            }}
+                          >
+                            <img
+                              src={`/api/photos/image/${photo.filename}`}
+                              alt={photo.originalName}
+                              className="w-full h-20 object-cover rounded-lg"
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 rounded-lg transition-all" />
+                            {formData.selectedPhotos?.includes(photo.id) && (
+                              <div className="absolute top-1 right-1 bg-pink-500 text-white rounded-full p-1">
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            )}
+                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b-lg truncate">
+                              {photo.caption || photo.originalName}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-sm text-center py-4">
+                        No photos available. Upload some photos first!
+                      </p>
+                    )}
+                  </div>
+                  {formData.selectedPhotos && formData.selectedPhotos.length > 0 && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      {formData.selectedPhotos.length} photo(s) selected
+                    </p>
+                  )}
+                </div>
+              )}
               
               <div className="flex space-x-3 pt-4">
                 <button
@@ -369,6 +467,34 @@ function Memories() {
                     </div>
                     
                     <p className="text-gray-600 mb-3">{memory.description}</p>
+                    
+                    {/* Display photos for event type memories */}
+                    {memory.type === 'event' && memory.photos && memory.photos.length > 0 && (
+                      <div className="mb-3">
+                        <div className="flex flex-wrap gap-2">
+                          {memory.photos.slice(0, 4).map((photo) => (
+                            <div key={photo.id} className="relative">
+                              <img
+                                src={`/api/photos/image/${photo.filename}`}
+                                alt={photo.originalName}
+                                className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                                title={photo.caption || photo.originalName}
+                              />
+                            </div>
+                          ))}
+                          {memory.photos.length > 4 && (
+                            <div className="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                              <span className="text-xs text-gray-500 font-medium">
+                                +{memory.photos.length - 4}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {memory.photos.length} photo{memory.photos.length !== 1 ? 's' : ''} attached
+                        </p>
+                      </div>
+                    )}
                     
                     <div className="flex items-center space-x-4 text-sm text-gray-500">
                       <div className="flex items-center space-x-1">

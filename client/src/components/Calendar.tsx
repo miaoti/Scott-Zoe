@@ -113,6 +113,8 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
         return '❤️';
       case 'milestone':
         return '⭐';
+      case 'event':
+        return '📅';
       default:
         return '🎁';
     }

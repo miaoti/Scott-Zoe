@@ -261,6 +261,58 @@ public class MemoryController {
         }
     }
     
+    /**
+     * Add photos to an EVENT memory
+     */
+    @PostMapping("/{id}/photos")
+    public ResponseEntity<?> addPhotosToMemory(@PathVariable Long id, @RequestBody List<Long> photoIds) {
+        try {
+            Memory memory = memoryService.addPhotosToMemory(id, photoIds);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Photos added to memory successfully");
+            response.put("memory", createMemoryResponse(memory));
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(400).body(error);
+        } catch (Exception e) {
+            logger.error("Error adding photos to memory with ID: {}", id, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Remove photos from an EVENT memory
+     */
+    @DeleteMapping("/{id}/photos")
+    public ResponseEntity<?> removePhotosFromMemory(@PathVariable Long id, @RequestBody List<Long> photoIds) {
+        try {
+            Memory memory = memoryService.removePhotosFromMemory(id, photoIds);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Photos removed from memory successfully");
+            response.put("memory", createMemoryResponse(memory));
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(400).body(error);
+        } catch (Exception e) {
+            logger.error("Error removing photos from memory with ID: {}", id, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
     // Helper method to create memory response
     private Map<String, Object> createMemoryResponse(Memory memory) {
         Map<String, Object> response = new HashMap<>();
@@ -274,6 +326,21 @@ public class MemoryController {
         
         if (memory.getCreator() != null) {
             response.put("creator", Map.of("name", memory.getCreator().getName()));
+        }
+        
+        // Include photos for EVENT type memories
+        if (memory.getType() == Memory.MemoryType.EVENT && memory.getPhotos() != null) {
+            List<Map<String, Object>> photoList = memory.getPhotos().stream()
+                .map(photo -> {
+                    Map<String, Object> photoMap = new HashMap<>();
+                    photoMap.put("id", photo.getId());
+                    photoMap.put("filename", photo.getFilename());
+                    photoMap.put("originalName", photo.getOriginalName());
+                    photoMap.put("caption", photo.getCaption());
+                    return photoMap;
+                })
+                .collect(Collectors.toList());
+            response.put("photos", photoList);
         }
         
         return response;
