@@ -262,10 +262,10 @@ function Settings() {
             >
               <div className="flex items-center">
                 <div className={`p-3 rounded-xl mr-4 ${
-                  user?.username === 'scott' ? 'bg-blue-100' : 'bg-pink-100'
+                  user?.username === 'scott' ? 'bg-purple-100' : 'bg-pink-100'
                 }`}>
                   <BarChart3 className={`h-6 w-6 ${
-                    user?.username === 'scott' ? 'text-blue-600' : 'text-pink-600'
+                    user?.username === 'scott' ? 'text-purple-600' : 'text-pink-600'
                   }`} />
                 </div>
                 <div className="text-left">
@@ -433,8 +433,8 @@ function Settings() {
               className="w-full p-6 flex items-center justify-between hover:bg-apple-gray-6/5 transition-colors duration-200"
             >
               <div className="flex items-center">
-                <div className="bg-blue-100 p-3 rounded-xl mr-4">
-                  <Cog className="h-6 w-6 text-blue-600" />
+                <div className="bg-purple-100 p-3 rounded-xl mr-4">
+                  <Cog className="h-6 w-6 text-purple-600" />
                 </div>
                 <div className="text-left">
                   <h2 className="font-heading text-xl font-semibold text-apple-label">

@@ -51,7 +51,7 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
     } else if (prizeType === 'GIFT') {
       return <Gift className={`${iconSize} text-purple-200 drop-shadow-lg`} />;
     } else if (prizeType === 'EXPERIENCE') {
-      return <Star className={`${iconSize} text-blue-200 drop-shadow-lg`} />;
+      return <Star className={`${iconSize} text-purple-200 drop-shadow-lg`} />;
     } else {
       return <Gift className={`${iconSize} text-white drop-shadow-lg`} />;
     }
@@ -502,7 +502,7 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
                     e.stopPropagation();
                     handleClaimPrize();
                   }}
-                  className="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="px-8 py-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   💰 Claim ${wonPrize.amount} Prize
                 </button>

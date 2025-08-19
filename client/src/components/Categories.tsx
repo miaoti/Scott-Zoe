@@ -186,7 +186,7 @@ function Categories() {
           </p>
           <button
             onClick={handleCreateNew}
-            className="inline-flex items-center px-6 py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-lg transition-colors"
+            className="inline-flex items-center px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
           >
             <Plus className="h-5 w-5 mr-2" />
             Create First Category

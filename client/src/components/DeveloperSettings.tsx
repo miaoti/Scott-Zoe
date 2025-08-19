@@ -158,7 +158,7 @@ const DeveloperSettings: React.FC = () => {
     return (
       <div className="apple-card p-6">
         <div className="text-center mb-6">
-          <Settings className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+          <Settings className="h-12 w-12 text-purple-500 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-apple-label mb-2">Developer Settings</h3>
           <p className="text-apple-secondary-label">Enter the developer password to access advanced settings</p>
         </div>
@@ -173,7 +173,7 @@ const DeveloperSettings: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && verifyPassword()}
-              className="w-full px-3 py-2 border border-apple-separator rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-apple-separator rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               placeholder="Enter password"
             />
           </div>
@@ -187,7 +187,7 @@ const DeveloperSettings: React.FC = () => {
           <button
             onClick={verifyPassword}
             disabled={loading}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors"
+            className="w-full bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-600 disabled:opacity-50 transition-colors"
           >
             {loading ? 'Verifying...' : 'Access Developer Settings'}
           </button>
@@ -200,7 +200,7 @@ const DeveloperSettings: React.FC = () => {
     <div className="space-y-6">
       <div className="apple-card p-6">
         <div className="flex items-center mb-6">
-          <Settings className="h-6 w-6 text-blue-500 mr-3" />
+          <Settings className="h-6 w-6 text-purple-500 mr-3" />
           <h3 className="text-lg font-semibold text-apple-label">Developer Settings</h3>
         </div>
         
@@ -228,14 +228,14 @@ const DeveloperSettings: React.FC = () => {
                     type="number"
                     value={newLoveCount}
                     onChange={(e) => setNewLoveCount(e.target.value)}
-                    className="w-full px-3 py-2 border border-apple-separator rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-apple-separator rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                     placeholder="New love count"
                   />
                 </div>
                 <button
                   onClick={updateLoveCount}
                   disabled={loading}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors flex items-center"
+                  className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 disabled:opacity-50 transition-colors flex items-center"
                 >
                   <Save className="h-4 w-4 mr-1" />
                   Update
@@ -246,10 +246,10 @@ const DeveloperSettings: React.FC = () => {
             {/* Users Section */}
             <div className="grid md:grid-cols-2 gap-6">
               {/* Scott */}
-              <div className="border border-blue-200 rounded-lg p-4">
+              <div className="border border-purple-200 rounded-lg p-4">
                 <div className="flex items-center mb-4">
-                  <Users className="h-5 w-5 text-blue-500 mr-2" />
-                  <h4 className="font-semibold text-blue-700">Scott</h4>
+                  <Users className="h-5 w-5 text-purple-500 mr-2" />
+                  <h4 className="font-semibold text-purple-700">Scott</h4>
                 </div>
                 
                 <div className="space-y-4">
@@ -263,13 +263,13 @@ const DeveloperSettings: React.FC = () => {
                         type="number"
                         value={scottOpportunities}
                         onChange={(e) => setScottOpportunities(e.target.value)}
-                        className="flex-1 px-3 py-2 border border-apple-separator rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-3 py-2 border border-apple-separator rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                         placeholder="New count"
                       />
                       <button
                         onClick={() => updateOpportunities('scott')}
                         disabled={loading}
-                        className="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors flex items-center"
+                        className="bg-purple-500 text-white px-3 py-2 rounded-lg hover:bg-purple-600 disabled:opacity-50 transition-colors flex items-center"
                       >
                         <Gift className="h-4 w-4 mr-1" />
                         Set

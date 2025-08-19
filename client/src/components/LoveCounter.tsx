@@ -412,13 +412,13 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
               const canUseThisWeek = canUseWheelThisWeek;
 
               return (
-                <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="mb-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm text-blue-700 font-medium">
+                      <div className="text-sm text-purple-700 font-medium">
                         🎰 {savedOpportunities} Saved Spin{savedOpportunities > 1 ? 's' : ''}
                       </div>
-                      <div className="text-xs text-blue-600 mt-1">
+                      <div className="text-xs text-purple-600 mt-1">
                         {canUseThisWeek
                           ? 'Ready to use this week!'
                           : 'Available next week!'
@@ -430,7 +430,7 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
                       disabled={!canUseThisWeek}
                       className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors relative z-30 pointer-events-auto touch-manipulation ${
                         canUseThisWeek
-                          ? 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95'
+                          ? 'bg-purple-600 text-white hover:bg-purple-700 active:scale-95'
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       }`}
                       style={{ WebkitTapHighlightColor: 'transparent' }}

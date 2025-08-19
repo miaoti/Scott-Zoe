@@ -149,14 +149,14 @@ const PartnerLoveCard: React.FC = () => {
 
   const isScott = user?.username === 'scott';
   const partnerColor = partnerData.partnerUsername === 'scott' ? 'blue' : 'pink';
-  const heartColor = partnerData.partnerUsername === 'scott' ? 'text-blue-500' : 'text-pink-500';
-  const bgColor = partnerData.partnerUsername === 'scott' ? 'bg-blue-50' : 'bg-pink-50';
-  const borderColor = partnerData.partnerUsername === 'scott' ? 'border-blue-200' : 'border-pink-200';
+  const heartColor = partnerData.partnerUsername === 'scott' ? 'text-purple-500' : 'text-pink-500';
+  const bgColor = partnerData.partnerUsername === 'scott' ? 'bg-purple-50' : 'bg-pink-50';
+  const borderColor = partnerData.partnerUsername === 'scott' ? 'border-purple-200' : 'border-pink-200';
 
   return (
     <div className={`apple-card apple-shadow p-6 text-center transition-all duration-300 cursor-pointer group pointer-events-auto relative ${bgColor} ${borderColor} border group-hover:shadow-lg`}>
       <div className="flex items-center justify-center mb-4">
-        <div className={`p-3 rounded-full ${partnerData.partnerUsername === 'scott' ? 'bg-blue-100' : 'bg-pink-100'} transition-all duration-300 group-hover:scale-105`}>
+        <div className={`p-3 rounded-full ${partnerData.partnerUsername === 'scott' ? 'bg-purple-100' : 'bg-pink-100'} transition-all duration-300 group-hover:scale-105`}>
           <Heart 
             className={`h-8 w-8 ${heartColor} transition-all duration-300 group-hover:scale-110`} 
             fill="currentColor"

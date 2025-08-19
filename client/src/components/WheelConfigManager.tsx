@@ -368,11 +368,11 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
       <style>{sliderStyles}</style>
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-100">
+      <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-6 border-b border-gray-100">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center space-x-3">
-            <div className="bg-blue-100 p-2 rounded-lg">
-              <Settings className="w-5 h-5 text-blue-600" />
+            <div className="bg-purple-100 p-2 rounded-lg">
+              <Settings className="w-5 h-5 text-purple-600" />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
@@ -467,7 +467,7 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
                     type="text"
                     value={prize.prizeName}
                     onChange={(e) => updatePrize(index, 'prizeName', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     placeholder="e.g., $10"
                   />
                 </div>
@@ -480,7 +480,7 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
                     type="text"
                     value={prize.prizeDescription}
                     onChange={(e) => updatePrize(index, 'prizeDescription', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     placeholder="Prize description"
                   />
                 </div>
@@ -494,7 +494,7 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
                   <select
                     value={prize.prizeType}
                     onChange={(e) => updatePrize(index, 'prizeType', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   >
                     <option value="MONEY">💰 Money</option>
                     <option value="GIFT">🎁 Gift</option>
@@ -510,7 +510,7 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
                     type="number"
                     value={prize.prizeValue}
                     onChange={(e) => updatePrize(index, 'prizeValue', parseFloat(e.target.value) || 0)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     placeholder="Value"
                     min="0"
                     step="0.01"
@@ -522,7 +522,7 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
                     Color
                   </label>
                   <div className="relative">
-                    <div className="flex items-center space-x-2 p-2 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors"
+                    <div className="flex items-center space-x-2 p-2 border border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-colors"
                          onClick={() => {
                            const colorSelect = document.getElementById(`color-select-${index}`);
                            if (colorSelect) colorSelect.focus();
@@ -558,7 +558,7 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
                         type="button"
                         onClick={() => updatePrize(index, 'color', color.value)}
                         className={`w-6 h-6 rounded-full border-2 hover:scale-110 transition-transform ${
-                          prize.color === color.value ? 'border-blue-500 ring-2 ring-blue-200' : 'border-white shadow-sm'
+                          prize.color === color.value ? 'border-purple-500 ring-2 ring-purple-200' : 'border-white shadow-sm'
                         }`}
                         style={{ backgroundColor: color.value }}
                         title={color.name}
@@ -586,7 +586,7 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
                     >
                       {prize.locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
                     </button>
-                    <span className="text-sm font-semibold text-blue-600">
+                    <span className="text-sm font-semibold text-purple-600">
                       {prize.probability.toFixed(1)}%
                     </span>
                   </div>
@@ -619,7 +619,7 @@ const WheelConfigManager: React.FC<WheelConfigManagerProps> = ({ targetUserId, t
           <div className="flex flex-wrap gap-2 justify-center">
             <button
               onClick={addPrize}
-              className="flex items-center justify-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-sm"
+              className="flex items-center justify-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-sm"
             >
               <Plus className="w-4 h-4" />
               <span className="font-medium">Add Prize</span>
