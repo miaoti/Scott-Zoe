@@ -454,8 +454,8 @@ function Settings() {
               </div>
             </button>
             
-            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
-              expandedSections.wheelConfig ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
+            <div className={`transition-all duration-300 ease-in-out ${
+              expandedSections.wheelConfig ? 'max-h-none opacity-100 overflow-visible' : 'max-h-0 opacity-0 overflow-hidden'
             }`}>
               <div className="px-6 pb-6">
                 <div className="text-center mb-6">
