@@ -217,7 +217,22 @@ function Memories() {
   const upcomingMemories = memories
     .filter((memory) => memory.type !== 'event') // Exclude event type memories
     .map((memory) => {
-      const memoryDate = new Date(memory.date);
+      // Parse date more safely
+      let memoryDate;
+      if (typeof memory.date === 'string') {
+        // Handle string format like "2024-01-15" or "2024-01-15T00:00:00"
+        const dateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
+        const [year, month, day] = dateStr.split('-').map(Number);
+        memoryDate = new Date(year, month - 1, day); // month is 0-indexed
+      } else {
+        memoryDate = new Date(memory.date);
+      }
+      
+      // Validate the date
+      if (isNaN(memoryDate.getTime())) {
+        return null; // Skip invalid dates
+      }
+      
       const today = new Date();
       const thisYear = today.getFullYear();
       const anniversaryThisYear = new Date(thisYear, memoryDate.getMonth(), memoryDate.getDate());
@@ -229,6 +244,7 @@ function Memories() {
         daysUntil: Math.ceil((nextAnniversary.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
       };
     })
+    .filter(memory => memory !== null) // Remove invalid dates
     .sort((a, b) => a.daysUntil - b.daysUntil)
     .slice(0, 3);
 
@@ -270,7 +286,9 @@ function Memories() {
                   <div className="flex items-start justify-between mb-2">
                     {getTypeIcon(memory.type)}
                     <span className="text-xs text-gray-500">
-                      {memory.nextAnniversaryDate.toLocaleDateString()}
+                      {memory.nextAnniversaryDate && !isNaN(memory.nextAnniversaryDate.getTime()) 
+                        ? memory.nextAnniversaryDate.toLocaleDateString() 
+                        : 'Invalid Date'}
                     </span>
                   </div>
                   <h3 className="font-semibold text-gray-800 mb-1">{memory.title}</h3>
@@ -305,39 +323,41 @@ function Memories() {
         </h2>
         
         {/* Filters and Sort */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-600 font-medium">Filter by type:</span>
-            {['all', 'anniversary', 'milestone', 'special_moment', 'event'].map((type) => (
-              <button
-                key={type}
-                onClick={() => setFilter(type)}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  filter === type
-                    ? 'romantic-gradient text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {type === 'all' ? 'All' : getTypeLabel(type)}
-              </button>
-            ))}
+        <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 mb-6">
+          <div className="flex flex-col space-y-3 md:flex-row md:items-center md:space-y-0 md:space-x-4">
+            <span className="text-gray-600 font-medium text-sm md:text-base">Filter by type:</span>
+            <div className="flex flex-wrap gap-2">
+              {['all', 'anniversary', 'milestone', 'special_moment', 'event'].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setFilter(type)}
+                  className={`px-3 py-2 text-sm rounded-lg transition-colors ${
+                    filter === type
+                      ? 'romantic-gradient text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {type === 'all' ? 'All' : getTypeLabel(type)}
+                </button>
+              ))}
+            </div>
           </div>
           
           <button
             onClick={toggleSortOrder}
-            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors w-full md:w-auto"
           >
             <ArrowUpDown className="h-4 w-4" />
-            {/* <span>Sort by Date ({sortOrder === 'asc' ? 'Oldest First' : 'Newest First'})</span> */}
+            <span className="text-sm md:hidden">Sort by Date</span>
           </button>
         </div>
 
       {/* Memory Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-hidden">
-            <div className="flex justify-between items-center p-6 border-b border-gray-100">
-              <h3 className="text-xl font-semibold text-gray-800">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-2 md:p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[95vh] md:max-h-[85vh] overflow-hidden">
+            <div className="flex justify-between items-center p-4 md:p-6 border-b border-gray-100">
+              <h3 className="text-lg md:text-xl font-semibold text-gray-800">
                 {editingMemory ? 'Edit Memory' : 'Create Memory'}
               </h3>
               <button
@@ -348,8 +368,8 @@ function Memories() {
               </button>
             </div>
             
-            <div className="overflow-y-auto max-h-[calc(85vh-140px)]">
-              <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            <div className="overflow-y-auto max-h-[calc(95vh-140px)] md:max-h-[calc(85vh-140px)]">
+              <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4 md:space-y-5">
                 <div className="grid grid-cols-1 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -359,13 +379,13 @@ function Memories() {
                       type="text"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                      className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-sm md:text-base"
                       placeholder="Enter memory title"
                       required
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         📅 {formData.type === 'event' ? 'Start Date' : 'Date'}
@@ -374,7 +394,7 @@ function Memories() {
                         type="date"
                         value={formData.date}
                         onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                        className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-sm md:text-base"
                         required
                       />
                     </div>
@@ -386,7 +406,7 @@ function Memories() {
                       <select
                         value={formData.type}
                         onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                        className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-sm md:text-base"
                       >
                         <option value="special_moment">Special Moment</option>
                         <option value="anniversary">Anniversary</option>
