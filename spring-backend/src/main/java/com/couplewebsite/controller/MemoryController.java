@@ -356,6 +356,7 @@ public class MemoryController {
         private LocalDate date;
         private LocalDate endDate;
         private String type;
+        private List<String> selectedPhotos;
         
         // Getters and setters
         public String getTitle() { return title; }
@@ -368,5 +369,7 @@ public class MemoryController {
         public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
         public String getType() { return type; }
         public void setType(String type) { this.type = type; }
+        public List<String> getSelectedPhotos() { return selectedPhotos; }
+        public void setSelectedPhotos(List<String> selectedPhotos) { this.selectedPhotos = selectedPhotos; }
     }
 }
