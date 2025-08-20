@@ -64,12 +64,22 @@ function MemoryItem({ memory, onPress, onEdit, onDelete }: MemoryItemProps) {
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    try {
+      const dateStr = dateString.includes('T') ? dateString.split('T')[0] : dateString;
+      const date = new Date(dateStr);
+      
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+      
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch (error) {
+      return 'Invalid Date';
+    }
   };
 
   return (

@@ -39,18 +39,27 @@ function PhotoDetail() {
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
 
   const formatDate = (dateInput: string | number[]) => {
-    let date: Date;
-    
-    if (Array.isArray(dateInput)) {
-      // Handle array format: [year, month, day, hour, minute, second, nanoseconds]
-      const [year, month, day, hour = 0, minute = 0, second = 0] = dateInput;
-      date = new Date(year, month - 1, day, hour, minute, second); // month is 0-indexed in Date constructor
-    } else {
-      // Handle string format
-      date = new Date(dateInput);
+    try {
+      let date: Date;
+      
+      if (Array.isArray(dateInput)) {
+        // Handle array format: [year, month, day, hour, minute, second, nanoseconds]
+        const [year, month, day, hour = 0, minute = 0, second = 0] = dateInput;
+        date = new Date(year, month - 1, day, hour, minute, second); // month is 0-indexed in Date constructor
+      } else {
+        // Handle string format - extract date part if it includes time
+        const dateStr = dateInput.includes('T') ? dateInput.split('T')[0] : dateInput;
+        date = new Date(dateStr);
+      }
+      
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+      
+      return date.toLocaleDateString();
+    } catch (error) {
+      return 'Invalid Date';
     }
-    
-    return date.toLocaleDateString();
   };
 
   useEffect(() => {

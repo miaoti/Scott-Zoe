@@ -168,7 +168,7 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
         <div
           key={day}
           onClick={() => handleDayClick(day)}
-          className={`h-16 flex flex-col items-center justify-start cursor-pointer rounded-lg transition-colors relative p-1 ${
+          className={`h-12 md:h-16 flex flex-col items-center justify-start cursor-pointer rounded-lg transition-colors relative p-0.5 md:p-1 overflow-hidden ${
             isToday
               ? 'bg-gradient-to-br from-pink-500 to-pink-600 text-white font-bold shadow-lg ring-2 ring-pink-300'
               : hasMemories
@@ -176,29 +176,29 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
               : 'hover:bg-gray-100 text-gray-700'
           }`}
         >
-          <span className="text-sm font-medium">{day}</span>
+          <span className="text-xs md:text-sm font-medium">{day}</span>
           {isToday && (
-            <span className="text-xs font-semibold mt-0.5 opacity-90">Today</span>
+            <span className="text-xs font-semibold mt-0.5 opacity-90 hidden md:block">Today</span>
           )}
           {hasMemories && !isToday && (
-            <div className="flex flex-col items-center space-y-0.5 mt-0.5">
-              {dayMemories.slice(0, 2).map((memory, index) => (
-                <div key={memory.id} className="flex items-center space-x-1">
+            <div className="flex flex-col items-center space-y-0.5 mt-0.5 w-full">
+              {dayMemories.slice(0, 1).map((memory, index) => (
+                <div key={memory.id} className="flex items-center justify-center w-full">
                   <span className="text-xs">{getTypeIcon(memory.type)}</span>
-                  <span className="text-xs truncate max-w-12 text-purple-700">
+                  <span className="text-xs truncate max-w-8 md:max-w-12 text-purple-700 ml-0.5 hidden md:inline">
                     {memory.title}
                   </span>
                 </div>
               ))}
-              {dayMemories.length > 2 && (
+              {dayMemories.length > 1 && (
                 <span className="text-xs text-purple-500">
-                  +{dayMemories.length - 2} more
+                  +{dayMemories.length - 1}
                 </span>
               )}
             </div>
           )}
           {hasMemories && isToday && (
-            <div className="flex items-center space-x-1 mt-0.5">
+            <div className="flex items-center justify-center space-x-1 mt-0.5 w-full">
               <span className="text-xs">{getTypeIcon(dayMemories[0].type)}</span>
               {dayMemories.length > 1 && (
                 <span className="text-xs text-white opacity-90">
@@ -258,22 +258,22 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
       </div>
       
       {/* Legend */}
-      <div className="flex items-center justify-center space-x-6 mt-4 text-xs text-gray-500">
+      <div className="flex flex-wrap items-center justify-center gap-2 md:gap-6 mt-4 text-xs text-gray-500">
         <div className="flex items-center space-x-1">
           <span>❤️</span>
-          <span>Anniversary</span>
+          <span className="hidden sm:inline">Anniversary</span>
         </div>
         <div className="flex items-center space-x-1">
           <span>⭐</span>
-          <span>Milestone</span>
+          <span className="hidden sm:inline">Milestone</span>
         </div>
         <div className="flex items-center space-x-1">
           <span>🎁</span>
-          <span>Special Moment</span>
+          <span className="hidden sm:inline">Special Moment</span>
         </div>
         <div className="flex items-center space-x-1">
           <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
-          <span>Today</span>
+          <span className="hidden sm:inline">Today</span>
         </div>
       </div>
     </div>

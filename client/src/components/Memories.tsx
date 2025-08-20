@@ -352,183 +352,7 @@ function Memories() {
           </button>
         </div>
 
-      {/* Memory Form Modal */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-2 md:p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[95vh] md:max-h-[85vh] overflow-hidden">
-            <div className="flex justify-between items-center p-4 md:p-6 border-b border-gray-100">
-              <h3 className="text-lg md:text-xl font-semibold text-gray-800">
-                {editingMemory ? 'Edit Memory' : 'Create Memory'}
-              </h3>
-              <button
-                onClick={resetForm}
-                className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div className="overflow-y-auto max-h-[calc(95vh-140px)] md:max-h-[calc(85vh-140px)]">
-              <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4 md:space-y-5">
-                <div className="grid grid-cols-1 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Title
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-sm md:text-base"
-                      placeholder="Enter memory title"
-                      required
-                    />
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        📅 {formData.type === 'event' ? 'Start Date' : 'Date'}
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.date}
-                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                        className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-sm md:text-base"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Type
-                      </label>
-                      <select
-                        value={formData.type}
-                        onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                        className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-sm md:text-base"
-                      >
-                        <option value="special_moment">Special Moment</option>
-                        <option value="anniversary">Anniversary</option>
-                        <option value="milestone">Milestone</option>
-                        <option value="event">Event</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* End Date for Event Type */}
-                  {formData.type === 'event' && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        📅 End Date (Optional)
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.endDate || ''}
-                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value || undefined })}
-                        min={formData.date}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Leave empty for single-day events
-                      </p>
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Description
-                    </label>
-                    <textarea
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all resize-none"
-                      rows={3}
-                      placeholder="Share the story behind this memory..."
-                      required
-                    />
-                  </div>
-
-                  {/* Photo Selection for Event Type */}
-                  {formData.type === 'event' && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-3">
-                          Select Photos ({formData.selectedPhotos?.length || 0} selected)
-                        </label>
-                        <div className="border border-gray-200 rounded-lg overflow-hidden">
-                          <div className="max-h-64 overflow-y-auto p-3">
-                            <div className="grid grid-cols-3 gap-3">
-                              {availablePhotos.map((photo) => (
-                                <div
-                                  key={photo.id}
-                                  className={`relative cursor-pointer rounded-lg border-2 transition-all ${
-                                    formData.selectedPhotos?.includes(photo.id)
-                                      ? 'border-pink-500 ring-2 ring-pink-200'
-                                      : 'border-gray-200 hover:border-gray-300'
-                                  }`}
-                                  onClick={() => {
-                                    const currentSelected = formData.selectedPhotos || [];
-                                    const isSelected = currentSelected.includes(photo.id);
-                                    const newSelected = isSelected
-                                      ? currentSelected.filter(id => id !== photo.id)
-                                      : [...currentSelected, photo.id];
-                                    setFormData({ ...formData, selectedPhotos: newSelected });
-                                  }}
-                                >
-                                  <img
-                                    src={`/api/photos/image/${photo.filename}`}
-                                    alt={photo.originalName}
-                                    className="w-full h-20 object-cover rounded-lg"
-                                  />
-                                  <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 rounded-lg transition-all" />
-                                  {formData.selectedPhotos?.includes(photo.id) && (
-                                    <div className="absolute top-1 right-1 bg-pink-500 text-white rounded-full p-1">
-                                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                      </svg>
-                                    </div>
-                                  )}
-                                  {photo.caption && (
-                                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b-lg truncate">
-                                      {photo.caption}
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          {availablePhotos.length === 0 && (
-                            <div className="p-4 text-center text-gray-500 text-sm">
-                              No photos available. Upload some photos first!
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                </div>
-              </form>
-            </div>
-            
-            <div className="flex space-x-3 p-6 border-t border-gray-100 bg-gray-50">
-              <button
-                type="button"
-                onClick={resetForm}
-                className="flex-1 px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                disabled={submitting}
-                className="flex-1 px-6 py-3 romantic-gradient text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-              >
-                {submitting ? (editingMemory ? 'Updating...' : 'Creating...') : (editingMemory ? 'Update Memory' : 'Create Memory')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
         {/* Memory Items */}
         {sortedMemories.length > 0 ? (
@@ -580,9 +404,22 @@ function Memories() {
                         <Calendar className="h-4 w-4" />
                         <span>
                           {memory.type === 'event' && memory.endDate ? (
-                            `${new Date(memory.date).toLocaleDateString()} - ${new Date(memory.endDate).toLocaleDateString()}`
+                            (() => {
+                              const startDateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
+                              const endDateStr = memory.endDate.includes('T') ? memory.endDate.split('T')[0] : memory.endDate;
+                              const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
+                              const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+                              const startDate = new Date(startYear, startMonth - 1, startDay);
+                              const endDate = new Date(endYear, endMonth - 1, endDay);
+                              return `${!isNaN(startDate.getTime()) ? startDate.toLocaleDateString() : 'Invalid Date'} - ${!isNaN(endDate.getTime()) ? endDate.toLocaleDateString() : 'Invalid Date'}`;
+                            })()
                           ) : (
-                            new Date(memory.date).toLocaleDateString()
+                            (() => {
+                              const dateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
+                              const [year, month, day] = dateStr.split('-').map(Number);
+                              const date = new Date(year, month - 1, day);
+                              return !isNaN(date.getTime()) ? date.toLocaleDateString() : 'Invalid Date';
+                            })()
                           )}
                         </span>
                       </div>
@@ -775,6 +612,176 @@ function Memories() {
            </div>
          </div>
        )}
+
+      {/* Memory Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-2 md:p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[95vh] md:max-h-[85vh] overflow-hidden">
+            <div className="flex justify-between items-center p-4 md:p-6 border-b border-gray-100">
+              <h3 className="text-lg md:text-xl font-semibold text-gray-800">
+                {editingMemory ? 'Edit Memory' : 'Create Memory'}
+              </h3>
+              <button
+                onClick={resetForm}
+                className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="overflow-y-auto max-h-[calc(95vh-140px)] md:max-h-[calc(85vh-140px)]">
+              <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4 md:space-y-5">
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Title
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-sm md:text-base"
+                      placeholder="Enter memory title"
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        📅 {formData.type === 'event' ? 'Start Date' : 'Date'}
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.date}
+                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                        className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-sm md:text-base"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Type
+                      </label>
+                      <select
+                        value={formData.type}
+                        onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+                        className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-sm md:text-base"
+                      >
+                        <option value="special_moment">Special Moment</option>
+                        <option value="anniversary">Anniversary</option>
+                        <option value="milestone">Milestone</option>
+                        <option value="event">Event</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* End Date for Event Type */}
+                  {formData.type === 'event' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        📅 End Date (Optional)
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.endDate || ''}
+                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value || undefined })}
+                        min={formData.date}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Leave empty for single-day events
+                      </p>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Description
+                    </label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all resize-none"
+                      rows={3}
+                      placeholder="Share the story behind this memory..."
+                      required
+                    />
+                  </div>
+
+                  {/* Photo Selection for Event Type */}
+                  {formData.type === 'event' && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-3">
+                          Select Photos ({formData.selectedPhotos?.length || 0} selected)
+                        </label>
+                        <div className="border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="max-h-64 overflow-y-auto p-3">
+                            <div className="grid grid-cols-3 gap-3">
+                              {availablePhotos.map((photo) => (
+                                <div
+                                  key={photo.id}
+                                  className={`relative cursor-pointer rounded-lg border-2 transition-all ${
+                                    formData.selectedPhotos?.includes(photo.id)
+                                      ? 'border-pink-500 bg-pink-50'
+                                      : 'border-gray-200 hover:border-gray-300'
+                                  }`}
+                                  onClick={() => {
+                                    const currentSelected = formData.selectedPhotos || [];
+                                    const isSelected = currentSelected.includes(photo.id);
+                                    const newSelected = isSelected
+                                      ? currentSelected.filter(id => id !== photo.id)
+                                      : [...currentSelected, photo.id];
+                                    setFormData({ ...formData, selectedPhotos: newSelected });
+                                  }}
+                                >
+                                  <img
+                                    src={`/api/photos/image/${photo.filename}`}
+                                    alt={photo.originalName}
+                                    className="w-full h-20 object-cover rounded-md"
+                                  />
+                                  {formData.selectedPhotos?.includes(photo.id) && (
+                                    <div className="absolute top-1 right-1 w-5 h-5 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs">
+                                      ✓
+                                    </div>
+                                  )}
+                                  {photo.caption && (
+                                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-1 rounded-b-md">
+                                      <p className="truncate">{photo.caption}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                  )}
+                </div>
+              </form>
+            </div>
+            
+            <div className="flex space-x-3 p-4 md:p-6 border-t border-gray-100 bg-gray-50">
+              <button
+                type="button"
+                onClick={resetForm}
+                className="flex-1 px-4 md:px-6 py-2 md:py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm md:text-base"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="flex-1 px-4 md:px-6 py-2 md:py-3 romantic-gradient text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm md:text-base"
+              >
+                {submitting ? (editingMemory ? 'Updating...' : 'Creating...') : (editingMemory ? 'Update Memory' : 'Create Memory')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
      </div>
    );
  }

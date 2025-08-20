@@ -47,16 +47,26 @@ const DayMemoriesModal: React.FC<DayMemoriesModalProps> = ({
   };
 
   const formatDate = (dateString: string) => {
-  // Parse the date string and create a Date object in local timezone
-  const [year, month, day] = dateString.split('-').map(Number);
-  const date = new Date(year, month - 1, day); // month is 0-indexed in Date constructor
-  return date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-};
+    try {
+      // Parse the date string and create a Date object in local timezone
+      const dateStr = dateString.includes('T') ? dateString.split('T')[0] : dateString;
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const date = new Date(year, month - 1, day); // month is 0-indexed in Date constructor
+      
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+      
+      return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return 'Invalid Date';
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
