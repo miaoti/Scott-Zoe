@@ -278,8 +278,19 @@ function Memories() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {upcomingMemories.map((memory) => {
-              const memoryDate = new Date(memory.date);
-              const yearsAgo = memory.nextAnniversaryDate.getFullYear() - memoryDate.getFullYear();
+              let memoryDate;
+              try {
+                if (memory.date && typeof memory.date === 'string') {
+                  const dateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
+                  const [year, month, day] = dateStr.split('-').map(Number);
+                  memoryDate = new Date(year, month - 1, day);
+                } else {
+                  memoryDate = new Date(memory.date);
+                }
+              } catch (error) {
+                memoryDate = new Date(); // fallback to current date
+              }
+              const yearsAgo = memory.nextAnniversaryDate && !isNaN(memory.nextAnniversaryDate.getTime()) ? memory.nextAnniversaryDate.getFullYear() - memoryDate.getFullYear() : 0;
               
               return (
                 <div key={memory.id} className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-lg p-4 border border-pink-200">
@@ -529,9 +540,35 @@ function Memories() {
                     <h4 className="text-sm font-medium text-gray-700 mb-1">Date</h4>
                     <p className="text-gray-600">
                       {selectedMemory.type === 'event' && selectedMemory.endDate ? (
-                        `${new Date(selectedMemory.date).toLocaleDateString()} - ${new Date(selectedMemory.endDate).toLocaleDateString()}`
+                        (() => {
+                          try {
+                            if (!selectedMemory.date || typeof selectedMemory.date !== 'string') return 'Invalid Date';
+                            if (!selectedMemory.endDate || typeof selectedMemory.endDate !== 'string') return 'Invalid Date';
+                            
+                            const startDateStr = selectedMemory.date.includes('T') ? selectedMemory.date.split('T')[0] : selectedMemory.date;
+                            const endDateStr = selectedMemory.endDate.includes('T') ? selectedMemory.endDate.split('T')[0] : selectedMemory.endDate;
+                            const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
+                            const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+                            const startDate = new Date(startYear, startMonth - 1, startDay);
+                            const endDate = new Date(endYear, endMonth - 1, endDay);
+                            return `${!isNaN(startDate.getTime()) ? startDate.toLocaleDateString() : 'Invalid Date'} - ${!isNaN(endDate.getTime()) ? endDate.toLocaleDateString() : 'Invalid Date'}`;
+                          } catch (error) {
+                            return 'Invalid Date';
+                          }
+                        })()
                       ) : (
-                        new Date(selectedMemory.date).toLocaleDateString()
+                        (() => {
+                          try {
+                            if (!selectedMemory.date || typeof selectedMemory.date !== 'string') return 'Invalid Date';
+                            
+                            const dateStr = selectedMemory.date.includes('T') ? selectedMemory.date.split('T')[0] : selectedMemory.date;
+                            const [year, month, day] = dateStr.split('-').map(Number);
+                            const date = new Date(year, month - 1, day);
+                            return !isNaN(date.getTime()) ? date.toLocaleDateString() : 'Invalid Date';
+                          } catch (error) {
+                            return 'Invalid Date';
+                          }
+                        })()
                       )}
                     </p>
                   </div>
