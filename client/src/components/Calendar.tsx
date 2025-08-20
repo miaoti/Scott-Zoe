@@ -168,41 +168,56 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
         <div
           key={day}
           onClick={() => handleDayClick(day)}
-          className={`h-12 md:h-16 flex flex-col items-center justify-start cursor-pointer rounded-lg transition-colors relative p-0.5 md:p-1 overflow-hidden ${
+          className={`h-10 md:h-16 flex flex-col items-center justify-center cursor-pointer rounded-lg transition-all duration-200 relative overflow-hidden ${
             isToday
-              ? 'bg-gradient-to-br from-pink-500 to-pink-600 text-white font-bold shadow-lg ring-2 ring-pink-300'
+              ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold shadow-md'
               : hasMemories
-              ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
-              : 'hover:bg-gray-100 text-gray-700'
+              ? 'bg-blue-50 text-blue-900 hover:bg-blue-100 border border-blue-200'
+              : 'hover:bg-gray-50 text-gray-700 border border-transparent hover:border-gray-200'
           }`}
         >
-          <span className="text-xs md:text-sm font-medium">{day}</span>
-          {isToday && (
-            <span className="text-xs font-semibold mt-0.5 opacity-90 hidden md:block">Today</span>
+          <span className={`text-sm md:text-base font-medium ${
+            isToday ? 'text-white' : hasMemories ? 'text-blue-900' : 'text-gray-700'
+          }`}>{day}</span>
+          
+          {/* Mobile: Show only dots for memories */}
+          {hasMemories && (
+            <div className="md:hidden flex items-center justify-center space-x-0.5 mt-1">
+              {dayMemories.slice(0, 3).map((memory, index) => (
+                <div
+                  key={memory.id}
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    isToday ? 'bg-white' : 'bg-blue-500'
+                  }`}
+                  title={memory.title}
+                />
+              ))}
+              {dayMemories.length > 3 && (
+                <div className={`w-1.5 h-1.5 rounded-full ${
+                  isToday ? 'bg-white opacity-60' : 'bg-blue-300'
+                }`} />
+              )}
+            </div>
           )}
-          {hasMemories && !isToday && (
-            <div className="flex flex-col items-center space-y-0.5 mt-0.5 w-full">
-              {dayMemories.slice(0, 1).map((memory, index) => (
+          
+          {/* Desktop: Show memory details */}
+          {hasMemories && (
+            <div className="hidden md:flex flex-col items-center space-y-0.5 mt-1 w-full px-1">
+              {dayMemories.slice(0, 2).map((memory, index) => (
                 <div key={memory.id} className="flex items-center justify-center w-full">
-                  <span className="text-xs">{getTypeIcon(memory.type)}</span>
-                  <span className="text-xs truncate max-w-8 md:max-w-12 text-purple-700 ml-0.5 hidden md:inline">
+                  <span className="text-xs mr-1">{getTypeIcon(memory.type)}</span>
+                  <span className={`text-xs truncate max-w-12 ${
+                    isToday ? 'text-white' : 'text-blue-700'
+                  }`}>
                     {memory.title}
                   </span>
                 </div>
               ))}
-              {dayMemories.length > 1 && (
-                <span className="text-xs text-purple-500">
-                  +{dayMemories.length - 1}
-                </span>
-              )}
-            </div>
-          )}
-          {hasMemories && isToday && (
-            <div className="flex items-center justify-center space-x-1 mt-0.5 w-full">
-              <span className="text-xs">{getTypeIcon(dayMemories[0].type)}</span>
-              {dayMemories.length > 1 && (
-                <span className="text-xs text-white opacity-90">
-                  +{dayMemories.length - 1}
+              {dayMemories.length > 2 && (
+                <span className={`text-xs ${
+                  isToday ? 'text-white opacity-90' : 'text-blue-500'
+                }`}>
+                  +{dayMemories.length - 2}
                 </span>
               )}
             </div>
@@ -244,36 +259,45 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
       </div>
       
       {/* Day headers */}
-      <div className="grid grid-cols-7 gap-1 mb-2">
+      <div className="grid grid-cols-7 gap-1 md:gap-2 mb-2">
         {dayNames.map(day => (
-          <div key={day} className="h-8 flex items-center justify-center text-sm font-medium text-gray-500">
-            {day}
+          <div key={day} className="h-8 flex items-center justify-center text-xs md:text-sm font-semibold text-gray-600 bg-gray-50 rounded-md">
+            <span className="hidden sm:inline">{day}</span>
+            <span className="sm:hidden">{day.charAt(0)}</span>
           </div>
         ))}
       </div>
       
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1 md:gap-2">
         {renderCalendarDays()}
       </div>
       
       {/* Legend */}
-      <div className="flex flex-wrap items-center justify-center gap-2 md:gap-6 mt-4 text-xs text-gray-500">
-        <div className="flex items-center space-x-1">
-          <span>❤️</span>
+      <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6 mt-6 text-xs text-gray-500">
+        <div className="flex items-center space-x-1.5">
+          <span className="text-sm">❤️</span>
           <span className="hidden sm:inline">Anniversary</span>
         </div>
-        <div className="flex items-center space-x-1">
-          <span>⭐</span>
+        <div className="flex items-center space-x-1.5">
+          <span className="text-sm">⭐</span>
           <span className="hidden sm:inline">Milestone</span>
         </div>
-        <div className="flex items-center space-x-1">
-          <span>🎁</span>
+        <div className="flex items-center space-x-1.5">
+          <span className="text-sm">🎁</span>
           <span className="hidden sm:inline">Special Moment</span>
         </div>
-        <div className="flex items-center space-x-1">
-          <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
+        <div className="flex items-center space-x-1.5">
+          <span className="text-sm">📅</span>
+          <span className="hidden sm:inline">Event</span>
+        </div>
+        <div className="flex items-center space-x-1.5">
+          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
           <span className="hidden sm:inline">Today</span>
+        </div>
+        <div className="flex items-center space-x-1.5 md:hidden">
+          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+          <span>Has memories</span>
         </div>
       </div>
     </div>

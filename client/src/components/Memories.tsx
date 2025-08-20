@@ -65,6 +65,13 @@ function Memories() {
   const fetchMemories = async () => {
     try {
       const response = await api.get('/api/memories');
+      console.log('DEBUG: Raw memories data from backend:', response.data);
+      if (response.data && response.data.length > 0) {
+        console.log('DEBUG: First memory date format:', response.data[0].date, 'type:', typeof response.data[0].date);
+        if (response.data[0].endDate) {
+          console.log('DEBUG: First memory endDate format:', response.data[0].endDate, 'type:', typeof response.data[0].endDate);
+        }
+      }
       setMemories(response.data);
     } catch (error) {
       console.error('Error fetching memories:', error);
@@ -114,8 +121,24 @@ function Memories() {
     setFormData({
       title: memory.title,
       description: memory.description,
-      date: (memory.date && typeof memory.date === 'string') ? (memory.date.includes('T') ? memory.date.split('T')[0] : memory.date) : '', // Format for date input
-      endDate: memory.endDate && typeof memory.endDate === 'string' ? (memory.endDate.includes('T') ? memory.endDate.split('T')[0] : memory.endDate) : undefined,
+      date: (() => {
+        if (Array.isArray(memory.date)) {
+          const [year, month, day] = memory.date;
+          return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+        } else if (typeof memory.date === 'string') {
+          return memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
+        }
+        return '';
+      })(),
+      endDate: (() => {
+        if (Array.isArray(memory.endDate)) {
+          const [year, month, day] = memory.endDate;
+          return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+        } else if (typeof memory.endDate === 'string') {
+          return memory.endDate.includes('T') ? memory.endDate.split('T')[0] : memory.endDate;
+        }
+        return undefined;
+      })(),
       type: memory.type,
       selectedPhotos: memory.photos ? memory.photos.map(photo => photo.id) : [],
     });
@@ -219,7 +242,11 @@ function Memories() {
     .map((memory) => {
       // Parse date more safely
       let memoryDate;
-      if (typeof memory.date === 'string') {
+      if (Array.isArray(memory.date)) {
+        // Handle array format [year, month, day] from Java LocalDate
+        const [year, month, day] = memory.date;
+        memoryDate = new Date(year, month - 1, day); // month is 0-indexed
+      } else if (typeof memory.date === 'string') {
         // Handle string format like "2024-01-15" or "2024-01-15T00:00:00"
         const dateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
         const [year, month, day] = dateStr.split('-').map(Number);
@@ -417,30 +444,69 @@ function Memories() {
                           {memory.type === 'event' && memory.endDate ? (
                             (() => {
                               try {
-                                if (!memory.date || typeof memory.date !== 'string') return 'Invalid Date';
-                                if (!memory.endDate || typeof memory.endDate !== 'string') return 'Invalid Date';
+                                console.log('DEBUG: Event date parsing - memory.date:', memory.date, 'type:', typeof memory.date);
+                                console.log('DEBUG: Event date parsing - memory.endDate:', memory.endDate, 'type:', typeof memory.endDate);
                                 
-                                const startDateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
-                                const endDateStr = memory.endDate.includes('T') ? memory.endDate.split('T')[0] : memory.endDate;
-                                const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
-                                const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+                                // Handle array format [year, month, day] from Java LocalDate
+                                let startYear, startMonth, startDay;
+                                if (Array.isArray(memory.date)) {
+                                  [startYear, startMonth, startDay] = memory.date;
+                                } else if (typeof memory.date === 'string') {
+                                  const startDateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
+                                  [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
+                                } else {
+                                  console.log('DEBUG: Invalid start date format');
+                                  return 'Invalid Date';
+                                }
+                                
+                                let endYear, endMonth, endDay;
+                                if (Array.isArray(memory.endDate)) {
+                                  [endYear, endMonth, endDay] = memory.endDate;
+                                } else if (typeof memory.endDate === 'string') {
+                                  const endDateStr = memory.endDate.includes('T') ? memory.endDate.split('T')[0] : memory.endDate;
+                                  [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+                                } else {
+                                  console.log('DEBUG: Invalid end date format');
+                                  return 'Invalid Date';
+                                }
+                                
+                                console.log('DEBUG: Date components - start:', {startYear, startMonth, startDay}, 'end:', {endYear, endMonth, endDay});
+                                
                                 const startDate = new Date(startYear, startMonth - 1, startDay);
                                 const endDate = new Date(endYear, endMonth - 1, endDay);
+                                console.log('DEBUG: Created dates - start:', startDate, 'end:', endDate);
+                                
                                 return `${!isNaN(startDate.getTime()) ? startDate.toLocaleDateString() : 'Invalid Date'} - ${!isNaN(endDate.getTime()) ? endDate.toLocaleDateString() : 'Invalid Date'}`;
                               } catch (error) {
+                                console.error('DEBUG: Date parsing error:', error);
                                 return 'Invalid Date';
                               }
                             })()
                           ) : (
                             (() => {
                               try {
-                                if (!memory.date || typeof memory.date !== 'string') return 'Invalid Date';
+                                console.log('DEBUG: Single date parsing - memory.date:', memory.date, 'type:', typeof memory.date);
                                 
-                                const dateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
-                                const [year, month, day] = dateStr.split('-').map(Number);
+                                // Handle array format [year, month, day] from Java LocalDate
+                                let year, month, day;
+                                if (Array.isArray(memory.date)) {
+                                  [year, month, day] = memory.date;
+                                } else if (typeof memory.date === 'string') {
+                                  const dateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
+                                  [year, month, day] = dateStr.split('-').map(Number);
+                                } else {
+                                  console.log('DEBUG: Invalid single date format');
+                                  return 'Invalid Date';
+                                }
+                                
+                                console.log('DEBUG: Date components:', {year, month, day});
+                                
                                 const date = new Date(year, month - 1, day);
+                                console.log('DEBUG: Created date:', date);
+                                
                                 return !isNaN(date.getTime()) ? date.toLocaleDateString() : 'Invalid Date';
                               } catch (error) {
+                                console.error('DEBUG: Single date parsing error:', error);
                                 return 'Invalid Date';
                               }
                             })()
@@ -542,13 +608,27 @@ function Memories() {
                       {selectedMemory.type === 'event' && selectedMemory.endDate ? (
                         (() => {
                           try {
-                            if (!selectedMemory.date || typeof selectedMemory.date !== 'string') return 'Invalid Date';
-                            if (!selectedMemory.endDate || typeof selectedMemory.endDate !== 'string') return 'Invalid Date';
+                            // Handle array format [year, month, day] from Java LocalDate
+                            let startYear, startMonth, startDay;
+                            if (Array.isArray(selectedMemory.date)) {
+                              [startYear, startMonth, startDay] = selectedMemory.date;
+                            } else if (typeof selectedMemory.date === 'string') {
+                              const startDateStr = selectedMemory.date.includes('T') ? selectedMemory.date.split('T')[0] : selectedMemory.date;
+                              [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
+                            } else {
+                              return 'Invalid Date';
+                            }
                             
-                            const startDateStr = selectedMemory.date.includes('T') ? selectedMemory.date.split('T')[0] : selectedMemory.date;
-                            const endDateStr = selectedMemory.endDate.includes('T') ? selectedMemory.endDate.split('T')[0] : selectedMemory.endDate;
-                            const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
-                            const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+                            let endYear, endMonth, endDay;
+                            if (Array.isArray(selectedMemory.endDate)) {
+                              [endYear, endMonth, endDay] = selectedMemory.endDate;
+                            } else if (typeof selectedMemory.endDate === 'string') {
+                              const endDateStr = selectedMemory.endDate.includes('T') ? selectedMemory.endDate.split('T')[0] : selectedMemory.endDate;
+                              [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+                            } else {
+                              return 'Invalid Date';
+                            }
+                            
                             const startDate = new Date(startYear, startMonth - 1, startDay);
                             const endDate = new Date(endYear, endMonth - 1, endDay);
                             return `${!isNaN(startDate.getTime()) ? startDate.toLocaleDateString() : 'Invalid Date'} - ${!isNaN(endDate.getTime()) ? endDate.toLocaleDateString() : 'Invalid Date'}`;
@@ -559,10 +639,17 @@ function Memories() {
                       ) : (
                         (() => {
                           try {
-                            if (!selectedMemory.date || typeof selectedMemory.date !== 'string') return 'Invalid Date';
+                            // Handle array format [year, month, day] from Java LocalDate
+                            let year, month, day;
+                            if (Array.isArray(selectedMemory.date)) {
+                              [year, month, day] = selectedMemory.date;
+                            } else if (typeof selectedMemory.date === 'string') {
+                              const dateStr = selectedMemory.date.includes('T') ? selectedMemory.date.split('T')[0] : selectedMemory.date;
+                              [year, month, day] = dateStr.split('-').map(Number);
+                            } else {
+                              return 'Invalid Date';
+                            }
                             
-                            const dateStr = selectedMemory.date.includes('T') ? selectedMemory.date.split('T')[0] : selectedMemory.date;
-                            const [year, month, day] = dateStr.split('-').map(Number);
                             const date = new Date(year, month - 1, day);
                             return !isNaN(date.getTime()) ? date.toLocaleDateString() : 'Invalid Date';
                           } catch (error) {
