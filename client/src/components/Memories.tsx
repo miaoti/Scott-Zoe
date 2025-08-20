@@ -390,65 +390,98 @@ function Memories() {
           All Memories
         </h2>
         
-        {/* Filters and Sort */}
-        <div className="flex flex-col space-y-4 mb-6">
-          {/* Type Filter */}
-          <div className="flex flex-col space-y-3 md:flex-row md:items-center md:space-y-0 md:space-x-4">
-            <span className="text-gray-600 font-medium text-sm md:text-base">Filter by type:</span>
-            <div className="flex flex-wrap gap-2">
-              {['all', 'anniversary', 'milestone', 'special_moment', 'event'].map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setFilter(type)}
-                  className={`px-3 py-2 text-sm rounded-lg transition-colors ${
-                    filter === type
-                      ? 'romantic-gradient text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {type === 'all' ? 'All' : getTypeLabel(type)}
-                </button>
-              ))}
+        {/* Enhanced Filters and Sort */}
+        <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-6 mb-6 border border-pink-100">
+          <div className="space-y-6">
+            {/* Type Filter */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-gradient-to-r from-pink-400 to-purple-400 rounded-full"></div>
+                <h3 className="text-gray-800 font-semibold text-lg">Filter by Type</h3>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                {[
+                  { value: 'all', label: 'All Types', icon: '🌟' },
+                  { value: 'anniversary', label: 'Anniversary', icon: '💕' },
+                  { value: 'milestone', label: 'Milestone', icon: '⭐' },
+                  { value: 'special_moment', label: 'Special Moment', icon: '🎁' },
+                  { value: 'event', label: 'Event', icon: '📅' }
+                ].map((type) => (
+                  <button
+                    key={type.value}
+                    onClick={() => setFilter(type.value)}
+                    className={`group relative overflow-hidden px-4 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 ${
+                      filter === type.value
+                        ? 'romantic-gradient text-white shadow-lg shadow-pink-200'
+                        : 'bg-white text-gray-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 border border-gray-200 hover:border-pink-200'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center space-y-1">
+                      <span className="text-lg">{type.icon}</span>
+                      <span className="text-sm font-medium text-center leading-tight">{type.label}</span>
+                    </div>
+                    {filter === type.value && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-pink-400/20 to-purple-400/20 rounded-xl"></div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Time Filter */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full"></div>
+                <h3 className="text-gray-800 font-semibold text-lg">Filter by Time</h3>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+                {[
+                  { value: 'all', label: 'All Time', icon: '🕐' },
+                  { value: 'thisMonth', label: 'This Month', icon: '📅' },
+                  { value: 'last6Months', label: 'Last 6 Months', icon: '📊' },
+                  { value: 'thisYear', label: 'This Year', icon: '🗓️' },
+                  { value: 'lastYear', label: 'Last Year', icon: '📆' },
+                  { value: 'older', label: '2+ Years Ago', icon: '🕰️' }
+                ].map((timeOption) => (
+                  <button
+                    key={timeOption.value}
+                    onClick={() => setTimeFilter(timeOption.value)}
+                    className={`group relative overflow-hidden px-4 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 ${
+                      timeFilter === timeOption.value
+                        ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-200'
+                        : 'bg-white text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 border border-gray-200 hover:border-blue-200'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center space-y-1">
+                      <span className="text-lg">{timeOption.icon}</span>
+                      <span className="text-sm font-medium text-center leading-tight">{timeOption.label}</span>
+                    </div>
+                    {timeFilter === timeOption.value && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-xl"></div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Sort Control */}
+            <div className="flex justify-between items-center pt-4 border-t border-pink-200">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full"></div>
+                <h3 className="text-gray-800 font-semibold text-lg">Sort Order</h3>
+              </div>
+              <button
+                onClick={toggleSortOrder}
+                className="group flex items-center space-x-3 px-6 py-3 bg-white border border-gray-200 rounded-xl hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:border-green-200 transition-all duration-300 transform hover:scale-105 shadow-sm"
+              >
+                <ArrowUpDown className="h-5 w-5 text-green-500 group-hover:rotate-180 transition-transform duration-300" />
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-medium text-gray-800">Sort by Date</span>
+                  <span className="text-xs text-gray-500">{sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}</span>
+                </div>
+              </button>
             </div>
           </div>
-          
-          {/* Time Filter */}
-          <div className="flex flex-col space-y-3 md:flex-row md:items-center md:space-y-0 md:space-x-4">
-            <span className="text-gray-600 font-medium text-sm md:text-base">Filter by time:</span>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { value: 'all', label: 'All Time' },
-                { value: 'thisMonth', label: 'This Month' },
-                { value: 'last6Months', label: 'Last 6 Months' },
-                { value: 'thisYear', label: 'This Year' },
-                { value: 'lastYear', label: 'Last Year' },
-                { value: 'older', label: '2+ Years Ago' }
-              ].map((timeOption) => (
-                <button
-                  key={timeOption.value}
-                  onClick={() => setTimeFilter(timeOption.value)}
-                  className={`px-3 py-2 text-sm rounded-lg transition-colors ${
-                    timeFilter === timeOption.value
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {timeOption.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          {/* Sort Control */}
-           <div className="flex justify-end">
-            <button
-              onClick={toggleSortOrder}
-              className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors w-full md:w-auto"
-            >
-              <ArrowUpDown className="h-4 w-4" />
-              <span className="text-sm">Sort by Date ({sortOrder === 'asc' ? 'Oldest First' : 'Newest First'})</span>
-            </button>
-           </div>
         </div>
 
 
