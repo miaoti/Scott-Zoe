@@ -54,6 +54,8 @@ function Memories() {
   }>>([]);
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<{id: number; filename: string; originalName: string; caption: string} | null>(null);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
 
   useEffect(() => {
     fetchMemories();
@@ -153,6 +155,16 @@ function Memories() {
   const closeMemoryDetail = () => {
     setSelectedMemory(null);
     setShowDetailModal(false);
+  };
+
+  const openPhotoViewer = (photo: {id: number; filename: string; originalName: string; caption: string}) => {
+    setSelectedPhoto(photo);
+    setShowPhotoModal(true);
+  };
+
+  const closePhotoViewer = () => {
+    setSelectedPhoto(null);
+    setShowPhotoModal(false);
   };
 
   const handleDayClick = (date: string, memories: Memory[]) => {
@@ -419,52 +431,60 @@ function Memories() {
 
                   {/* Photo Selection for Event Type */}
                   {formData.type === 'event' && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-3">
-                        Select Photos ({formData.selectedPhotos?.length || 0} selected)
-                      </label>
-                      <div className="border border-gray-200 rounded-lg overflow-hidden">
-                        <div className="max-h-48 overflow-y-auto">
-                          <div className="grid grid-cols-1 divide-y divide-gray-100">
-                            {availablePhotos.map((photo) => (
-                              <label key={photo.id} className="flex items-center p-3 hover:bg-gray-50 cursor-pointer transition-colors">
-                                <input
-                                  type="checkbox"
-                                  checked={formData.selectedPhotos?.includes(photo.id) || false}
-                                  onChange={(e) => {
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-3">
+                          Select Photos ({formData.selectedPhotos?.length || 0} selected)
+                        </label>
+                        <div className="border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="max-h-64 overflow-y-auto p-3">
+                            <div className="grid grid-cols-3 gap-3">
+                              {availablePhotos.map((photo) => (
+                                <div
+                                  key={photo.id}
+                                  className={`relative cursor-pointer rounded-lg border-2 transition-all ${
+                                    formData.selectedPhotos?.includes(photo.id)
+                                      ? 'border-pink-500 ring-2 ring-pink-200'
+                                      : 'border-gray-200 hover:border-gray-300'
+                                  }`}
+                                  onClick={() => {
                                     const currentSelected = formData.selectedPhotos || [];
-                                    if (e.target.checked) {
-                                      setFormData({
-                                        ...formData,
-                                        selectedPhotos: [...currentSelected, photo.id]
-                                      });
-                                    } else {
-                                      setFormData({
-                                        ...formData,
-                                        selectedPhotos: currentSelected.filter(id => id !== photo.id)
-                                      });
-                                    }
+                                    const isSelected = currentSelected.includes(photo.id);
+                                    const newSelected = isSelected
+                                      ? currentSelected.filter(id => id !== photo.id)
+                                      : [...currentSelected, photo.id];
+                                    setFormData({ ...formData, selectedPhotos: newSelected });
                                   }}
-                                  className="w-4 h-4 text-pink-600 border-gray-300 rounded focus:ring-pink-500"
-                                />
-                                <div className="ml-3 flex-1">
-                                  <div className="text-sm font-medium text-gray-900">{photo.originalName}</div>
+                                >
+                                  <img
+                                    src={`/api/photos/image/${photo.filename}`}
+                                    alt={photo.originalName}
+                                    className="w-full h-20 object-cover rounded-lg"
+                                  />
+                                  <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 rounded-lg transition-all" />
+                                  {formData.selectedPhotos?.includes(photo.id) && (
+                                    <div className="absolute top-1 right-1 bg-pink-500 text-white rounded-full p-1">
+                                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                      </svg>
+                                    </div>
+                                  )}
                                   {photo.caption && (
-                                    <div className="text-xs text-gray-500 mt-1">{photo.caption}</div>
+                                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b-lg truncate">
+                                      {photo.caption}
+                                    </div>
                                   )}
                                 </div>
-                              </label>
-                            ))}
+                              ))}
+                            </div>
                           </div>
+                          {availablePhotos.length === 0 && (
+                            <div className="p-4 text-center text-gray-500 text-sm">
+                              No photos available. Upload some photos first!
+                            </div>
+                          )}
                         </div>
-                        {availablePhotos.length === 0 && (
-                          <div className="p-4 text-center text-gray-500 text-sm">
-                            No photos available. Upload some photos first!
-                          </div>
-                        )}
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
               </form>
             </div>
@@ -652,28 +672,33 @@ function Memories() {
                 </div>
                 
                 {selectedMemory.type === 'event' && selectedMemory.photos && selectedMemory.photos.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-3">Photos ({selectedMemory.photos.length})</h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {selectedMemory.photos.map((photo) => (
-                        <div key={photo.id} className="relative group">
-                          <img
-                            src={`/api/photos/image/${photo.filename}`}
-                            alt={photo.originalName}
-                            className="w-full h-24 object-cover rounded-lg border border-gray-200 group-hover:shadow-md transition-shadow"
-                          />
-                          {photo.caption && (
-                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-lg transition-all flex items-end p-2">
-                              <p className="text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                                {photo.caption}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                   <div>
+                     <h4 className="text-sm font-medium text-gray-700 mb-3">Photos ({selectedMemory.photos.length})</h4>
+                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                       {selectedMemory.photos.map((photo) => (
+                         <div key={photo.id} className="relative group cursor-pointer" onClick={() => openPhotoViewer(photo)}>
+                           <img
+                             src={`/api/photos/image/${photo.filename}`}
+                             alt={photo.originalName}
+                             className="w-full h-24 object-cover rounded-lg border border-gray-200 group-hover:shadow-lg group-hover:scale-105 transition-all duration-200"
+                           />
+                           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-lg transition-all flex items-center justify-center">
+                             <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white bg-opacity-90 rounded-full p-2">
+                               <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                               </svg>
+                             </div>
+                           </div>
+                           {photo.caption && (
+                             <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-2 rounded-b-lg">
+                               <p className="truncate">{photo.caption}</p>
+                             </div>
+                           )}
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                 )}
               </div>
             </div>
             
@@ -696,10 +721,42 @@ function Memories() {
               </button>
             </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
+         </div>
+       )}
+
+       {/* Full-Size Photo Viewer Modal */}
+       {showPhotoModal && selectedPhoto && (
+         <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+           <div className="relative max-w-4xl max-h-full w-full h-full flex items-center justify-center">
+             <button
+               onClick={closePhotoViewer}
+               className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-colors z-10"
+             >
+               ✕
+             </button>
+             
+             <div className="relative max-w-full max-h-full">
+               <img
+                 src={`/api/photos/image/${selectedPhoto.filename}`}
+                 alt={selectedPhoto.originalName}
+                 className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+               />
+               
+               {selectedPhoto.caption && (
+                 <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 text-white p-4 rounded-b-lg">
+                   <p className="text-center text-sm">{selectedPhoto.caption}</p>
+                 </div>
+               )}
+             </div>
+             
+             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-4 py-2 rounded-full text-sm">
+               {selectedPhoto.originalName}
+             </div>
+           </div>
+         </div>
+       )}
+     </div>
+   );
+ }
 
 export default Memories;
