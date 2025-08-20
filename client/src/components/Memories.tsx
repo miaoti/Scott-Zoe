@@ -92,9 +92,7 @@ function Memories() {
       // Handle photo associations for event type memories
       if (formData.type === 'event' && formData.selectedPhotos && formData.selectedPhotos.length > 0) {
         const memoryId = editingMemory ? editingMemory.id : memoryResponse.data.memory.id;
-        await api.post(`/api/memories/${memoryId}/photos`, {
-          photoIds: formData.selectedPhotos
-        });
+        await api.post(`/api/memories/${memoryId}/photos`, formData.selectedPhotos);
       }
       
       await fetchMemories();
