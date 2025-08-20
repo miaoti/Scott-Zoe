@@ -263,9 +263,7 @@ function Memories() {
     return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
   });
 
-  const toggleSortOrder = () => {
-    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
-  };
+
 
   const upcomingMemories = memories
     .filter((memory) => memory.type !== 'event') // Exclude event type memories
@@ -390,63 +388,67 @@ function Memories() {
           All Memories
         </h2>
         
-        {/* Apple-style Filters */}
+        {/* Dropdown Filters */}
         <div className="mb-8">
-          <div className="flex flex-col space-y-4">
-            {/* Type Filter */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-gray-500 text-sm font-medium mr-2">Type:</span>
-              {['all', 'anniversary', 'milestone', 'special_moment', 'event'].map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setFilter(type)}
-                  className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
-                    filter === type
-                      ? 'bg-blue-500 text-white shadow-sm'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {type === 'all' ? 'All' : getTypeLabel(type)}
-                </button>
-              ))}
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Type Filter Dropdown */}
+            <div className="relative">
+              <label className="block text-gray-500 text-sm font-medium mb-1">Type</label>
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition-colors"
+              >
+                <option value="all">All Types</option>
+                <option value="anniversary">Anniversary</option>
+                <option value="milestone">Milestone</option>
+                <option value="special_moment">Special Moment</option>
+                <option value="event">Event</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none mt-6">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
             
-            {/* Time Filter */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-gray-500 text-sm font-medium mr-2">Time:</span>
-              {[
-                { value: 'all', label: 'All' },
-                { value: 'thisMonth', label: 'This Month' },
-                { value: 'last6Months', label: 'Last 6 Months' },
-                { value: 'thisYear', label: 'This Year' },
-                { value: 'lastYear', label: 'Last Year' },
-                { value: 'older', label: '2+ Years' }
-              ].map((timeOption) => (
-                <button
-                  key={timeOption.value}
-                  onClick={() => setTimeFilter(timeOption.value)}
-                  className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
-                    timeFilter === timeOption.value
-                      ? 'bg-blue-500 text-white shadow-sm'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {timeOption.label}
-                </button>
-              ))}
+            {/* Time Filter Dropdown */}
+            <div className="relative">
+              <label className="block text-gray-500 text-sm font-medium mb-1">Time Period</label>
+              <select
+                value={timeFilter}
+                onChange={(e) => setTimeFilter(e.target.value)}
+                className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition-colors"
+              >
+                <option value="all">All Time</option>
+                <option value="thisMonth">This Month</option>
+                <option value="last6Months">Last 6 Months</option>
+                <option value="thisYear">This Year</option>
+                <option value="lastYear">Last Year</option>
+                <option value="older">2+ Years Ago</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none mt-6">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
             
-            {/* Sort Control */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-500 text-sm font-medium">Sort:</span>
-                <button
-                  onClick={toggleSortOrder}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200 transition-all duration-200"
-                >
-                  <ArrowUpDown className="h-4 w-4" />
-                  {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}
-                </button>
+            {/* Sort Control Dropdown */}
+            <div className="relative">
+              <label className="block text-gray-500 text-sm font-medium mb-1">Sort Order</label>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+                className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition-colors"
+              >
+                <option value="desc">Newest First</option>
+                <option value="asc">Oldest First</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none mt-6">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </div>
             </div>
           </div>
