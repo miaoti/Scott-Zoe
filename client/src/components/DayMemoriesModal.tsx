@@ -6,7 +6,8 @@ interface Memory {
   title: string;
   description: string;
   date: string;
-  type: 'anniversary' | 'special_moment' | 'milestone';
+  endDate?: string;
+  type: 'anniversary' | 'special_moment' | 'milestone' | 'event';
   createdAt: string;
   creator: { name: string };
 }

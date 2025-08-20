@@ -38,6 +38,13 @@ public class MemoryService {
      * Create a new memory
      */
     public Memory createMemory(String title, String description, LocalDate date, Memory.MemoryType type) {
+        return createMemory(title, description, date, null, type);
+    }
+    
+    /**
+     * Create a new memory with optional end date for EVENT types
+     */
+    public Memory createMemory(String title, String description, LocalDate date, LocalDate endDate, Memory.MemoryType type) {
         try {
             // Get current user
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -45,6 +52,17 @@ public class MemoryService {
             
             // Create memory
             Memory memory = new Memory(title, description, date, type, creator);
+            
+            // Set end date for EVENT types
+            if (type == Memory.MemoryType.EVENT && endDate != null) {
+                if (endDate.isBefore(date)) {
+                    throw new RuntimeException("End date cannot be before start date");
+                }
+                memory.setEndDate(endDate);
+            } else if (type != Memory.MemoryType.EVENT && endDate != null) {
+                throw new RuntimeException("End date can only be set for EVENT type memories");
+            }
+            
             Memory savedMemory = memoryRepository.save(memory);
             
             logger.info("Memory created successfully: {}", title);
@@ -74,6 +92,13 @@ public class MemoryService {
      * Update memory
      */
     public Memory updateMemory(Long id, String title, String description, LocalDate date, Memory.MemoryType type) {
+        return updateMemory(id, title, description, date, null, type);
+    }
+    
+    /**
+     * Update memory with optional end date for EVENT types
+     */
+    public Memory updateMemory(Long id, String title, String description, LocalDate date, LocalDate endDate, Memory.MemoryType type) {
         Memory memory = memoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Memory not found"));
         
@@ -81,6 +106,20 @@ public class MemoryService {
         memory.setDescription(description);
         memory.setDate(date);
         memory.setType(type);
+        
+        // Handle end date for EVENT types
+        if (type == Memory.MemoryType.EVENT && endDate != null) {
+            if (endDate.isBefore(date)) {
+                throw new RuntimeException("End date cannot be before start date");
+            }
+            memory.setEndDate(endDate);
+        } else if (type != Memory.MemoryType.EVENT) {
+            // Clear end date for non-EVENT types
+            memory.setEndDate(null);
+        } else {
+            // EVENT type with null endDate - keep existing endDate or set to null
+            memory.setEndDate(endDate);
+        }
         
         return memoryRepository.save(memory);
     }

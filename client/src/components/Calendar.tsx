@@ -7,6 +7,7 @@ interface Memory {
   title: string;
   description: string;
   date: string;
+  endDate?: string;
   type: string;
   creator: {
     name: string;
@@ -71,6 +72,15 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
   
   // Group memories by day
   const memoriesByDay: { [key: number]: Memory[] } = {};
+  
+  // Helper function to add memory to a specific day
+  const addMemoryToDay = (day: number, memory: Memory) => {
+    if (!memoriesByDay[day]) {
+      memoriesByDay[day] = [];
+    }
+    memoriesByDay[day].push(memory);
+  };
+  
   monthMemories.forEach(memory => {
     let memoryDay;
     if (Array.isArray(memory.date)) {
@@ -82,10 +92,30 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
       memoryDay = day;
     }
     
-    if (!memoriesByDay[memoryDay]) {
-      memoriesByDay[memoryDay] = [];
+    // For EVENT type memories with endDate, add to all days in the range
+    if (memory.type === 'event' && memory.endDate) {
+      let endDay;
+      if (Array.isArray(memory.endDate)) {
+        endDay = memory.endDate[2];
+      } else {
+        const endDateStr = memory.endDate.toString();
+        const [endYear, endMonth, day] = endDateStr.split('-').map(Number);
+        endDay = day;
+        
+        // Only show in current month if the end date is in the same month
+        if (endMonth !== (month + 1)) {
+          endDay = memoryDay; // Fallback to single day if end date is in different month
+        }
+      }
+      
+      // Add memory to all days in the range
+      for (let day = memoryDay; day <= Math.min(endDay, daysInMonth); day++) {
+        addMemoryToDay(day, memory);
+      }
+    } else {
+      // For non-event memories or events without endDate, add to single day
+      addMemoryToDay(memoryDay, memory);
     }
-    memoriesByDay[memoryDay].push(memory);
   });
   
   const navigateMonth = (direction: 'prev' | 'next') => {

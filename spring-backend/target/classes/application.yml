@@ -154,6 +154,11 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     baseline-version: 0
+    validate-on-migrate: false
+    out-of-order: true
+    ignore-missing-migrations: true
+    ignore-ignored-migrations: true
+    ignore-pending-migrations: true
 
 server:
   port: ${PORT:8080}

@@ -34,6 +34,9 @@ public class Memory {
     @NotNull(message = "Date is required")
     private LocalDate date;
     
+    @Column(name = "end_date")
+    private LocalDate endDate;
+    
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MemoryType type = MemoryType.SPECIAL_MOMENT;
@@ -133,6 +136,14 @@ public class Memory {
         this.date = date;
     }
     
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+    
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+    
     public MemoryType getType() {
         return type;
     }
@@ -179,6 +190,22 @@ public class Memory {
     
     public void removePhoto(Photo photo) {
         this.photos.remove(photo);
+    }
+    
+    // Validation methods
+    public boolean isDateRangeValid() {
+        if (type == MemoryType.EVENT && endDate != null) {
+            return !endDate.isBefore(date);
+        }
+        return true;
+    }
+    
+    public boolean isEventType() {
+        return type == MemoryType.EVENT;
+    }
+    
+    public boolean hasDateRange() {
+        return isEventType() && endDate != null;
     }
     
     @Override

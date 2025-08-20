@@ -9,6 +9,7 @@ interface Memory {
   title: string;
   description: string;
   date: string;
+  endDate?: string;
   type: 'anniversary' | 'special_moment' | 'milestone' | 'event';
   createdAt: string;
   creator: { name: string };
@@ -24,6 +25,7 @@ type MemoryFormData = {
   title: string;
   description: string;
   date: string;
+  endDate?: string;
   type: 'anniversary' | 'special_moment' | 'milestone' | 'event';
   selectedPhotos?: number[];
 };
@@ -111,6 +113,7 @@ function Memories() {
       title: memory.title,
       description: memory.description,
       date: memory.date.includes('T') ? memory.date.split('T')[0] : memory.date, // Format for date input
+      endDate: memory.endDate ? (memory.endDate.includes('T') ? memory.endDate.split('T')[0] : memory.endDate) : undefined,
       type: memory.type,
       selectedPhotos: memory.photos ? memory.photos.map(photo => photo.id) : [],
     });
@@ -134,6 +137,7 @@ function Memories() {
       title: '',
       description: '',
       date: '',
+      endDate: undefined,
       type: 'special_moment',
       selectedPhotos: [],
     });
@@ -342,7 +346,7 @@ function Memories() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  📅 Date
+                  📅 {formData.type === 'event' ? 'Start Date' : 'Date'}
                 </label>
                 <div className="relative">
                   <input
@@ -354,6 +358,27 @@ function Memories() {
                   />
                 </div>
               </div>
+              
+              {/* End Date for Event Type */}
+              {formData.type === 'event' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    📅 End Date (Optional)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      value={formData.endDate || ''}
+                      onChange={(e) => setFormData({ ...formData, endDate: e.target.value || undefined })}
+                      min={formData.date}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors text-gray-700 font-medium"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Leave empty for single-day events
+                  </p>
+                </div>
+              )}
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -499,7 +524,13 @@ function Memories() {
                     <div className="flex items-center space-x-4 text-sm text-gray-500">
                       <div className="flex items-center space-x-1">
                         <Calendar className="h-4 w-4" />
-                        <span>{new Date(memory.date).toLocaleDateString()}</span>
+                        <span>
+                          {memory.type === 'event' && memory.endDate ? (
+                            `${new Date(memory.date).toLocaleDateString()} - ${new Date(memory.endDate).toLocaleDateString()}`
+                          ) : (
+                            new Date(memory.date).toLocaleDateString()
+                          )}
+                        </span>
                       </div>
                       <span>•</span>
                       <span>Added by {memory.creator.name}</span>

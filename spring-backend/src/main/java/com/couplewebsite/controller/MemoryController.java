@@ -41,6 +41,7 @@ public class MemoryController {
                     request.getTitle(),
                     request.getDescription(),
                     request.getDate(),
+                    request.getEndDate(),
                     type
             );
             
@@ -116,6 +117,7 @@ public class MemoryController {
                     request.getTitle(),
                     request.getDescription(),
                     request.getDate(),
+                    request.getEndDate(),
                     type
             );
             
@@ -320,6 +322,7 @@ public class MemoryController {
         response.put("title", memory.getTitle());
         response.put("description", memory.getDescription());
         response.put("date", memory.getDate());
+        response.put("endDate", memory.getEndDate());
         response.put("type", memory.getType().getValue());
         response.put("createdAt", memory.getCreatedAt());
         response.put("updatedAt", memory.getUpdatedAt());
@@ -351,6 +354,7 @@ public class MemoryController {
         private String title;
         private String description;
         private LocalDate date;
+        private LocalDate endDate;
         private String type;
         
         // Getters and setters
@@ -360,6 +364,8 @@ public class MemoryController {
         public void setDescription(String description) { this.description = description; }
         public LocalDate getDate() { return date; }
         public void setDate(LocalDate date) { this.date = date; }
+        public LocalDate getEndDate() { return endDate; }
+        public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
         public String getType() { return type; }
         public void setType(String type) { this.type = type; }
     }
