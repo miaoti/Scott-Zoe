@@ -114,8 +114,8 @@ function Memories() {
     setFormData({
       title: memory.title,
       description: memory.description,
-      date: memory.date.includes('T') ? memory.date.split('T')[0] : memory.date, // Format for date input
-      endDate: memory.endDate ? (memory.endDate.includes('T') ? memory.endDate.split('T')[0] : memory.endDate) : undefined,
+      date: (memory.date && typeof memory.date === 'string') ? (memory.date.includes('T') ? memory.date.split('T')[0] : memory.date) : '', // Format for date input
+      endDate: memory.endDate && typeof memory.endDate === 'string' ? (memory.endDate.includes('T') ? memory.endDate.split('T')[0] : memory.endDate) : undefined,
       type: memory.type,
       selectedPhotos: memory.photos ? memory.photos.map(photo => photo.id) : [],
     });
@@ -405,20 +405,33 @@ function Memories() {
                         <span>
                           {memory.type === 'event' && memory.endDate ? (
                             (() => {
-                              const startDateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
-                              const endDateStr = memory.endDate.includes('T') ? memory.endDate.split('T')[0] : memory.endDate;
-                              const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
-                              const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
-                              const startDate = new Date(startYear, startMonth - 1, startDay);
-                              const endDate = new Date(endYear, endMonth - 1, endDay);
-                              return `${!isNaN(startDate.getTime()) ? startDate.toLocaleDateString() : 'Invalid Date'} - ${!isNaN(endDate.getTime()) ? endDate.toLocaleDateString() : 'Invalid Date'}`;
+                              try {
+                                if (!memory.date || typeof memory.date !== 'string') return 'Invalid Date';
+                                if (!memory.endDate || typeof memory.endDate !== 'string') return 'Invalid Date';
+                                
+                                const startDateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
+                                const endDateStr = memory.endDate.includes('T') ? memory.endDate.split('T')[0] : memory.endDate;
+                                const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
+                                const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+                                const startDate = new Date(startYear, startMonth - 1, startDay);
+                                const endDate = new Date(endYear, endMonth - 1, endDay);
+                                return `${!isNaN(startDate.getTime()) ? startDate.toLocaleDateString() : 'Invalid Date'} - ${!isNaN(endDate.getTime()) ? endDate.toLocaleDateString() : 'Invalid Date'}`;
+                              } catch (error) {
+                                return 'Invalid Date';
+                              }
                             })()
                           ) : (
                             (() => {
-                              const dateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
-                              const [year, month, day] = dateStr.split('-').map(Number);
-                              const date = new Date(year, month - 1, day);
-                              return !isNaN(date.getTime()) ? date.toLocaleDateString() : 'Invalid Date';
+                              try {
+                                if (!memory.date || typeof memory.date !== 'string') return 'Invalid Date';
+                                
+                                const dateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
+                                const [year, month, day] = dateStr.split('-').map(Number);
+                                const date = new Date(year, month - 1, day);
+                                return !isNaN(date.getTime()) ? date.toLocaleDateString() : 'Invalid Date';
+                              } catch (error) {
+                                return 'Invalid Date';
+                              }
                             })()
                           )}
                         </span>
