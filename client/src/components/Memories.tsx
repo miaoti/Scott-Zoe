@@ -42,6 +42,7 @@ function Memories() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [filter, setFilter] = useState<string>('all');
+  const [timeFilter, setTimeFilter] = useState<string>('all');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedDayMemories, setSelectedDayMemories] = useState<Memory[]>([]);
@@ -61,6 +62,10 @@ function Memories() {
     fetchMemories();
     fetchPhotos();
   }, []);
+  
+  useEffect(() => {
+    fetchFilteredMemories();
+  }, [filter, timeFilter]);
 
   const fetchMemories = async () => {
     try {
@@ -78,6 +83,27 @@ function Memories() {
     }
   };
 
+  const fetchFilteredMemories = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (filter !== 'all') {
+        params.append('type', filter);
+      }
+      if (timeFilter !== 'all') {
+        params.append('timeFilter', timeFilter);
+      }
+      
+      const url = params.toString() ? `/api/memories/filter?${params.toString()}` : '/api/memories';
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        setMemories(data);
+      }
+    } catch (error) {
+      console.error('Error fetching filtered memories:', error);
+    }
+  };
+
   const fetchPhotos = async () => {
     try {
       const response = await api.get('/api/photos?limit=100');
@@ -90,6 +116,12 @@ function Memories() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
+
+    // Check if description is empty and show validation message
+    if (!formData.description.trim()) {
+      alert('Please enter a description for this memory.');
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -222,10 +254,8 @@ function Memories() {
     }
   };
 
-  const filteredMemories = memories.filter((memory) => {
-    if (filter === 'all') return true;
-    return memory.type === filter;
-  });
+  // Since filtering is now done server-side, we just use the memories directly
+  const filteredMemories = memories;
 
   const sortedMemories = filteredMemories.sort((a, b) => {
     const dateA = new Date(a.date).getTime();
@@ -361,7 +391,8 @@ function Memories() {
         </h2>
         
         {/* Filters and Sort */}
-        <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 mb-6">
+        <div className="flex flex-col space-y-4 mb-6">
+          {/* Type Filter */}
           <div className="flex flex-col space-y-3 md:flex-row md:items-center md:space-y-0 md:space-x-4">
             <span className="text-gray-600 font-medium text-sm md:text-base">Filter by type:</span>
             <div className="flex flex-wrap gap-2">
@@ -381,13 +412,43 @@ function Memories() {
             </div>
           </div>
           
-          <button
-            onClick={toggleSortOrder}
-            className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors w-full md:w-auto"
-          >
-            <ArrowUpDown className="h-4 w-4" />
-            <span className="text-sm md:hidden">Sort by Date</span>
-          </button>
+          {/* Time Filter */}
+          <div className="flex flex-col space-y-3 md:flex-row md:items-center md:space-y-0 md:space-x-4">
+            <span className="text-gray-600 font-medium text-sm md:text-base">Filter by time:</span>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { value: 'all', label: 'All Time' },
+                { value: 'thisMonth', label: 'This Month' },
+                { value: 'last6Months', label: 'Last 6 Months' },
+                { value: 'thisYear', label: 'This Year' },
+                { value: 'lastYear', label: 'Last Year' },
+                { value: 'older', label: '2+ Years Ago' }
+              ].map((timeOption) => (
+                <button
+                  key={timeOption.value}
+                  onClick={() => setTimeFilter(timeOption.value)}
+                  className={`px-3 py-2 text-sm rounded-lg transition-colors ${
+                    timeFilter === timeOption.value
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {timeOption.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Sort Control */}
+           <div className="flex justify-end">
+            <button
+              onClick={toggleSortOrder}
+              className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors w-full md:w-auto"
+            >
+              <ArrowUpDown className="h-4 w-4" />
+              <span className="text-sm">Sort by Date ({sortOrder === 'asc' ? 'Oldest First' : 'Newest First'})</span>
+            </button>
+           </div>
         </div>
 
 
@@ -909,7 +970,6 @@ function Memories() {
               </button>
               <button
                 type="submit"
-                onClick={handleSubmit}
                 disabled={submitting}
                 className="flex-1 px-4 md:px-6 py-2 md:py-3 romantic-gradient text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm md:text-base"
               >

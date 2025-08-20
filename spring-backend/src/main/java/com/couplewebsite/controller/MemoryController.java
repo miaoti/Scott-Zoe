@@ -211,6 +211,30 @@ public class MemoryController {
     }
     
     /**
+     * Get memories filtered by time period
+     */
+    @GetMapping("/filter")
+    public ResponseEntity<?> getMemoriesFiltered(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String timeFilter) {
+        try {
+            List<Memory> memories = memoryService.getMemoriesFiltered(type, timeFilter);
+            
+            List<Map<String, Object>> memoryResponses = memories.stream()
+                    .map(this::createMemoryResponse)
+                    .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(memoryResponses);
+            
+        } catch (Exception e) {
+            logger.error("Error fetching filtered memories with type: {} and timeFilter: {}", type, timeFilter, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
      * Get anniversary information
      */
     @GetMapping("/anniversary")

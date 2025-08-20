@@ -231,6 +231,56 @@ public class MemoryService {
     }
     
     /**
+     * Get memories filtered by type and time period
+     */
+    public List<Memory> getMemoriesFiltered(String type, String timeFilter) {
+        try {
+            List<Memory> memories = memoryRepository.findAllByOrderByDateDesc();
+            
+            // Filter by type if specified
+            if (type != null && !"all".equals(type)) {
+                Memory.MemoryType memoryType = Memory.MemoryType.fromValue(type);
+                memories = memories.stream()
+                    .filter(memory -> memory.getType() == memoryType)
+                    .collect(Collectors.toList());
+            }
+            
+            // Filter by time period if specified
+            if (timeFilter != null && !"all".equals(timeFilter)) {
+                LocalDate now = LocalDate.now();
+                memories = memories.stream()
+                    .filter(memory -> {
+                        LocalDate memoryDate = memory.getDate();
+                        
+                        switch (timeFilter) {
+                            case "thisYear":
+                                return memoryDate.getYear() == now.getYear();
+                            case "lastYear":
+                                return memoryDate.getYear() == now.getYear() - 1;
+                            case "thisMonth":
+                                return memoryDate.getYear() == now.getYear() && 
+                                       memoryDate.getMonth() == now.getMonth();
+                            case "last6Months":
+                                LocalDate sixMonthsAgo = now.minusMonths(6);
+                                return memoryDate.isAfter(sixMonthsAgo) || memoryDate.isEqual(sixMonthsAgo);
+                            case "older":
+                                LocalDate twoYearsAgo = now.minusYears(2);
+                                return memoryDate.isBefore(twoYearsAgo);
+                            default:
+                                return true;
+                        }
+                    })
+                    .collect(Collectors.toList());
+            }
+            
+            return memories;
+        } catch (Exception e) {
+            logger.error("Error fetching filtered memories with type: {} and timeFilter: {}", type, timeFilter, e);
+            throw new RuntimeException("Failed to fetch filtered memories: " + e.getMessage());
+        }
+    }
+    
+    /**
      * Add photos to an EVENT memory
      */
     public Memory addPhotosToMemory(Long memoryId, List<Long> photoIds) {

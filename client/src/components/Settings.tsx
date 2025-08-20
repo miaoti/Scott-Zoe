@@ -165,7 +165,9 @@ function Settings() {
   const formatDate = (dateString: string) => {
     try {
       const dateStr = dateString.includes('T') ? dateString.split('T')[0] : dateString;
-      const date = new Date(dateStr);
+      const [year, month, day] = dateStr.split('-').map(Number);
+      // Create date in local timezone to avoid timezone conversion issues
+      const date = new Date(year, month - 1, day); // month is 0-indexed in Date constructor
       
       if (isNaN(date.getTime())) {
         return 'Invalid Date';
@@ -465,7 +467,7 @@ function Settings() {
             </button>
             
             <div className={`transition-all duration-300 ease-in-out ${
-              expandedSections.wheelConfig ? 'max-h-none opacity-100 overflow-visible' : 'max-h-0 opacity-0 overflow-hidden'
+              expandedSections.wheelConfig ? 'max-h-96 opacity-100 overflow-y-auto' : 'max-h-0 opacity-0 overflow-hidden'
             }`}>
               <div className="px-6 pb-6">
                 <div className="text-center mb-6">
