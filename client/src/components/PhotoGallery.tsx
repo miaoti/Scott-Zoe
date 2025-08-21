@@ -142,7 +142,20 @@ function PhotoGallery() {
   };
 
   const renderPhotoGrid = (photosToRender: Photo[], showAll = false) => {
-    const displayPhotos = showAll ? photosToRender : photosToRender;
+    // Calculate how many photos to show based on grid size and available photos
+    const getPreviewCount = () => {
+      if (showAll) return photosToRender.length;
+      
+      // Base preview count on image size and grid layout
+      switch (imageSize) {
+        case 'small': return Math.min(12, photosToRender.length); // 3x4 grid
+        case 'medium': return Math.min(8, photosToRender.length);  // 2x4 grid  
+        case 'large': return Math.min(6, photosToRender.length);   // 2x3 grid
+        default: return Math.min(8, photosToRender.length);
+      }
+    };
+    
+    const displayPhotos = photosToRender.slice(0, getPreviewCount());
     
     return (
       <div className={`grid ${getGridCols()} gap-4`}>
@@ -264,7 +277,7 @@ function PhotoGallery() {
         
         {photos.length > 0 ? (
           <div>
-            {renderPhotoGrid(photos, true)}
+            {renderPhotoGrid(photos, false)}
           </div>
         ) : (
           <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
