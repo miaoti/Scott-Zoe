@@ -60,15 +60,23 @@ function AllPhotos() {
     try {
       setLoading(true);
       const endpoint = isFavoritesView 
-        ? '/api/photos/favorites'
+        ? `/api/photos/favorites?page=${page}&limit=20`
         : `/api/photos?page=${page}&limit=20`;
       const response = await api.get(endpoint);
       
       if (isFavoritesView) {
-        // Favorites endpoint returns array directly
-        setPhotos(response.data);
-        setTotalPhotos(response.data.length);
-        setTotalPages(1);
+        // Check if response has pagination structure (new format) or is array (legacy)
+        if (response.data.photos) {
+          // New paginated format
+          setPhotos(response.data.photos);
+          setTotalPages(response.data.pagination.totalPages);
+          setTotalPhotos(response.data.pagination.total);
+        } else {
+          // Legacy format - array directly
+          setPhotos(response.data);
+          setTotalPhotos(response.data.length);
+          setTotalPages(1);
+        }
       } else {
         setPhotos(response.data.photos);
         setTotalPages(response.data.pagination.totalPages);

@@ -36,6 +36,9 @@ function PhotoGallery() {
   const [imageSize, setImageSize] = useState<ImageSize>('medium');
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [showPhotoDetail, setShowPhotoDetail] = useState(false);
+  const [page, setPage] = useState(0);
+  const [totalPhotos, setTotalPhotos] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     fetchPhotos();
@@ -47,15 +50,30 @@ function PhotoGallery() {
     }
   }, [photos]);
 
-  const fetchPhotos = async () => {
+  const fetchPhotos = async (pageNum = 0, append = false) => {
     try {
-      const response = await api.get('/api/photos?page=0&limit=100');
-      const photosData = response.data.photos || response.data;
-      setPhotos(photosData);
+      if (!append) setLoading(true);
+      const response = await api.get(`/api/photos?page=${pageNum}&limit=20`);
+      
+      if (append) {
+        setPhotos(prev => [...prev, ...response.data.photos]);
+      } else {
+        setPhotos(response.data.photos);
+      }
+      
+      setTotalPhotos(response.data.pagination.total);
+      setHasMore(response.data.pagination.hasNext);
+      setPage(pageNum);
     } catch (error) {
       console.error('Error fetching photos:', error);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const loadMorePhotos = async () => {
+    if (hasMore && !loading) {
+      await fetchPhotos(page + 1, true);
     }
   };
 
@@ -178,10 +196,10 @@ function PhotoGallery() {
                   e.stopPropagation();
                   toggleFavorite(photo.id);
                 }}
-                className="absolute top-2 right-2 p-1 bg-white/80 rounded-full hover:bg-white transition-colors opacity-0 group-hover:opacity-100"
+                className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white active:scale-95 transition-all duration-200 opacity-0 group-hover:opacity-100 shadow-sm hover:shadow-md"
               >
                 <Heart
-                  className={`h-4 w-4 ${photo.isFavorite ? 'text-red-500 fill-current' : 'text-gray-600'}`}
+                  className={`h-4 w-4 transition-all duration-200 ${photo.isFavorite ? 'text-red-500 fill-current scale-110' : 'text-gray-600 hover:text-red-400'}`}
                 />
               </button>
             </div>
@@ -218,28 +236,28 @@ function PhotoGallery() {
           <p className="text-gray-600">Your beautiful memories organized by categories</p>
         </div>
         
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:space-x-2 sm:gap-0">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2">
           <Link
             to="/recycle-bin"
-            className="bg-apple-gray-6 hover:bg-apple-gray-5 text-apple-label px-4 sm:px-6 py-2 sm:py-3 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium border border-apple-separator text-sm sm:text-base"
+            className="group bg-white/80 backdrop-blur-sm hover:bg-white/90 active:bg-gray-50 text-gray-700 px-4 py-3 sm:px-5 sm:py-2.5 rounded-2xl sm:rounded-xl transition-all duration-200 flex items-center justify-center gap-2.5 sm:gap-2 shadow-sm hover:shadow-md border border-gray-200/60 font-medium text-sm sm:text-base min-h-[44px] sm:min-h-[40px]"
           >
-            <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+            <Trash2 className="w-4 h-4 text-gray-600 group-hover:text-gray-700 transition-colors" />
             <span className="hidden sm:inline">Recycle Bin</span>
             <span className="sm:hidden">Recycle</span>
           </Link>
           <Link
             to="/categories"
-            className="bg-apple-gray-6 hover:bg-apple-gray-5 text-apple-label px-4 sm:px-6 py-2 sm:py-3 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium border border-apple-separator text-sm sm:text-base"
+            className="group bg-white/80 backdrop-blur-sm hover:bg-white/90 active:bg-gray-50 text-gray-700 px-4 py-3 sm:px-5 sm:py-2.5 rounded-2xl sm:rounded-xl transition-all duration-200 flex items-center justify-center gap-2.5 sm:gap-2 shadow-sm hover:shadow-md border border-gray-200/60 font-medium text-sm sm:text-base min-h-[44px] sm:min-h-[40px]"
           >
-            <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+            <Settings className="w-4 h-4 text-gray-600 group-hover:text-gray-700 transition-colors" />
             <span className="hidden sm:inline">Manage Categories</span>
             <span className="sm:hidden">Categories</span>
           </Link>
           <button
             onClick={() => setShowUploadModal(true)}
-            className="bg-apple-gray-6 hover:bg-apple-gray-5 text-apple-label px-4 sm:px-6 py-2 sm:py-3 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium border border-apple-separator text-sm sm:text-base"
+            className="group bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white px-4 py-3 sm:px-5 sm:py-2.5 rounded-2xl sm:rounded-xl transition-all duration-200 flex items-center justify-center gap-2.5 sm:gap-2 shadow-sm hover:shadow-md font-medium text-sm sm:text-base min-h-[44px] sm:min-h-[40px]"
           >
-            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+            <Plus className="w-4 h-4 transition-transform group-hover:scale-110" />
             <span className="hidden sm:inline">Add Photos</span>
             <span className="sm:hidden">Add</span>
           </button>
@@ -249,12 +267,12 @@ function PhotoGallery() {
       {/* Controls */}
       <div className="flex items-center space-x-4">
         {/* Size selector */}
-        <div className="flex items-center space-x-2">
-          <Settings className="h-4 w-4 text-gray-600" />
+        <div className="flex items-center gap-3">
+          <Settings className="h-4 w-4 text-gray-500" />
           <select
             value={imageSize}
             onChange={(e) => setImageSize(e.target.value as ImageSize)}
-            className="px-3 py-1 border border-apple-separator rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue bg-white"
+            className="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white/80 backdrop-blur-sm transition-all duration-200 font-medium text-gray-700 shadow-sm hover:shadow-md"
           >
             <option value="small">Small</option>
             <option value="medium">Medium</option>
@@ -271,13 +289,33 @@ function PhotoGallery() {
             to="/photos"
             className="text-apple-blue hover:text-apple-blue-dark font-medium transition-colors"
           >
-            View All ({photos.length})
+            View All ({totalPhotos})
           </Link>
         </div>
         
         {photos.length > 0 ? (
           <div>
             {renderPhotoGrid(photos, false)}
+            
+            {/* Load More Button */}
+            {hasMore && (
+              <div className="mt-8 text-center">
+                <button
+                  onClick={loadMorePhotos}
+                  disabled={loading}
+                  className="group bg-blue-500 hover:bg-blue-600 active:bg-blue-700 disabled:bg-gray-300 text-white px-8 py-3.5 rounded-2xl transition-all duration-200 font-medium text-base shadow-sm hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none min-h-[48px] flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Loading...</span>
+                    </>
+                  ) : (
+                    <span>Load More Photos</span>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
@@ -343,14 +381,14 @@ function PhotoGallery() {
                   {category.id === -1 ? (
                     <Link
                       to="/photos?filter=favorites"
-                      className="block w-full text-center bg-apple-gray-6 hover:bg-apple-gray-5 text-apple-label py-2 px-4 rounded-lg transition-colors duration-200 text-sm font-medium border border-apple-separator"
+                      className="block w-full text-center bg-white/80 backdrop-blur-sm hover:bg-white/90 active:bg-gray-50 text-gray-700 py-3 px-4 rounded-xl transition-all duration-200 text-sm font-medium border border-gray-200/60 shadow-sm hover:shadow-md"
                     >
                       View All Favorites
                     </Link>
                   ) : (
                     <Link
                       to={`/category/${category.id}`}
-                      className="block w-full text-center bg-apple-gray-6 hover:bg-apple-gray-5 text-apple-label py-2 px-4 rounded-lg transition-colors duration-200 text-sm font-medium border border-apple-separator"
+                      className="block w-full text-center bg-white/80 backdrop-blur-sm hover:bg-white/90 active:bg-gray-50 text-gray-700 py-3 px-4 rounded-xl transition-all duration-200 text-sm font-medium border border-gray-200/60 shadow-sm hover:shadow-md"
                     >
                       View All Photos
                     </Link>
@@ -372,9 +410,9 @@ function PhotoGallery() {
           </p>
           <button
             onClick={() => setShowUploadModal(true)}
-            className="inline-flex items-center px-6 py-3 bg-purple-400 hover:bg-purple-500 text-white rounded-lg transition-colors"
+            className="group inline-flex items-center px-8 py-4 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-2xl transition-all duration-200 font-medium shadow-sm hover:shadow-md gap-3"
           >
-            <Plus className="w-5 h-5 mr-2" />
+            <Plus className="w-5 h-5 transition-transform group-hover:scale-110" />
             Add Your First Photo
           </button>
         </div>

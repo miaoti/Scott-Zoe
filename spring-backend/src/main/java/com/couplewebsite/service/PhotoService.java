@@ -362,6 +362,18 @@ public class PhotoService {
     public List<Photo> getFavoritePhotos() {
         return photoRepository.findByIsFavoriteTrue();
     }
+    
+    /**
+     * Get favorite photos with pagination
+     */
+    public Page<Photo> getFavoritePhotos(int page, int size) {
+        // Limit page size to prevent excessive memory usage
+        if (size > 50) {
+            size = 50;
+        }
+        Pageable pageable = PageRequest.of(page, size);
+        return photoRepository.findByIsFavoriteTrueOrderByCreatedAtDesc(pageable);
+    }
 
     /**
      * Bulk delete photos

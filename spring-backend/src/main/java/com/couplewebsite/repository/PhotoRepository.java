@@ -53,6 +53,11 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
     List<Photo> findByIsFavoriteTrue();
     
     /**
+     * Find favorite photos with pagination, ordered by creation date descending
+     */
+    Page<Photo> findByIsFavoriteTrueOrderByCreatedAtDesc(Pageable pageable);
+    
+    /**
      * Find all non-deleted photos with pagination, ordered by creation date descending
      */
     Page<Photo> findByIsDeletedFalseOrderByCreatedAtDesc(Pageable pageable);

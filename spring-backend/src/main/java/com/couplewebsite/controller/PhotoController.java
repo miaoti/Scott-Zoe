@@ -386,14 +386,36 @@ public class PhotoController {
      * Get user's favorite photos
      */
     @GetMapping("/favorites")
-    public ResponseEntity<List<Map<String, Object>>> getFavoritePhotos(Authentication authentication) {
+    public ResponseEntity<?> getFavoritePhotos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int limit,
+            Authentication authentication) {
         try {
-            // Get all favorite photos
-            List<Photo> favoritePhotos = photoService.getFavoritePhotos();
-            List<Map<String, Object>> favorites = favoritePhotos.stream()
-                .map(this::createPhotoResponseWithStats)
-                .collect(Collectors.toList());
-            return ResponseEntity.ok(favorites);
+            if (page < 0) {
+                // Legacy behavior: return all favorites for backward compatibility
+                List<Photo> favoritePhotos = photoService.getFavoritePhotos();
+                List<Map<String, Object>> favorites = favoritePhotos.stream()
+                    .map(this::createPhotoResponseWithStats)
+                    .collect(Collectors.toList());
+                return ResponseEntity.ok(favorites);
+            } else {
+                // New paginated behavior
+                Page<Photo> favoritePage = photoService.getFavoritePhotos(page, limit);
+                List<Map<String, Object>> favorites = favoritePage.getContent().stream()
+                    .map(this::createPhotoResponseWithStats)
+                    .collect(Collectors.toList());
+                
+                Map<String, Object> response = new HashMap<>();
+                response.put("photos", favorites);
+                response.put("pagination", Map.of(
+                    "currentPage", page,
+                    "totalPages", favoritePage.getTotalPages(),
+                    "total", favoritePage.getTotalElements(),
+                    "hasNext", favoritePage.hasNext(),
+                    "hasPrevious", favoritePage.hasPrevious()
+                ));
+                return ResponseEntity.ok(response);
+            }
         } catch (Exception e) {
             logger.error("Error getting favorite photos: ", e);
             return ResponseEntity.ok(new ArrayList<>());
