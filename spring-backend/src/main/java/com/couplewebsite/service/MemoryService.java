@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -233,7 +234,7 @@ public class MemoryService {
     /**
      * Get memories filtered by type and time period
      */
-    public List<Memory> getMemoriesFiltered(String type, String timeFilter) {
+    public List<Memory> getMemoriesFiltered(String type, String timeFilter, String sortOrder) {
         try {
             List<Memory> memories = memoryRepository.findAllByOrderByDateDesc();
             
@@ -273,9 +274,22 @@ public class MemoryService {
                     .collect(Collectors.toList());
             }
             
+            // Sort by date based on sortOrder parameter
+            if (sortOrder != null) {
+                if ("asc".equals(sortOrder)) {
+                    memories = memories.stream()
+                        .sorted(Comparator.comparing(Memory::getDate))
+                        .collect(Collectors.toList());
+                } else if ("desc".equals(sortOrder)) {
+                    memories = memories.stream()
+                        .sorted(Comparator.comparing(Memory::getDate).reversed())
+                        .collect(Collectors.toList());
+                }
+            }
+            
             return memories;
         } catch (Exception e) {
-            logger.error("Error fetching filtered memories with type: {} and timeFilter: {}", type, timeFilter, e);
+            logger.error("Error fetching filtered memories with type: {}, timeFilter: {}, sortOrder: {}", type, timeFilter, sortOrder, e);
             throw new RuntimeException("Failed to fetch filtered memories: " + e.getMessage());
         }
     }

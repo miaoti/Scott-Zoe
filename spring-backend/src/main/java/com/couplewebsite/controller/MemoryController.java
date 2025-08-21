@@ -216,9 +216,10 @@ public class MemoryController {
     @GetMapping("/filter")
     public ResponseEntity<?> getMemoriesFiltered(
             @RequestParam(required = false) String type,
-            @RequestParam(required = false) String timeFilter) {
+            @RequestParam(required = false) String timeFilter,
+            @RequestParam(required = false) String sortOrder) {
         try {
-            List<Memory> memories = memoryService.getMemoriesFiltered(type, timeFilter);
+            List<Memory> memories = memoryService.getMemoriesFiltered(type, timeFilter, sortOrder);
             
             List<Map<String, Object>> memoryResponses = memories.stream()
                     .map(this::createMemoryResponse)
@@ -227,7 +228,7 @@ public class MemoryController {
             return ResponseEntity.ok(memoryResponses);
             
         } catch (Exception e) {
-            logger.error("Error fetching filtered memories with type: {} and timeFilter: {}", type, timeFilter, e);
+            logger.error("Error fetching filtered memories with type: {}, timeFilter: {}, sortOrder: {}", type, timeFilter, sortOrder, e);
             Map<String, String> error = new HashMap<>();
             error.put("message", "Server error");
             return ResponseEntity.status(500).body(error);

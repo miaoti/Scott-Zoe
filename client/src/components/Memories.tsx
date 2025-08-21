@@ -65,7 +65,7 @@ function Memories() {
   
   useEffect(() => {
     fetchFilteredMemories();
-  }, [filter, timeFilter]);
+  }, [filter, timeFilter, sortOrder]);
 
   const fetchMemories = async () => {
     try {
@@ -91,6 +91,9 @@ function Memories() {
       }
       if (timeFilter !== 'all') {
         params.append('timeFilter', timeFilter);
+      }
+      if (sortOrder) {
+        params.append('sortOrder', sortOrder);
       }
       
       const url = params.toString() ? `/api/memories/filter?${params.toString()}` : '/api/memories';
@@ -254,14 +257,8 @@ function Memories() {
     }
   };
 
-  // Since filtering is now done server-side, we just use the memories directly
-  const filteredMemories = memories;
-
-  const sortedMemories = filteredMemories.sort((a, b) => {
-    const dateA = new Date(a.date).getTime();
-    const dateB = new Date(b.date).getTime();
-    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
-  });
+  // Since filtering and sorting are now done server-side, we just use the memories directly
+  const sortedMemories = memories;
 
 
 
