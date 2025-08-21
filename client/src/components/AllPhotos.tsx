@@ -190,10 +190,10 @@ function AllPhotos() {
 
   const getGridCols = () => {
     switch (imageSize) {
-      case 'small': return 'grid-cols-6 md:grid-cols-8 lg:grid-cols-10';
-      case 'medium': return 'grid-cols-4 md:grid-cols-6 lg:grid-cols-8';
-      case 'large': return 'grid-cols-3 md:grid-cols-4 lg:grid-cols-6';
-      default: return 'grid-cols-4 md:grid-cols-6 lg:grid-cols-8';
+      case 'small': return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10';
+      case 'medium': return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8';
+      case 'large': return 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6';
+      default: return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8';
     }
   };
 
@@ -209,7 +209,7 @@ function AllPhotos() {
   if (loading && page === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-blue-500"></div>
       </div>
     );
   }
@@ -308,30 +308,30 @@ function AllPhotos() {
 
       {/* Photos Grid */}
       {photos.length > 0 ? (
-        <div className={`grid ${getGridCols()} gap-4`}>
+        <div className={`grid ${getGridCols()} gap-2 sm:gap-3 md:gap-4 px-2 sm:px-0`}>
           {photos.map((photo) => (
             <div key={photo.id} className="relative group">
               <div 
-                className={`${getImageSizeClass()} relative overflow-hidden rounded-lg cursor-pointer transition-transform hover:scale-105`}
+                className={`${getImageSizeClass()} relative overflow-hidden rounded-xl cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg shadow-sm bg-white`}
                 onClick={() => selectionMode ? togglePhotoSelection(photo.id) : openPhotoDetail(photo)}
               >
                 <img
                   src={`${API_BASE_URL}/api/photos/image/${photo.filename}`}
                   alt={photo.originalName}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-xl"
                   loading="lazy"
                 />
                 
                 {/* Selection checkbox */}
                 {selectionMode && (
-                  <div className="absolute top-2 left-2 p-1 bg-white/80 rounded-full">
-                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                  <div className="absolute top-2 left-2 p-1.5 bg-white/95 backdrop-blur-sm rounded-full shadow-sm">
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
                       selectedPhotos.has(photo.id) 
-                        ? 'bg-blue-500 border-blue-500' 
-                        : 'border-gray-400 bg-white'
+                        ? 'bg-blue-500 border-blue-500 scale-110' 
+                        : 'border-gray-300 bg-white hover:border-blue-400'
                     }`}>
                       {selectedPhotos.has(photo.id) && (
-                        <Check className="w-3 h-3 text-white" />
+                        <Check className="w-3.5 h-3.5 text-white" />
                       )}
                     </div>
                   </div>
@@ -344,36 +344,31 @@ function AllPhotos() {
                       e.stopPropagation();
                       toggleFavorite(photo.id);
                     }}
-                    className="absolute top-2 right-2 p-1 bg-white/80 rounded-full hover:bg-white transition-colors opacity-0 group-hover:opacity-100"
+                    className="absolute top-2 right-2 p-2 bg-white/95 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-110"
                   >
                     <Heart
-                      className={`h-4 w-4 ${photo.isFavorite ? 'text-red-500 fill-current' : 'text-gray-600'}`}
+                      className={`h-4 w-4 transition-colors duration-200 ${photo.isFavorite ? 'text-red-500 fill-current' : 'text-gray-600 hover:text-red-400'}`}
                     />
                   </button>
                 )}
               </div>
                
-               {/* Photo info - only show caption if available */}
-               {photo.caption && (
-                 <div className="mt-2">
-                   <p className="text-xs text-gray-600 truncate">{photo.caption}</p>
-                 </div>
-               )}
+
             </div>
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
-          <div className="text-gray-400 mb-4">
-            <Plus className="w-16 h-16 mx-auto mb-4" />
+        <div className="text-center py-16 px-4">
+          <div className="text-gray-300 mb-6">
+            <Plus className="w-20 h-20 mx-auto mb-6 stroke-1" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-600 mb-2">No photos yet</h3>
-          <p className="text-gray-500 mb-6">
+          <h3 className="text-2xl font-semibold text-gray-800 mb-3">No photos yet</h3>
+          <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
             Start building your gallery by uploading your first photos!
           </p>
           <button
             onClick={() => setShowUploadModal(true)}
-            className="inline-flex items-center px-6 py-3 bg-purple-400 hover:bg-purple-500 text-white rounded-lg transition-colors"
+            className="inline-flex items-center px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl hover:scale-105"
           >
             <Plus className="w-5 h-5 mr-2" />
             Add Your First Photo
