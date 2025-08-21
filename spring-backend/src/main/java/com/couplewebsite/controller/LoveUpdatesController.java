@@ -40,7 +40,7 @@ public class LoveUpdatesController {
         String partnerUsername = "scott".equals(currentUsername) ? "zoe" : "scott";
         String partnerDisplayName = "scott".equals(partnerUsername) ? "Scott" : "Zoe";
         
-        SseEmitter emitter = new SseEmitter(300000L); // 5 minutes timeout
+        SseEmitter emitter = new SseEmitter(0L); // No timeout for persistent connection
         
         // Add emitter to user's list
         userEmitters.computeIfAbsent(currentUsername, k -> new CopyOnWriteArrayList<>()).add(emitter);
