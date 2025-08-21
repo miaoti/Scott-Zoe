@@ -204,13 +204,7 @@ function PhotoGallery() {
               </button>
             </div>
             
-            {/* Photo info */}
-            <div className="mt-2">
-              <p className="text-sm font-medium text-gray-800 truncate">{photo.originalName}</p>
-              {photo.caption && (
-                <p className="text-xs text-gray-600 truncate">{photo.caption}</p>
-              )}
-            </div>
+
           </div>
         ))}
       </div>
