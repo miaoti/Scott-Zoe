@@ -390,14 +390,14 @@ function Memories() {
         
         {/* Dropdown Filters */}
         <div className="mb-8">
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4">
             {/* Type Filter Dropdown */}
-            <div className="relative">
+            <div className="relative flex-1 sm:flex-none sm:min-w-[140px]">
               <label className="block text-gray-500 text-sm font-medium mb-1">Type</label>
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition-colors"
+                className="w-full appearance-none bg-white border border-gray-300 rounded-lg px-4 py-3 pr-8 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition-colors touch-manipulation"
               >
                 <option value="all">All Types</option>
                 <option value="anniversary">Anniversary</option>
@@ -413,12 +413,12 @@ function Memories() {
             </div>
             
             {/* Time Filter Dropdown */}
-            <div className="relative">
+            <div className="relative flex-1 sm:flex-none sm:min-w-[140px]">
               <label className="block text-gray-500 text-sm font-medium mb-1">Time Period</label>
               <select
                 value={timeFilter}
                 onChange={(e) => setTimeFilter(e.target.value)}
-                className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition-colors"
+                className="w-full appearance-none bg-white border border-gray-300 rounded-lg px-4 py-3 pr-8 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition-colors touch-manipulation"
               >
                 <option value="all">All Time</option>
                 <option value="thisMonth">This Month</option>
@@ -435,12 +435,12 @@ function Memories() {
             </div>
             
             {/* Sort Control Dropdown */}
-            <div className="relative">
+            <div className="relative flex-1 sm:flex-none sm:min-w-[140px]">
               <label className="block text-gray-500 text-sm font-medium mb-1">Sort Order</label>
               <select
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-                className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition-colors"
+                className="w-full appearance-none bg-white border border-gray-300 rounded-lg px-4 py-3 pr-8 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition-colors touch-manipulation"
               >
                 <option value="desc">Newest First</option>
                 <option value="asc">Oldest First</option>
