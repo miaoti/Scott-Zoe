@@ -69,21 +69,7 @@ function Memories() {
     fetchFilteredMemories();
   }, [filter, timeFilter, sortOrder]);
 
-  // Handle opening specific memory from query parameter
-  useEffect(() => {
-    const openMemoryId = searchParams.get('openMemory');
-    
-    if (openMemoryId && memories.length > 0) {
-      const memoryToOpen = memories.find(memory => memory.id === parseInt(openMemoryId));
-      
-      if (memoryToOpen) {
-        setSelectedMemory(memoryToOpen);
-        setShowDetailModal(true);
-        // Clear the query parameter
-        setSearchParams({});
-      }
-    }
-  }, [searchParams, memories, setSearchParams]);
+  // Handle opening specific memory from query parameter - removed duplicate logic
 
   const fetchMemories = async () => {
     try {
