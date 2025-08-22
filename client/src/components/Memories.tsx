@@ -88,31 +88,38 @@ function Memories() {
   const fetchMemories = async () => {
     try {
       const response = await api.get('/api/memories');
-      console.log('Fetched memories:', response.data);
       setMemories(response.data);
-      
-      // Check for openMemory parameter after memories are loaded
-      const openMemoryId = searchParams.get('openMemory');
-      console.log('openMemoryId from URL:', openMemoryId);
-      
-      if (openMemoryId && response.data && response.data.length > 0) {
-        const memoryToOpen = response.data.find((memory: Memory) => memory.id === parseInt(openMemoryId));
-        console.log('Found memory to open:', memoryToOpen);
-        
-        if (memoryToOpen) {
-          console.log('Setting selected memory and showing modal');
-          setSelectedMemory(memoryToOpen);
-          setShowDetailModal(true);
-          // Clear the query parameter after a short delay to ensure modal opens
-          setTimeout(() => {
-            setSearchParams({});
-          }, 100);
-        }
-      }
     } catch (error) {
       console.error('Error fetching memories:', error);
     }
   };
+
+  // Handle opening memory from URL parameter
+  const handleOpenMemoryFromURL = () => {
+    const openMemoryId = searchParams.get('openMemory');
+    console.log('Checking for openMemoryId:', openMemoryId);
+    console.log('Available memories:', memories.length);
+    
+    if (openMemoryId && memories.length > 0) {
+      const memoryToOpen = memories.find(memory => memory.id === parseInt(openMemoryId));
+      console.log('Found memory to open:', memoryToOpen);
+      
+      if (memoryToOpen) {
+        console.log('Opening memory detail modal');
+        setSelectedMemory(memoryToOpen);
+        setShowDetailModal(true);
+        // Clear the query parameter
+        setSearchParams({});
+      }
+    }
+  };
+
+  // Trigger memory opening when memories are loaded and URL has parameter
+  useEffect(() => {
+    if (memories.length > 0) {
+      handleOpenMemoryFromURL();
+    }
+  }, [memories]);
 
   const fetchFilteredMemories = async () => {
     try {
