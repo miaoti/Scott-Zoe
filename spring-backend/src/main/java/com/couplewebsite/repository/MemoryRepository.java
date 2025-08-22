@@ -39,6 +39,14 @@ public interface MemoryRepository extends JpaRepository<Memory, Long> {
                                          @Param("endDate") LocalDate endDate);
     
     /**
+     * Find upcoming memories excluding EVENT type
+     */
+    @Query("SELECT m FROM Memory m LEFT JOIN FETCH m.creator " +
+           "WHERE m.type != 'EVENT' " +
+           "ORDER BY m.date ASC")
+    List<Memory> findUpcomingMemoriesExcludingEvents();
+    
+    /**
      * Find memories by creator
      */
     List<Memory> findByCreatorIdOrderByDateDesc(Long creatorId);

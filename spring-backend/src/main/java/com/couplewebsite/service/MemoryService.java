@@ -152,6 +152,35 @@ public class MemoryService {
     }
     
     /**
+     * Get upcoming memories excluding EVENT type (for dashboard)
+     */
+    public List<Memory> getUpcomingMemoriesExcludingEvents(int limit) {
+        List<Memory> allMemories = memoryRepository.findUpcomingMemoriesExcludingEvents();
+        LocalDate today = LocalDate.now();
+        
+        return allMemories.stream()
+            .map(memory -> {
+                LocalDate memoryDate = memory.getDate();
+                int thisYear = today.getYear();
+                LocalDate anniversaryThisYear = LocalDate.of(thisYear, memoryDate.getMonth(), memoryDate.getDayOfMonth());
+                LocalDate nextAnniversary = anniversaryThisYear.isBefore(today) || anniversaryThisYear.isEqual(today) 
+                    ? LocalDate.of(thisYear + 1, memoryDate.getMonth(), memoryDate.getDayOfMonth())
+                    : anniversaryThisYear;
+                
+                // Create a wrapper to include next anniversary date
+                return new Object() {
+                    public final Memory memoryData = memory;
+                    public final LocalDate nextAnniversaryDate = nextAnniversary;
+                    public final long daysUntil = ChronoUnit.DAYS.between(today, nextAnniversary);
+                };
+            })
+            .sorted((a, b) -> Long.compare(a.daysUntil, b.daysUntil))
+            .limit(limit)
+            .map(wrapper -> wrapper.memoryData)
+            .collect(Collectors.toList());
+    }
+    
+    /**
      * Calculate anniversary information
      */
     public AnniversaryInfo calculateAnniversary(LocalDate relationshipStartDate) {

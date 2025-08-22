@@ -289,6 +289,28 @@ public class MemoryController {
     }
     
     /**
+     * Get upcoming memories for dashboard (excluding EVENT type)
+     */
+    @GetMapping("/dashboard/upcoming")
+    public ResponseEntity<?> getUpcomingMemoriesForDashboard(@RequestParam(defaultValue = "3") int limit) {
+        try {
+            List<Memory> upcomingMemories = memoryService.getUpcomingMemoriesExcludingEvents(limit);
+            
+            List<Map<String, Object>> memoryResponses = upcomingMemories.stream()
+                    .map(this::createMemoryResponse)
+                    .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(memoryResponses);
+            
+        } catch (Exception e) {
+            logger.error("Error fetching upcoming memories for dashboard", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
      * Add photos to an EVENT memory
      */
     @PostMapping("/{id}/photos")

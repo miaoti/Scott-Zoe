@@ -27,6 +27,7 @@ com\couplewebsite\entity\SavedOpportunity.class
 com\couplewebsite\service\WheelPrizeService.class
 com\couplewebsite\config\MimeTypeConfig.class
 com\couplewebsite\service\EarningsService.class
+com\couplewebsite\service\MemoryService$1.class
 com\couplewebsite\entity\WheelConfiguration.class
 com\couplewebsite\controller\StaticController.class
 com\couplewebsite\exception\GlobalExceptionHandler.class

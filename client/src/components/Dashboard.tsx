@@ -144,10 +144,10 @@ function Dashboard() {
       setRecentPhotos(photosData.slice(0, 6));
       setStats(prev => ({ ...prev, photos: totalPhotos }));
 
-      // Fetch upcoming memories
+      // Fetch upcoming memories for dashboard (excluding event type)
       try {
-        const memoriesResponse = await api.get('/api/memories/upcoming');
-        setUpcomingMemories(memoriesResponse.data.slice(0, 3));
+        const memoriesResponse = await api.get('/api/memories/dashboard/upcoming?limit=3');
+        setUpcomingMemories(memoriesResponse.data);
       } catch (memError) {
         console.log('No upcoming memories endpoint, skipping');
         setUpcomingMemories([]);
@@ -291,37 +291,69 @@ function Dashboard() {
 
           <Link
             to="/memories"
-            className="apple-card apple-card-hover p-6 text-center apple-shadow transition-all duration-200 hover:scale-105 cursor-pointer group pointer-events-auto relative z-10"
+            className="apple-card apple-card-hover apple-shadow transition-all duration-200 hover:scale-105 cursor-pointer group pointer-events-auto relative z-10 overflow-hidden"
           >
-            <Calendar className="h-12 w-12 text-apple-blue-light mx-auto mb-4 group-hover:scale-110 transition-transform duration-200" />
-            <div className="text-3xl font-semibold text-apple-label mb-2">{stats.memories}</div>
-            <div className="text-apple-secondary-label group-hover:text-apple-blue-light transition-colors duration-200 mb-3">Memories Created</div>
+            {/* Background decorations */}
+            <div className="absolute inset-0 bg-gradient-to-br from-apple-blue/5 to-apple-purple/5 opacity-60"></div>
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-apple-blue/10 rounded-full blur-xl"></div>
+            <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-apple-purple/10 rounded-full blur-xl"></div>
             
-            {/* Recent memories preview */}
-            {upcomingMemories.length > 0 && (
-              <div className="mt-4 space-y-2">
-                <div className="text-xs text-apple-tertiary-label mb-2">Recent:</div>
-                <div className="flex flex-wrap gap-1 justify-center">
-                  {upcomingMemories.slice(0, 2).map((memory, index) => (
-                    <div
-                      key={memory.id}
-                      className="bg-apple-gray-6/10 rounded-lg px-2 py-1 text-xs text-apple-secondary-label transform transition-all duration-300 hover:bg-apple-blue/10 hover:text-apple-blue"
-                      style={{
-                        animationDelay: `${index * 0.1}s`
-                      }}
-                    >
-                      {memory.title.length > 12 ? `${memory.title.substring(0, 12)}...` : memory.title}
-                    </div>
-                  ))}
+            <div className="relative p-6">
+              {/* Header with icon and stats */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="bg-apple-blue/10 p-3 rounded-xl group-hover:bg-apple-blue/20 transition-colors duration-200">
+                  <Calendar className="h-6 w-6 text-apple-blue" />
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-apple-label">{stats.memories}</div>
+                  <div className="text-xs text-apple-tertiary-label">Total</div>
                 </div>
               </div>
-            )}
-            
-            <div className="text-xs text-apple-tertiary-label mt-3">
-              Special moments we'll never forget
-            </div>
-            <div className="mt-2 text-xs text-apple-blue-light font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              Browse Memories →
+              
+              {/* Title */}
+              <h3 className="text-lg font-semibold text-apple-label mb-3 group-hover:text-apple-blue transition-colors duration-200">
+                Memories Created
+              </h3>
+              
+              {/* Upcoming memories grid */}
+              {upcomingMemories.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="text-xs text-apple-tertiary-label font-medium">Upcoming:</div>
+                  <div className="grid grid-cols-1 gap-2">
+                    {upcomingMemories.slice(0, 3).map((memory, index) => (
+                      <div
+                        key={memory.id}
+                        className="bg-apple-gray-6/20 backdrop-blur-sm rounded-lg p-3 transform transition-all duration-300 hover:bg-apple-blue/10 hover:scale-105"
+                        style={{
+                          animationDelay: `${index * 0.1}s`
+                        }}
+                      >
+                        <div className="text-sm font-medium text-apple-label truncate">
+                          {memory.title}
+                        </div>
+                        <div className="text-xs text-apple-tertiary-label mt-1 truncate">
+                          {memory.description}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <div className="text-sm text-apple-tertiary-label mb-2">No upcoming memories</div>
+                  <div className="text-xs text-apple-quaternary-label">Create your first memory</div>
+                </div>
+              )}
+              
+              {/* Footer */}
+              <div className="mt-4 pt-3 border-t border-apple-separator/30">
+                <div className="text-xs text-apple-tertiary-label text-center">
+                  Special moments we'll never forget
+                </div>
+                <div className="mt-1 text-xs text-apple-blue font-medium text-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  Browse All Memories →
+                </div>
+              </div>
             </div>
           </Link>
         </div>
