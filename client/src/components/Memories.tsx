@@ -88,18 +88,25 @@ function Memories() {
   const fetchMemories = async () => {
     try {
       const response = await api.get('/api/memories');
+      console.log('Fetched memories:', response.data);
       setMemories(response.data);
       
       // Check for openMemory parameter after memories are loaded
       const openMemoryId = searchParams.get('openMemory');
+      console.log('openMemoryId from URL:', openMemoryId);
+      
       if (openMemoryId && response.data && response.data.length > 0) {
         const memoryToOpen = response.data.find((memory: Memory) => memory.id === parseInt(openMemoryId));
+        console.log('Found memory to open:', memoryToOpen);
         
         if (memoryToOpen) {
+          console.log('Setting selected memory and showing modal');
           setSelectedMemory(memoryToOpen);
           setShowDetailModal(true);
-          // Clear the query parameter
-          setSearchParams({});
+          // Clear the query parameter after a short delay to ensure modal opens
+          setTimeout(() => {
+            setSearchParams({});
+          }, 100);
         }
       }
     } catch (error) {
