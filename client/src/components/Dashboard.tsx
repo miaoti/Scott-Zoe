@@ -323,16 +323,18 @@ function Dashboard() {
                     {upcomingMemories.slice(0, 3).map((memory, index) => (
                       <div
                         key={memory.id}
-                        className="bg-apple-gray-6/20 backdrop-blur-sm rounded-lg p-3 transform transition-all duration-300 hover:bg-apple-blue/10 hover:scale-105"
+                        className="bg-apple-gray-6/20 backdrop-blur-sm rounded-lg p-2.5 transform transition-all duration-300 hover:bg-apple-blue/10 hover:scale-105"
                         style={{
                           animationDelay: `${index * 0.1}s`
                         }}
                       >
-                        <div className="text-sm font-medium text-apple-label truncate">
-                          {memory.title}
-                        </div>
-                        <div className="text-xs text-apple-tertiary-label mt-1 truncate">
-                          {memory.description}
+                        <div className="flex items-center justify-between">
+                          <div className="text-sm font-medium text-apple-label truncate flex-1 mr-2">
+                            {memory.title}
+                          </div>
+                          <div className="text-xs text-apple-tertiary-label whitespace-nowrap">
+                            {new Date(memory.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </div>
                         </div>
                       </div>
                     ))}
