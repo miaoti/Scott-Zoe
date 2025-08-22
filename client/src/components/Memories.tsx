@@ -543,8 +543,8 @@ function Memories() {
                           {memory.type === 'event' && memory.endDate ? (
                             (() => {
                               try {
-                                console.log('DEBUG: Event date parsing - memory.date:', memory.date, 'type:', typeof memory.date);
-                                console.log('DEBUG: Event date parsing - memory.endDate:', memory.endDate, 'type:', typeof memory.endDate);
+                                // console.log('DEBUG: Event date parsing - memory.date:', memory.date, 'type:', typeof memory.date);
+                                // console.log('DEBUG: Event date parsing - memory.endDate:', memory.endDate, 'type:', typeof memory.endDate);
                                 
                                 // Handle array format [year, month, day] from Java LocalDate
                                 let startYear, startMonth, startDay;
@@ -554,7 +554,7 @@ function Memories() {
                                   const startDateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
                                   [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
                                 } else {
-                                  console.log('DEBUG: Invalid start date format');
+                                  // console.log('DEBUG: Invalid start date format');
                                   return 'Invalid Date';
                                 }
                                 
@@ -565,26 +565,26 @@ function Memories() {
                                   const endDateStr = memory.endDate.includes('T') ? memory.endDate.split('T')[0] : memory.endDate;
                                   [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
                                 } else {
-                                  console.log('DEBUG: Invalid end date format');
+                                  // console.log('DEBUG: Invalid end date format');
                                   return 'Invalid Date';
                                 }
                                 
-                                console.log('DEBUG: Date components - start:', {startYear, startMonth, startDay}, 'end:', {endYear, endMonth, endDay});
+                                // console.log('DEBUG: Date components - start:', {startYear, startMonth, startDay}, 'end:', {endYear, endMonth, endDay});
                                 
                                 const startDate = new Date(startYear, startMonth - 1, startDay);
                                 const endDate = new Date(endYear, endMonth - 1, endDay);
-                                console.log('DEBUG: Created dates - start:', startDate, 'end:', endDate);
+                                // console.log('DEBUG: Created dates - start:', startDate, 'end:', endDate);
                                 
                                 return `${!isNaN(startDate.getTime()) ? startDate.toLocaleDateString() : 'Invalid Date'} - ${!isNaN(endDate.getTime()) ? endDate.toLocaleDateString() : 'Invalid Date'}`;
                               } catch (error) {
-                                console.error('DEBUG: Date parsing error:', error);
+                                // console.error('DEBUG: Date parsing error:', error);
                                 return 'Invalid Date';
                               }
                             })()
                           ) : (
                             (() => {
                               try {
-                                console.log('DEBUG: Single date parsing - memory.date:', memory.date, 'type:', typeof memory.date);
+                                // console.log('DEBUG: Single date parsing - memory.date:', memory.date, 'type:', typeof memory.date);
                                 
                                 // Handle array format [year, month, day] from Java LocalDate
                                 let year, month, day;
@@ -594,18 +594,18 @@ function Memories() {
                                   const dateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
                                   [year, month, day] = dateStr.split('-').map(Number);
                                 } else {
-                                  console.log('DEBUG: Invalid single date format');
+                                  // console.log('DEBUG: Invalid single date format');
                                   return 'Invalid Date';
                                 }
                                 
-                                console.log('DEBUG: Date components:', {year, month, day});
+                                // console.log('DEBUG: Date components:', {year, month, day});
                                 
                                 const date = new Date(year, month - 1, day);
-                                console.log('DEBUG: Created date:', date);
+                                // console.log('DEBUG: Created date:', date);
                                 
                                 return !isNaN(date.getTime()) ? date.toLocaleDateString() : 'Invalid Date';
                               } catch (error) {
-                                console.error('DEBUG: Single date parsing error:', error);
+                                // console.error('DEBUG: Single date parsing error:', error);
                                 return 'Invalid Date';
                               }
                             })()
