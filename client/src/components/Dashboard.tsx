@@ -130,6 +130,8 @@ function Dashboard() {
 
   // Handle memory click - navigate to memories page and open detail
   const handleMemoryClick = (memoryId: number) => {
+    // Store the memory ID in sessionStorage as a fallback
+    sessionStorage.setItem('openMemoryId', memoryId.toString());
     navigate(`/memories?openMemory=${memoryId}`);
   };
 

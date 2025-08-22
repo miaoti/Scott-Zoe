@@ -80,12 +80,20 @@ function Memories() {
     }
   };
 
-  // Handle opening memory from URL parameter
+  // Handle opening memory from URL parameter or sessionStorage
   const handleOpenMemoryFromURL = () => {
-    const openMemoryId = searchParams.get('openMemory');
+    // Try to get memory ID from URL parameter first
+    let openMemoryId = searchParams.get('openMemory');
+    
+    // If not found in URL, check sessionStorage as fallback
+    if (!openMemoryId) {
+      openMemoryId = sessionStorage.getItem('openMemoryId');
+    }
+    
     console.log('Current URL:', window.location.href);
     console.log('SearchParams toString:', searchParams.toString());
-    console.log('Checking for openMemoryId:', openMemoryId);
+    console.log('SessionStorage openMemoryId:', sessionStorage.getItem('openMemoryId'));
+    console.log('Final openMemoryId:', openMemoryId);
     console.log('Available memories:', memories.length);
     
     if (openMemoryId && memories.length > 0) {
@@ -96,7 +104,9 @@ function Memories() {
         console.log('Opening memory detail modal');
         setSelectedMemory(memoryToOpen);
         setShowDetailModal(true);
-        // Clear the query parameter after a delay
+        
+        // Clear both URL parameter and sessionStorage
+        sessionStorage.removeItem('openMemoryId');
         setTimeout(() => {
           setSearchParams({});
         }, 100);
