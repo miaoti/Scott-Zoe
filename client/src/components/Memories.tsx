@@ -72,8 +72,10 @@ function Memories() {
   // Handle opening specific memory from query parameter
   useEffect(() => {
     const openMemoryId = searchParams.get('openMemory');
+    
     if (openMemoryId && memories.length > 0) {
       const memoryToOpen = memories.find(memory => memory.id === parseInt(openMemoryId));
+      
       if (memoryToOpen) {
         setSelectedMemory(memoryToOpen);
         setShowDetailModal(true);
@@ -86,14 +88,20 @@ function Memories() {
   const fetchMemories = async () => {
     try {
       const response = await api.get('/api/memories');
-      console.log('DEBUG: Raw memories data from backend:', response.data);
-      if (response.data && response.data.length > 0) {
-        console.log('DEBUG: First memory date format:', response.data[0].date, 'type:', typeof response.data[0].date);
-        if (response.data[0].endDate) {
-          console.log('DEBUG: First memory endDate format:', response.data[0].endDate, 'type:', typeof response.data[0].endDate);
+      setMemories(response.data);
+      
+      // Check for openMemory parameter after memories are loaded
+      const openMemoryId = searchParams.get('openMemory');
+      if (openMemoryId && response.data && response.data.length > 0) {
+        const memoryToOpen = response.data.find((memory: Memory) => memory.id === parseInt(openMemoryId));
+        
+        if (memoryToOpen) {
+          setSelectedMemory(memoryToOpen);
+          setShowDetailModal(true);
+          // Clear the query parameter
+          setSearchParams({});
         }
       }
-      setMemories(response.data);
     } catch (error) {
       console.error('Error fetching memories:', error);
     }
