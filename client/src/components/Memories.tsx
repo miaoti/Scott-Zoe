@@ -105,7 +105,7 @@ function Memories() {
     if (memories.length > 0) {
       handleOpenMemoryFromURL();
     }
-  }, [memories]);
+  }, [memories, searchParams]);
 
   const fetchFilteredMemories = async () => {
     try {
