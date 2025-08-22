@@ -83,6 +83,8 @@ function Memories() {
   // Handle opening memory from URL parameter
   const handleOpenMemoryFromURL = () => {
     const openMemoryId = searchParams.get('openMemory');
+    console.log('Current URL:', window.location.href);
+    console.log('SearchParams toString:', searchParams.toString());
     console.log('Checking for openMemoryId:', openMemoryId);
     console.log('Available memories:', memories.length);
     
@@ -94,8 +96,10 @@ function Memories() {
         console.log('Opening memory detail modal');
         setSelectedMemory(memoryToOpen);
         setShowDetailModal(true);
-        // Clear the query parameter
-        setSearchParams({});
+        // Clear the query parameter after a delay
+        setTimeout(() => {
+          setSearchParams({});
+        }, 100);
       }
     }
   };
