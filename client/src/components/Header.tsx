@@ -124,7 +124,7 @@ function Header() {
 
           {/* Relationship Counter Dropdown */}
           {relationshipInfo && (
-            <div className="relative hidden md:block">
+            <div className="relative hidden md:block relationship-dropdown">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center space-x-2 apple-glass-background rounded-xl px-4 py-2 apple-shadow hover:bg-apple-gray-6/10 transition-all duration-200"
@@ -232,7 +232,7 @@ function Header() {
         {/* Mobile Relationship Counter Dropdown */}
         {relationshipInfo && (
           <div className="md:hidden pb-4 text-center">
-            <div className="relative inline-block">
+            <div className="relative inline-block relationship-dropdown">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center space-x-2 apple-glass-background rounded-xl px-4 py-2 apple-shadow hover:bg-apple-gray-6/10 transition-all duration-200"

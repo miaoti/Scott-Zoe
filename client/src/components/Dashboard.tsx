@@ -409,39 +409,7 @@ function Dashboard() {
 
 
 
-        {/* Upcoming Memories */}
-        {upcomingMemories.length > 0 && (
-          <div className="mb-8 pointer-events-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-apple-label flex items-center">
-                <Clock className="h-6 w-6 mr-3 text-apple-blue-light" />
-                Upcoming Anniversaries
-              </h2>
-              <Link
-                to="/memories"
-                className="text-apple-blue-light hover:text-apple-blue-light/80 font-medium transition-colors pointer-events-auto"
-              >
-                View All
-              </Link>
-            </div>
-            
-            <div className="space-y-4">
-              {upcomingMemories.map((memory) => (
-                <div key={memory.id} className="apple-card apple-shadow p-6 pointer-events-auto">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold text-apple-label">{memory.title}</h3>
-                      <p className="text-apple-secondary-label text-sm mt-1">{memory.description}</p>
-                    </div>
-                    <div className="text-right text-sm text-apple-tertiary-label">
-                      {new Date(memory.date).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {/* Empty State */}
         {recentPhotos.length === 0 && upcomingMemories.length === 0 && (
