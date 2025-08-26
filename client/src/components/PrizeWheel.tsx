@@ -429,7 +429,11 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
                       <div className="flex items-center justify-center mb-0.5">
                         <span className="text-base">{prize.prizeType === 'MONEY' ? '💰' : prize.prizeType === 'GIFT' ? '🎁' : '✨'}</span>
                       </div>
-                      <span className="whitespace-nowrap text-center leading-tight font-bold" style={{ fontSize: prizes.length > 8 ? '8px' : '10px' }}>
+                      <span 
+                        className="text-center leading-tight font-bold max-w-16 truncate block" 
+                        style={{ fontSize: prizes.length > 8 ? '8px' : '10px' }}
+                        title={prize.prizeName}
+                      >
                         {prize.prizeName}
                       </span>
                     </div>

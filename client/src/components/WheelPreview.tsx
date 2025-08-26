@@ -175,7 +175,7 @@ const WheelPreview: React.FC<WheelPreviewProps> = ({ prizes, size = 300 }) => {
             >
               <div className="flex flex-col items-center space-y-1 px-1">
                 {getIconForPrize(segment.prizeType, segment.prizeValue)}
-                <div className="text-xs font-medium whitespace-nowrap">
+                <div className="text-xs font-medium max-w-16 truncate" title={segment.prizeName}>
                   {segment.prizeName}
                 </div>
               </div>
