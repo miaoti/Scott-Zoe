@@ -111,13 +111,13 @@ function Header() {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 group">
             <Heart 
-              className="h-7 w-7 text-apple-blue-light animate-heart-bounce hover-glow transition-all duration-500" 
+              className="h-7 w-7 text-apple-purple animate-heart-bounce hover-glow transition-all duration-500" 
               fill="currentColor"
               style={{
-                filter: 'drop-shadow(0 0 12px rgba(59, 130, 246, 0.4))'
+                filter: 'drop-shadow(0 0 12px rgba(168, 85, 247, 0.4))'
               }}
             />
-            <span className="font-semibold text-xl text-apple-label group-hover:text-apple-blue-light transition-colors duration-300">
+            <span className="font-semibold text-xl text-apple-label group-hover:text-apple-purple transition-colors duration-300">
               Scott &amp; Zoe
             </span>
           </Link>
@@ -129,7 +129,7 @@ function Header() {
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center space-x-2 apple-glass-background rounded-xl px-4 py-2 apple-shadow hover:bg-apple-gray-6/10 transition-all duration-200"
               >
-                <Heart className="h-4 w-4 text-apple-blue-light" fill="currentColor" />
+                <Heart className="h-4 w-4 text-apple-purple" fill="currentColor" />
                 <span className="text-sm font-medium text-apple-label">Days Together</span>
                 <ChevronDown className={`h-4 w-4 text-apple-secondary-label transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
               </button>
@@ -138,20 +138,20 @@ function Header() {
                 <div className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-xl p-6 apple-shadow border border-apple-separator min-w-[280px] z-40">
                   <div className="text-center">
                     <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="bg-apple-blue/5 rounded-lg p-3">
-                        <div className="text-2xl font-bold text-apple-blue">{timeElapsed.days}</div>
+                      <div className="bg-apple-purple/5 rounded-lg p-3">
+                        <div className="text-2xl font-bold text-apple-purple">{timeElapsed.days}</div>
                         <div className="text-xs text-apple-secondary-label">Days</div>
                       </div>
-                      <div className="bg-apple-blue/5 rounded-lg p-3">
-                        <div className="text-2xl font-bold text-apple-blue">{timeElapsed.hours}</div>
+                      <div className="bg-apple-purple/5 rounded-lg p-3">
+                        <div className="text-2xl font-bold text-apple-purple">{timeElapsed.hours}</div>
                         <div className="text-xs text-apple-secondary-label">Hours</div>
                       </div>
-                      <div className="bg-apple-blue/5 rounded-lg p-3">
-                        <div className="text-2xl font-bold text-apple-blue">{timeElapsed.minutes}</div>
+                      <div className="bg-apple-purple/5 rounded-lg p-3">
+                        <div className="text-2xl font-bold text-apple-purple">{timeElapsed.minutes}</div>
                         <div className="text-xs text-apple-secondary-label">Minutes</div>
                       </div>
-                      <div className="bg-apple-blue/5 rounded-lg p-3">
-                        <div className="text-2xl font-bold text-apple-blue">{timeElapsed.seconds}</div>
+                      <div className="bg-apple-purple/5 rounded-lg p-3">
+                        <div className="text-2xl font-bold text-apple-purple">{timeElapsed.seconds}</div>
                         <div className="text-xs text-apple-secondary-label">Seconds</div>
                       </div>
                     </div>
@@ -173,7 +173,7 @@ function Header() {
               to="/"
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
                 isActive('/') 
-                  ? 'bg-apple-blue-light/10 text-apple-blue-light' 
+                  ? 'bg-apple-purple/10 text-apple-purple' 
                   : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
               }`}
             >
@@ -185,7 +185,7 @@ function Header() {
               to="/gallery"
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
                 isActive('/gallery') 
-                  ? 'bg-apple-blue-light/10 text-apple-blue-light' 
+                  ? 'bg-apple-purple/10 text-apple-purple' 
                   : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
               }`}
             >
@@ -199,7 +199,7 @@ function Header() {
               to="/memories"
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
                 isActive('/memories') 
-                  ? 'bg-apple-blue-light/10 text-apple-blue-light' 
+                  ? 'bg-apple-purple/10 text-apple-purple' 
                   : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
               }`}
             >
@@ -211,7 +211,7 @@ function Header() {
               to="/settings"
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
                 isActive('/settings') 
-                  ? 'bg-apple-blue-light/10 text-apple-blue-light' 
+                  ? 'bg-apple-purple/10 text-apple-purple' 
                   : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
               }`}
             >
@@ -237,7 +237,7 @@ function Header() {
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center space-x-2 apple-glass-background rounded-xl px-4 py-2 apple-shadow hover:bg-apple-gray-6/10 transition-all duration-200"
               >
-                <Heart className="h-4 w-4 text-apple-blue-light" fill="currentColor" />
+                <Heart className="h-4 w-4 text-apple-purple" fill="currentColor" />
                 <span className="text-sm font-medium text-apple-label">Days Together</span>
                 <ChevronDown className={`h-4 w-4 text-apple-secondary-label transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
               </button>
@@ -246,20 +246,20 @@ function Header() {
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white/95 backdrop-blur-xl rounded-xl p-4 apple-shadow border border-apple-separator min-w-[200px] z-50">
                   <div className="text-center">
                     <div className="grid grid-cols-2 gap-2 mb-3">
-                      <div className="bg-apple-blue/5 rounded-lg p-2">
-                        <div className="text-lg font-bold text-apple-blue">{timeElapsed.days}</div>
+                      <div className="bg-apple-purple/5 rounded-lg p-2">
+                        <div className="text-lg font-bold text-apple-purple">{timeElapsed.days}</div>
                         <div className="text-xs text-apple-secondary-label">Days</div>
                       </div>
-                      <div className="bg-apple-blue/5 rounded-lg p-2">
-                        <div className="text-lg font-bold text-apple-blue">{timeElapsed.hours}</div>
+                      <div className="bg-apple-purple/5 rounded-lg p-2">
+                        <div className="text-lg font-bold text-apple-purple">{timeElapsed.hours}</div>
                         <div className="text-xs text-apple-secondary-label">Hours</div>
                       </div>
-                      <div className="bg-apple-blue/5 rounded-lg p-2">
-                        <div className="text-lg font-bold text-apple-blue">{timeElapsed.minutes}</div>
+                      <div className="bg-apple-purple/5 rounded-lg p-2">
+                        <div className="text-lg font-bold text-apple-purple">{timeElapsed.minutes}</div>
                         <div className="text-xs text-apple-secondary-label">Minutes</div>
                       </div>
-                      <div className="bg-apple-blue/5 rounded-lg p-2">
-                        <div className="text-lg font-bold text-apple-blue">{timeElapsed.seconds}</div>
+                      <div className="bg-apple-purple/5 rounded-lg p-2">
+                        <div className="text-lg font-bold text-apple-purple">{timeElapsed.seconds}</div>
                         <div className="text-xs text-apple-secondary-label">Seconds</div>
                       </div>
                     </div>

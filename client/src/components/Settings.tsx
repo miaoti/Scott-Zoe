@@ -192,7 +192,7 @@ function Settings() {
         <div className="mb-8">
           <Link
             to="/dashboard"
-            className="inline-flex items-center text-apple-blue hover:text-apple-blue/80 mb-6 transition-colors"
+            className="inline-flex items-center text-apple-purple hover:text-apple-purple/80 mb-6 transition-colors"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back to Dashboard
@@ -200,8 +200,8 @@ function Settings() {
           
           <div className="text-center">
             <div className="flex justify-center mb-4">
-              <div className="bg-apple-blue/10 p-4 rounded-2xl">
-                <Heart className="h-8 w-8 text-apple-blue" fill="currentColor" />
+              <div className="bg-apple-purple/10 p-4 rounded-2xl">
+                <Heart className="h-8 w-8 text-apple-purple" fill="currentColor" />
               </div>
             </div>
             <h1 className="font-heading text-4xl font-semibold text-apple-label mb-3">
@@ -220,8 +220,8 @@ function Settings() {
             className="w-full p-6 flex items-center justify-between hover:bg-apple-gray-6/5 transition-colors duration-200"
           >
             <div className="flex items-center">
-              <div className="bg-apple-blue/10 p-3 rounded-xl mr-4">
-                <Calendar className="h-6 w-6 text-apple-blue" />
+              <div className="bg-apple-purple/10 p-3 rounded-xl mr-4">
+                <Calendar className="h-6 w-6 text-apple-purple" />
               </div>
               <div className="text-left">
                 <h2 className="font-heading text-xl font-semibold text-apple-label">
@@ -245,9 +245,9 @@ function Settings() {
             expandedSections.relationship ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
           }`}>
             <div className="px-6 pb-6">
-              <div className="bg-apple-blue/5 border border-apple-blue/20 rounded-xl p-6">
+              <div className="bg-apple-purple/5 border border-apple-purple/20 rounded-xl p-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-apple-blue mb-3">
+                  <div className="text-3xl font-bold text-apple-purple mb-3">
                     💕
                   </div>
                   <div className="text-lg font-semibold text-apple-label mb-2">
