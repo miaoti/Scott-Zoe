@@ -342,7 +342,25 @@ function Dashboard() {
                             {memory.title}
                           </div>
                           <div className="text-xs text-apple-tertiary-label whitespace-nowrap">
-                            {new Date(memory.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            {(() => {
+                              try {
+                                // Handle array format [year, month, day] from Java LocalDate
+                                let year, month, day;
+                                if (Array.isArray(memory.date)) {
+                                  [year, month, day] = memory.date;
+                                } else if (typeof memory.date === 'string') {
+                                  const dateStr = memory.date.includes('T') ? memory.date.split('T')[0] : memory.date;
+                                  [year, month, day] = dateStr.split('-').map(Number);
+                                } else {
+                                  return 'Invalid Date';
+                                }
+                                
+                                const date = new Date(year, month - 1, day);
+                                return !isNaN(date.getTime()) ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Invalid Date';
+                              } catch (error) {
+                                return 'Invalid Date';
+                              }
+                            })()} 
                           </div>
                         </div>
                       </div>
