@@ -82,7 +82,7 @@ public class SecurityConfig {
                 // API endpoints
                 .requestMatchers("/api/auth/login", "/api/auth/validate", "/health", "/actuator/health", "/api/photos/image/**", "/api/photos/test", "/api/photos", "/api/categories", "/api/categories/**", "/api/memories", "/api/memories/**", "/api/love-updates/**").permitAll()
                 // Frontend routes
-                .requestMatchers("/", "/login", "/gallery", "/memories", "/wheel", "/settings").permitAll()
+                .requestMatchers("/", "/login", "/gallery", "/memories", "/wheel", "/settings", "/scott", "/zoe").permitAll()
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())

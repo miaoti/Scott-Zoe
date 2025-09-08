@@ -83,6 +83,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private boolean isPublicPath(String path) {
         return path.equals("/") ||
                path.equals("/index.html") ||
+               path.equals("/scott") ||
+               path.equals("/zoe") ||
                path.startsWith("/assets/") ||
                path.startsWith("/static/") ||
                path.startsWith("/uploads/") ||
