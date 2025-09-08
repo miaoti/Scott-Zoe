@@ -214,7 +214,7 @@ function Scott() {
 
             {/* Health Management Platform */}
             <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <h4 className="text-xl font-semibold text-gray-900 mb-3">Enterprise Health Management Platform</h4>
+              <h4 className="text-xl font-semibold text-gray-900 mb-3">WellnessPathway v2 — Health Management Platform</h4>
               <p className="text-gray-600 mb-4">
                 Microservice-based health monitoring system with real-time metrics and automated alerting capabilities.
               </p>
@@ -226,7 +226,7 @@ function Scott() {
               <ul className="text-gray-700 text-sm space-y-1">
                 <li>• Implemented health check endpoints with Spring Boot Actuator</li>
                 <li>• Integrated monitoring dashboards with real-time alerting</li>
-                <li>• Achieved 90%+ test coverage with comprehensive testing strategy</li>
+                <li>•	Monitored system health via Grafana/Prometheus; participated in release cycles, backup strategies, and incident response</li>
               </ul>
             </div>
 
