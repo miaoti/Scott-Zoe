@@ -10,6 +10,8 @@ import CategoryPhotos from './components/CategoryPhotos';
 import AllPhotos from './components/AllPhotos';
 import RecycleBin from './components/RecycleBin';
 import Header from './components/Header';
+import Scott from './components/Scott';
+import Zoe from './components/Zoe';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 
@@ -27,29 +29,96 @@ function AppContent() {
     );
   }
 
-  if (!isAuthenticated) {
-    return <Login />;
-  }
-
   return (
-    <div className="min-h-screen">
-      <Header />
-      <main className="container mx-auto px-4 py-8">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/gallery" element={<PhotoGallery />} />
-          <Route path="/photos" element={<AllPhotos />} />
-          <Route path="/category/:id" element={<CategoryPhotos />} />
-          <Route path="/photo/:id" element={<PhotoDetail />} />
-          <Route path="/memories" element={<Memories />} />
-          <Route path="/categories" element={<Categories />} />
-          <Route path="/recycle-bin" element={<RecycleBin />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-    </div>
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/scott" element={<Scott />} />
+      <Route path="/zoe" element={<Zoe />} />
+      
+      {/* Private Routes */}
+      <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} />
+      <Route path="/" element={isAuthenticated ? (
+        <div className="min-h-screen">
+          <Header />
+          <main className="container mx-auto px-4 py-8">
+            <Dashboard />
+          </main>
+        </div>
+      ) : <Navigate to="/login" replace />} />
+      <Route path="/dashboard" element={isAuthenticated ? (
+        <div className="min-h-screen">
+          <Header />
+          <main className="container mx-auto px-4 py-8">
+            <Dashboard />
+          </main>
+        </div>
+      ) : <Navigate to="/login" replace />} />
+      <Route path="/gallery" element={isAuthenticated ? (
+        <div className="min-h-screen">
+          <Header />
+          <main className="container mx-auto px-4 py-8">
+            <PhotoGallery />
+          </main>
+        </div>
+      ) : <Navigate to="/login" replace />} />
+      <Route path="/photos" element={isAuthenticated ? (
+        <div className="min-h-screen">
+          <Header />
+          <main className="container mx-auto px-4 py-8">
+            <AllPhotos />
+          </main>
+        </div>
+      ) : <Navigate to="/login" replace />} />
+      <Route path="/category/:id" element={isAuthenticated ? (
+        <div className="min-h-screen">
+          <Header />
+          <main className="container mx-auto px-4 py-8">
+            <CategoryPhotos />
+          </main>
+        </div>
+      ) : <Navigate to="/login" replace />} />
+      <Route path="/photo/:id" element={isAuthenticated ? (
+        <div className="min-h-screen">
+          <Header />
+          <main className="container mx-auto px-4 py-8">
+            <PhotoDetail />
+          </main>
+        </div>
+      ) : <Navigate to="/login" replace />} />
+      <Route path="/memories" element={isAuthenticated ? (
+        <div className="min-h-screen">
+          <Header />
+          <main className="container mx-auto px-4 py-8">
+            <Memories />
+          </main>
+        </div>
+      ) : <Navigate to="/login" replace />} />
+      <Route path="/categories" element={isAuthenticated ? (
+        <div className="min-h-screen">
+          <Header />
+          <main className="container mx-auto px-4 py-8">
+            <Categories />
+          </main>
+        </div>
+      ) : <Navigate to="/login" replace />} />
+      <Route path="/recycle-bin" element={isAuthenticated ? (
+        <div className="min-h-screen">
+          <Header />
+          <main className="container mx-auto px-4 py-8">
+            <RecycleBin />
+          </main>
+        </div>
+      ) : <Navigate to="/login" replace />} />
+      <Route path="/settings" element={isAuthenticated ? (
+        <div className="min-h-screen">
+          <Header />
+          <main className="container mx-auto px-4 py-8">
+            <Settings />
+          </main>
+        </div>
+      ) : <Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
 }
 
