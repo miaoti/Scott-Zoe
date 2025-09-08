@@ -80,7 +80,7 @@ function Scott() {
               </div>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
                 <p className="text-gray-600">PhD in Computer Science</p>
-                <span className="text-gray-500">Aug 2021 - Present</span>
+                <span className="text-gray-500">Aug 2022 - Present</span>
               </div>
               <ul className="text-gray-700 space-y-1">
                 <li>• <strong>Research Focus:</strong> Software Engineering, Microservice Testing & Quality Assurance</li>
