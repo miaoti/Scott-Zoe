@@ -262,12 +262,15 @@ function Scott() {
                 "Systematic Mapping Study of Test Generation for Microservices: Approaches, Challenges, and Impact on System Quality"
               </h4>
               <p className="text-gray-600 mb-2">
-                <strong>Miao, T.</strong>, Shahkh, S.,, I., & Song,LL. (2025). <emInformaoiman</em>, 6611), 13.
+                <strong>Miao, T.</strong>, Shaafi, A. I., & Song, E. (2025). <em>Electronics</em>, 14(7), 1397.
               </p>
-              <p className="text-gray-700 text-sm              Comprehensive analysis of microservice testing methodologies and their impact on system reliability and performance.
-    Cap className"htdsvice testing</li>
-                <li>• Mentored 50+ students in programming fundamentals, data structures, algorithms, and software engineering best practices</li>
-              </ul>
+              <p className="text-gray-700 text-sm mb-2">
+                Comprehensive analysis of microservice testing methodologies and their impact on system reliability and performance.
+              </p>
+              <a href="https://doi.org/10.3390/electronics14071397" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                https://doi.org/10.3390/electronics14071397
+              </a>
+            </div>
             </div>
           </div>
         </section>
