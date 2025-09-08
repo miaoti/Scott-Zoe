@@ -293,8 +293,11 @@ function Scott() {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Couple Website */}
-            <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <h4 className="text-xl font-semibold text-gray-900 mb-3">Scott & Zoe Couple Website</h4>
+            <a href="https://qimiao.live" target="_blank" rel="noopener noreferrer" className="block border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow hover:border-blue-300">
+              <h4 className="text-xl font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                Scott & Zoe Couple Website
+                <Globe className="h-4 w-4 text-blue-500" />
+              </h4>
               <p className="text-gray-600 mb-4">
                 Full-stack web application for couples to share memories, photos, and special moments with beautiful UI/UX design.
               </p>
@@ -308,11 +311,14 @@ function Scott() {
                 <li>• RESTful API with comprehensive error handling and validation</li>
                 <li>• Deployed on Railway with CI/CD pipeline and custom domain</li>
               </ul>
-            </div>
+            </a>
 
             {/* Health Management Platform */}
-            <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <h4 className="text-xl font-semibold text-gray-900 mb-3">WellnessPathway v2 — Health Management Platform</h4>
+            <a href="https://khoemanh.info/" target="_blank" rel="noopener noreferrer" className="block border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow hover:border-green-300">
+              <h4 className="text-xl font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                WellnessPathway v2 — Health Management Platform
+                <Globe className="h-4 w-4 text-green-500" />
+              </h4>
               <p className="text-gray-600 mb-4">
                 Microservice-based health monitoring system with real-time metrics and automated alerting capabilities.
               </p>
@@ -324,27 +330,35 @@ function Scott() {
               <ul className="text-gray-700 text-sm space-y-1">
                 <li>• Implemented health check endpoints with Spring Boot Actuator</li>
                 <li>• Integrated monitoring dashboards with real-time alerting</li>
-                <li>•	Monitored system health via Grafana/Prometheus; participated in release cycles, backup strategies, and incident response</li>
+                <li>• Monitored system health via Grafana/Prometheus; participated in release cycles, backup strategies, and incident response</li>
               </ul>
-            </div>
+            </a>
 
-            {/* Research Projects */}
-            <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <h4 className="text-xl font-semibold text-gray-900 mb-3">Microservice Testing Research</h4>
+            {/* InventoryPro */}
+            <a href="https://github.com/miaoti/inventoryPro" target="_blank" rel="noopener noreferrer" className="block border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow hover:border-purple-300">
+              <h4 className="text-xl font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                InventoryPro — Internal Inventory Management System
+                <Github className="h-4 w-4 text-purple-500" />
+              </h4>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm text-gray-500 font-medium">Jun 2025 – Sep 2025</span>
+                <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">Full-Stack Developer (Solo Project)</span>
+              </div>
               <p className="text-gray-600 mb-4">
-                Comprehensive research on test generation methodologies for microservice architectures, focusing on system quality and reliability.
+                Designed and delivered a secure, scalable inventory system for internal company use, featuring role-based access, barcode scanning, audit logs, and low-stock alerts.
               </p>
               <div className="flex flex-wrap gap-2 mb-4">
-                {['Java', 'Spring Boot', 'JUnit', 'Mockito', 'Docker', 'Research Methodology'].map((tech) => (
+                {['Spring Boot', 'Next.js', 'TypeScript', 'MySQL', 'Docker', 'GCP', 'Flyway'].map((tech) => (
                   <span key={tech} className="px-2 py-1 bg-purple-50 text-purple-700 rounded text-sm">{tech}</span>
                 ))}
               </div>
               <ul className="text-gray-700 text-sm space-y-1">
-                <li>• Systematic mapping study of microservice testing approaches</li>
-                <li>• Development of Service Availability Ratio (SAR) metric</li>
-                <li>• Published research findings in peer-reviewed journals</li>
+                <li>• Implemented backend with Spring Security + JWT for authentication; used Flyway for version-controlled, repeatable database migrations</li>
+                <li>• Developed responsive frontend with Next.js App Router + Redux; integrated real-time notifications and exportable reporting dashboards</li>
+                <li>• Containerized deployment via Docker + Nginx reverse proxy with HTTPS; configured CI/CD on GitHub Actions for automated testing & deployment to GCP</li>
+                <li>• Delivered audit trails, email alerts, and scheduled tasks to support operational compliance and decision-making</li>
               </ul>
-            </div>
+            </a>
           </div>
         </section>
 
