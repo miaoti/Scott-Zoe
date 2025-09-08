@@ -270,6 +270,7 @@ function Scott() {
               <a href="https://doi.org/10.3390/electronics14071397" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                 https://doi.org/10.3390/electronics14071397
               </a>
+            </div>
             
             <div className="border-l-4 border-green-500 pl-6">
               <h4 className="text-lg font-semibold text-gray-900 mb-2">
