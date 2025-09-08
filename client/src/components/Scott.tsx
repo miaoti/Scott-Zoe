@@ -13,7 +13,7 @@ function Scott() {
             </div>
             <div className="flex-1 text-center md:text-left">
               <h1 className="text-5xl font-bold text-gray-900 mb-4">Tingshuo Miao</h1>
-              <h2 className="text-2xl text-blue-600 font-semibold mb-6">Software Engineer & Full-Stack Developer</h2>
+              <h2 className="text-2xl text-blue-600 font-semibold mb-6">PhD Student</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600">
                 <div className="flex items-center justify-center md:justify-start gap-2">
@@ -28,11 +28,11 @@ function Scott() {
                 </div>
                 <div className="flex items-center justify-center md:justify-start gap-2">
                   <Phone className="h-5 w-5 text-blue-500" />
-                  <span>+1 (254) 716-1576</span>
+                  <span>+1 (541) 979-1876</span>
                 </div>
                 <div className="flex items-center justify-center md:justify-start gap-2">
                   <Globe className="h-5 w-5 text-blue-500" />
-                  <span>US Citizen (English & Native Mandarin)</span>
+                  <span>F1 Visa (English & Native Mandarin)</span>
                 </div>
                 <div className="flex items-center justify-center md:justify-start gap-2">
                   <Linkedin className="h-5 w-5 text-blue-500" />
@@ -75,16 +75,16 @@ function Scott() {
           <div className="space-y-6">
             <div className="border-l-4 border-blue-500 pl-6">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
-                <h4 className="text-xl font-semibold text-gray-900">Bachelor of Science in Computer Science</h4>
+                <h4 className="text-xl font-semibold text-gray-900">Baylor University</h4>
                 <span className="text-blue-600 font-medium">Waco, TX</span>
               </div>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
-                <p className="text-gray-600">Baylor University</p>
+                <p className="text-gray-600">PhD in Computer Science</p>
                 <span className="text-gray-500">Aug 2021 - Present</span>
               </div>
               <ul className="text-gray-700 space-y-1">
                 <li>• <strong>Research Focus:</strong> Software Engineering, Microservice Testing & Quality Assurance</li>
-                <li>• <strong>Relevant Coursework:</strong> Data Structures & Algorithms, Database Systems, Software Engineering, Web Development, and contribute to open-source projects</li>
+                <li>• <strong>Relevant Coursework:</strong> Advanced Algorithms, Distributed Systems, Software Engineering Research Methods, Microservice Testing</li>
               </ul>
             </div>
             
@@ -95,11 +95,11 @@ function Scott() {
               </div>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
                 <p className="text-gray-600">Bachelor of Science in Applied Mathematics/Secondary Major</p>
-                <span className="text-gray-500">Sep 2019 - Jan 2022</span>
+                <span className="text-gray-500">Sep 2018 - Jan 2022</span>
               </div>
               <ul className="text-gray-700 space-y-1">
                 <li>• Dean's List Honors (Fall 2019, Spring 2019, Fall 2020)</li>
-                <li>• <strong>Capstone Project:</strong> Led development of a machine learning platform (see Projects)</li>
+                <li>• <strong>Academic Excellence:</strong> Strong foundation in mathematical modeling and statistical analysis</li>
               </ul>
             </div>
           </div>
@@ -166,56 +166,21 @@ function Scott() {
           </h3>
           
           <div className="space-y-8">
-            {/* Wolfram Research */}
-            <div className="border-l-4 border-red-500 pl-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
-                <h4 className="text-xl font-semibold text-gray-900">Software Engineering Intern</h4>
-                <span className="text-red-600 font-medium">Sep 2024 - Present</span>
-              </div>
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                <p className="text-gray-600 font-medium">Wolfram Research — Enterprise Health Management Platform</p>
-                <span className="text-gray-500">Remote</span>
-              </div>
-              <ul className="text-gray-700 space-y-2">
-                <li>• <strong>Microservice Health Monitoring:</strong> Developed comprehensive health check endpoints using Spring Boot and integrated with Actuator, GitLab Actions, Allure, Grafana</li>
-                <li>• <strong>Performance Optimization:</strong> Conducted performance testing using JMeter, identified bottlenecks and recommended optimizations, reducing latency by ~15% under load</li>
-                <li>• <strong>Quality Assurance:</strong> Implemented comprehensive unit testing strategies and integration tests, achieving 90%+ test coverage and establishing CI/CD pipeline with automated testing and deployment</li>
-                <li>• <strong>System Monitoring:</strong> Measured system health via Grafana/Prometheus, participated in release cycles, backup strategies, and incident response</li>
-              </ul>
-            </div>
-
-            {/* Research Experience */}
+            {/* Teaching Experience */}
             <div className="border-l-4 border-blue-500 pl-6">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
-                <h4 className="text-xl font-semibold text-gray-900">Undergraduate Research Assistant</h4>
-                <span className="text-blue-600 font-medium">Jan 2024 - Present</span>
-              </div>
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                <p className="text-gray-600 font-medium">Baylor University — Internet Inventory Management System</p>
-                <span className="text-gray-500">Waco, TX</span>
-              </div>
-              <ul className="text-gray-700 space-y-2">
-                <li>• <strong>Full-Stack Development:</strong> Built comprehensive inventory system using React.js, Node.js, Express.js, and PostgreSQL with real-time updates</li>
-                <li>• <strong>Performance Optimization:</strong> Implemented caching strategies, database indexing, and API optimization, resulting in 40% faster query response times</li>
-                <li>• <strong>System Integration:</strong> Integrated barcode scanning, automated notifications, and reporting features with seamless user experience</li>
-                <li>• <strong>Collaboration:</strong> Worked closely with faculty and staff to gather requirements, conduct user testing, and iterate on feedback for optimal usability</li>
-              </ul>
-            </div>
-
-            {/* Teaching Experience */}
-            <div className="border-l-4 border-green-500 pl-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
                 <h4 className="text-xl font-semibold text-gray-900">Graduate Teaching & Research Assistant</h4>
-                <span className="text-green-600 font-medium">Aug 2022 - Present</span>
+                <span className="text-blue-600 font-medium">Aug 2022 - Present</span>
               </div>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                 <p className="text-gray-600 font-medium">Baylor University</p>
                 <span className="text-gray-500">Waco, TX</span>
               </div>
               <ul className="text-gray-700 space-y-2">
-                <li>• Taught undergraduate CS courses, led discussion sections, held office hours, graded assignments, developed instructional materials</li>
-                <li>• Supported faculty research, conducted literature reviews, collected/analyzed experimental data, co-authored publications on microservice testing</li>
-                <li>• Mentored students in programming concepts, debugging techniques, and software development best practices</li>
+                <li>• <strong>Teaching Responsibilities:</strong> Taught undergraduate CS courses, led discussion sections, held office hours, graded assignments, developed instructional materials</li>
+                <li>• <strong>Research Activities:</strong> Supported faculty research, conducted literature reviews, collected/analyzed experimental data, co-authored publications on microservice testing</li>
+                <li>• <strong>Student Mentoring:</strong> Mentored 50+ students in programming fundamentals, data structures, algorithms, and software development best practices</li>
+                <li>• <strong>Academic Contributions:</strong> Contributed to research projects focusing on software engineering and microservice architecture quality assurance</li>
               </ul>
             </div>
           </div>
@@ -265,39 +230,21 @@ function Scott() {
               </ul>
             </div>
 
-            {/* Machine Learning Platform */}
+            {/* Research Projects */}
             <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <h4 className="text-xl font-semibold text-gray-900 mb-3">Machine Learning Platform (Capstone)</h4>
+              <h4 className="text-xl font-semibold text-gray-900 mb-3">Microservice Testing Research</h4>
               <p className="text-gray-600 mb-4">
-                Led development of a campus-focused machine learning platform for academic data analysis and predictions.
+                Comprehensive research on test generation methodologies for microservice architectures, focusing on system quality and reliability.
               </p>
               <div className="flex flex-wrap gap-2 mb-4">
-                {['Python', 'TensorFlow', 'Flask', 'PostgreSQL', 'Docker', 'AWS'].map((tech) => (
+                {['Java', 'Spring Boot', 'JUnit', 'Mockito', 'Docker', 'Research Methodology'].map((tech) => (
                   <span key={tech} className="px-2 py-1 bg-purple-50 text-purple-700 rounded text-sm">{tech}</span>
                 ))}
               </div>
               <ul className="text-gray-700 text-sm space-y-1">
-                <li>• Developed predictive models for student performance analysis</li>
-                <li>• Built RESTful APIs for model serving and data management</li>
-                <li>• Deployed scalable solution with containerized microservices</li>
-              </ul>
-            </div>
-
-            {/* Inventory Management */}
-            <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <h4 className="text-xl font-semibold text-gray-900 mb-3">Internet Inventory Management System</h4>
-              <p className="text-gray-600 mb-4">
-                Comprehensive inventory tracking system with barcode scanning, real-time updates, and automated reporting.
-              </p>
-              <div className="flex flex-wrap gap-2 mb-4">
-                {['React', 'Node.js', 'Express', 'PostgreSQL', 'Socket.io', 'Barcode API'].map((tech) => (
-                  <span key={tech} className="px-2 py-1 bg-orange-50 text-orange-700 rounded text-sm">{tech}</span>
-                ))}
-              </div>
-              <ul className="text-gray-700 text-sm space-y-1">
-                <li>• Real-time inventory tracking with WebSocket integration</li>
-                <li>• Barcode scanning functionality for efficient data entry</li>
-                <li>• Automated reporting and notification system</li>
+                <li>• Systematic mapping study of microservice testing approaches</li>
+                <li>• Development of Service Availability Ratio (SAR) metric</li>
+                <li>• Published research findings in peer-reviewed journals</li>
               </ul>
             </div>
           </div>
@@ -315,11 +262,51 @@ function Scott() {
                 "Systematic Mapping Study of Test Generation for Microservices: Approaches, Challenges, and Impact on System Quality"
               </h4>
               <p className="text-gray-600 mb-2">
-                <strong>Miao, T.</strong>, Shaikh, S., I., & Song, L. (2025). <em>Information</em>, 16(1), 139.
+                <strong>Miao, T.</strong>, Shahkh, S.,, I., & Song,LL. (2025). <emInformaoiman</em>, 6611), 13.
               </p>
-              <p className="text-gray-700 text-sm">
+              <p className="text-gray-700 text-sm              Comprehensive analysis of microservice testing methodologies and their impact on system reliability and performance.
+    Cap className"htdsvice testing</li>
+                <li>• Mentored 50+ students in programming fundamentals, data structures, algorithms, and software engineering best practices</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* Publications */}
+        <section className="bg-white rounded-xl shadow-lg p-8">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+            <BookOpen className="h-6 w-6 text-blue-500" />
+            Publications
+          </h3>
+          <div className="space-y-6">
+            <div className="border-l-4 border-blue-500 pl-6">
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                "Systematic Mapping Study of Test Generation for Microservices: Approaches, Challenges, and Impact on System Quality"
+              </h4>
+              <p className="text-gray-600 mb-2">
+                <strong>Miao, T.</strong>, Shaafi, A. I., & Song, E. (2025). <em>Electronics</em>, 14(7), 1397.
+              </p>
+              <p className="text-gray-700 text-sm mb-2">
                 Comprehensive analysis of microservice testing methodologies and their impact on system reliability and performance.
               </p>
+              <a href="https://doi.org/10.3390/electronics14071397" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                https://doi.org/10.3390/electronics14071397
+              </a>
+            </div>
+            
+            <div className="border-l-4 border-green-500 pl-6">
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                "Service Availability Ratio (SAR): An Availability Metric for Microservices"
+              </h4>
+              <p className="text-gray-600 mb-2">
+                <strong>Miao, T.</strong>, & Shaafi, A. I. (2025). In <em>Lecture Notes in Computer Science</em> (Vol. 14678, pp. 112–127). Springer.
+              </p>
+              <p className="text-gray-700 text-sm mb-2">
+                Novel availability metric for microservice architectures that considers end-to-end service dependencies and system reliability.
+              </p>
+              <a href="https://doi.org/10.1007/978-3-031-86644-9_8" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                https://doi.org/10.1007/978-3-031-86644-9_8
+              </a>
             </div>
           </div>
         </section>
@@ -338,9 +325,9 @@ function Scott() {
               </div>
               <p className="text-gray-600 mb-3">Baylor University</p>
               <ul className="text-gray-700 space-y-1">
-                <li>• Taught undergraduate CS courses, led discussion sections, held office hours, graded assignments, developed instructional materials</li>
-                <li>• Supported faculty research, conducted literature reviews, collected/analyzed experimental data, co-authored publications on microservice testing</li>
-                <li>• Mentored 50+ students in programming fundamentals, data structures, algorithms, and software engineering best practices</li>
+                <li>• <strong>Teaching Responsibilities:</strong> Taught undergraduate CS courses, led discussion sections, held office hours, graded assignments, developed instructional materials</li>
+                <li>• <strong>Research Activities:</strong> Supported faculty research, conducted literature reviews, collected/analyzed experimental data, co-authored publications on microservice testing</li>
+                <li>• <strong>Student Mentoring:</strong> Mentored 50+ students in programming fundamentals, data structures, algorithms, and software engineering best practices</li>
               </ul>
             </div>
           </div>
