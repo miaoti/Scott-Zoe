@@ -270,32 +270,6 @@ function Scott() {
               <a href="https://doi.org/10.3390/electronics14071397" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                 https://doi.org/10.3390/electronics14071397
               </a>
-            </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Publications */}
-        <section className="bg-white rounded-xl shadow-lg p-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-            <BookOpen className="h-6 w-6 text-blue-500" />
-            Publications
-          </h3>
-          <div className="space-y-6">
-            <div className="border-l-4 border-blue-500 pl-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                "Systematic Mapping Study of Test Generation for Microservices: Approaches, Challenges, and Impact on System Quality"
-              </h4>
-              <p className="text-gray-600 mb-2">
-                <strong>Miao, T.</strong>, Shaafi, A. I., & Song, E. (2025). <em>Electronics</em>, 14(7), 1397.
-              </p>
-              <p className="text-gray-700 text-sm mb-2">
-                Comprehensive analysis of microservice testing methodologies and their impact on system reliability and performance.
-              </p>
-              <a href="https://doi.org/10.3390/electronics14071397" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                https://doi.org/10.3390/electronics14071397
-              </a>
-            </div>
             
             <div className="border-l-4 border-green-500 pl-6">
               <h4 className="text-lg font-semibold text-gray-900 mb-2">
