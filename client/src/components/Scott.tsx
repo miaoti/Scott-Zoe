@@ -34,6 +34,18 @@ function Scott() {
                   <Globe className="h-5 w-5 text-blue-500" />
                   <span>US Citizen (English & Native Mandarin)</span>
                 </div>
+                <div className="flex items-center justify-center md:justify-start gap-2">
+                  <Linkedin className="h-5 w-5 text-blue-500" />
+                  <a href="https://www.linkedin.com/in/tingshuo-miao-823912232" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">
+                    LinkedIn Profile
+                  </a>
+                </div>
+                <div className="flex items-center justify-center md:justify-start gap-2">
+                  <Github className="h-5 w-5 text-blue-500" />
+                  <a href="https://github.com/miaoti/" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">
+                    GitHub Profile
+                  </a>
+                </div>
               </div>
             </div>
           </div>
