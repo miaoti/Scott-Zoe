@@ -59,7 +59,7 @@ function Scott() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-gray-200">
                 <div className="flex items-center gap-3 text-gray-600">
                   <MapPin className="h-5 w-5 text-blue-500 flex-shrink-0" />
-                  <span>Waco/, TX (Open to Relocation)</span>
+                  <span>Waco/Dallas, TX (Open to Relocation)</span>
                 </div>
                 <div className="flex items-center gap-3 text-gray-600">
                   <Globe className="h-5 w-5 text-blue-500 flex-shrink-0" />
@@ -387,27 +387,7 @@ function Scott() {
           </div>
         </section>
 
-        {/* Academic & Teaching Experience */}
-        <section className="bg-white rounded-xl shadow-lg p-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-            <GraduationCap className="h-6 w-6 text-blue-500" />
-            Academic & Teaching Experience
-          </h3>
-          <div className="space-y-6">
-            <div className="border-l-4 border-blue-500 pl-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
-                <h4 className="text-lg font-semibold text-gray-900">Graduate Teaching & Research Assistant</h4>
-                <span className="text-blue-600 font-medium">Aug 2022 - Present</span>
-              </div>
-              <p className="text-gray-600 mb-3">Baylor University</p>
-              <ul className="text-gray-700 space-y-1">
-                <li>• <strong>Teaching Responsibilities:</strong> Taught undergraduate CS courses, led discussion sections, held office hours, graded assignments, developed instructional materials</li>
-                <li>• <strong>Research Activities:</strong> Supported faculty research, conducted literature reviews, collected/analyzed experimental data, co-authored publications on microservice testing</li>
-                <li>• <strong>Student Mentoring:</strong> Mentored 50+ students in programming fundamentals, data structures, algorithms, and software engineering best practices</li>
-              </ul>
-            </div>
-          </div>
-        </section>
+
       </div>
     </div>
   );
