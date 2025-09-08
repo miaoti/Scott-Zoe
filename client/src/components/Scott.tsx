@@ -3,48 +3,67 @@ import { MapPin, Mail, Phone, Globe, Github, Linkedin, Calendar, Award, BookOpen
 
 function Scott() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Header Section */}
-      <div className="bg-white shadow-lg">
-        <div className="max-w-6xl mx-auto px-6 py-12">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-            <div className="w-48 h-48 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-6xl font-bold shadow-xl">
-              TM
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+      {/* Modern Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Professional Photo */}
+            <div className="flex justify-center lg:justify-start">
+              <div className="relative">
+                <div className="w-80 h-80 rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-blue-50 to-purple-50">
+                  <img 
+                    src="https://github.com/miaoti/Test/blob/main/ResumeICON.png?raw=true" 
+                    alt="Tingshuo Miao" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl opacity-20"></div>
+              </div>
             </div>
-            <div className="flex-1 text-center md:text-left">
-              <h1 className="text-5xl font-bold text-gray-900 mb-4">Tingshuo Miao</h1>
-              <h2 className="text-2xl text-blue-600 font-semibold mb-6">PhD Student</h2>
+            
+            {/* Hero Content */}
+            <div className="text-center lg:text-left space-y-8">
+              <div className="space-y-4">
+                <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                  Tingshuo <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Miao</span>
+                </h1>
+                <p className="text-2xl text-gray-600 font-light">PhD Student in Computer Science</p>
+                <p className="text-lg text-gray-500 max-w-2xl leading-relaxed">
+                  Passionate researcher specializing in microservice architecture, software engineering, and system quality assurance. 
+                  Dedicated to advancing the field through innovative testing methodologies and robust system design.
+                </p>
+              </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600">
-                <div className="flex items-center justify-center md:justify-start gap-2">
-                  <MapPin className="h-5 w-5 text-blue-500" />
-                  <span>Waco, TX (Open to Relocation)</span>
+              {/* Contact & Social Links */}
+              <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+                <a href="mailto:tingshuo_miao2@baylor.edu" 
+                   className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+                  <Mail className="h-5 w-5" />
+                  <span className="font-medium">Email</span>
+                </a>
+                <a href="https://www.linkedin.com/in/tingshuo-miao-823912232" target="_blank" rel="noopener noreferrer"
+                   className="inline-flex items-center gap-2 px-6 py-3 bg-white text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl border border-gray-200">
+                  <Linkedin className="h-5 w-5 text-blue-600" />
+                  <span className="font-medium">LinkedIn</span>
+                </a>
+                <a href="https://github.com/miaoti/" target="_blank" rel="noopener noreferrer"
+                   className="inline-flex items-center gap-2 px-6 py-3 bg-white text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl border border-gray-200">
+                  <Github className="h-5 w-5 text-gray-700" />
+                  <span className="font-medium">GitHub</span>
+                </a>
+              </div>
+              
+              {/* Quick Info */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-gray-200">
+                <div className="flex items-center gap-3 text-gray-600">
+                  <MapPin className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                  <span>Waco/, TX (Open to Relocation)</span>
                 </div>
-                <div className="flex items-center justify-center md:justify-start gap-2">
-                  <Mail className="h-5 w-5 text-blue-500" />
-                  <a href="mailto:tingshuo_miao2@baylor.edu" className="hover:text-blue-600 transition-colors">
-                    tingshuo_miao2@baylor.edu
-                  </a>
-                </div>
-                <div className="flex items-center justify-center md:justify-start gap-2">
-                  <Phone className="h-5 w-5 text-blue-500" />
-                  <span>+1 (541) 979-1876</span>
-                </div>
-                <div className="flex items-center justify-center md:justify-start gap-2">
-                  <Globe className="h-5 w-5 text-blue-500" />
+                <div className="flex items-center gap-3 text-gray-600">
+                  <Globe className="h-5 w-5 text-blue-500 flex-shrink-0" />
                   <span>F1 Visa (English & Native Mandarin)</span>
-                </div>
-                <div className="flex items-center justify-center md:justify-start gap-2">
-                  <Linkedin className="h-5 w-5 text-blue-500" />
-                  <a href="https://www.linkedin.com/in/tingshuo-miao-823912232" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">
-                    LinkedIn Profile
-                  </a>
-                </div>
-                <div className="flex items-center justify-center md:justify-start gap-2">
-                  <Github className="h-5 w-5 text-blue-500" />
-                  <a href="https://github.com/miaoti/" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">
-                    GitHub Profile
-                  </a>
                 </div>
               </div>
             </div>
@@ -52,55 +71,134 @@ function Scott() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-12 space-y-12">
-        {/* Professional Objective */}
-        <section className="bg-white rounded-xl shadow-lg p-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-            <Award className="h-6 w-6 text-blue-500" />
-            Professional Objective
-          </h3>
-          <p className="text-gray-700 leading-relaxed text-lg">
-            Passionate about building reliable, scalable software solutions and system optimization as a collaborative, product-driven environment. 
-            Passionate about building reliable, scalable software solutions and system optimization as a collaborative, product-driven environment. 
-            Passionate about building reliable, scalable software solutions and system optimization as a collaborative, product-driven environment.
-          </p>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-20">
+        
+        {/* Research Focus */}
+        <section className="relative">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Research & Expertise</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Advancing software engineering through innovative research in microservice architectures and quality assurance
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="group relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6">
+                  <Code className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Microservice Testing</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Developing comprehensive testing methodologies for distributed microservice architectures to ensure system reliability and performance.
+                </p>
+              </div>
+            </div>
+            
+            <div className="group relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6">
+                  <Award className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Quality Assurance</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Researching innovative approaches to software quality metrics and system availability measurement in distributed environments.
+                </p>
+              </div>
+            </div>
+            
+            <div className="group relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-teal-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-6">
+                  <BookOpen className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Academic Research</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Contributing to the academic community through peer-reviewed publications and collaborative research initiatives.
+                </p>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Education */}
-        <section className="bg-white rounded-xl shadow-lg p-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-            <GraduationCap className="h-6 w-6 text-blue-500" />
-            Education
-          </h3>
-          <div className="space-y-6">
-            <div className="border-l-4 border-blue-500 pl-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
-                <h4 className="text-xl font-semibold text-gray-900">Baylor University</h4>
-                <span className="text-blue-600 font-medium">Waco, TX</span>
+        <section className="relative">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Education</h2>
+            <p className="text-xl text-gray-600">Academic foundation in computer science and mathematics</p>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* PhD */}
+            <div className="group relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                    <GraduationCap className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">Baylor University</h3>
+                    <p className="text-blue-600 font-medium">Waco, TX</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-xl font-semibold text-gray-900">PhD in Computer Science</h4>
+                    <p className="text-gray-500 font-medium">Aug 2022 - Present</p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <p className="text-gray-700"><strong>Research Focus:</strong> Software Engineering, Microservice Testing & Quality Assurance</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <p className="text-gray-700"><strong>Coursework:</strong> Advanced Algorithms, Distributed Systems, Software Engineering Research Methods, Microservice Testing</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
-                <p className="text-gray-600">PhD in Computer Science</p>
-                <span className="text-gray-500">Aug 2022 - Present</span>
-              </div>
-              <ul className="text-gray-700 space-y-1">
-                <li>• <strong>Research Focus:</strong> Software Engineering, Microservice Testing & Quality Assurance</li>
-                <li>• <strong>Relevant Coursework:</strong> Advanced Algorithms, Distributed Systems, Software Engineering Research Methods, Microservice Testing</li>
-              </ul>
             </div>
             
-            <div className="border-l-4 border-purple-500 pl-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
-                <h4 className="text-xl font-semibold text-gray-900">University of Massachusetts Amherst</h4>
-                <span className="text-purple-600 font-medium">Amherst, MA</span>
+            {/* Bachelor's */}
+            <div className="group relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+                    <Award className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">UMass Amherst</h3>
+                    <p className="text-purple-600 font-medium">Amherst, MA</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-xl font-semibold text-gray-900">BS in Applied Mathematics</h4>
+                    <p className="text-gray-500 font-medium">Sep 2018 - Jan 2022</p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <p className="text-gray-700"><strong>Honors:</strong> Dean's List (Fall 2019, Spring 2019, Fall 2020)</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <p className="text-gray-700"><strong>Foundation:</strong> Mathematical modeling and statistical analysis</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
-                <p className="text-gray-600">Bachelor of Science in Applied Mathematics/Secondary Major</p>
-                <span className="text-gray-500">Sep 2018 - Jan 2022</span>
-              </div>
-              <ul className="text-gray-700 space-y-1">
-                <li>• Dean's List Honors (Fall 2019, Spring 2019, Fall 2020)</li>
-                <li>• <strong>Academic Excellence:</strong> Strong foundation in mathematical modeling and statistical analysis</li>
-              </ul>
             </div>
           </div>
         </section>
