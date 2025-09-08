@@ -293,7 +293,7 @@ function Scott() {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Couple Website */}
-            <a href="https://qimiao.live" target="_blank" rel="noopener noreferrer" className="block border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow hover:border-blue-300">
+            <a href="https://qimiao.life" target="_blank" rel="noopener noreferrer" className="block border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow hover:border-blue-300">
               <h4 className="text-xl font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 Scott & Zoe Couple Website
                 <Globe className="h-4 w-4 text-blue-500" />
