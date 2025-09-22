@@ -30,11 +30,19 @@ public class WheelPrizeService {
      */
     public WheelPrize recordPrize(String prizeType, Integer prizeValue, String prizeDescription) {
         try {
+            logger.info("Starting prize recording process...");
+            
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            logger.info("Current authenticated username: {}", currentUsername);
+            
             User currentUser = userDetailsService.getUserByUsername(currentUsername);
+            logger.info("Found user: {} with ID: {}", currentUser.getUsername(), currentUser.getId());
             
             WheelPrize wheelPrize = new WheelPrize(currentUser, prizeType, prizeValue, prizeDescription);
+            logger.info("Created WheelPrize object: {}", wheelPrize);
+            
             WheelPrize savedPrize = wheelPrizeRepository.save(wheelPrize);
+            logger.info("Successfully saved prize with ID: {} for user: {}", savedPrize.getId(), currentUsername);
             
             logger.info("Wheel prize recorded for user: {} - Type: {}, Value: {}", 
                        currentUsername, prizeType, prizeValue);
@@ -42,7 +50,8 @@ public class WheelPrizeService {
             return savedPrize;
             
         } catch (Exception e) {
-            logger.error("Error recording wheel prize", e);
+            logger.error("Error recording wheel prize for user. Exception type: {}, Message: {}", 
+                        e.getClass().getSimpleName(), e.getMessage(), e);
             throw new RuntimeException("Failed to record wheel prize: " + e.getMessage());
         }
     }
