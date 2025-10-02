@@ -63,8 +63,8 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
     } else {
       // Fallback for string format
       const dateStr = memory.date.toString();
-      const [memoryYear, month, memoryDay] = dateStr.split('-').map(Number);
-      memoryMonth = month;
+      const [memoryYear, memoryMonthFromDate, memoryDay] = dateStr.split('-').map(Number);
+      memoryMonth = memoryMonthFromDate;
     }
     // Backend months are 1-indexed, JavaScript months are 0-indexed
     return (memoryMonth - 1) === month;
@@ -88,7 +88,7 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
     } else {
       // Fallback for string format
       const dateStr = memory.date.toString();
-      const [memoryYear, memoryMonth, day] = dateStr.split('-').map(Number);
+      const [memoryYear, memoryMonthFromDate, day] = dateStr.split('-').map(Number);
       memoryDay = day;
     }
     
@@ -99,11 +99,11 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
         endDay = memory.endDate[2];
       } else {
         const endDateStr = memory.endDate.toString();
-        const [endYear, endMonth, day] = endDateStr.split('-').map(Number);
+        const [endYear, endMonthFromDate, day] = endDateStr.split('-').map(Number);
         endDay = day;
         
         // Only show in current month if the end date is in the same month
-        if (endMonth !== (month + 1)) {
+        if (endMonthFromDate !== (month + 1)) {
           endDay = memoryDay; // Fallback to single day if end date is in different month
         }
       }
