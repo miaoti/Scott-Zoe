@@ -65,6 +65,14 @@ export const useSurpriseBoxActions = () => {
     store.setError(error);
   }, []);
 
+  const setShowCreateForm = useCallback((show: boolean) => {
+    store.setShowCreateForm(show);
+  }, []);
+
+  const setShowPrizeHistory = useCallback((show: boolean) => {
+    store.setShowPrizeHistory(show);
+  }, []);
+
   return {
     // State (these are fine as they are)
     ownedBoxes: store.ownedBoxes,
@@ -76,6 +84,8 @@ export const useSurpriseBoxActions = () => {
     isLoading: store.isLoading,
     prizeHistory: store.prizeHistory,
     prizeStats: store.prizeStats,
+    showCreateForm: store.showCreateForm,
+    showPrizeHistory: store.showPrizeHistory,
     
     // Stable action references
     loadOwnedBoxes,
@@ -92,6 +102,8 @@ export const useSurpriseBoxActions = () => {
     loadPrizeStats,
     clearNotifications,
     setError,
+    setShowCreateForm,
+    setShowPrizeHistory,
     
     // Utility functions (these are also fine)
     getBoxById: store.getBoxById,
