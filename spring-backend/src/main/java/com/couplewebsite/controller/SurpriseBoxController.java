@@ -171,6 +171,29 @@ public class SurpriseBoxController {
     }
     
     /**
+     * Get dropped boxes for user (boxes available to claim)
+     */
+    @GetMapping("/dropped/{userId}")
+    public ResponseEntity<?> getDroppedBoxesByRecipient(@PathVariable Long userId) {
+        try {
+            User recipient = userService.findById(userId);
+            List<SurpriseBox> boxes = surpriseBoxService.getDroppedBoxesByRecipient(recipient);
+            
+            List<Map<String, Object>> boxResponses = boxes.stream()
+                .map(this::createBoxResponse)
+                .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(boxResponses);
+            
+        } catch (Exception e) {
+            logger.error("Error fetching dropped boxes by recipient: {}", userId, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
      * Get active box for owner
      */
     @GetMapping("/active/{userId}")

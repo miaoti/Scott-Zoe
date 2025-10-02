@@ -76,10 +76,19 @@ public class SurpriseBoxService {
         
         // Set future drop time and initialize intermittent dropping
         LocalDateTime now = LocalDateTime.now();
-        // Set dropAt to a future time (e.g., 1 minute from now) instead of immediate
-        LocalDateTime futureDropTime = now.plusMinutes(1);
+        // TEMPORARY: Set dropAt to 20 seconds from now for testing
+        LocalDateTime futureDropTime = now.plusSeconds(20);
         box.setDropAt(futureDropTime);
         box.setIsDropping(false); // Start in waiting phase, not dropping
+        
+        // Set default drop and pause durations if not set
+        if (box.getDropDurationMinutes() == null) {
+            box.setDropDurationMinutes(3); // Default 3 minutes
+        }
+        if (box.getPauseDurationMinutes() == null) {
+            box.setPauseDurationMinutes(5); // Default 5 minutes
+        }
+        
         box.setNextDropTime(futureDropTime.plusMinutes(box.getDropDurationMinutes())); // Next transition time
         
         return surpriseBoxRepository.save(box);
@@ -225,6 +234,13 @@ public class SurpriseBoxService {
                 .stream()
                 .filter(box -> box.getClaimedAt() != null)
                 .collect(Collectors.toList());
+    }
+    
+    /**
+     * Get dropped boxes for recipient (boxes that are dropped but not yet claimed)
+     */
+    public List<SurpriseBox> getDroppedBoxesByRecipient(User recipient) {
+        return surpriseBoxRepository.findByRecipientAndStatusOrderByCreatedAtDesc(recipient, SurpriseBox.BoxStatus.DROPPED);
     }
     
     /**

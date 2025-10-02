@@ -308,7 +308,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       const payload = JSON.parse(atob(token?.split('.')[1] || ''));
       const userId = payload.userId;
       
-      const response = await fetch(`${API_BASE_URL}/surprise-boxes/received/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/surprise-boxes/dropped/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -320,9 +320,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       }
       
       const boxes = await response.json();
-      // Filter only DROPPED status boxes
-      const droppedBoxes = boxes.filter((box: SurpriseBox) => box.status === 'DROPPED');
-      set({ droppedBoxes, isLoading: false });
+      set({ droppedBoxes: boxes, isLoading: false });
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Failed to load dropped boxes', isLoading: false });
     }
