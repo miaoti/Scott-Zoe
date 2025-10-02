@@ -49,8 +49,13 @@ const SurpriseBoxManager: React.FC = () => {
     
     // Connect WebSocket
     const token = localStorage.getItem('token');
+    console.log('🔍 SurpriseBoxManager: Checking token for WebSocket connection:', token ? 'Token found' : 'No token');
     if (token) {
+      console.log('✅ SurpriseBoxManager: Calling connectWebSocket with token');
       connectWebSocket(token);
+    } else {
+      console.log('🧪 SurpriseBoxManager: For testing, attempting WebSocket connection without token');
+      connectWebSocket();
     }
     
     return () => {

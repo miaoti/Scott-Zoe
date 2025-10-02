@@ -12,6 +12,8 @@ export default defineConfig({
       process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : 
       process.env.VITE_API_URL || 'http://localhost:8080'
     ),
+    // Fix for sockjs-client in browser environment
+    global: 'globalThis',
   },
   
   server: {

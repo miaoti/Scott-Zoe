@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { io, Socket } from 'socket.io-client';
+import { Client, IMessage } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 import axios from 'axios';
 
 export interface SurpriseBox {
@@ -83,7 +84,7 @@ interface SurpriseBoxState {
   notifications: WebSocketNotification[];
   
   // WebSocket
-  socket: Socket | null;
+  stompClient: Client | null;
   isConnected: boolean;
   
   // Actions
@@ -143,7 +144,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   showCreateForm: false,
   showPrizeHistory: false,
   notifications: [],
-  socket: null,
+  stompClient: null,
   isConnected: false,
   
   // Basic setters
@@ -333,75 +334,132 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   },
   
   // WebSocket
-  connectWebSocket: (token) => {
-    const socket = io(WS_URL, {
-      auth: { token },
-      transports: ['websocket', 'polling']
-    });
+  connectWebSocket: (token?: string) => {
+    // Get token from parameter or localStorage
+    const authToken = token || localStorage.getItem('token');
     
-    socket.on('connect', () => {
-      console.log('Connected to surprise box WebSocket');
-      set({ isConnected: true });
+    console.log('🔌 Attempting WebSocket connection...');
+    console.log('Token present:', !!authToken);
+    console.log('Token value:', authToken ? `${authToken.substring(0, 20)}...` : 'null');
+    console.log('WebSocket URL:', `${WS_URL}/ws`);
+    
+    const { stompClient } = get();
+    
+    if (!authToken) {
+      console.log('❌ No authentication token found, cannot connect to WebSocket');
+      console.log('💡 Please log in first to enable real-time notifications');
+      console.log('🧪 For testing purposes, attempting connection without token...');
+      // For testing, we'll continue without token to see connection behavior
+    }
+    
+    if (stompClient && stompClient.connected) {
+      console.log('✅ Already connected to WebSocket');
+      return; // Already connected
+    }
+
+    const client = new Client({
+      webSocketFactory: () => new SockJS(`${WS_URL}/ws`),
+      connectHeaders: authToken ? {
+        Authorization: `Bearer ${authToken}`
+      } : {},
+      debug: (str) => {
+        console.log('STOMP Debug:', str);
+      },
+      reconnectDelay: 5000,
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+    });
+
+    client.onConnect = (frame) => {
+      console.log('✅ Connected to surprise box WebSocket:', frame);
+      set({ stompClient: client, isConnected: true });
       
-      // Subscribe to surprise box updates
-      socket.emit('/surprise-box/subscribe', {});
-    });
-    
-    socket.on('disconnect', () => {
-      console.log('Disconnected from surprise box WebSocket');
+      // Subscribe to user-specific updates
+      const subscription = client.subscribe('/user/queue/surprise-box/updates', (message) => {
+        console.log('📨 Received WebSocket notification:', message.body);
+        const notification: WebSocketNotification = JSON.parse(message.body);
+        const { notifications } = get();
+        set({ notifications: [notification, ...notifications] });
+        
+        // Refresh relevant data based on notification type
+        switch (notification.type) {
+          case 'BOX_DROPPED':
+            get().loadReceivedBoxes();
+            get().loadActiveBox();
+            break;
+          case 'BOX_OPENED':
+            get().loadOwnedBoxes();
+            break;
+          case 'BOX_APPROVED':
+            get().loadPrizeHistory();
+            get().loadPrizeStats();
+            break;
+          case 'BOX_REJECTED':
+          case 'BOX_EXPIRED':
+          case 'BOX_CANCELLED':
+            get().loadOwnedBoxes();
+            break;
+        }
+      });
+      console.log('📡 Subscribed to surprise box updates');
+      
+      // Subscribe to ping responses
+      const pongSubscription = client.subscribe('/user/queue/surprise-box/pong', (message) => {
+        console.log('🏓 Received pong:', message.body);
+      });
+      console.log('📡 Subscribed to ping responses');
+      
+      // Send initial subscription message
+      client.publish({
+        destination: '/app/surprise-box/subscribe',
+        body: JSON.stringify({ action: 'subscribe' })
+      });
+      console.log('📤 Sent initial subscription message');
+      
+      // Set up periodic ping
+      const pingInterval = setInterval(() => {
+        if (client.connected) {
+          client.publish({
+            destination: '/app/surprise-box/ping',
+            body: JSON.stringify({ timestamp: Date.now() })
+          });
+          console.log('🏓 Sent ping');
+        }
+      }, 30000); // Every 30 seconds
+      
+      // Store interval for cleanup
+      (client as any).pingInterval = pingInterval;
+    };
+
+    client.onStompError = (frame) => {
+      console.error('❌ STOMP error:', frame);
       set({ isConnected: false });
-    });
-    
-    socket.on('/queue/surprise-box/updates', (notification: WebSocketNotification) => {
-      console.log('Received surprise box notification:', notification);
-      get().addNotification(notification);
+    };
+
+    client.onDisconnect = () => {
+      console.log('🔌 Disconnected from surprise box WebSocket');
+      set({ isConnected: false });
       
-      // Refresh relevant data based on notification type
-      switch (notification.type) {
-        case 'BOX_DROPPED':
-          get().loadReceivedBoxes();
-          get().loadActiveBox();
-          break;
-        case 'BOX_OPENED':
-          get().loadOwnedBoxes();
-          break;
-        case 'BOX_APPROVED':
-          get().loadPrizeHistory();
-          get().loadPrizeStats();
-          break;
-        case 'BOX_REJECTED':
-        case 'BOX_EXPIRED':
-        case 'BOX_CANCELLED':
-          get().loadOwnedBoxes();
-          get().loadReceivedBoxes();
-          get().loadActiveBox();
-          break;
+      // Clear ping interval if it exists
+      if ((client as any).pingInterval) {
+        clearInterval((client as any).pingInterval);
       }
-    });
-    
-    socket.on('/queue/surprise-box/pong', (data) => {
-      console.log('WebSocket pong received:', data);
-    });
-    
-    // Send periodic ping
-    const pingInterval = setInterval(() => {
-      if (socket.connected) {
-        socket.emit('/surprise-box/ping', { timestamp: new Date().toISOString() });
-      }
-    }, 30000); // Every 30 seconds
-    
-    socket.on('disconnect', () => {
-      clearInterval(pingInterval);
-    });
-    
-    set({ socket });
+    };
+
+    console.log('🚀 Activating STOMP client...');
+    set({ stompClient: client });
+    client.activate();
   },
   
   disconnectWebSocket: () => {
-    const { socket } = get();
-    if (socket) {
-      socket.disconnect();
-      set({ socket: null, isConnected: false });
+    const { stompClient } = get();
+    if (stompClient) {
+      // Clear ping interval if it exists
+      if ((stompClient as any).pingInterval) {
+        clearInterval((stompClient as any).pingInterval);
+      }
+      stompClient.deactivate();
+      set({ stompClient: null, isConnected: false });
     }
   },
   

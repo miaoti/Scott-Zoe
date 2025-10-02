@@ -81,6 +81,8 @@ public class SecurityConfig {
                 .requestMatchers("/assets/**", "/static/**", "/*.svg", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.css", "/*.js", "/*.woff", "/*.woff2", "/*.ttf", "/*.eot", "/*.json", "/*.txt").permitAll()
                 // API endpoints
                 .requestMatchers("/api/auth/login", "/api/auth/validate", "/health", "/actuator/health", "/api/photos/image/**", "/api/photos/test", "/api/photos", "/api/categories", "/api/categories/**", "/api/memories", "/api/memories/**", "/api/love-updates/**", "/api/surprise-boxes/**").permitAll()
+                // WebSocket endpoints
+                .requestMatchers("/ws/**", "/ws").permitAll()
                 // Frontend routes
                 .requestMatchers("/", "/login", "/dashboard", "/gallery", "/photos", "/memories", "/categories", "/category/**", "/photo/**", "/recycle-bin", "/wheel", "/settings", "/scott", "/zoe", "/surprise-boxes").permitAll()
                 .anyRequest().authenticated()
