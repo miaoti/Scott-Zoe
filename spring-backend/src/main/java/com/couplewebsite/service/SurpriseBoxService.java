@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 @Transactional
@@ -30,7 +31,7 @@ public class SurpriseBoxService {
      */
     public SurpriseBox createBox(Long ownerId, Long recipientId, String prizeName, 
                                 String prizeDescription, SurpriseBox.CompletionType completionType, 
-                                String completionCriteria, Integer dropDelayHours) {
+                                String completionCriteria) {
         
         // Check if owner already has an active box
         User owner = userService.findById(ownerId);
@@ -50,12 +51,10 @@ public class SurpriseBoxService {
         box.setStatus(SurpriseBox.BoxStatus.CREATED);
         box.setCreatedAt(LocalDateTime.now());
         
-        // Calculate drop time
-        if (dropDelayHours != null && dropDelayHours > 0) {
-            box.setDropAt(LocalDateTime.now().plusHours(dropDelayHours));
-        } else {
-            box.setDropAt(LocalDateTime.now()); // Drop immediately
-        }
+        // Generate random drop time between 5 minutes and 2 hours after creation
+        Random random = new Random();
+        int randomMinutes = 5 + random.nextInt(115); // 5 to 119 minutes (5 min to 2 hours)
+        box.setDropAt(LocalDateTime.now().plusMinutes(randomMinutes));
         
         return surpriseBoxRepository.save(box);
     }

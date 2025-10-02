@@ -44,8 +44,7 @@ public class SurpriseBoxController {
                 request.getPrizeName(),
                 request.getPrizeDescription(),
                 completionType,
-                request.getCompletionCriteria(),
-                request.getDropDelayHours()
+                request.getCompletionCriteria()
             );
             
             Map<String, Object> response = new HashMap<>();
@@ -349,7 +348,6 @@ public class SurpriseBoxController {
         private String prizeDescription;
         private String completionType;
         private String completionCriteria;
-        private Integer dropDelayHours;
         
         // Getters and setters
         public Long getOwnerId() { return ownerId; }
@@ -364,8 +362,6 @@ public class SurpriseBoxController {
         public void setCompletionType(String completionType) { this.completionType = completionType; }
         public String getCompletionCriteria() { return completionCriteria; }
         public void setCompletionCriteria(String completionCriteria) { this.completionCriteria = completionCriteria; }
-        public Integer getDropDelayHours() { return dropDelayHours; }
-        public void setDropDelayHours(Integer dropDelayHours) { this.dropDelayHours = dropDelayHours; }
     }
     
     public static class RejectCompletionRequest {
