@@ -21,6 +21,14 @@ export const useSurpriseBoxActions = () => {
     store.loadActiveBox();
   }, []);
 
+  const loadDroppedBoxes = useCallback(() => {
+    store.loadDroppedBoxes();
+  }, []);
+
+  const claimBox = useCallback((boxId: number) => {
+    return store.claimBox(boxId);
+  }, []);
+
   const connectWebSocket = useCallback((token: string) => {
     store.connectWebSocket(token);
   }, []);
@@ -81,6 +89,7 @@ export const useSurpriseBoxActions = () => {
     // State (these are fine as they are)
     ownedBoxes: store.ownedBoxes,
     receivedBoxes: store.receivedBoxes,
+    droppedBoxes: store.droppedBoxes,
     activeBox: store.activeBox,
     notifications: store.notifications,
     isConnected: store.isConnected,
@@ -95,6 +104,8 @@ export const useSurpriseBoxActions = () => {
     loadOwnedBoxes,
     loadReceivedBoxes,
     loadActiveBox,
+    loadDroppedBoxes,
+    claimBox,
     connectWebSocket,
     disconnectWebSocket,
     createBox,

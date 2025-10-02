@@ -62,6 +62,13 @@ public interface SurpriseBoxRepository extends JpaRepository<SurpriseBox, Long> 
     @Query("SELECT COUNT(sb) > 0 FROM SurpriseBox sb WHERE sb.owner = :owner AND sb.status NOT IN ('CLAIMED', 'EXPIRED')")
     boolean hasActiveBoxAsOwner(@Param("owner") User owner);
     
+    // New method for finding active boxes for recipients (only claimed/opened boxes)
+    @Query("SELECT sb FROM SurpriseBox sb WHERE sb.recipient = :recipient AND sb.status IN ('OPENED', 'WAITING_APPROVAL', 'CLAIMED') AND sb.claimedAt IS NOT NULL")
+    Optional<SurpriseBox> findActiveBoxByRecipient(@Param("recipient") User recipient);
+
+    @Query("SELECT CASE WHEN COUNT(sb) > 0 THEN true ELSE false END FROM SurpriseBox sb WHERE sb.recipient = :recipient AND sb.status IN ('OPENED', 'WAITING_APPROVAL', 'CLAIMED') AND sb.claimedAt IS NOT NULL")
+    boolean hasActiveBoxAsRecipient(@Param("recipient") User recipient);}]}
+    
     /**
      * Find boxes that need to be re-dropped (expired but not claimed)
      */

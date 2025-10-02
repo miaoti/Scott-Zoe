@@ -221,15 +221,45 @@ public class SurpriseBoxService {
     /**
      * Get active box for owner
      */
-    public Optional<SurpriseBox> getActiveBoxByOwner(User owner) {
-        return surpriseBoxRepository.findActiveBoxByOwner(owner);
+    public Optional<SurpriseBox> getActiveBoxByOwner(Long userId) {
+        User user = userService.findById(userId);
+        // Only return active boxes for recipients (claimed boxes), not for creators
+        return surpriseBoxRepository.findActiveBoxByRecipient(user);
     }
     
     /**
-     * Check if user has an active box as owner
+     * Check if user has active box
      */
     public boolean hasActiveBox(User owner) {
-        return surpriseBoxRepository.hasActiveBoxAsOwner(owner);
+        // Only check for active boxes as recipient (claimed boxes), not as creator
+        return surpriseBoxRepository.hasActiveBoxAsRecipient(owner);
+    }
+
+    /**
+     * Claim a box when recipient clicks on it from dashboard
+     */
+    public SurpriseBox claimBox(Long boxId, Long userId) {
+        SurpriseBox box = surpriseBoxRepository.findById(boxId)
+                .orElseThrow(() -> new RuntimeException("Box not found"));
+        
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Verify the user is the recipient
+        if (!box.getRecipient().getId().equals(userId)) {
+            throw new RuntimeException("User is not the recipient of this box");
+        }
+        
+        // Only allow claiming if box is dropped and not yet claimed
+        if (!box.getStatus().equals(BoxStatus.DROPPED)) {
+            throw new RuntimeException("Box cannot be claimed in current status: " + box.getStatus());
+        }
+        
+        // Set claimed timestamp and update status
+        box.setClaimedAt(LocalDateTime.now());
+        box.setStatus(BoxStatus.OPENED);
+        
+        return surpriseBoxRepository.save(box);
     }
     
     /**

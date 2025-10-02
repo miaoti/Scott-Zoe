@@ -366,6 +366,16 @@ public class SurpriseBoxController {
         }
     }
     
+    @PostMapping("/claim/{boxId}")
+    public ResponseEntity<SurpriseBoxResponse> claimBox(@PathVariable Long boxId, @RequestParam Long userId) {
+        try {
+            SurpriseBox claimedBox = surpriseBoxService.claimBox(boxId, userId);
+            return ResponseEntity.ok(createBoxResponse(claimedBox));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
     // Helper method to create box response
     private Map<String, Object> createBoxResponse(SurpriseBox box) {
         Map<String, Object> response = new HashMap<>();

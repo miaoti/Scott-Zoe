@@ -71,7 +71,21 @@ function Dashboard() {
   const [stats, setStats] = useState({ photos: 0, memories: 0, totalLove: 0 });
   const [catPositions, setCatPositions] = useState<CatPosition[]>([]);
   const [showWheel, setShowWheel] = useState(false);
-  const { ownedBoxes, receivedBoxes, activeBox, loadOwnedBoxes, loadReceivedBoxes } = useSurpriseBoxActions();
+  const {
+    ownedBoxes,
+    receivedBoxes,
+    droppedBoxes,
+    activeBox,
+    loadOwnedBoxes,
+    loadReceivedBoxes,
+    loadActiveBox,
+    loadDroppedBoxes,
+    claimBox,
+    connectWebSocket,
+    disconnectWebSocket,
+    isConnected,
+    error
+  } = useSurpriseBoxActions();
 
   // Generate random positions for cats with minimum distance to avoid crowding
   const generateRandomPosition = (existingPositions: CatPosition[] = []): { top: string; left: string } => {
@@ -171,7 +185,18 @@ function Dashboard() {
     fetchDashboardData();
     loadOwnedBoxes();
     loadReceivedBoxes();
-  }, [loadOwnedBoxes, loadReceivedBoxes]);
+    loadDroppedBoxes();
+    loadActiveBox();
+  }, [loadOwnedBoxes, loadReceivedBoxes, loadDroppedBoxes, loadActiveBox]);
+
+  // Handle claiming a box
+  const handleClaimBox = async (boxId: number) => {
+    try {
+      await claimBox(boxId);
+    } catch (error) {
+      console.error('Failed to claim box:', error);
+    }
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -460,6 +485,44 @@ function Dashboard() {
                 </div>
               </div>
             ) : null}
+
+            {/* Dropped Boxes - Available to Claim */}
+            {droppedBoxes.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-apple-label mb-3 flex items-center">
+                  <div className="bg-gradient-to-r from-blue-400 to-purple-400 p-1.5 rounded-lg mr-2">
+                    <Gift className="h-4 w-4 text-white" />
+                  </div>
+                  New Surprise Boxes Available!
+                </h3>
+                <div className="space-y-2">
+                  {droppedBoxes.map((box) => (
+                    <div key={box.id} className="bg-gradient-to-r from-blue-50/80 to-purple-50/80 rounded-xl p-4 border border-blue-200/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-apple-label mb-1">{box.prizeName}</h4>
+                          <p className="text-sm text-apple-secondary-label mb-2">
+                            From {box.owner.name} • Dropped {formatDate(box.droppedAt)}
+                          </p>
+                          {box.prizeDescription && (
+                            <p className="text-xs text-apple-tertiary-label mb-2">{box.prizeDescription}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <div className="text-2xl animate-pulse">🎁</div>
+                          <button
+                            onClick={() => handleClaimBox(box.id)}
+                            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-sm"
+                          >
+                            Claim Box
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             
             {/* Quick Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">

@@ -73,6 +73,7 @@ interface SurpriseBoxState {
   // Box data
   ownedBoxes: SurpriseBox[];
   receivedBoxes: SurpriseBox[];
+  droppedBoxes: SurpriseBox[];
   activeBox: SurpriseBox | null;
   prizeHistory: PrizeHistory[];
   prizeStats: PrizeHistoryStats | null;
@@ -99,6 +100,8 @@ interface SurpriseBoxState {
   loadOwnedBoxes: () => Promise<void>;
   loadReceivedBoxes: () => Promise<void>;
   loadActiveBox: () => Promise<void>;
+  loadDroppedBoxes: () => Promise<void>;
+  claimBox: (boxId: number) => Promise<void>;
   openBox: (boxId: number, completionData: string) => Promise<void>;
   approveCompletion: (boxId: number) => Promise<void>;
   rejectCompletion: (boxId: number, reason: string) => Promise<void>;
@@ -151,6 +154,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   // Initial state
   ownedBoxes: [],
   receivedBoxes: [],
+  droppedBoxes: [],
   activeBox: null,
   prizeHistory: [],
   prizeStats: null,
@@ -293,6 +297,55 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
         set({ error: error.response?.data?.message || 'Failed to load active box' });
       }
       set({ activeBox: null });
+    }
+  },
+
+  loadDroppedBoxes: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const token = localStorage.getItem('token');
+      // Get user ID from token payload
+      const payload = JSON.parse(atob(token?.split('.')[1] || ''));
+      const userId = payload.userId;
+      
+      const response = await fetch(`${API_BASE_URL}/surprise-boxes/received/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to load dropped boxes');
+      }
+      
+      const boxes = await response.json();
+      // Filter only DROPPED status boxes
+      const droppedBoxes = boxes.filter((box: SurpriseBox) => box.status === 'DROPPED');
+      set({ droppedBoxes, isLoading: false });
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : 'Failed to load dropped boxes', isLoading: false });
+    }
+  },
+
+  claimBox: async (boxId) => {
+    set({ isLoading: true, error: null });
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_BASE_URL}/surprise-boxes/claim/${boxId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Refresh boxes and active box
+      await Promise.all([
+        get().loadDroppedBoxes(),
+        get().loadReceivedBoxes(),
+        get().loadActiveBox()
+      ]);
+    } catch (error: any) {
+      set({ error: error.response?.data?.message || 'Failed to claim box' });
+    } finally {
+      set({ isLoading: false });
     }
   },
   
