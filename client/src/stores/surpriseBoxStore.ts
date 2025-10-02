@@ -332,7 +332,19 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${API_BASE_URL}/surprise-boxes/claim/${boxId}`, {}, {
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
+      // Get user ID from token payload
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.userId;
+      
+      if (!userId) {
+        throw new Error('User information not found in token');
+      }
+      
+      await axios.post(`${API_BASE_URL}/surprise-boxes/claim/${boxId}?userId=${userId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       

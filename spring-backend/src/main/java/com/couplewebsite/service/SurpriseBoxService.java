@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.Random;
 
 @Service
@@ -216,10 +217,14 @@ public class SurpriseBoxService {
     }
     
     /**
-     * Get boxes received by user
+     * Get boxes received by user (only claimed boxes)
      */
     public List<SurpriseBox> getBoxesByRecipient(User recipient) {
-        return surpriseBoxRepository.findByRecipientOrderByCreatedAtDesc(recipient);
+        // Only return boxes that have been claimed by the recipient
+        return surpriseBoxRepository.findByRecipientOrderByCreatedAtDesc(recipient)
+                .stream()
+                .filter(box -> box.getClaimedAt() != null)
+                .collect(Collectors.toList());
     }
     
     /**
