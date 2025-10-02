@@ -28,12 +28,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Check if user is already logged in
     const token = localStorage.getItem('token');
+    console.log('AuthContext: Checking token on mount, token exists:', !!token);
     if (token) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setIsAuthenticated(true);
+      console.log('AuthContext: Token found, setting authenticated to true');
       // Fetch user data to populate the user state
       fetchUserData();
     } else {
+      console.log('AuthContext: No token found, user not authenticated');
       setLoading(false);
     }
   }, []);

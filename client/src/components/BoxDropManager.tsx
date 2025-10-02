@@ -24,33 +24,54 @@ const BoxDropManager: React.FC = () => {
   const [activeDrops, setActiveDrops] = useState<Set<number>>(new Set());
   const { loadDroppingBoxes } = useSurpriseBoxStore();
   const { user } = useAuth();
+  
+  console.log('BoxDropManager: Component mounted/rendered, user:', user);
 
   // Check for boxes that should be dropping
   const checkForDroppingBoxes = useCallback(async () => {
-    if (!user?.id) return;
+    console.log('BoxDropManager: Checking for dropping boxes, user:', user);
+    
+    if (!user?.id) {
+      console.log('BoxDropManager: No user ID, skipping check');
+      return;
+    }
     
     try {
+      console.log('BoxDropManager: Loading dropping boxes for user ID:', user.id);
       const boxes = await loadDroppingBoxes(user.id);
-      const now = new Date();
       
-      // Filter boxes that should drop now (20 seconds after creation)
-      const boxesToDrop = boxes.filter(box => {
-        const createdTime = new Date(box.createdAt);
-        const dropTime = new Date(createdTime.getTime() + 20 * 1000); // 20 seconds after creation
-        return dropTime <= now && !activeDrops.has(box.id);
-      });
+      console.log('BoxDropManager: Received boxes from API:', boxes);
       
-      // Add new dropping boxes
-      boxesToDrop.forEach(box => {
-        if (!activeDrops.has(box.id)) {
-          setDroppingBoxes(prev => [...prev, box]);
-          setActiveDrops(prev => new Set([...prev, box.id]));
-        }
-      });
+      // The backend now returns only boxes that are ready to drop (dropAt time has passed)
+      // Filter out boxes that are already actively dropping
+      const boxesToDrop = boxes.filter(box => !activeDrops.has(box.id));
+      
+      console.log('BoxDropManager: Boxes ready to drop (filtered):', boxesToDrop);
+      console.log('BoxDropManager: Currently active drops:', Array.from(activeDrops));
+      
+      if (boxesToDrop.length > 0) {
+        console.log('BoxDropManager: Adding boxes to dropping animation');
+        setDroppingBoxes(prev => {
+          const existingIds = new Set(prev.map(box => box.id));
+          const newBoxes = boxesToDrop.filter(box => !existingIds.has(box.id));
+          console.log('BoxDropManager: New boxes to add:', newBoxes);
+          return [...prev, ...newBoxes];
+        });
+        
+        // Mark these boxes as actively dropping
+        setActiveDrops(prev => {
+          const newSet = new Set(prev);
+          boxesToDrop.forEach(box => newSet.add(box.id));
+          console.log('BoxDropManager: Updated active drops:', Array.from(newSet));
+          return newSet;
+        });
+      } else {
+        console.log('BoxDropManager: No new boxes to drop');
+      }
     } catch (error) {
-      console.error('Error checking for dropping boxes:', error);
+      console.error('BoxDropManager: Error checking for dropping boxes:', error);
     }
-  }, [user?.id, loadDroppingBoxes, activeDrops]);
+  }, [loadDroppingBoxes, user?.id, activeDrops]);
 
   // Don't render if user is not logged in
   if (!user?.id) {
