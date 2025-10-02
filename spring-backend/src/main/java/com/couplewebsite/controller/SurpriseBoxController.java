@@ -400,6 +400,29 @@ public class SurpriseBoxController {
         }
     }
     
+    /**
+     * Get boxes that are ready to drop for a user
+     */
+    @GetMapping("/dropping/{userId}")
+    public ResponseEntity<?> getDroppingBoxes(@PathVariable Long userId) {
+        try {
+            User user = userService.findById(userId);
+            List<SurpriseBox> droppingBoxes = surpriseBoxService.getDroppingBoxes(user);
+            
+            List<Map<String, Object>> boxResponses = droppingBoxes.stream()
+                .map(this::createBoxResponse)
+                .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(boxResponses);
+            
+        } catch (Exception e) {
+            logger.error("Error fetching dropping boxes for user: {}", userId, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
     // Helper method to create box response
     private Map<String, Object> createBoxResponse(SurpriseBox box) {
         Map<String, Object> response = new HashMap<>();

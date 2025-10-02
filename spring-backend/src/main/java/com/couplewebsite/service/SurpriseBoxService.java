@@ -295,6 +295,21 @@ public class SurpriseBoxService {
     }
     
     /**
+     * Get boxes that are ready to drop for a user (as recipient)
+     */
+    public List<SurpriseBox> getDroppingBoxes(Long userId) {
+        // Get boxes that are 20 seconds old and ready to drop
+        LocalDateTime twentySecondsAgo = LocalDateTime.now().minusSeconds(20);
+        User recipient = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        return surpriseBoxRepository.findByRecipientAndStatusAndCreatedAtBefore(
+            recipient, 
+            SurpriseBox.BoxStatus.CREATED, 
+            twentySecondsAgo
+        );
+    }
+    
+    /**
      * Get boxes ready for dropping (scheduled task)
      */
     public List<SurpriseBox> getBoxesReadyForDrop() {

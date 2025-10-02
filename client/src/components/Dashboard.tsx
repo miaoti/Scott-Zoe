@@ -6,6 +6,7 @@ import PrizeWheel from './PrizeWheel';
 import LoveCounter from './LoveCounter';
 import PartnerLoveCard from './PartnerLoveCard';
 import { useSurpriseBoxActions } from '../hooks/useSurpriseBoxActions';
+import BoxDropManager from './BoxDropManager';
 
 // Utility function to safely parse dates from different formats
 const parseDate = (dateString: string | null | undefined): Date | null => {
@@ -446,162 +447,14 @@ function Dashboard() {
           </Link>
         </div>
 
-        {/* Surprise Boxes Section */}
-        <div className="apple-card apple-shadow p-6 mb-8 pointer-events-auto relative overflow-hidden">
-          {/* Background decorations */}
-          <div className="absolute inset-0 bg-gradient-to-br from-yellow-50/50 to-orange-50/50 opacity-60"></div>
-          <div className="absolute -top-4 -right-4 w-24 h-24 bg-yellow-200/20 rounded-full blur-xl"></div>
-          <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-orange-200/20 rounded-full blur-xl"></div>
-          
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <div className="bg-gradient-to-r from-yellow-400 to-orange-400 p-2 rounded-xl">
-                  <Gift className="h-6 w-6 text-white" />
-                </div>
-                <h2 className="text-2xl font-semibold text-apple-label">Surprise Boxes</h2>
-              </div>
-              <Link
-                to="/surprise-boxes"
-                className="text-sm text-orange-500 hover:text-orange-600 font-medium transition-colors duration-200"
-              >
-                View All →
-              </Link>
-            </div>
-            
-            {/* Active Box Display */}
-            {activeBox ? (
-              <div className="bg-gradient-to-r from-yellow-100/80 to-orange-100/80 rounded-xl p-4 mb-4 border border-yellow-200/50">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-apple-label mb-1">{activeBox.prizeName}</h3>
-                    <p className="text-sm text-apple-secondary-label">
-                      {activeBox.status === 'PENDING_APPROVAL' ? 'Waiting for approval' : 
-                       activeBox.status === 'ACTIVE' ? 'Ready to open!' : 
-                       activeBox.status === 'SCHEDULED' ? 'Scheduled to drop' : activeBox.status}
-                    </p>
-                  </div>
-                  <div className="text-2xl animate-bounce">🎁</div>
-                </div>
-              </div>
-            ) : null}
 
-            {/* Dropped Boxes - Available to Claim */}
-            {droppedBoxes.length > 0 && (
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-apple-label mb-3 flex items-center">
-                  <div className="bg-gradient-to-r from-blue-400 to-purple-400 p-1.5 rounded-lg mr-2">
-                    <Gift className="h-4 w-4 text-white" />
-                  </div>
-                  New Surprise Boxes Available!
-                </h3>
-                <div className="space-y-2">
-                  {droppedBoxes.map((box) => (
-                    <div key={box.id} className="bg-gradient-to-r from-blue-50/80 to-purple-50/80 rounded-xl p-4 border border-blue-200/50">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-apple-label mb-1">{box.prizeName}</h4>
-                          <p className="text-sm text-apple-secondary-label mb-2">
-                            From {box.owner.name} • Dropped {formatDate(box.droppedAt)}
-                          </p>
-                          {box.prizeDescription && (
-                            <p className="text-xs text-apple-tertiary-label mb-2">{box.prizeDescription}</p>
-                          )}
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <div className="text-2xl animate-pulse">🎁</div>
-                          <button
-                            onClick={() => handleClaimBox(box.id)}
-                            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-sm"
-                          >
-                            Claim Box
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">{ownedBoxes.length}</div>
-                <div className="text-xs text-apple-tertiary-label">Created</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-600">{receivedBoxes.length}</div>
-                <div className="text-xs text-apple-tertiary-label">Received</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {[...ownedBoxes, ...receivedBoxes].filter(box => box.status === 'COMPLETED').length}
-                </div>
-                <div className="text-xs text-apple-tertiary-label">Completed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {[...ownedBoxes, ...receivedBoxes].filter(box => box.status === 'ACTIVE').length}
-                </div>
-                <div className="text-xs text-apple-tertiary-label">Active</div>
-              </div>
-            </div>
-            
-            {/* Recent Activity */}
-            <div className="space-y-2">
-              <div className="text-sm font-medium text-apple-secondary-label mb-2">Recent Activity:</div>
-              {[...ownedBoxes, ...receivedBoxes]
-                .sort((a, b) => {
-                  const dateA = parseDate(a.updatedAt);
-                  const dateB = parseDate(b.updatedAt);
-                  if (!dateA || !dateB) return 0;
-                  return dateB.getTime() - dateA.getTime();
-                })
-                .slice(0, 3)
-                .map((box, index) => (
-                  <div key={box.id} className="flex items-center justify-between py-2 px-3 bg-white/50 rounded-lg">
-                    <div className="flex items-center space-x-2">
-                      <div className="text-lg">
-                        {box.status === 'COMPLETED' ? '✅' : 
-                         box.status === 'ACTIVE' ? '🎁' : 
-                         box.status === 'PENDING_APPROVAL' ? '⏳' : '📦'}
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-apple-label truncate max-w-32">
-                          {box.prizeName}
-                        </div>
-                        <div className="text-xs text-apple-tertiary-label">
-                          {box.status === 'COMPLETED' ? 'Completed' : 
-                           box.status === 'ACTIVE' ? 'Ready to open' : 
-                           box.status === 'PENDING_APPROVAL' ? 'Pending approval' : box.status}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-xs text-apple-quaternary-label">
-                      {formatDate(box.updatedAt)}
-                    </div>
-                  </div>
-                ))
-              }
-              
-              {[...ownedBoxes, ...receivedBoxes].length === 0 && (
-                <div className="text-center py-6">
-                  <div className="text-4xl mb-2">🎁</div>
-                  <div className="text-sm text-apple-tertiary-label mb-1">No surprise boxes yet</div>
-                  <div className="text-xs text-apple-quaternary-label">Create your first surprise box!</div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
 
         {/* Quick Actions */}
         <div className="apple-card apple-shadow p-8 mb-8 pointer-events-auto">
           <h2 className="text-2xl font-semibold text-apple-label mb-6 text-center">
             Create New Memories
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Link
               to="/gallery"
               className="bg-apple-blue/5 border border-apple-blue/20 rounded-xl p-6 hover:bg-apple-blue/10 transition-all duration-300 group pointer-events-auto"
@@ -632,20 +485,7 @@ function Dashboard() {
               </div>
             </Link>
 
-            <Link
-              to="/surprise-boxes"
-              className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200/50 rounded-xl p-6 hover:from-yellow-100 hover:to-orange-100 transition-all duration-300 group pointer-events-auto"
-            >
-              <div className="flex items-center space-x-4">
-                <div className="bg-gradient-to-r from-yellow-400 to-orange-400 p-3 rounded-xl group-hover:from-yellow-500 group-hover:to-orange-500 transition-all duration-200">
-                  <Gift className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-apple-label">Create Surprise</h3>
-                  <p className="text-sm text-apple-secondary-label">Send a surprise box</p>
-                </div>
-              </div>
-            </Link>
+
           </div>
         </div>
 
@@ -666,6 +506,9 @@ function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Box Drop Manager */}
+      <BoxDropManager />
 
       {/* Prize Wheel Modal */}
       {showWheel && (

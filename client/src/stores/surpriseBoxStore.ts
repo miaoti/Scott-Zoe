@@ -101,6 +101,7 @@ interface SurpriseBoxState {
   loadReceivedBoxes: () => Promise<void>;
   loadActiveBox: () => Promise<void>;
   loadDroppedBoxes: () => Promise<void>;
+  loadDroppingBoxes: (userId: number) => Promise<SurpriseBox[]>;
   claimBox: (boxId: number) => Promise<void>;
   openBox: (boxId: number, completionData: string) => Promise<void>;
   approveCompletion: (boxId: number) => Promise<void>;
@@ -326,6 +327,32 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
     }
   },
 
+  loadDroppingBoxes: async (userId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/surprise-boxes/dropping/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to load dropping boxes');
+      }
+      
+      const boxes = await response.json();
+      return boxes;
+    } catch (error) {
+      console.error('Failed to load dropping boxes:', error);
+      return [];
+    }
+  },
+
   claimBox: async (boxId) => {
     set({ isLoading: true, error: null });
     try {
@@ -423,7 +450,19 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${API_BASE_URL}/surprise-boxes/${boxId}`, {
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
+      // Get user ID from token payload
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.userId;
+      
+      if (!userId) {
+        throw new Error('User information not found in token');
+      }
+      
+      await axios.delete(`${API_BASE_URL}/surprise-boxes/${boxId}?ownerId=${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
