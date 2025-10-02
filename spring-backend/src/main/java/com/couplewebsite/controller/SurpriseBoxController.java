@@ -44,7 +44,8 @@ public class SurpriseBoxController {
                 request.getPrizeName(),
                 request.getPrizeDescription(),
                 completionType,
-                request.getCompletionCriteria()
+                request.getCompletionCriteria(),
+                request.getExpiresAt()
             );
             
             Map<String, Object> response = new HashMap<>();
@@ -348,6 +349,7 @@ public class SurpriseBoxController {
         private String prizeDescription;
         private String completionType;
         private String completionCriteria;
+        private String expiresAt;
         
         // Getters and setters
         public Long getOwnerId() { return ownerId; }
@@ -362,6 +364,8 @@ public class SurpriseBoxController {
         public void setCompletionType(String completionType) { this.completionType = completionType; }
         public String getCompletionCriteria() { return completionCriteria; }
         public void setCompletionCriteria(String completionCriteria) { this.completionCriteria = completionCriteria; }
+        public String getExpiresAt() { return expiresAt; }
+        public void setExpiresAt(String expiresAt) { this.expiresAt = expiresAt; }
     }
     
     public static class RejectCompletionRequest {

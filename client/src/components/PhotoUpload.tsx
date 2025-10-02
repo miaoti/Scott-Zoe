@@ -24,6 +24,44 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { showPhotoSuccess } = useToast();
 
+  // Compress image to reduce file size
+  const compressImage = (file: File, maxWidth = 1920, maxHeight = 1080, quality = 0.8): Promise<File> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d')!;
+      const img = new Image();
+      
+      img.onload = () => {
+        // Calculate new dimensions
+        let { width, height } = img;
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width *= ratio;
+          height *= ratio;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const compressedFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          } else {
+            resolve(file); // Fallback to original file
+          }
+        }, 'image/jpeg', quality);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   // Debug logging
   console.log('PhotoUpload rendered', { files: files.length, isUploading, uploadStats });
 
@@ -35,14 +73,48 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
     progress: 0,
   });
 
-  const handleFileSelect = useCallback((selectedFiles: FileList | null) => {
+  const handleFileSelect = useCallback(async (selectedFiles: FileList | null) => {
     if (!selectedFiles) return;
 
-    const newFiles = Array.from(selectedFiles)
-      .filter(file => file.type.startsWith('image/'))
-      .map(createUploadFile);
+    const imageFiles = Array.from(selectedFiles)
+      .filter(file => file.type.startsWith('image/'));
 
-    setFiles(prev => [...prev, ...newFiles]);
+    // Show loading state while compressing
+    const tempFiles = imageFiles.map(file => ({
+      ...createUploadFile(file),
+      status: 'uploading' as const
+    }));
+    setFiles(prev => [...prev, ...tempFiles]);
+
+    // Compress images in parallel
+    const compressedFiles = await Promise.all(
+      imageFiles.map(async (file, index) => {
+        try {
+          console.log(`Compressing ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)...`);
+          const compressedFile = await compressImage(file);
+          console.log(`Compressed ${file.name} to ${(compressedFile.size / 1024 / 1024).toFixed(1)}MB`);
+          return { file: compressedFile, originalIndex: index };
+        } catch (error) {
+          console.error(`Failed to compress ${file.name}:`, error);
+          return { file, originalIndex: index }; // Use original file if compression fails
+        }
+      })
+    );
+
+    // Update files with compressed versions
+    setFiles(prev => {
+      const newFiles = [...prev];
+      compressedFiles.forEach(({ file, originalIndex }) => {
+        const tempFileIndex = newFiles.length - imageFiles.length + originalIndex;
+        if (newFiles[tempFileIndex]) {
+          newFiles[tempFileIndex] = {
+            ...createUploadFile(file),
+            status: 'pending'
+          };
+        }
+      });
+      return newFiles;
+    });
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -71,10 +143,10 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
     });
   };
 
-  const uploadFiles = async () => {
+  const uploadFiles = async (retryCount = 0) => {
     if (files.length === 0) return;
 
-    console.log('Starting upload for', files.length, 'files');
+    console.log('Starting upload for', files.length, 'files', retryCount > 0 ? `(Retry ${retryCount})` : '');
     setIsUploading(true);
     setUploadStats({ success: 0, total: files.length });
 
@@ -88,22 +160,29 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
         console.log('Added file to FormData:', file.name, file.size);
       });
 
-      // Simulate progress for better UX
-      const progressInterval = setInterval(() => {
-        setFiles(prev => prev.map(f => ({
-          ...f,
-          progress: f.status === 'uploading' ? Math.min(f.progress + Math.random() * 20, 90) : f.progress
-        })));
-      }, 200);
+      // Initialize progress for all files
+      setFiles(prev => prev.map(f => ({ ...f, progress: 0 })));
 
       console.log('Sending upload request...');
       const response = await api.post('/api/photos/upload-multiple', formData, {
         headers: {
           'Content-Type': undefined, // Remove default Content-Type to let browser set multipart/form-data
         },
+        timeout: 300000, // 5 minutes timeout for large file uploads
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            console.log('Upload progress:', percentCompleted + '%');
+            // Update progress for all files based on actual upload progress
+            setFiles(prev => prev.map(f => ({
+              ...f,
+              progress: f.status === 'uploading' ? Math.min(percentCompleted, 95) : f.progress
+            })));
+          }
+        },
       });
 
-      clearInterval(progressInterval);
+      // Upload completed successfully
       console.log('Upload response:', response.status, response.data);
 
       if (response.status === 200) {
@@ -127,10 +206,29 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
       }
     } catch (error) {
       console.error('Upload error:', error);
+      
+      // Check if it's a timeout error and we haven't exceeded retry limit
+      const isTimeoutError = error instanceof Error && (error.message.includes('timeout') || error.message.includes('ECONNABORTED'));
+      const maxRetries = 2;
+      
+      if (isTimeoutError && retryCount < maxRetries) {
+        console.log(`Upload timed out, retrying... (${retryCount + 1}/${maxRetries})`);
+        // Wait a bit before retrying
+        setTimeout(() => {
+          uploadFiles(retryCount + 1);
+        }, 2000);
+        return;
+      }
+      
       setFiles(prev => prev.map(f => ({ ...f, status: 'error' as const })));
 
-      // Show error message
-      alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Show error message with retry option
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const shouldRetry = confirm(`Upload failed: ${errorMessage}\n\nWould you like to try again?`);
+      
+      if (shouldRetry) {
+        uploadFiles(0); // Reset retry count for manual retry
+      }
     } finally {
       setIsUploading(false);
     }
@@ -195,7 +293,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
                 Drop photos here or click to browse
               </h3>
               <p className="text-apple-secondary-label mb-6">
-                Support for JPEG, PNG, HEIC and more. Upload as many as you want!
+                Support for JPEG, PNG, HEIC and more. Images are automatically optimized for faster uploads!
               </p>
               <button
                 onClick={() => fileInputRef.current?.click()}

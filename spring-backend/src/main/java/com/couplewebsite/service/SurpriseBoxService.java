@@ -31,7 +31,7 @@ public class SurpriseBoxService {
      */
     public SurpriseBox createBox(Long ownerId, Long recipientId, String prizeName, 
                                 String prizeDescription, SurpriseBox.CompletionType completionType, 
-                                String completionCriteria) {
+                                String completionCriteria, String expiresAt) {
         
         // Check if owner already has an active box
         User owner = userService.findById(ownerId);
@@ -50,6 +50,20 @@ public class SurpriseBoxService {
         box.setCompletionCriteria(completionCriteria);
         box.setStatus(SurpriseBox.BoxStatus.CREATED);
         box.setCreatedAt(LocalDateTime.now());
+        
+        // Parse and set expiration date if provided
+        if (expiresAt != null && !expiresAt.trim().isEmpty()) {
+            try {
+                LocalDateTime expirationDateTime = LocalDateTime.parse(expiresAt);
+                box.setExpiresAt(expirationDateTime);
+            } catch (Exception e) {
+                // If parsing fails, set a default expiration (24 hours from now)
+                box.setExpiresAt(LocalDateTime.now().plusHours(24));
+            }
+        } else {
+            // Default expiration if not provided (24 hours from now)
+            box.setExpiresAt(LocalDateTime.now().plusHours(24));
+        }
         
         // Set immediate drop time and initialize intermittent dropping
         LocalDateTime now = LocalDateTime.now();

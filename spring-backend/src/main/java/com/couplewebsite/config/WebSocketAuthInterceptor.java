@@ -1,6 +1,6 @@
 package com.couplewebsite.config;
 
-import com.couplewebsite.security.JwtTokenProvider;
+import com.couplewebsite.security.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
     private static final Logger logger = LoggerFactory.getLogger(WebSocketAuthInterceptor.class);
     
     @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private JwtUtil jwtUtil;
     
     @Autowired
     private UserDetailsService userDetailsService;
@@ -39,8 +39,8 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
                 try {
                     String token = authToken.substring(7);
                     
-                    if (jwtTokenProvider.validateToken(token)) {
-                        String username = jwtTokenProvider.getUsernameFromToken(token);
+                    if (jwtUtil.validateToken(token)) {
+                        String username = jwtUtil.extractUsername(token);
                         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                         
                         Authentication authentication = new UsernamePasswordAuthenticationToken(
