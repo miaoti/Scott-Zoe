@@ -42,7 +42,5 @@ CREATE INDEX idx_prize_history_claimed_at ON prize_history(claimed_at DESC);
 CREATE INDEX idx_prize_history_box_id ON prize_history(box_id);
 
 -- Grant permissions (if using RLS)
-GRANT SELECT ON surprise_boxes TO anon;
 GRANT ALL PRIVILEGES ON surprise_boxes TO authenticated;
-GRANT SELECT ON prize_history TO anon;
 GRANT ALL PRIVILEGES ON prize_history TO authenticated;
