@@ -382,7 +382,7 @@ function CategoryPhotos() {
                 className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold"
                 style={{ backgroundColor: category.color }}
               >
-                {category.name.charAt(0).toUpperCase()}
+                {category?.name?.charAt(0)?.toUpperCase() || '?'}
               </div>
             )}
           </div>

@@ -658,7 +658,7 @@ function Memories() {
                         </span>
                       </div>
                       <span>•</span>
-                      <span>Added by {memory.creator.name}</span>
+                      <span>Added by {memory.creator?.name || 'Unknown'}</span>
                   
                     </div>
                   </div>
@@ -808,7 +808,7 @@ function Memories() {
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-1">Added by</h4>
-                    <p className="text-gray-600">{selectedMemory.creator.name}</p>
+                    <p className="text-gray-600">{selectedMemory.creator?.name || 'Unknown'}</p>
                   </div>
                 </div>
                 

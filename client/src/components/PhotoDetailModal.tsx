@@ -252,7 +252,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                     <User className="w-4 h-4 text-gray-500 flex-shrink-0" />
                     <span className="text-gray-700">
-                      Uploaded by {photo.uploader.name}
+                      Uploaded by {photo.uploader?.name || 'Unknown'}
                     </span>
                   </div>
                 </div>

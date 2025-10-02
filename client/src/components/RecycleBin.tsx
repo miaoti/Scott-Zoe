@@ -337,7 +337,7 @@ function RecycleBin() {
                   <div className="text-xs text-gray-500 mb-3">
                     <p>Deleted: {formatDate(photo.deletedAt)}</p>
                     <p>Size: {formatFileSize(photo.size)}</p>
-                    <p>By: {photo.uploader.name}</p>
+                    <p>By: {photo.uploader?.name || 'Unknown'}</p>
                   </div>
                   
                   {photo.categories.length > 0 && (

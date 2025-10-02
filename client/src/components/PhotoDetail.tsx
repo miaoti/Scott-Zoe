@@ -225,7 +225,7 @@ function PhotoDetail() {
             <div className="space-y-3 text-sm text-gray-500">
               <div className="flex items-center">
                 <User className="h-4 w-4 mr-2" />
-                <span>Uploaded by {photo.uploader.name}</span>
+                <span>Uploaded by {photo.uploader?.name || 'Unknown'}</span>
               </div>
               <div className="flex items-center">
                 <Calendar className="h-4 w-4 mr-2" />
@@ -297,7 +297,7 @@ function PhotoDetail() {
                   <div key={note.id} className="bg-gray-50 rounded-lg p-3">
                     <p className="text-gray-800 mb-2">{note.content}</p>
                     <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>By {note.author.name}</span>
+                      <span>By {note.author?.name || 'Unknown'}</span>
                       <span>{formatDate(note.createdAt)}</span>
                     </div>
                   </div>

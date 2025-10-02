@@ -213,7 +213,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
           <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
             <div className="flex items-center">
               <User className="w-4 h-4 mr-1" />
-              <span>{isOwner ? `For: ${box.recipient.name}` : `From: ${box.owner.name}`}</span>
+              <span>{isOwner ? `For: ${box.recipient?.name || 'Unknown'}` : `From: ${box.owner?.name || 'Unknown'}`}</span>
             </div>
             <div className="flex items-center">
               <Calendar className="w-4 h-4 mr-1" />

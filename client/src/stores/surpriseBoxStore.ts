@@ -213,12 +213,20 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       const response = await axios.get(`${API_BASE_URL}/surprise-boxes/active/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      set({ activeBox: response.data });
+      
+      // Check if response contains a valid box or just a message
+      if (response.data && response.data.id && response.data.owner && response.data.recipient) {
+        set({ activeBox: response.data });
+      } else {
+        // No active box found or invalid response structure
+        set({ activeBox: null });
+      }
     } catch (error: any) {
       // No active box is not an error
       if (error.response?.status !== 404) {
         set({ error: error.response?.data?.message || 'Failed to load active box' });
       }
+      set({ activeBox: null });
     }
   },
   
