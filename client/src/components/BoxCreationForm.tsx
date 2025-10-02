@@ -15,8 +15,10 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
   const [formData, setFormData] = useState({
     prizeName: '',
     prizeDescription: '',
-    completionType: 'PHOTO' as CompletionType,
-    expiresAt: ''
+    completionType: 'task' as 'task' | 'time',
+    expiresAt: '',
+    priceAmount: '',
+    taskDescription: ''
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -49,6 +51,16 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     }
   ];
 
+  const validateStep1 = () => {
+    const errors: string[] = [];
+    if (!formData.prizeName.trim()) errors.push('Prize name is required');
+    if (!formData.prizeDescription.trim()) errors.push('Prize description is required');
+    if (!formData.priceAmount.trim()) errors.push('Price amount is required');
+    if (formData.priceAmount && parseFloat(formData.priceAmount) < 0.01) errors.push('Price amount must be at least 0.01');
+    if (!formData.taskDescription.trim()) errors.push('Task description is required');
+    return errors;
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
@@ -79,7 +91,11 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     }
     
     try {
-      await createBox(formData);
+      const submitData = {
+        ...formData,
+        priceAmount: parseFloat(formData.priceAmount)
+      };
+      await createBox(submitData);
       onClose();
     } catch (error) {
       // Error is handled by the store
@@ -219,6 +235,34 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
                           value={formData.prizeDescription}
                           onChange={(e) => handleInputChange('prizeDescription', e.target.value)}
                           placeholder="Add more details about this surprise..."
+                          rows={3}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors resize-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Price Amount
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          value={formData.priceAmount}
+                          onChange={(e) => handleInputChange('priceAmount', e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
+                          placeholder="Enter price amount"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Task Description
+                        </label>
+                        <textarea
+                          value={formData.taskDescription}
+                          onChange={(e) => handleInputChange('taskDescription', e.target.value)}
+                          placeholder="Describe the task to complete"
                           rows={3}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors resize-none"
                         />

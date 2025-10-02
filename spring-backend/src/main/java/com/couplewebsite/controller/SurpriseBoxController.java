@@ -45,7 +45,9 @@ public class SurpriseBoxController {
                 request.getPrizeDescription(),
                 completionType,
                 request.getCompletionCriteria(),
-                request.getExpiresAt()
+                request.getExpiresAt(),
+                request.getPriceAmount(),
+                request.getTaskDescription()
             );
             
             Map<String, Object> response = new HashMap<>();
@@ -65,10 +67,10 @@ public class SurpriseBoxController {
     /**
      * Get boxes owned by user
      */
-    @GetMapping("/owned/{username}")
-    public ResponseEntity<?> getBoxesByOwner(@PathVariable String username) {
+    @GetMapping("/owned/{userId}")
+    public ResponseEntity<?> getBoxesByOwner(@PathVariable Long userId) {
         try {
-            User owner = userService.findByUsername(username);
+            User owner = userService.findById(userId);
             List<SurpriseBox> boxes = surpriseBoxService.getBoxesByOwner(owner);
             
             List<Map<String, Object>> boxResponses = boxes.stream()
@@ -78,7 +80,7 @@ public class SurpriseBoxController {
             return ResponseEntity.ok(boxResponses);
             
         } catch (Exception e) {
-            logger.error("Error fetching boxes by owner: {}", username, e);
+            logger.error("Error fetching boxes by owner: {}", userId, e);
             Map<String, String> error = new HashMap<>();
             error.put("message", "Server error");
             return ResponseEntity.status(500).body(error);
@@ -88,10 +90,10 @@ public class SurpriseBoxController {
     /**
      * Get boxes received by user
      */
-    @GetMapping("/received/{username}")
-    public ResponseEntity<?> getBoxesByRecipient(@PathVariable String username) {
+    @GetMapping("/received/{userId}")
+    public ResponseEntity<?> getBoxesByRecipient(@PathVariable Long userId) {
         try {
-            User recipient = userService.findByUsername(username);
+            User recipient = userService.findById(userId);
             List<SurpriseBox> boxes = surpriseBoxService.getBoxesByRecipient(recipient);
             
             List<Map<String, Object>> boxResponses = boxes.stream()
@@ -101,7 +103,7 @@ public class SurpriseBoxController {
             return ResponseEntity.ok(boxResponses);
             
         } catch (Exception e) {
-            logger.error("Error fetching boxes by recipient: {}", username, e);
+            logger.error("Error fetching boxes by recipient: {}", userId, e);
             Map<String, String> error = new HashMap<>();
             error.put("message", "Server error");
             return ResponseEntity.status(500).body(error);
@@ -111,10 +113,10 @@ public class SurpriseBoxController {
     /**
      * Get active box for owner
      */
-    @GetMapping("/active/{username}")
-    public ResponseEntity<?> getActiveBox(@PathVariable String username) {
+    @GetMapping("/active/{userId}")
+    public ResponseEntity<?> getActiveBox(@PathVariable Long userId) {
         try {
-            User owner = userService.findByUsername(username);
+            User owner = userService.findById(userId);
             Optional<SurpriseBox> activeBox = surpriseBoxService.getActiveBoxByOwner(owner);
             
             if (activeBox.isPresent()) {
@@ -126,7 +128,7 @@ public class SurpriseBoxController {
             }
             
         } catch (Exception e) {
-            logger.error("Error fetching active box for user: {}", username, e);
+            logger.error("Error fetching active box for user: {}", userId, e);
             Map<String, String> error = new HashMap<>();
             error.put("message", "Server error");
             return ResponseEntity.status(500).body(error);
@@ -262,10 +264,10 @@ public class SurpriseBoxController {
     /**
      * Get boxes waiting for approval by owner
      */
-    @GetMapping("/waiting-approval/{username}")
-    public ResponseEntity<?> getBoxesWaitingForApproval(@PathVariable String username) {
+    @GetMapping("/waiting-approval/{userId}")
+    public ResponseEntity<?> getBoxesWaitingForApproval(@PathVariable Long userId) {
         try {
-            User owner = userService.findByUsername(username);
+            User owner = userService.findById(userId);
             List<SurpriseBox> boxes = surpriseBoxService.getBoxesWaitingForApproval(owner);
             
             List<Map<String, Object>> boxResponses = boxes.stream()
@@ -275,7 +277,7 @@ public class SurpriseBoxController {
             return ResponseEntity.ok(boxResponses);
             
         } catch (Exception e) {
-            logger.error("Error fetching boxes waiting for approval by owner: {}", username, e);
+            logger.error("Error fetching boxes waiting for approval by owner: {}", userId, e);
             Map<String, String> error = new HashMap<>();
             error.put("message", "Server error");
             return ResponseEntity.status(500).body(error);
@@ -285,10 +287,10 @@ public class SurpriseBoxController {
     /**
      * Check if user has active box
      */
-    @GetMapping("/has-active/{username}")
-    public ResponseEntity<?> hasActiveBox(@PathVariable String username) {
+    @GetMapping("/has-active/{userId}")
+    public ResponseEntity<?> hasActiveBox(@PathVariable Long userId) {
         try {
-            User owner = userService.findByUsername(username);
+            User owner = userService.findById(userId);
             boolean hasActive = surpriseBoxService.hasActiveBox(owner);
             
             Map<String, Object> response = new HashMap<>();
@@ -297,7 +299,7 @@ public class SurpriseBoxController {
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
-            logger.error("Error checking active box for user: {}", username, e);
+            logger.error("Error checking active box for user: {}", userId, e);
             Map<String, String> error = new HashMap<>();
             error.put("message", "Server error");
             return ResponseEntity.status(500).body(error);
@@ -350,6 +352,8 @@ public class SurpriseBoxController {
         private String completionType;
         private String completionCriteria;
         private String expiresAt;
+        private BigDecimal priceAmount;
+        private String taskDescription;
         
         // Getters and setters
         public Long getOwnerId() { return ownerId; }
@@ -366,6 +370,10 @@ public class SurpriseBoxController {
         public void setCompletionCriteria(String completionCriteria) { this.completionCriteria = completionCriteria; }
         public String getExpiresAt() { return expiresAt; }
         public void setExpiresAt(String expiresAt) { this.expiresAt = expiresAt; }
+        public BigDecimal getPriceAmount() { return priceAmount; }
+        public void setPriceAmount(BigDecimal priceAmount) { this.priceAmount = priceAmount; }
+        public String getTaskDescription() { return taskDescription; }
+        public void setTaskDescription(String taskDescription) { this.taskDescription = taskDescription; }
     }
     
     public static class RejectCompletionRequest {

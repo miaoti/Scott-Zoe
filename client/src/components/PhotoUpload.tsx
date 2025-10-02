@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Upload, X, Camera, Image, CheckCircle, AlertCircle, Plus } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
 import api from '../utils/api';
+import imageCompression from 'browser-image-compression';
 
 interface PhotoUploadProps {
   onUploadComplete: () => void;
@@ -24,42 +25,23 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { showPhotoSuccess } = useToast();
 
-  // Compress image to reduce file size
-  const compressImage = (file: File, maxWidth = 1920, maxHeight = 1080, quality = 0.8): Promise<File> => {
-    return new Promise((resolve) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d')!;
-      const img = new Image();
-      
-      img.onload = () => {
-        // Calculate new dimensions
-        let { width, height } = img;
-        if (width > maxWidth || height > maxHeight) {
-          const ratio = Math.min(maxWidth / width, maxHeight / height);
-          width *= ratio;
-          height *= ratio;
-        }
-        
-        canvas.width = width;
-        canvas.height = height;
-        
-        // Draw and compress
-        ctx.drawImage(img, 0, 0, width, height);
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const compressedFile = new File([blob], file.name, {
-              type: 'image/jpeg',
-              lastModified: Date.now(),
-            });
-            resolve(compressedFile);
-          } else {
-            resolve(file); // Fallback to original file
-          }
-        }, 'image/jpeg', quality);
+  // Compress image to reduce file size using browser-image-compression
+  const compressImage = async (file: File): Promise<File> => {
+    try {
+      const options = {
+        maxSizeMB: 2, // Maximum file size in MB
+        maxWidthOrHeight: 1920, // Maximum width or height
+        useWebWorker: true, // Use web worker for better performance
+        fileType: 'image/jpeg', // Convert to JPEG for better compression
+        initialQuality: 0.8 // Initial quality
       };
       
-      img.src = URL.createObjectURL(file);
-    });
+      const compressedFile = await imageCompression(file, options);
+      return compressedFile;
+    } catch (error) {
+      console.error('Image compression failed:', error);
+      return file; // Return original file if compression fails
+    }
   };
 
   // Debug logging
@@ -86,31 +68,48 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
     }));
     setFiles(prev => [...prev, ...tempFiles]);
 
-    // Compress images in parallel
+    // Compress images in parallel with enhanced error handling
     const compressedFiles = await Promise.all(
       imageFiles.map(async (file, index) => {
         try {
           console.log(`Compressing ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)...`);
           const compressedFile = await compressImage(file);
-          console.log(`Compressed ${file.name} to ${(compressedFile.size / 1024 / 1024).toFixed(1)}MB`);
-          return { file: compressedFile, originalIndex: index };
+          const compressionRatio = ((1 - compressedFile.size / file.size) * 100).toFixed(1);
+          console.log(`Compressed ${file.name} to ${(compressedFile.size / 1024 / 1024).toFixed(1)}MB (${compressionRatio}% reduction)`);
+          return { file: compressedFile, originalIndex: index, compressed: true };
         } catch (error) {
           console.error(`Failed to compress ${file.name}:`, error);
-          return { file, originalIndex: index }; // Use original file if compression fails
+          // Show user-friendly error message for compression failure
+          const errorMessage = error instanceof Error ? error.message : 'Unknown compression error';
+          console.warn(`Using original file for ${file.name} due to compression error: ${errorMessage}`);
+          return { file, originalIndex: index, compressed: false }; // Use original file if compression fails
         }
       })
     );
 
+    // Log compression summary
+    const successfulCompressions = compressedFiles.filter(f => f.compressed).length;
+    const totalFiles = compressedFiles.length;
+    if (successfulCompressions < totalFiles) {
+      console.warn(`Compression completed: ${successfulCompressions}/${totalFiles} files compressed successfully`);
+    } else {
+      console.log(`All ${totalFiles} files compressed successfully`);
+    }
+
     // Update files with compressed versions
     setFiles(prev => {
       const newFiles = [...prev];
-      compressedFiles.forEach(({ file, originalIndex }) => {
+      compressedFiles.forEach(({ file, originalIndex, compressed }) => {
         const tempFileIndex = newFiles.length - imageFiles.length + originalIndex;
         if (newFiles[tempFileIndex]) {
           newFiles[tempFileIndex] = {
             ...createUploadFile(file),
             status: 'pending'
           };
+          // Add a visual indicator if compression failed
+          if (!compressed && file.size > 5 * 1024 * 1024) { // Files larger than 5MB
+            console.warn(`Large file ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB) will be uploaded without compression`);
+          }
         }
       });
       return newFiles;

@@ -13,7 +13,8 @@ import {
   Clock,
   Type,
   Star,
-  TrendingUp
+  TrendingUp,
+  X
 } from 'lucide-react';
 import { useSurpriseBoxStore } from '../stores/surpriseBoxStore';
 import { format } from 'date-fns';
@@ -21,11 +22,13 @@ import { format } from 'date-fns';
 interface PrizeHistoryProps {
   recipientId?: string;
   className?: string;
+  onClose?: () => void;
 }
 
 const PrizeHistory: React.FC<PrizeHistoryProps> = ({ 
   recipientId, 
-  className = '' 
+  className = '',
+  onClose
 }) => {
   const { 
     prizeHistory, 
@@ -115,29 +118,59 @@ const PrizeHistory: React.FC<PrizeHistoryProps> = ({
   const totalPages = Math.ceil(filteredHistory.length / itemsPerPage);
 
   return (
-    <div className={`bg-white rounded-xl shadow-lg p-6 ${className}`}>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
-            <Trophy className="text-white" size={24} />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">Prize History</h2>
-            <p className="text-gray-600">Track your completed surprises</p>
-          </div>
-        </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+    <>
+      {/* Modal Backdrop */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        {/* Modal Content */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className={`bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden ${className}`}
+          onClick={(e) => e.stopPropagation()}
         >
-          <Filter size={16} />
-          <span>Filters</span>
-          {showFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </motion.button>
-      </div>
+          {/* Scrollable Content */}
+          <div className="overflow-y-auto max-h-[90vh] p-6">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
+                  <Trophy className="text-white" size={24} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">Prize History</h2>
+                  <p className="text-gray-600">Track your completed surprises</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  <Filter size={16} />
+                  <span>Filters</span>
+                  {showFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </motion.button>
+                {onClose && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={onClose}
+                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <X size={20} />
+                  </motion.button>
+                )}
+              </div>
+            </div>
 
       {/* Statistics */}
       {prizeStats && (
@@ -376,9 +409,12 @@ const PrizeHistory: React.FC<PrizeHistoryProps> = ({
           >
             Next
           </motion.button>
-        </div>
-      )}
-    </div>
+          </div>
+        )}
+          </div>
+        </motion.div>
+      </motion.div>
+    </>
   );
 };
 
