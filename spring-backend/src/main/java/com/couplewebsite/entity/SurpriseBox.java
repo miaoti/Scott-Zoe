@@ -76,6 +76,24 @@ public class SurpriseBox {
     @Column(name = "completion_type")
     private CompletionType completionType;
     
+    @Column(name = "prize_description", columnDefinition = "TEXT")
+    private String prizeDescription;
+    
+    @Column(name = "completion_criteria", columnDefinition = "TEXT")
+    private String completionCriteria;
+    
+    @Column(name = "rejection_reason", columnDefinition = "TEXT")
+    private String rejectionReason;
+    
+    @Column(name = "dropped_at")
+    private LocalDateTime droppedAt;
+    
+    @Column(name = "drop_at")
+    private LocalDateTime dropAt;
+    
+    @Column(name = "claimed_at")
+    private LocalDateTime claimedAt;
+    
     @OneToMany(mappedBy = "box", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<PrizeHistory> prizeHistories = new ArrayList<>();
@@ -99,7 +117,7 @@ public class SurpriseBox {
     }
     
     public enum CompletionType {
-        TASK, PAYMENT
+        TASK, PAYMENT, LOCATION, TIME, PHOTO
     }
     
     // Getters and Setters
@@ -221,6 +239,54 @@ public class SurpriseBox {
     
     public void setPrizeHistories(List<PrizeHistory> prizeHistories) {
         this.prizeHistories = prizeHistories;
+    }
+    
+    public String getPrizeDescription() {
+        return prizeDescription;
+    }
+    
+    public void setPrizeDescription(String prizeDescription) {
+        this.prizeDescription = prizeDescription;
+    }
+    
+    public String getCompletionCriteria() {
+        return completionCriteria;
+    }
+    
+    public void setCompletionCriteria(String completionCriteria) {
+        this.completionCriteria = completionCriteria;
+    }
+    
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+    
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
+    
+    public LocalDateTime getDroppedAt() {
+        return droppedAt;
+    }
+    
+    public void setDroppedAt(LocalDateTime droppedAt) {
+        this.droppedAt = droppedAt;
+    }
+    
+    public LocalDateTime getDropAt() {
+        return dropAt;
+    }
+    
+    public void setDropAt(LocalDateTime dropAt) {
+        this.dropAt = dropAt;
+    }
+    
+    public LocalDateTime getClaimedAt() {
+        return claimedAt;
+    }
+    
+    public void setClaimedAt(LocalDateTime claimedAt) {
+        this.claimedAt = claimedAt;
     }
     
     // Helper methods

@@ -85,4 +85,28 @@ public interface PrizeHistoryRepository extends JpaRepository<PrizeHistory, Long
         @Param("recipient") User recipient,
         @Param("sinceDate") LocalDateTime sinceDate
     );
+    
+    /**
+     * Count prizes claimed after a specific date
+     */
+    @Query("SELECT COUNT(ph) FROM PrizeHistory ph WHERE ph.recipient = :recipient AND ph.claimedAt >= :sinceDate")
+    Long countByRecipientAndClaimedAtAfter(
+        @Param("recipient") User recipient,
+        @Param("sinceDate") LocalDateTime sinceDate
+    );
+    
+    /**
+     * Find prize history by recipient and prize name containing (case insensitive)
+     */
+    @Query("SELECT ph FROM PrizeHistory ph WHERE ph.recipient = :recipient AND LOWER(ph.prizeName) LIKE LOWER(CONCAT('%', :prizeName, '%')) ORDER BY ph.claimedAt DESC")
+    List<PrizeHistory> findByRecipientAndPrizeNameContainingIgnoreCase(
+        @Param("recipient") User recipient,
+        @Param("prizeName") String prizeName
+    );
+    
+    /**
+     * Find prize history by box ID
+     */
+    @Query("SELECT ph FROM PrizeHistory ph WHERE ph.box.id = :boxId")
+    List<PrizeHistory> findByBoxId(@Param("boxId") Long boxId);
 }

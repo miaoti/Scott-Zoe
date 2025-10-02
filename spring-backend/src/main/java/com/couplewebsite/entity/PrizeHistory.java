@@ -116,6 +116,16 @@ public class PrizeHistory {
         this.claimedAt = claimedAt;
     }
     
+    public String getPrizeDescription() {
+        return box != null ? box.getPrizeDescription() : null;
+    }
+    
+    public void setPrizeDescription(String prizeDescription) {
+        if (box != null) {
+            box.setPrizeDescription(prizeDescription);
+        }
+    }
+    
     @Override
     public String toString() {
         return "PrizeHistory{" +

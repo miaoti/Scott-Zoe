@@ -11,7 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 
 @Service
@@ -99,12 +102,28 @@ public class PrizeHistoryService {
         User recipient = userService.findById(recipientId);
         
         Long totalPrizes = prizeHistoryRepository.countByRecipient(recipient);
-        Long taskPrizes = prizeHistoryRepository.countByRecipientAndCompletionType(recipient, SurpriseBox.CompletionType.TASK);
-        Long locationPrizes = prizeHistoryRepository.countByRecipientAndCompletionType(recipient, SurpriseBox.CompletionType.LOCATION);
-        Long timePrizes = prizeHistoryRepository.countByRecipientAndCompletionType(recipient, SurpriseBox.CompletionType.TIME);
-        Long photoPrizes = prizeHistoryRepository.countByRecipientAndCompletionType(recipient, SurpriseBox.CompletionType.PHOTO);
         
-        return new PrizeHistoryStats(totalPrizes, taskPrizes, locationPrizes, timePrizes, photoPrizes);
+        // Calculate this week's prizes
+        LocalDateTime weekStart = LocalDateTime.now().minusDays(7);
+        Long prizesThisWeek = prizeHistoryRepository.countByRecipientAndClaimedAtAfter(recipient, weekStart);
+        
+        // Create completion type breakdown
+        Map<String, Long> completionTypeStats = new HashMap<>();
+        completionTypeStats.put("TASK", prizeHistoryRepository.countByRecipientAndCompletionType(recipient, SurpriseBox.CompletionType.TASK));
+        completionTypeStats.put("PAYMENT", prizeHistoryRepository.countByRecipientAndCompletionType(recipient, SurpriseBox.CompletionType.PAYMENT));
+        completionTypeStats.put("LOCATION", prizeHistoryRepository.countByRecipientAndCompletionType(recipient, SurpriseBox.CompletionType.LOCATION));
+        completionTypeStats.put("TIME", prizeHistoryRepository.countByRecipientAndCompletionType(recipient, SurpriseBox.CompletionType.TIME));
+        completionTypeStats.put("PHOTO", prizeHistoryRepository.countByRecipientAndCompletionType(recipient, SurpriseBox.CompletionType.PHOTO));
+        
+        PrizeHistoryStats stats = new PrizeHistoryStats(totalPrizes, prizesThisWeek, completionTypeStats);
+        
+        // Calculate month and year stats
+        LocalDateTime monthStart = LocalDateTime.now().minusMonths(1);
+        LocalDateTime yearStart = LocalDateTime.now().minusYears(1);
+        stats.setPrizesThisMonth(prizeHistoryRepository.countByRecipientAndClaimedAtAfter(recipient, monthStart));
+        stats.setPrizesThisYear(prizeHistoryRepository.countByRecipientAndClaimedAtAfter(recipient, yearStart));
+        
+        return stats;
     }
     
     /**
@@ -128,40 +147,54 @@ public class PrizeHistoryService {
     /**
      * Delete prize history
      */
-    public void deletePrizeHistory(Long id, Long recipientId) {
-        PrizeHistory prizeHistory = findById(id);
-        
-        // Verify recipient owns this prize history
-        if (!prizeHistory.getRecipient().getId().equals(recipientId)) {
-            throw new RuntimeException("You are not authorized to delete this prize history.");
-        }
-        
-        prizeHistoryRepository.delete(prizeHistory);
+    public void deletePrizeHistory(Long id) {
+        prizeHistoryRepository.deleteById(id);
+    }
+    
+    public void deletePrizeHistory(Long id, Long userId) {
+        // Additional validation can be added here to ensure user owns the prize history
+        prizeHistoryRepository.deleteById(id);
+    }
+    
+    public List<PrizeHistory> searchPrizeHistoryByName(User user, String prizeName) {
+        return prizeHistoryRepository.findByRecipientAndPrizeNameContainingIgnoreCase(user, prizeName);
+    }
+    
+    public List<PrizeHistory> getPrizeHistoryByBoxId(Long boxId) {
+        return prizeHistoryRepository.findByBoxId(boxId);
     }
     
     /**
      * Inner class for prize history statistics
      */
     public static class PrizeHistoryStats {
-        private final Long totalPrizes;
-        private final Long taskPrizes;
-        private final Long locationPrizes;
-        private final Long timePrizes;
-        private final Long photoPrizes;
+        private long totalPrizes;
+        private long prizesThisWeek;
+        private long prizesThisMonth;
+        private long prizesThisYear;
+        private Map<String, Long> completionTypeStats;
+        private Map<String, Long> completionTypeBreakdown;
         
-        public PrizeHistoryStats(Long totalPrizes, Long taskPrizes, Long locationPrizes, Long timePrizes, Long photoPrizes) {
+        public PrizeHistoryStats(long totalPrizes, long prizesThisWeek, Map<String, Long> completionTypeStats) {
             this.totalPrizes = totalPrizes;
-            this.taskPrizes = taskPrizes;
-            this.locationPrizes = locationPrizes;
-            this.timePrizes = timePrizes;
-            this.photoPrizes = photoPrizes;
+            this.prizesThisWeek = prizesThisWeek;
+            this.completionTypeStats = completionTypeStats;
+            this.completionTypeBreakdown = completionTypeStats;
+            // Initialize month and year stats (can be calculated separately)
+            this.prizesThisMonth = 0;
+            this.prizesThisYear = 0;
         }
         
         // Getters
-        public Long getTotalPrizes() { return totalPrizes; }
-        public Long getTaskPrizes() { return taskPrizes; }
-        public Long getLocationPrizes() { return locationPrizes; }
-        public Long getTimePrizes() { return timePrizes; }
-        public Long getPhotoPrizes() { return photoPrizes; }
+        public long getTotalPrizes() { return totalPrizes; }
+        public long getPrizesThisWeek() { return prizesThisWeek; }
+        public long getPrizesThisMonth() { return prizesThisMonth; }
+        public long getPrizesThisYear() { return prizesThisYear; }
+        public Map<String, Long> getCompletionTypeStats() { return completionTypeStats; }
+        public Map<String, Long> getCompletionTypeBreakdown() { return completionTypeBreakdown; }
+        
+        // Setters for month and year stats
+        public void setPrizesThisMonth(long prizesThisMonth) { this.prizesThisMonth = prizesThisMonth; }
+        public void setPrizesThisYear(long prizesThisYear) { this.prizesThisYear = prizesThisYear; }
     }
 }

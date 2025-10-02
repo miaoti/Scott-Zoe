@@ -44,7 +44,7 @@ public class PrizeHistoryController {
         try {
             User recipient = userService.findById(recipientId);
             Pageable pageable = PageRequest.of(page, size);
-            Page<PrizeHistory> historyPage = prizeHistoryService.getPrizeHistoryByRecipient(recipient, pageable);
+            Page<PrizeHistory> historyPage = prizeHistoryService.getPrizeHistoryByRecipient(recipient.getId(), pageable);
             
             Map<String, Object> response = new HashMap<>();
             response.put("content", historyPage.getContent().stream()
@@ -74,7 +74,7 @@ public class PrizeHistoryController {
     public ResponseEntity<?> getAllPrizeHistoryByRecipient(@PathVariable Long recipientId) {
         try {
             User recipient = userService.findById(recipientId);
-            List<PrizeHistory> history = prizeHistoryService.getAllPrizeHistoryByRecipient(recipient);
+            List<PrizeHistory> history = prizeHistoryService.getAllPrizeHistoryByRecipient(recipient.getId());
             
             List<Map<String, Object>> historyResponses = history.stream()
                 .map(this::createPrizeHistoryResponse)
@@ -100,7 +100,7 @@ public class PrizeHistoryController {
         try {
             User recipient = userService.findById(recipientId);
             SurpriseBox.CompletionType type = SurpriseBox.CompletionType.valueOf(completionType.toUpperCase());
-            List<PrizeHistory> history = prizeHistoryService.getPrizeHistoryByCompletionType(recipient, type);
+            List<PrizeHistory> history = prizeHistoryService.getPrizeHistoryByCompletionType(recipient.getId(), type);
             
             List<Map<String, Object>> historyResponses = history.stream()
                 .map(this::createPrizeHistoryResponse)
@@ -133,7 +133,11 @@ public class PrizeHistoryController {
             LocalDate start = LocalDate.parse(startDate);
             LocalDate end = LocalDate.parse(endDate);
             
-            List<PrizeHistory> history = prizeHistoryService.getPrizeHistoryByDateRange(recipient, start, end);
+            // Convert LocalDate to LocalDateTime (start of day and end of day)
+            LocalDateTime startDateTime = start.atStartOfDay();
+            LocalDateTime endDateTime = end.atTime(23, 59, 59);
+            
+            List<PrizeHistory> history = prizeHistoryService.getPrizeHistoryByDateRange(recipient.getId(), startDateTime, endDateTime);
             
             List<Map<String, Object>> historyResponses = history.stream()
                 .map(this::createPrizeHistoryResponse)
@@ -183,7 +187,7 @@ public class PrizeHistoryController {
             @RequestParam(defaultValue = "5") int limit) {
         try {
             User recipient = userService.findById(recipientId);
-            List<PrizeHistory> history = prizeHistoryService.getRecentPrizeHistory(recipient, limit);
+            List<PrizeHistory> history = prizeHistoryService.getRecentPrizeHistory(recipient.getId(), limit);
             
             List<Map<String, Object>> historyResponses = history.stream()
                 .map(this::createPrizeHistoryResponse)
@@ -206,7 +210,7 @@ public class PrizeHistoryController {
     public ResponseEntity<?> getPrizeHistoryStats(@PathVariable Long recipientId) {
         try {
             User recipient = userService.findById(recipientId);
-            PrizeHistoryService.PrizeHistoryStats stats = prizeHistoryService.getPrizeHistoryStats(recipient);
+            PrizeHistoryService.PrizeHistoryStats stats = prizeHistoryService.getPrizeHistoryStats(recipient.getId());
             
             Map<String, Object> response = new HashMap<>();
             response.put("totalPrizes", stats.getTotalPrizes());
