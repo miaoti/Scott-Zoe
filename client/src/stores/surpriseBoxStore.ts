@@ -174,7 +174,11 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   loadOwnedBoxes: async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_BASE_URL}/surprise-boxes/owned`, {
+      // Get user ID from token payload
+      const payload = JSON.parse(atob(token?.split('.')[1] || ''));
+      const userId = payload.sub;
+      
+      const response = await axios.get(`${API_BASE_URL}/surprise-boxes/owned/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       set({ ownedBoxes: response.data });
@@ -186,7 +190,11 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   loadReceivedBoxes: async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_BASE_URL}/surprise-boxes/received`, {
+      // Get user ID from token payload
+      const payload = JSON.parse(atob(token?.split('.')[1] || ''));
+      const userId = payload.sub;
+      
+      const response = await axios.get(`${API_BASE_URL}/surprise-boxes/received/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       set({ receivedBoxes: response.data });
@@ -198,7 +206,11 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   loadActiveBox: async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_BASE_URL}/surprise-boxes/active`, {
+      // Get user ID from token payload
+      const payload = JSON.parse(atob(token?.split('.')[1] || ''));
+      const userId = payload.sub;
+      
+      const response = await axios.get(`${API_BASE_URL}/surprise-boxes/active/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       set({ activeBox: response.data });

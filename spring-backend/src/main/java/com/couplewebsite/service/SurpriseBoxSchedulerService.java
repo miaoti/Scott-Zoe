@@ -27,7 +27,7 @@ public class SurpriseBoxSchedulerService {
     private SurpriseBoxWebSocketController webSocketController;
     
     /**
-     * Check for boxes that need to be dropped
+     * Check for boxes that need to be dropped (initial drop only)
      * Runs every minute
      */
     @Scheduled(fixedRate = 60000) // Every 60 seconds
@@ -41,16 +41,25 @@ public class SurpriseBoxSchedulerService {
                 
                 for (SurpriseBox box : boxesToDrop) {
                     try {
-                        // Update box status to DROPPED
-                        box.setStatus(BoxStatus.DROPPED);
-                        box.setDroppedAt(now);
-                        surpriseBoxService.save(box);
-                        
-                        // Send WebSocket notification
-                        webSocketController.sendBoxDroppedNotification(box);
-                        
-                        logger.info("Successfully dropped box {} for user {}", 
-                                box.getId(), box.getRecipient().getUsername());
+                        // Only drop boxes that haven't been dropped yet (initial drop)
+                        if (box.getStatus() == BoxStatus.CREATED) {
+                            // Update box status to DROPPED
+                            box.setStatus(BoxStatus.DROPPED);
+                            box.setDroppedAt(now);
+                            SurpriseBox droppedBox = surpriseBoxService.save(box);
+                            
+                            // Send WebSocket notification separately (don't let this fail the transaction)
+                            try {
+                                webSocketController.sendBoxDroppedNotification(droppedBox);
+                            } catch (Exception wsException) {
+                                logger.warn("Failed to send WebSocket notification for dropped box {}: {}", 
+                                        box.getId(), wsException.getMessage());
+                                // Don't rethrow - WebSocket failure shouldn't affect the database transaction
+                            }
+                            
+                            logger.info("Successfully dropped box {} for user {}", 
+                                    box.getId(), box.getRecipient().getUsername());
+                        }
                         
                     } catch (Exception e) {
                         logger.error("Error dropping box {}", box.getId(), e);
@@ -60,6 +69,59 @@ public class SurpriseBoxSchedulerService {
             
         } catch (Exception e) {
             logger.error("Error in processBoxDrops scheduled task", e);
+        }
+    }
+    
+    /**
+     * Handle intermittent dropping cycles for dropped boxes
+     * Runs every minute
+     */
+    @Scheduled(fixedRate = 60000) // Every 60 seconds
+    public void processIntermittentDropping() {
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            List<SurpriseBox> droppedBoxes = surpriseBoxService.findDroppedBoxesForIntermittentCycle();
+            
+            if (!droppedBoxes.isEmpty()) {
+                logger.debug("Processing {} boxes for intermittent dropping", droppedBoxes.size());
+                
+                for (SurpriseBox box : droppedBoxes) {
+                    try {
+                        // Check if it's time to transition between dropping and pausing
+                        if (box.getNextDropTime() != null && now.isAfter(box.getNextDropTime())) {
+                            if (box.getIsDropping()) {
+                                // Currently dropping, switch to pause
+                                box.setIsDropping(false);
+                                box.setNextDropTime(now.plusMinutes(box.getPauseDurationMinutes()));
+                                logger.debug("Box {} switched to pause phase for {} minutes", 
+                                        box.getId(), box.getPauseDurationMinutes());
+                            } else {
+                                // Currently paused, switch to dropping
+                                box.setIsDropping(true);
+                                box.setNextDropTime(now.plusMinutes(box.getDropDurationMinutes()));
+                                logger.debug("Box {} switched to dropping phase for {} minutes", 
+                                        box.getId(), box.getDropDurationMinutes());
+                                
+                                // Send notification when switching back to dropping
+                                try {
+                                    webSocketController.sendBoxDroppedNotification(box);
+                                } catch (Exception wsException) {
+                                    logger.warn("Failed to send WebSocket notification for intermittent drop {}: {}", 
+                                            box.getId(), wsException.getMessage());
+                                }
+                            }
+                            
+                            surpriseBoxService.save(box);
+                        }
+                        
+                    } catch (Exception e) {
+                        logger.error("Error processing intermittent dropping for box {}", box.getId(), e);
+                    }
+                }
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error in processIntermittentDropping scheduled task", e);
         }
     }
     
@@ -77,11 +139,17 @@ public class SurpriseBoxSchedulerService {
                 
                 for (SurpriseBox box : expiredBoxes) {
                     try {
-                        // Mark as expired
-                        surpriseBoxService.markAsExpired(box.getId());
+                        // Mark as expired first
+                        SurpriseBox expiredBox = surpriseBoxService.markAsExpired(box.getId());
                         
-                        // Send WebSocket notification
-                        webSocketController.sendBoxExpiredNotification(box);
+                        // Send WebSocket notification separately (don't let this fail the transaction)
+                        try {
+                            webSocketController.sendBoxExpiredNotification(expiredBox);
+                        } catch (Exception wsException) {
+                            logger.warn("Failed to send WebSocket notification for expired box {}: {}", 
+                                    box.getId(), wsException.getMessage());
+                            // Don't rethrow - WebSocket failure shouldn't affect the database transaction
+                        }
                         
                         logger.info("Successfully marked box {} as expired", box.getId());
                         

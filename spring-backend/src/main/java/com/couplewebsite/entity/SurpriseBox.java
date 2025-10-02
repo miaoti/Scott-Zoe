@@ -97,6 +97,19 @@ public class SurpriseBox {
     @Column(name = "claimed_at")
     private LocalDateTime claimedAt;
     
+    // Intermittent dropping fields
+    @Column(name = "drop_duration_minutes")
+    private Integer dropDurationMinutes = 3; // Default: drop for 3 minutes
+    
+    @Column(name = "pause_duration_minutes")
+    private Integer pauseDurationMinutes = 5; // Default: pause for 5 minutes
+    
+    @Column(name = "next_drop_time")
+    private LocalDateTime nextDropTime;
+    
+    @Column(name = "is_dropping")
+    private Boolean isDropping = false; // Whether currently in dropping phase
+    
     @OneToMany(mappedBy = "box", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<PrizeHistory> prizeHistories = new ArrayList<>();
@@ -298,6 +311,38 @@ public class SurpriseBox {
     
     public void setClaimedAt(LocalDateTime claimedAt) {
         this.claimedAt = claimedAt;
+    }
+    
+    public Integer getDropDurationMinutes() {
+        return dropDurationMinutes;
+    }
+    
+    public void setDropDurationMinutes(Integer dropDurationMinutes) {
+        this.dropDurationMinutes = dropDurationMinutes;
+    }
+    
+    public Integer getPauseDurationMinutes() {
+        return pauseDurationMinutes;
+    }
+    
+    public void setPauseDurationMinutes(Integer pauseDurationMinutes) {
+        this.pauseDurationMinutes = pauseDurationMinutes;
+    }
+    
+    public LocalDateTime getNextDropTime() {
+        return nextDropTime;
+    }
+    
+    public void setNextDropTime(LocalDateTime nextDropTime) {
+        this.nextDropTime = nextDropTime;
+    }
+    
+    public Boolean getIsDropping() {
+        return isDropping;
+    }
+    
+    public void setIsDropping(Boolean isDropping) {
+        this.isDropping = isDropping;
     }
     
     // Helper methods

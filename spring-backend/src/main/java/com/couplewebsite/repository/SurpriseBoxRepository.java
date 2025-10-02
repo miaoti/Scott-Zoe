@@ -88,4 +88,10 @@ public interface SurpriseBoxRepository extends JpaRepository<SurpriseBox, Long> 
      */
     @Query("SELECT sb FROM SurpriseBox sb WHERE sb.recipient = :recipient AND sb.status = :status ORDER BY sb.createdAt DESC")
     List<SurpriseBox> findByRecipientAndStatusOrderByCreatedAtDesc(@Param("recipient") User recipient, @Param("status") SurpriseBox.BoxStatus status);
+    
+    /**
+     * Find dropped boxes for intermittent cycling (have nextDropTime set)
+     */
+    @Query("SELECT sb FROM SurpriseBox sb WHERE sb.status = 'DROPPED' AND sb.nextDropTime IS NOT NULL")
+    List<SurpriseBox> findByStatusAndNextDropTimeIsNotNull();
 }

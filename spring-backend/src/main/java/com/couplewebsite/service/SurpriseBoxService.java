@@ -51,10 +51,11 @@ public class SurpriseBoxService {
         box.setStatus(SurpriseBox.BoxStatus.CREATED);
         box.setCreatedAt(LocalDateTime.now());
         
-        // Generate random drop time between 5 minutes and 2 hours after creation
-        Random random = new Random();
-        int randomMinutes = 5 + random.nextInt(115); // 5 to 119 minutes (5 min to 2 hours)
-        box.setDropAt(LocalDateTime.now().plusMinutes(randomMinutes));
+        // Set immediate drop time and initialize intermittent dropping
+        LocalDateTime now = LocalDateTime.now();
+        box.setDropAt(now); // Drop immediately
+        box.setIsDropping(true); // Start in dropping phase
+        box.setNextDropTime(now.plusMinutes(box.getDropDurationMinutes())); // Next transition time
         
         return surpriseBoxRepository.save(box);
     }
@@ -273,6 +274,10 @@ public class SurpriseBoxService {
     public List<SurpriseBox> findBoxesReadyToDrop() {
         LocalDateTime now = LocalDateTime.now();
         return surpriseBoxRepository.findByStatusAndDropAtBefore(SurpriseBox.BoxStatus.CREATED, now);
+    }
+    
+    public List<SurpriseBox> findDroppedBoxesForIntermittentCycle() {
+        return surpriseBoxRepository.findByStatusAndNextDropTimeIsNotNull();
     }
     
     /**
