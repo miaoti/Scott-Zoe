@@ -1,11 +1,12 @@
 -- Add missing columns to surprise_boxes table that exist in SurpriseBox entity
+-- Using IF NOT EXISTS to prevent errors if columns already exist
 ALTER TABLE surprise_boxes 
-ADD COLUMN completion_criteria TEXT,
-ADD COLUMN prize_description TEXT,
-ADD COLUMN rejection_reason TEXT,
-ADD COLUMN dropped_at TIMESTAMP,
-ADD COLUMN drop_at TIMESTAMP,
-ADD COLUMN claimed_at TIMESTAMP;
+ADD COLUMN IF NOT EXISTS completion_criteria TEXT,
+ADD COLUMN IF NOT EXISTS prize_description TEXT,
+ADD COLUMN IF NOT EXISTS rejection_reason TEXT,
+ADD COLUMN IF NOT EXISTS dropped_at TIMESTAMP,
+ADD COLUMN IF NOT EXISTS drop_at TIMESTAMP,
+ADD COLUMN IF NOT EXISTS claimed_at TIMESTAMP;
 
 -- Add comments for the new fields
 COMMENT ON COLUMN surprise_boxes.completion_criteria IS 'Criteria that must be met to complete the surprise box task';
