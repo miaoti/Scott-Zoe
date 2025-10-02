@@ -177,21 +177,38 @@ function Memories() {
     console.log('✅ Starting memory submission...');
     setSubmitting(true);
     try {
+      // Prepare data for backend - convert selectedPhotos to strings for CreateMemoryRequest
+      const memoryData = {
+        ...formData,
+        selectedPhotos: formData.selectedPhotos.map(id => id.toString())
+      };
+      console.log('📤 Prepared memory data for backend:', memoryData);
+      
       let memoryResponse;
       if (editingMemory) {
         console.log('📝 Updating existing memory:', editingMemory.id);
-        memoryResponse = await api.put(`/api/memories/${editingMemory.id}`, formData);
+        memoryResponse = await api.put(`/api/memories/${editingMemory.id}`, memoryData);
       } else {
-        console.log('➕ Creating new memory with data:', formData);
-        memoryResponse = await api.post('/api/memories', formData);
+        console.log('➕ Creating new memory with data:', memoryData);
+        memoryResponse = await api.post('/api/memories', memoryData);
       }
       console.log('✅ Memory API response:', memoryResponse);
       
       // Handle photo associations for event type memories
       if (formData.type === 'event' && formData.selectedPhotos && formData.selectedPhotos.length > 0) {
         const memoryId = editingMemory ? editingMemory.id : memoryResponse.data.memory.id;
-        console.log('📸 Associating photos with memory:', { memoryId, photos: formData.selectedPhotos });
-        await api.post(`/api/memories/${memoryId}/photos`, formData.selectedPhotos);
+        // Send photo IDs as numbers (List<Long>) for the photo association endpoint
+        const photoIds = formData.selectedPhotos.map(id => Number(id));
+        console.log('📸 Associating photos with memory:', { memoryId, photoIds });
+        
+        try {
+          await api.post(`/api/memories/${memoryId}/photos`, photoIds);
+          console.log('✅ Photos associated successfully');
+        } catch (photoError) {
+          console.error('❌ Error associating photos:', photoError);
+          // Don't fail the entire operation if photo association fails
+          alert('Memory created but failed to associate photos. You can edit the memory to add photos later.');
+        }
       }
       
       console.log('🔄 Refreshing memories list...');
@@ -200,6 +217,10 @@ function Memories() {
       resetForm();
     } catch (error) {
       console.error('❌ Error saving memory:', error);
+      if (error.response) {
+        console.error('❌ Error response data:', error.response.data);
+        console.error('❌ Error response status:', error.response.status);
+      }
       alert('Error saving memory. Please try again.');
     } finally {
       setSubmitting(false);
