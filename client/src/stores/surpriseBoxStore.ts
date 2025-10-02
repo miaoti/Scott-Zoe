@@ -118,16 +118,18 @@ interface SurpriseBoxState {
   getActiveBoxesCount: () => number;
 }
 
-// Use the same API URL logic as utils/api.ts
+// Determine API URL - Railway production vs local development
 const getApiUrl = () => {
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+  // If deployed on Railway, use the same domain
+  if (window.location.hostname !== 'localhost') {
+    return window.location.origin;
   }
-  return 'http://localhost:8080';
+  // Local development
+  return import.meta.env.VITE_API_URL || 'http://localhost:8080';
 };
 
-const API_BASE_URL = getApiUrl();
-const WS_URL = import.meta.env.VITE_WS_URL || getApiUrl().replace('https://', 'wss://').replace('http://', 'ws://');
+const API_BASE_URL = `${getApiUrl()}/api`;
+const WS_URL = getApiUrl();
 
 export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   // Initial state

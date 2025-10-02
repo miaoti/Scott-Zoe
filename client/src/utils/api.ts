@@ -6,12 +6,12 @@ console.log('Window location:', window.location.origin);
 
 // Determine API URL - Railway production vs local development
 const getApiUrl = () => {
-  // Always use VITE_API_URL if it's set (production or custom configuration)
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+  // If deployed on Railway, use the same domain
+  if (window.location.hostname !== 'localhost') {
+    return window.location.origin;
   }
-  // Local development fallback
-  return 'http://localhost:8080';
+  // Local development
+  return import.meta.env.VITE_API_URL || 'http://localhost:8080';
 };
 
 const apiUrl = getApiUrl();

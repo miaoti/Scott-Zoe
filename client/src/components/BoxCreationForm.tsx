@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Gift, Calendar, Clock, Camera, Type, MapPin, Timer, AlertCircle } from 'lucide-react';
+import { X, Gift, Clock, Camera, Type, MapPin, Timer, AlertCircle } from 'lucide-react';
 import { useSurpriseBoxStore } from '../stores/surpriseBoxStore';
 
 interface BoxCreationFormProps {
@@ -79,13 +79,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     }
     
     try {
-      const boxData = {
-        prizeName: formData.prizeName,
-        prizeDescription: formData.prizeDescription,
-        completionType: formData.completionType,
-        expiresAt: formData.expiresAt
-      };
-      await createBox(boxData);
+      await createBox(formData);
       onClose();
     } catch (error) {
       // Error is handled by the store
@@ -119,11 +113,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     return now.toISOString().slice(0, 16);
   };
 
-  const getMinExpirationDateTime = () => {
-    const now = new Date();
-    now.setHours(now.getHours() + 1); // Minimum 1 hour from now
-    return now.toISOString().slice(0, 16);
-  };
+
 
   return (
     <motion.div
@@ -147,7 +137,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-800">Create Surprise Box</h2>
-              <p className="text-sm text-gray-600">Step {step} of 3</p>
+              <p className="text-sm text-gray-600">Step {step} of 2</p>
             </div>
           </div>
           <button
@@ -161,7 +151,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
         {/* Progress bar */}
         <div className="px-6 py-4">
           <div className="flex items-center space-x-2">
-            {[1, 2, 3].map((stepNum) => (
+            {[1, 2].map((stepNum) => (
               <React.Fragment key={stepNum}>
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
@@ -172,7 +162,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
                 >
                   {stepNum}
                 </div>
-                {stepNum < 3 && (
+                {stepNum < 2 && (
                   <div
                     className={`flex-1 h-1 rounded transition-colors ${
                       stepNum < step ? 'bg-purple-600' : 'bg-gray-200'
@@ -238,7 +228,9 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
                 </motion.div>
               )}
 
-              {/* Step 2: Completion Type */}
+
+
+              {/* Step 2: Completion Type & Expiration */}
               {step === 2 && (
                 <motion.div
                   key="step2"
@@ -250,7 +242,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">How should they claim it?</h3>
                     
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-4 md:grid-cols-2 mb-6">
                       {completionTypes.map((type) => {
                         const Icon = type.icon;
                         const isSelected = formData.completionType === type.type;
@@ -287,55 +279,30 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
                         );
                       })}
                     </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Step 3: Timing */}
-              {step === 3 && (
-                <motion.div
-                  key="step3"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-6"
-                >
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">When should it drop?</h3>
                     
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <p className="text-sm text-blue-700 font-medium">Drop Time: Random (5 minutes - 2 hours after creation)</p>
-                        </div>
-                        <p className="text-xs text-blue-600 mt-1">The surprise box will be dropped at a random time to make it more exciting!</p>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          <Clock className="w-4 h-4 inline mr-1" />
-                          Expiration Time *
-                        </label>
-                        <input
-                          type="datetime-local"
-                          value={formData.expiresAt}
-                          onChange={(e) => handleInputChange('expiresAt', e.target.value)}
-                          min={getMinExpirationDateTime()}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
-                            errors.expiresAt ? 'border-red-300' : 'border-gray-300'
-                          }`}
-                        />
-                        {errors.expiresAt && (
-                          <p className="mt-1 text-sm text-red-600 flex items-center space-x-1">
-                            <AlertCircle className="w-4 h-4" />
-                            <span>{errors.expiresAt}</span>
-                          </p>
-                        )}
-                        <p className="mt-1 text-sm text-gray-500">
-                          The box will expire if not claimed by this time
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <Clock className="w-4 h-4 inline mr-1" />
+                        Expiration Time *
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={formData.expiresAt}
+                        onChange={(e) => handleInputChange('expiresAt', e.target.value)}
+                        min={getMinDateTime()}
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                          errors.expiresAt ? 'border-red-300' : 'border-gray-300'
+                        }`}
+                      />
+                      {errors.expiresAt && (
+                        <p className="mt-1 text-sm text-red-600 flex items-center space-x-1">
+                          <AlertCircle className="w-4 h-4" />
+                          <span>{errors.expiresAt}</span>
                         </p>
-                      </div>
+                      )}
+                      <p className="mt-1 text-sm text-gray-500">
+                        The box will drop randomly and expire if not claimed by this time
+                      </p>
                     </div>
                   </div>
                 </motion.div>
@@ -354,7 +321,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
             </button>
             
             <div className="flex items-center space-x-3">
-              {step < 3 ? (
+              {step < 2 ? (
                 <button
                   type="button"
                   onClick={nextStep}
