@@ -39,6 +39,15 @@ public class SurpriseBoxWebSocketController {
     @SendToUser("/queue/surprise-box/updates")
     public Map<String, Object> subscribeToUpdates(@Payload Map<String, Object> payload, Principal principal) {
         try {
+            if (principal == null) {
+                logger.warn("Principal is null - user not authenticated for WebSocket subscription");
+                Map<String, Object> error = new HashMap<>();
+                error.put("type", "ERROR");
+                error.put("message", "Authentication required for subscription");
+                error.put("timestamp", LocalDateTime.now());
+                return error;
+            }
+            
             String username = principal.getName();
             logger.info("User {} subscribed to surprise box updates", username);
             
@@ -54,6 +63,7 @@ public class SurpriseBoxWebSocketController {
             Map<String, Object> error = new HashMap<>();
             error.put("type", "ERROR");
             error.put("message", "Failed to subscribe to updates");
+            error.put("timestamp", LocalDateTime.now());
             return error;
         }
     }
@@ -67,6 +77,14 @@ public class SurpriseBoxWebSocketController {
         Map<String, Object> response = new HashMap<>();
         response.put("type", "PONG");
         response.put("timestamp", LocalDateTime.now());
+        
+        if (principal != null) {
+            response.put("user", principal.getName());
+            logger.debug("Ping received from user: {}", principal.getName());
+        } else {
+            logger.warn("Ping received from unauthenticated user");
+        }
+        
         return response;
     }
     

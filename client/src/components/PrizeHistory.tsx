@@ -29,10 +29,9 @@ const PrizeHistory: React.FC<PrizeHistoryProps> = ({
 }) => {
   const { 
     prizeHistory, 
-    prizeHistoryStats, 
+    prizeStats, 
     loadPrizeHistory, 
-    loadPrizeHistoryStats,
-    searchPrizeHistory
+    loadPrizeStats
   } = useSurpriseBoxStore();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,18 +44,14 @@ const PrizeHistory: React.FC<PrizeHistoryProps> = ({
   const itemsPerPage = 10;
 
   useEffect(() => {
-    loadPrizeHistoryStats(recipientId);
+    loadPrizeStats();
     handleSearch();
   }, [recipientId]);
 
   const handleSearch = async () => {
     setIsLoading(true);
     try {
-      if (searchTerm.trim()) {
-        await searchPrizeHistory(searchTerm, recipientId);
-      } else {
-        await loadPrizeHistory(recipientId, currentPage, itemsPerPage);
-      }
+      await loadPrizeHistory();
     } finally {
       setIsLoading(false);
     }
@@ -145,7 +140,7 @@ const PrizeHistory: React.FC<PrizeHistoryProps> = ({
       </div>
 
       {/* Statistics */}
-      {prizeHistoryStats && (
+      {prizeStats && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -155,7 +150,7 @@ const PrizeHistory: React.FC<PrizeHistoryProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-blue-100 text-sm">Total Prizes</p>
-                <p className="text-2xl font-bold">{prizeHistoryStats.totalPrizes}</p>
+                <p className="text-2xl font-bold">{prizeStats.totalPrizes}</p>
               </div>
               <Gift size={24} className="text-blue-200" />
             </div>
@@ -164,7 +159,7 @@ const PrizeHistory: React.FC<PrizeHistoryProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-green-100 text-sm">This Month</p>
-                <p className="text-2xl font-bold">{prizeHistoryStats.thisMonth}</p>
+                <p className="text-2xl font-bold">{prizeStats.prizesThisMonth}</p>
               </div>
               <Calendar size={24} className="text-green-200" />
             </div>
@@ -173,7 +168,7 @@ const PrizeHistory: React.FC<PrizeHistoryProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-purple-100 text-sm">Favorite Type</p>
-                <p className="text-lg font-bold capitalize">{prizeHistoryStats.favoriteType}</p>
+                <p className="text-lg font-bold capitalize">{prizeStats.favoriteCompletionType}</p>
               </div>
               <Star size={24} className="text-purple-200" />
             </div>
@@ -182,7 +177,7 @@ const PrizeHistory: React.FC<PrizeHistoryProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-orange-100 text-sm">Streak</p>
-                <p className="text-2xl font-bold">{prizeHistoryStats.currentStreak}</p>
+                <p className="text-2xl font-bold">{prizeStats.prizesThisWeek}</p>
               </div>
               <TrendingUp size={24} className="text-orange-200" />
             </div>
@@ -319,7 +314,12 @@ const PrizeHistory: React.FC<PrizeHistoryProps> = ({
                       <div className="flex items-center space-x-4 text-sm text-gray-500">
                         <span className="flex items-center space-x-1">
                           <Calendar size={14} />
-                          <span>{format(new Date(item.completedAt), 'MMM dd, yyyy')}</span>
+                          <span>
+                            {item.completedAt && !isNaN(new Date(item.completedAt).getTime()) 
+                              ? format(new Date(item.completedAt), 'MMM dd, yyyy')
+                              : 'Invalid Date'
+                            }
+                          </span>
                         </span>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCompletionTypeColor(item.completionType)}`}>
                           {item.completionType}

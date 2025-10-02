@@ -204,7 +204,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
             {isExpired && (
               <div className="flex items-center text-sm text-red-600">
                 <X className="w-4 h-4 mr-2" />
-                <span>Expired on {new Date(box.expiresAt).toLocaleDateString()}</span>
+                <span>Expired on {box.expiresAt && !isNaN(new Date(box.expiresAt).getTime()) ? new Date(box.expiresAt).toLocaleDateString() : 'Invalid Date'}</span>
               </div>
             )}
           </div>
@@ -217,7 +217,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
             </div>
             <div className="flex items-center">
               <Calendar className="w-4 h-4 mr-1" />
-              <span>{new Date(box.dropAt).toLocaleDateString()}</span>
+              <span>{box.dropAt && !isNaN(new Date(box.dropAt).getTime()) ? new Date(box.dropAt).toLocaleDateString() : 'Invalid Date'}</span>
             </div>
           </div>
 
@@ -298,22 +298,22 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                 <div className="grid grid-cols-2 gap-4 text-xs text-gray-500">
                   <div>
                     <span className="font-medium">Created:</span>
-                    <p>{new Date(box.dropAt).toLocaleString()}</p>
+                    <p>{box.dropAt && !isNaN(new Date(box.dropAt).getTime()) ? new Date(box.dropAt).toLocaleString() : 'Invalid Date'}</p>
                   </div>
                   <div>
                     <span className="font-medium">Expires:</span>
-                    <p>{new Date(box.expiresAt).toLocaleString()}</p>
+                    <p>{box.expiresAt && !isNaN(new Date(box.expiresAt).getTime()) ? new Date(box.expiresAt).toLocaleString() : 'Invalid Date'}</p>
                   </div>
                   {box.droppedAt && (
                     <div>
                       <span className="font-medium">Dropped:</span>
-                      <p>{new Date(box.droppedAt).toLocaleString()}</p>
+                      <p>{box.droppedAt && !isNaN(new Date(box.droppedAt).getTime()) ? new Date(box.droppedAt).toLocaleString() : 'Invalid Date'}</p>
                     </div>
                   )}
                   {box.openedAt && (
                     <div>
                       <span className="font-medium">Opened:</span>
-                      <p>{new Date(box.openedAt).toLocaleString()}</p>
+                      <p>{box.openedAt && !isNaN(new Date(box.openedAt).getTime()) ? new Date(box.openedAt).toLocaleString() : 'Invalid Date'}</p>
                     </div>
                   )}
                 </div>

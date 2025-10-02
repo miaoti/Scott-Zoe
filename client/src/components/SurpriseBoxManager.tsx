@@ -143,7 +143,10 @@ const SurpriseBoxManager: React.FC = () => {
                             <div key={index} className="p-4">
                               <p className="text-sm text-gray-800">{notification.message}</p>
                               <p className="text-xs text-gray-500 mt-1">
-                                {new Date(notification.timestamp).toLocaleString()}
+                                {notification.timestamp && !isNaN(new Date(notification.timestamp).getTime())
+                                  ? new Date(notification.timestamp).toLocaleString()
+                                  : 'Invalid Date'
+                                }
                               </p>
                             </div>
                           ))}
