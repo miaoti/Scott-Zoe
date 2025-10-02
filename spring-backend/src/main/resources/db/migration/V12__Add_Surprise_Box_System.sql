@@ -41,6 +41,4 @@ CREATE INDEX idx_prize_history_recipient_id ON prize_history(recipient_id);
 CREATE INDEX idx_prize_history_claimed_at ON prize_history(claimed_at DESC);
 CREATE INDEX idx_prize_history_box_id ON prize_history(box_id);
 
--- Grant permissions (if using RLS)
-GRANT ALL PRIVILEGES ON surprise_boxes TO authenticated;
-GRANT ALL PRIVILEGES ON prize_history TO authenticated;
+-- Note: Permission grants removed as they are specific to Supabase and not needed for standard PostgreSQL
