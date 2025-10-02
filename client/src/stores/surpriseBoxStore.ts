@@ -158,7 +158,22 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(`${API_BASE_URL}/surprise-boxes`, boxData, {
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
+      // Get user ID from token payload
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.sub;
+      
+      // Add ownerId and recipientId to the request
+      const requestData = {
+        ...boxData,
+        ownerId: userId,
+        recipientId: userId // For now, using same user as both owner and recipient
+      };
+      
+      const response = await axios.post(`${API_BASE_URL}/surprise-boxes`, requestData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -401,7 +416,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
             break;
         }
       });
-      console.log('📡 Subscribed to surprise box updates');
+      console.log('📡 WebSocket subscription established');
       
       // Subscribe to ping responses
       const pongSubscription = client.subscribe('/user/queue/surprise-box/pong', (message) => {

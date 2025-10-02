@@ -34,6 +34,56 @@ public class PrizeHistoryController {
     private UserService userService;
     
     /**
+     * Get all prize history (general endpoint)
+     */
+    @GetMapping
+    public ResponseEntity<?> getAllPrizeHistory(
+            @RequestParam(required = false) Long recipientId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            if (recipientId != null) {
+                // If recipientId is provided, get history for that recipient
+                User recipient = userService.findById(recipientId);
+                Pageable pageable = PageRequest.of(page, size);
+                Page<PrizeHistory> historyPage = prizeHistoryService.getPrizeHistoryByRecipient(recipient.getId(), pageable);
+                
+                Map<String, Object> response = new HashMap<>();
+                response.put("content", historyPage.getContent().stream()
+                    .map(this::createPrizeHistoryResponse)
+                    .collect(Collectors.toList()));
+                response.put("totalElements", historyPage.getTotalElements());
+                response.put("totalPages", historyPage.getTotalPages());
+                response.put("currentPage", historyPage.getNumber());
+                response.put("size", historyPage.getSize());
+                response.put("hasNext", historyPage.hasNext());
+                response.put("hasPrevious", historyPage.hasPrevious());
+                
+                return ResponseEntity.ok(response);
+            } else {
+                // Return empty result or general message
+                Map<String, Object> response = new HashMap<>();
+                response.put("content", List.of());
+                response.put("totalElements", 0);
+                response.put("totalPages", 0);
+                response.put("currentPage", 0);
+                response.put("size", size);
+                response.put("hasNext", false);
+                response.put("hasPrevious", false);
+                response.put("message", "Please provide recipientId parameter to get prize history");
+                
+                return ResponseEntity.ok(response);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error fetching prize history", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
      * Get prize history by recipient with pagination
      */
     @GetMapping("/recipient/{recipientId}")
@@ -229,6 +279,29 @@ public class PrizeHistoryController {
     }
     
     /**
+     * Get general prize history statistics (without recipient ID)
+     */
+    @GetMapping("/stats")
+    public ResponseEntity<?> getGeneralPrizeHistoryStats() {
+        try {
+            // For now, return empty stats or implement general stats logic
+            Map<String, Object> response = new HashMap<>();
+            response.put("totalPrizes", 0);
+            response.put("prizesThisMonth", 0);
+            response.put("prizesThisYear", 0);
+            response.put("completionTypeBreakdown", new HashMap<>());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Error fetching general prize history stats", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
      * Get prize history by surprise box ID
      */
     @GetMapping("/box/{boxId}")
@@ -251,7 +324,7 @@ public class PrizeHistoryController {
     }
     
     /**
-     * Get prize history by ID
+     * Get prize history by ID - MOVED TO END to avoid routing conflicts
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getPrizeHistoryById(@PathVariable Long id) {

@@ -136,10 +136,13 @@ public class SurpriseBoxService {
         box.setStatus(SurpriseBox.BoxStatus.CLAIMED);
         box.setClaimedAt(LocalDateTime.now());
         
-        // Create prize history record
-        prizeHistoryService.createPrizeHistory(box);
+        // Save the box first to ensure it has an ID
+        SurpriseBox savedBox = surpriseBoxRepository.save(box);
         
-        return surpriseBoxRepository.save(box);
+        // Create prize history record after box is saved
+        prizeHistoryService.createPrizeHistory(savedBox);
+        
+        return savedBox;
     }
     
     /**

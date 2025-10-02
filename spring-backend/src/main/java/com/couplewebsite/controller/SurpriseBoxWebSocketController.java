@@ -36,35 +36,21 @@ public class SurpriseBoxWebSocketController {
      * Handle subscription to surprise box updates
      */
     @MessageMapping("/surprise-box/subscribe")
-    @SendToUser("/queue/surprise-box/updates")
-    public Map<String, Object> subscribeToUpdates(@Payload Map<String, Object> payload, Principal principal) {
+    public void subscribeToUpdates(@Payload Map<String, Object> payload, Principal principal) {
         try {
             if (principal == null) {
                 logger.warn("Principal is null - user not authenticated for WebSocket subscription");
-                Map<String, Object> error = new HashMap<>();
-                error.put("type", "ERROR");
-                error.put("message", "Authentication required for subscription");
-                error.put("timestamp", LocalDateTime.now());
-                return error;
+                return;
             }
             
             String username = principal.getName();
             logger.info("User {} subscribed to surprise box updates", username);
             
-            Map<String, Object> response = new HashMap<>();
-            response.put("type", "SUBSCRIPTION_CONFIRMED");
-            response.put("message", "Successfully subscribed to surprise box updates");
-            response.put("timestamp", LocalDateTime.now());
-            
-            return response;
+            // No automatic notification sent - subscription is silent
+            // Real notifications will be sent when actual events occur
             
         } catch (Exception e) {
             logger.error("Error handling surprise box subscription", e);
-            Map<String, Object> error = new HashMap<>();
-            error.put("type", "ERROR");
-            error.put("message", "Failed to subscribe to updates");
-            error.put("timestamp", LocalDateTime.now());
-            return error;
         }
     }
     
@@ -256,7 +242,7 @@ public class SurpriseBoxWebSocketController {
     private Map<String, Object> createBoxNotification(String type, SurpriseBox box) {
         Map<String, Object> notification = new HashMap<>();
         notification.put("type", type);
-        notification.put("timestamp", LocalDateTime.now());
+        notification.put("timestamp", LocalDateTime.now().toString());
         
         // Box information
         Map<String, Object> boxInfo = new HashMap<>();

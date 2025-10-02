@@ -35,6 +35,7 @@ com\couplewebsite\entity\SavedOpportunity.class
 com\couplewebsite\service\WheelPrizeService.class
 com\couplewebsite\config\MimeTypeConfig.class
 com\couplewebsite\service\EarningsService.class
+com\couplewebsite\config\WebSocketAuthInterceptor.class
 com\couplewebsite\config\WebSocketConfig.class
 com\couplewebsite\service\MemoryService$1.class
 com\couplewebsite\entity\WheelConfiguration.class
