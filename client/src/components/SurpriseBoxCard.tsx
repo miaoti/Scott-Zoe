@@ -162,7 +162,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                   </span>
                   <div className="flex items-center text-xs text-gray-500">
                     <CompletionIcon className="w-3 h-3 mr-1" />
-                    {box.completionType.toLowerCase()}
+                    {box.completionType?.toLowerCase() || 'unknown'}
                   </div>
                 </div>
               </div>
@@ -356,6 +356,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                     {box.completionType === 'TEXT' && 'Enter your response:'}
                     {box.completionType === 'LOCATION' && 'Confirm your location:'}
                     {box.completionType === 'TIMER' && 'Confirm completion:'}
+                    {!box.completionType && 'Complete the challenge:'}
                   </label>
                   <textarea
                     value={completionData}
@@ -364,7 +365,8 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                       box.completionType === 'PHOTO' ? 'Describe what you photographed...' :
                       box.completionType === 'TEXT' ? 'Enter your answer...' :
                       box.completionType === 'LOCATION' ? 'Confirm you are at the location...' :
-                      'Confirm you have completed the challenge...'
+                      box.completionType === 'TIMER' ? 'Confirm you have completed the challenge...' :
+                      'Enter completion details...'
                     }
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"

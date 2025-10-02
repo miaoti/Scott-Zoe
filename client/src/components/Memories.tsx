@@ -330,6 +330,8 @@ function Memories() {
         return 'Milestone';
       case 'event':
         return 'Event';
+      case 'all':
+        return 'memory';
       default:
         return 'Special Moment';
     }

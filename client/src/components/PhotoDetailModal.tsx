@@ -296,7 +296,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                 
                 <div className="max-h-48 overflow-y-auto space-y-2">
                   {availableCategories
-                    .filter(category => category.name.toLowerCase() !== 'favorites')
+                    .filter(category => category.name?.toLowerCase() !== 'favorites')
                     .map(category => (
                     <label
                       key={category.id}

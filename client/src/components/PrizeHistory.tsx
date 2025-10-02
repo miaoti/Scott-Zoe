@@ -68,6 +68,7 @@ const PrizeHistory: React.FC<PrizeHistoryProps> = ({
   };
 
   const getCompletionTypeIcon = (type: string) => {
+    if (!type) return <Gift size={16} className="text-gray-500" />;
     switch (type.toLowerCase()) {
       case 'photo':
         return <Camera size={16} className="text-blue-500" />;
@@ -83,6 +84,7 @@ const PrizeHistory: React.FC<PrizeHistoryProps> = ({
   };
 
   const getCompletionTypeColor = (type: string) => {
+    if (!type) return 'bg-gray-100 text-gray-800';
     switch (type.toLowerCase()) {
       case 'photo':
         return 'bg-blue-100 text-blue-800';
