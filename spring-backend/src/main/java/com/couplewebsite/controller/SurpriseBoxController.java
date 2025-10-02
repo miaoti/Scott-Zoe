@@ -406,8 +406,7 @@ public class SurpriseBoxController {
     @GetMapping("/dropping/{userId}")
     public ResponseEntity<?> getDroppingBoxes(@PathVariable Long userId) {
         try {
-            User user = userService.findById(userId);
-            List<SurpriseBox> droppingBoxes = surpriseBoxService.getDroppingBoxes(user);
+            List<SurpriseBox> droppingBoxes = surpriseBoxService.getDroppingBoxes(userId);
             
             List<Map<String, Object>> boxResponses = droppingBoxes.stream()
                 .map(this::createBoxResponse)
