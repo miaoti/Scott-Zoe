@@ -118,8 +118,16 @@ interface SurpriseBoxState {
   getActiveBoxesCount: () => number;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
-const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:8080';
+// Use the same API URL logic as utils/api.ts
+const getApiUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  return 'http://localhost:8080';
+};
+
+const API_BASE_URL = getApiUrl();
+const WS_URL = import.meta.env.VITE_WS_URL || getApiUrl().replace('https://', 'wss://').replace('http://', 'ws://');
 
 export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   // Initial state
