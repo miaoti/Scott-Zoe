@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Heart, Camera, Calendar, Home, Settings, LogOut, ChevronDown, Trash2 } from 'lucide-react';
+import { Heart, Camera, Calendar, Home, Settings, LogOut, ChevronDown, Trash2, Gift } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 
@@ -205,6 +205,18 @@ function Header() {
             >
               <Calendar className="h-4 w-4" />
               <span className="hidden sm:inline font-medium">Memories</span>
+            </Link>
+            
+            <Link
+              to="/surprise-boxes"
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                isActive('/surprise-boxes') 
+                  ? 'bg-apple-purple/10 text-apple-purple' 
+                  : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
+              }`}
+            >
+              <Gift className="h-4 w-4" />
+              <span className="hidden sm:inline font-medium">Surprises</span>
             </Link>
             
             <Link

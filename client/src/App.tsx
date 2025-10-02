@@ -12,6 +12,7 @@ import RecycleBin from './components/RecycleBin';
 import Header from './components/Header';
 import Scott from './components/Scott';
 import Zoe from './components/Zoe';
+import SurpriseBoxManager from './components/SurpriseBoxManager';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 
@@ -114,6 +115,14 @@ function AppContent() {
           <Header />
           <main className="container mx-auto px-4 py-8">
             <Settings />
+          </main>
+        </div>
+      ) : <Navigate to="/login" replace />} />
+      <Route path="/surprise-boxes" element={isAuthenticated ? (
+        <div className="min-h-screen">
+          <Header />
+          <main className="container mx-auto px-4 py-8">
+            <SurpriseBoxManager />
           </main>
         </div>
       ) : <Navigate to="/login" replace />} />

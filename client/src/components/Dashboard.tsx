@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Camera, Calendar, Heart, Clock } from 'lucide-react';
+import { Camera, Calendar, Heart, Clock, Gift } from 'lucide-react';
 import api, { API_BASE_URL } from '../utils/api';
 import PrizeWheel from './PrizeWheel';
 import LoveCounter from './LoveCounter';
 import PartnerLoveCard from './PartnerLoveCard';
+import { useSurpriseBoxStore } from '../stores/surpriseBoxStore';
 
 interface CatPosition {
   id: string;
@@ -40,6 +41,7 @@ function Dashboard() {
   const [stats, setStats] = useState({ photos: 0, memories: 0, totalLove: 0 });
   const [catPositions, setCatPositions] = useState<CatPosition[]>([]);
   const [showWheel, setShowWheel] = useState(false);
+  const { ownedBoxes, receivedBoxes, activeBox, loadOwnedBoxes, loadReceivedBoxes } = useSurpriseBoxStore();
 
   // Generate random positions for cats with minimum distance to avoid crowding
   const generateRandomPosition = (existingPositions: CatPosition[] = []): { top: string; left: string } => {
@@ -137,7 +139,9 @@ function Dashboard() {
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+    loadOwnedBoxes();
+    loadReceivedBoxes();
+  }, [loadOwnedBoxes, loadReceivedBoxes]);
 
   const fetchDashboardData = async () => {
     try {
@@ -387,12 +391,119 @@ function Dashboard() {
           </Link>
         </div>
 
+        {/* Surprise Boxes Section */}
+        <div className="apple-card apple-shadow p-6 mb-8 pointer-events-auto relative overflow-hidden">
+          {/* Background decorations */}
+          <div className="absolute inset-0 bg-gradient-to-br from-yellow-50/50 to-orange-50/50 opacity-60"></div>
+          <div className="absolute -top-4 -right-4 w-24 h-24 bg-yellow-200/20 rounded-full blur-xl"></div>
+          <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-orange-200/20 rounded-full blur-xl"></div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="bg-gradient-to-r from-yellow-400 to-orange-400 p-2 rounded-xl">
+                  <Gift className="h-6 w-6 text-white" />
+                </div>
+                <h2 className="text-2xl font-semibold text-apple-label">Surprise Boxes</h2>
+              </div>
+              <Link
+                to="/surprise-boxes"
+                className="text-sm text-orange-500 hover:text-orange-600 font-medium transition-colors duration-200"
+              >
+                View All →
+              </Link>
+            </div>
+            
+            {/* Active Box Display */}
+            {activeBox ? (
+              <div className="bg-gradient-to-r from-yellow-100/80 to-orange-100/80 rounded-xl p-4 mb-4 border border-yellow-200/50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-apple-label mb-1">{activeBox.prizeName}</h3>
+                    <p className="text-sm text-apple-secondary-label">
+                      {activeBox.status === 'PENDING_APPROVAL' ? 'Waiting for approval' : 
+                       activeBox.status === 'ACTIVE' ? 'Ready to open!' : 
+                       activeBox.status === 'SCHEDULED' ? 'Scheduled to drop' : activeBox.status}
+                    </p>
+                  </div>
+                  <div className="text-2xl animate-bounce">🎁</div>
+                </div>
+              </div>
+            ) : null}
+            
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">{ownedBoxes.length}</div>
+                <div className="text-xs text-apple-tertiary-label">Created</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-600">{receivedBoxes.length}</div>
+                <div className="text-xs text-apple-tertiary-label">Received</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {[...ownedBoxes, ...receivedBoxes].filter(box => box.status === 'COMPLETED').length}
+                </div>
+                <div className="text-xs text-apple-tertiary-label">Completed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {[...ownedBoxes, ...receivedBoxes].filter(box => box.status === 'ACTIVE').length}
+                </div>
+                <div className="text-xs text-apple-tertiary-label">Active</div>
+              </div>
+            </div>
+            
+            {/* Recent Activity */}
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-apple-secondary-label mb-2">Recent Activity:</div>
+              {[...ownedBoxes, ...receivedBoxes]
+                .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+                .slice(0, 3)
+                .map((box, index) => (
+                  <div key={box.id} className="flex items-center justify-between py-2 px-3 bg-white/50 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <div className="text-lg">
+                        {box.status === 'COMPLETED' ? '✅' : 
+                         box.status === 'ACTIVE' ? '🎁' : 
+                         box.status === 'PENDING_APPROVAL' ? '⏳' : '📦'}
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-apple-label truncate max-w-32">
+                          {box.prizeName}
+                        </div>
+                        <div className="text-xs text-apple-tertiary-label">
+                          {box.status === 'COMPLETED' ? 'Completed' : 
+                           box.status === 'ACTIVE' ? 'Ready to open' : 
+                           box.status === 'PENDING_APPROVAL' ? 'Pending approval' : box.status}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-apple-quaternary-label">
+                      {new Date(box.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </div>
+                  </div>
+                ))
+              }
+              
+              {[...ownedBoxes, ...receivedBoxes].length === 0 && (
+                <div className="text-center py-6">
+                  <div className="text-4xl mb-2">🎁</div>
+                  <div className="text-sm text-apple-tertiary-label mb-1">No surprise boxes yet</div>
+                  <div className="text-xs text-apple-quaternary-label">Create your first surprise box!</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Quick Actions */}
         <div className="apple-card apple-shadow p-8 mb-8 pointer-events-auto">
           <h2 className="text-2xl font-semibold text-apple-label mb-6 text-center">
             Create New Memories
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Link
               to="/gallery"
               className="bg-apple-blue/5 border border-apple-blue/20 rounded-xl p-6 hover:bg-apple-blue/10 transition-all duration-300 group pointer-events-auto"
@@ -419,6 +530,21 @@ function Dashboard() {
                 <div>
                   <h3 className="font-semibold text-apple-label">Add Memory</h3>
                   <p className="text-sm text-apple-secondary-label">Create a special moment</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link
+              to="/surprise-boxes"
+              className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200/50 rounded-xl p-6 hover:from-yellow-100 hover:to-orange-100 transition-all duration-300 group pointer-events-auto"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="bg-gradient-to-r from-yellow-400 to-orange-400 p-3 rounded-xl group-hover:from-yellow-500 group-hover:to-orange-500 transition-all duration-200">
+                  <Gift className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-apple-label">Create Surprise</h3>
+                  <p className="text-sm text-apple-secondary-label">Send a surprise box</p>
                 </div>
               </div>
             </Link>

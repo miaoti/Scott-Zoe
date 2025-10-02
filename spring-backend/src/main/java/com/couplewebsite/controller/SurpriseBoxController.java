@@ -1,0 +1,381 @@
+package com.couplewebsite.controller;
+
+import com.couplewebsite.entity.SurpriseBox;
+import com.couplewebsite.entity.User;
+import com.couplewebsite.service.SurpriseBoxService;
+import com.couplewebsite.service.UserService;
+import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/surprise-boxes")
+public class SurpriseBoxController {
+    
+    private static final Logger logger = LoggerFactory.getLogger(SurpriseBoxController.class);
+    
+    @Autowired
+    private SurpriseBoxService surpriseBoxService;
+    
+    @Autowired
+    private UserService userService;
+    
+    /**
+     * Create a new surprise box
+     */
+    @PostMapping
+    public ResponseEntity<?> createBox(@Valid @RequestBody CreateBoxRequest request) {
+        try {
+            SurpriseBox.CompletionType completionType = SurpriseBox.CompletionType.valueOf(request.getCompletionType().toUpperCase());
+            
+            SurpriseBox box = surpriseBoxService.createBox(
+                request.getOwnerId(),
+                request.getRecipientId(),
+                request.getPrizeName(),
+                request.getPrizeDescription(),
+                completionType,
+                request.getCompletionCriteria(),
+                request.getDropDelayHours()
+            );
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Surprise box created successfully");
+            response.put("box", createBoxResponse(box));
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Error creating surprise box", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Failed to create surprise box: " + e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Get boxes owned by user
+     */
+    @GetMapping("/owned/{userId}")
+    public ResponseEntity<?> getBoxesByOwner(@PathVariable Long userId) {
+        try {
+            User owner = userService.findById(userId);
+            List<SurpriseBox> boxes = surpriseBoxService.getBoxesByOwner(owner);
+            
+            List<Map<String, Object>> boxResponses = boxes.stream()
+                .map(this::createBoxResponse)
+                .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(boxResponses);
+            
+        } catch (Exception e) {
+            logger.error("Error fetching boxes by owner: {}", userId, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Get boxes received by user
+     */
+    @GetMapping("/received/{userId}")
+    public ResponseEntity<?> getBoxesByRecipient(@PathVariable Long userId) {
+        try {
+            User recipient = userService.findById(userId);
+            List<SurpriseBox> boxes = surpriseBoxService.getBoxesByRecipient(recipient);
+            
+            List<Map<String, Object>> boxResponses = boxes.stream()
+                .map(this::createBoxResponse)
+                .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(boxResponses);
+            
+        } catch (Exception e) {
+            logger.error("Error fetching boxes by recipient: {}", userId, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Get active box for owner
+     */
+    @GetMapping("/active/{userId}")
+    public ResponseEntity<?> getActiveBox(@PathVariable Long userId) {
+        try {
+            User owner = userService.findById(userId);
+            Optional<SurpriseBox> activeBox = surpriseBoxService.getActiveBoxByOwner(owner);
+            
+            if (activeBox.isPresent()) {
+                return ResponseEntity.ok(createBoxResponse(activeBox.get()));
+            } else {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "No active box found");
+                return ResponseEntity.ok(response);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error fetching active box for user: {}", userId, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Get box by ID
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getBoxById(@PathVariable Long id) {
+        try {
+            SurpriseBox box = surpriseBoxService.findById(id);
+            return ResponseEntity.ok(createBoxResponse(box));
+            
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(404).body(error);
+        } catch (Exception e) {
+            logger.error("Error fetching box by ID: {}", id, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Open a box (recipient opens it)
+     */
+    @PostMapping("/{id}/open")
+    public ResponseEntity<?> openBox(@PathVariable Long id, @RequestBody Map<String, Long> request) {
+        try {
+            Long recipientId = request.get("recipientId");
+            SurpriseBox box = surpriseBoxService.openBox(id, recipientId);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Box opened successfully. Waiting for owner approval.");
+            response.put("box", createBoxResponse(box));
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(400).body(error);
+        } catch (Exception e) {
+            logger.error("Error opening box with ID: {}", id, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Approve box completion (owner approves)
+     */
+    @PostMapping("/{id}/approve")
+    public ResponseEntity<?> approveCompletion(@PathVariable Long id, @RequestBody Map<String, Long> request) {
+        try {
+            Long ownerId = request.get("ownerId");
+            SurpriseBox box = surpriseBoxService.approveCompletion(id, ownerId);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Box completion approved! Prize claimed successfully.");
+            response.put("box", createBoxResponse(box));
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(400).body(error);
+        } catch (Exception e) {
+            logger.error("Error approving box completion with ID: {}", id, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Reject box completion (owner rejects)
+     */
+    @PostMapping("/{id}/reject")
+    public ResponseEntity<?> rejectCompletion(@PathVariable Long id, @RequestBody RejectCompletionRequest request) {
+        try {
+            SurpriseBox box = surpriseBoxService.rejectCompletion(id, request.getOwnerId(), request.getRejectionReason());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Box completion rejected. Box is available again with extended time.");
+            response.put("box", createBoxResponse(box));
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(400).body(error);
+        } catch (Exception e) {
+            logger.error("Error rejecting box completion with ID: {}", id, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Cancel a box (owner cancels)
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> cancelBox(@PathVariable Long id, @RequestParam Long ownerId) {
+        try {
+            surpriseBoxService.cancelBox(id, ownerId);
+            
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Box cancelled successfully");
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(400).body(error);
+        } catch (Exception e) {
+            logger.error("Error cancelling box with ID: {}", id, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Get boxes waiting for approval by owner
+     */
+    @GetMapping("/waiting-approval/{ownerId}")
+    public ResponseEntity<?> getBoxesWaitingForApproval(@PathVariable Long ownerId) {
+        try {
+            User owner = userService.findById(ownerId);
+            List<SurpriseBox> boxes = surpriseBoxService.getBoxesWaitingForApproval(owner);
+            
+            List<Map<String, Object>> boxResponses = boxes.stream()
+                .map(this::createBoxResponse)
+                .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(boxResponses);
+            
+        } catch (Exception e) {
+            logger.error("Error fetching boxes waiting for approval by owner: {}", ownerId, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Check if user has active box
+     */
+    @GetMapping("/has-active/{userId}")
+    public ResponseEntity<?> hasActiveBox(@PathVariable Long userId) {
+        try {
+            User owner = userService.findById(userId);
+            boolean hasActive = surpriseBoxService.hasActiveBox(owner);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("hasActiveBox", hasActive);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Error checking active box for user: {}", userId, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    // Helper method to create box response
+    private Map<String, Object> createBoxResponse(SurpriseBox box) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", box.getId());
+        response.put("prizeName", box.getPrizeName());
+        response.put("prizeDescription", box.getPrizeDescription());
+        response.put("completionType", box.getCompletionType().name());
+        response.put("completionCriteria", box.getCompletionCriteria());
+        response.put("status", box.getStatus().name());
+        response.put("createdAt", box.getCreatedAt());
+        response.put("dropAt", box.getDropAt());
+        response.put("droppedAt", box.getDroppedAt());
+        response.put("openedAt", box.getOpenedAt());
+        response.put("claimedAt", box.getClaimedAt());
+        response.put("expiresAt", box.getExpiresAt());
+        response.put("rejectionReason", box.getRejectionReason());
+        response.put("isExpired", box.isExpired());
+        
+        if (box.getOwner() != null) {
+            Map<String, Object> ownerMap = new HashMap<>();
+            ownerMap.put("id", box.getOwner().getId());
+            ownerMap.put("name", box.getOwner().getName());
+            ownerMap.put("username", box.getOwner().getUsername());
+            response.put("owner", ownerMap);
+        }
+        
+        if (box.getRecipient() != null) {
+            Map<String, Object> recipientMap = new HashMap<>();
+            recipientMap.put("id", box.getRecipient().getId());
+            recipientMap.put("name", box.getRecipient().getName());
+            recipientMap.put("username", box.getRecipient().getUsername());
+            response.put("recipient", recipientMap);
+        }
+        
+        return response;
+    }
+    
+    // Request DTOs
+    public static class CreateBoxRequest {
+        private Long ownerId;
+        private Long recipientId;
+        private String prizeName;
+        private String prizeDescription;
+        private String completionType;
+        private String completionCriteria;
+        private Integer dropDelayHours;
+        
+        // Getters and setters
+        public Long getOwnerId() { return ownerId; }
+        public void setOwnerId(Long ownerId) { this.ownerId = ownerId; }
+        public Long getRecipientId() { return recipientId; }
+        public void setRecipientId(Long recipientId) { this.recipientId = recipientId; }
+        public String getPrizeName() { return prizeName; }
+        public void setPrizeName(String prizeName) { this.prizeName = prizeName; }
+        public String getPrizeDescription() { return prizeDescription; }
+        public void setPrizeDescription(String prizeDescription) { this.prizeDescription = prizeDescription; }
+        public String getCompletionType() { return completionType; }
+        public void setCompletionType(String completionType) { this.completionType = completionType; }
+        public String getCompletionCriteria() { return completionCriteria; }
+        public void setCompletionCriteria(String completionCriteria) { this.completionCriteria = completionCriteria; }
+        public Integer getDropDelayHours() { return dropDelayHours; }
+        public void setDropDelayHours(Integer dropDelayHours) { this.dropDelayHours = dropDelayHours; }
+    }
+    
+    public static class RejectCompletionRequest {
+        private Long ownerId;
+        private String rejectionReason;
+        
+        // Getters and setters
+        public Long getOwnerId() { return ownerId; }
+        public void setOwnerId(Long ownerId) { this.ownerId = ownerId; }
+        public String getRejectionReason() { return rejectionReason; }
+        public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
+    }
+}
