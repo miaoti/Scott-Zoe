@@ -4,6 +4,7 @@ FROM node:18-slim AS frontend-build
 # Build React frontend
 WORKDIR /app/client
 COPY client/package*.json ./
+COPY package-lock.json ./
 RUN npm ci --cache /tmp/.npm
 COPY client/ ./
 
