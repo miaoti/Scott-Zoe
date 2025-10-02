@@ -15,7 +15,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
   const [formData, setFormData] = useState({
     prizeName: '',
     prizeDescription: '',
-    completionType: 'task' as 'task' | 'time',
+    completionType: 'PHOTO' as CompletionType,
     expiresAt: '',
     priceAmount: '',
     taskDescription: ''
