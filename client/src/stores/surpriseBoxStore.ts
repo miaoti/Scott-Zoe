@@ -164,7 +164,11 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       
       // Get user ID from token payload
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const userId = payload.sub;
+      const userId = payload.userId; // Use userId claim, not sub (which is username)
+      
+      if (!userId) {
+        throw new Error('User ID not found in token');
+      }
       
       // Add ownerId and recipientId to the request
       const requestData = {
@@ -192,7 +196,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       const token = localStorage.getItem('token');
       // Get user ID from token payload
       const payload = JSON.parse(atob(token?.split('.')[1] || ''));
-      const userId = payload.sub;
+      const userId = payload.userId; // Use userId claim, not sub (which is username)
       
       const response = await axios.get(`${API_BASE_URL}/surprise-boxes/owned/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -208,7 +212,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       const token = localStorage.getItem('token');
       // Get user ID from token payload
       const payload = JSON.parse(atob(token?.split('.')[1] || ''));
-      const userId = payload.sub;
+      const userId = payload.userId; // Use userId claim, not sub (which is username)
       
       const response = await axios.get(`${API_BASE_URL}/surprise-boxes/received/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -224,7 +228,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       const token = localStorage.getItem('token');
       // Get user ID from token payload
       const payload = JSON.parse(atob(token?.split('.')[1] || ''));
-      const userId = payload.sub;
+      const userId = payload.userId; // Use userId claim, not sub (which is username)
       
       const response = await axios.get(`${API_BASE_URL}/surprise-boxes/active/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -330,9 +334,22 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       const response = await axios.get(`${API_BASE_URL}/prize-history`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      set({ prizeHistory: response.data });
+      
+      // Handle both array and paginated response formats
+      let historyData = response.data;
+      if (historyData && typeof historyData === 'object' && historyData.content) {
+        // Paginated response - extract the content array
+        historyData = historyData.content;
+      }
+      
+      // Ensure we always set an array
+      set({ prizeHistory: Array.isArray(historyData) ? historyData : [] });
     } catch (error: any) {
-      set({ error: error.response?.data?.message || 'Failed to load prize history' });
+      console.error('Failed to load prize history:', error);
+      set({ 
+        error: error.response?.data?.message || 'Failed to load prize history',
+        prizeHistory: [] // Set empty array on error
+      });
     }
   },
   
@@ -342,9 +359,13 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       const response = await axios.get(`${API_BASE_URL}/prize-history/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      set({ prizeStats: response.data });
+      set({ prizeStats: response.data || null });
     } catch (error: any) {
-      set({ error: error.response?.data?.message || 'Failed to load prize stats' });
+      console.error('Failed to load prize stats:', error);
+      set({ 
+        error: error.response?.data?.message || 'Failed to load prize stats',
+        prizeStats: null
+      });
     }
   },
   
