@@ -54,20 +54,47 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
   const firstDayWeekday = firstDayOfMonth.getDay();
   const daysInMonth = lastDayOfMonth.getDate();
   
-  // Get memories for current month (including recurring memories from other years)
+  // Get memories for current month (including recurring memories from other years and spanning events)
   const monthMemories = memories.filter(memory => {
     // Backend sends dates as arrays [year, month, day]
-    let memoryMonth;
+    let memoryMonth, memoryYear;
     if (Array.isArray(memory.date)) {
       memoryMonth = memory.date[1]; // Month from array (1-indexed)
+      memoryYear = memory.date[0];
     } else {
       // Fallback for string format
       const dateStr = memory.date.toString();
-      const [memoryYear, memoryMonthFromDate, memoryDay] = dateStr.split('-').map(Number);
+      const [memoryYearFromDate, memoryMonthFromDate, memoryDay] = dateStr.split('-').map(Number);
       memoryMonth = memoryMonthFromDate;
+      memoryYear = memoryYearFromDate;
     }
+    
+    // Check if memory starts in current month
+    const startsInCurrentMonth = (memoryMonth - 1) === month;
+    
+    // For events with endDate, also check if they span into current month
+    if (memory.type === 'event' && memory.endDate) {
+      let endMonth, endYear;
+      if (Array.isArray(memory.endDate)) {
+        endMonth = memory.endDate[1];
+        endYear = memory.endDate[0];
+      } else {
+        const endDateStr = memory.endDate.toString();
+        [endYear, endMonth] = endDateStr.split('-').map(Number);
+      }
+      
+      // Check if event spans into current month
+      const currentMonthDate = new Date(year, month, 1);
+      const eventStartDate = new Date(memoryYear, memoryMonth - 1, 1);
+      const eventEndDate = new Date(endYear, endMonth - 1, 31);
+      
+      const spansIntoCurrentMonth = eventStartDate <= currentMonthDate && eventEndDate >= currentMonthDate;
+      
+      return startsInCurrentMonth || spansIntoCurrentMonth;
+    }
+    
     // Backend months are 1-indexed, JavaScript months are 0-indexed
-    return (memoryMonth - 1) === month;
+    return startsInCurrentMonth;
   });
   
   // Group memories by day
@@ -82,14 +109,18 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
   };
   
   monthMemories.forEach(memory => {
-    let memoryDay;
+    let memoryDay, memoryMonth, memoryYear;
     if (Array.isArray(memory.date)) {
       memoryDay = memory.date[2]; // Day from array
+      memoryMonth = memory.date[1];
+      memoryYear = memory.date[0];
     } else {
       // Fallback for string format
       const dateStr = memory.date.toString();
-      const [memoryYear, memoryMonthFromDate, memoryDayFromDate] = dateStr.split('-').map(Number);
+      const [memoryYearFromDate, memoryMonthFromDate, memoryDayFromDate] = dateStr.split('-').map(Number);
       memoryDay = memoryDayFromDate;
+      memoryMonth = memoryMonthFromDate;
+      memoryYear = memoryYearFromDate;
     }
     
     // For EVENT type memories with endDate, add to all days in the range
@@ -107,24 +138,38 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
         [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
       }
       
-      // If the event spans multiple months, only show days within the current month
-      if (endMonth === (month + 1) && endYear === year) {
-        // End date is in the same month and year - show full range
-        for (let day = memoryDay; day <= Math.min(endDay, daysInMonth); day++) {
-          addMemoryToDay(day, memory);
-        }
-      } else if (endMonth > (month + 1) || endYear > year) {
-        // End date is in a future month/year - show from start day to end of current month
-        for (let day = memoryDay; day <= daysInMonth; day++) {
-          addMemoryToDay(day, memory);
-        }
+      // Determine the start and end days within the current month
+      let startDay, endDayInMonth;
+      
+      // If event starts in current month
+      if ((memoryMonth - 1) === month && memoryYear === year) {
+        startDay = memoryDay;
       } else {
-        // End date is in the past or same day - show single day
-        addMemoryToDay(memoryDay, memory);
+        // Event started in a previous month, start from day 1 of current month
+        startDay = 1;
+      }
+      
+      // If event ends in current month
+      if ((endMonth - 1) === month && endYear === year) {
+        endDayInMonth = endDay;
+      } else if (endMonth > (month + 1) || endYear > year) {
+        // Event continues beyond current month, show until end of current month
+        endDayInMonth = daysInMonth;
+      } else {
+        // Event ended before current month (shouldn't happen with our filter, but safety check)
+        endDayInMonth = startDay;
+      }
+      
+      // Add memory to all days in the range within current month
+      for (let day = startDay; day <= endDayInMonth; day++) {
+        addMemoryToDay(day, memory);
       }
     } else {
       // For non-event memories or events without endDate, add to single day
-      addMemoryToDay(memoryDay, memory);
+      // Only add if the memory actually starts in the current month
+      if ((memoryMonth - 1) === month && memoryYear === year) {
+        addMemoryToDay(memoryDay, memory);
+      }
     }
   });
   
