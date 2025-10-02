@@ -88,8 +88,8 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
     } else {
       // Fallback for string format
       const dateStr = memory.date.toString();
-      const [memoryYear, memoryMonthFromDate, day] = dateStr.split('-').map(Number);
-      memoryDay = day;
+      const [memoryYear, memoryMonthFromDate, memoryDayFromDate] = dateStr.split('-').map(Number);
+      memoryDay = memoryDayFromDate;
     }
     
     // For EVENT type memories with endDate, add to all days in the range
@@ -99,8 +99,8 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
         endDay = memory.endDate[2];
       } else {
         const endDateStr = memory.endDate.toString();
-        const [endYear, endMonthFromDate, day] = endDateStr.split('-').map(Number);
-        endDay = day;
+        const [endYear, endMonthFromDate, endDayFromDate] = endDateStr.split('-').map(Number);
+        endDay = endDayFromDate;
         
         // Only show in current month if the end date is in the same month
         if (endMonthFromDate !== (month + 1)) {
