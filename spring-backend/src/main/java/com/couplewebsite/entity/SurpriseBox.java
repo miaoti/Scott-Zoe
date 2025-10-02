@@ -60,6 +60,9 @@ public class SurpriseBox {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    
     @Column(name = "opened_at")
     private LocalDateTime openedAt;
     
@@ -191,6 +194,14 @@ public class SurpriseBox {
     
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+    
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+    
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
     
     public LocalDateTime getOpenedAt() {
