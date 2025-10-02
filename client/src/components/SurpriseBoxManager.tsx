@@ -35,33 +35,25 @@ const SurpriseBoxManager: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'received' | 'owned'>('received');
   const [showNotifications, setShowNotifications] = useState(false);
 
+  // Initial data loading and WebSocket connection
   useEffect(() => {
-    // Load initial data
-    const loadData = async () => {
-      await Promise.all([
-        loadOwnedBoxes(),
-        loadReceivedBoxes(),
-        loadActiveBox()
-      ]);
-    };
-    
-    loadData();
+    console.log('🔄 SurpriseBoxManager: Initial useEffect triggered - loading data and connecting WebSocket');
+    loadOwnedBoxes();
+    loadReceivedBoxes();
+    loadActiveBox();
     
     // Connect WebSocket
     const token = localStorage.getItem('token');
-    console.log('🔍 SurpriseBoxManager: Checking token for WebSocket connection:', token ? 'Token found' : 'No token');
     if (token) {
-      console.log('✅ SurpriseBoxManager: Calling connectWebSocket with token');
       connectWebSocket(token);
-    } else {
-      console.log('🧪 SurpriseBoxManager: For testing, attempting WebSocket connection without token');
-      connectWebSocket();
     }
     
+    // Cleanup on unmount
     return () => {
+      console.log('🧹 SurpriseBoxManager: Cleaning up WebSocket connection');
       disconnectWebSocket();
     };
-  }, []);
+  }, []); // Empty dependency array to prevent infinite loops
 
   const boxesWaitingApproval = getBoxesWaitingApproval();
   const activeBoxesCount = getActiveBoxesCount();

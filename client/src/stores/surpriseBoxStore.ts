@@ -441,21 +441,33 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
         // Refresh relevant data based on notification type with debouncing
         switch (notification.type) {
           case 'BOX_DROPPED':
+            console.log('🎁 BOX_DROPPED notification - triggering refresh');
             debounce('loadReceivedBoxes', () => get().loadReceivedBoxes(), 1000);
             debounce('loadActiveBox', () => get().loadActiveBox(), 1000);
             break;
           case 'BOX_OPENED':
+            console.log('📦 BOX_OPENED notification - triggering refresh');
             debounce('loadOwnedBoxes', () => get().loadOwnedBoxes(), 1000);
             break;
           case 'BOX_APPROVED':
+            console.log('✅ BOX_APPROVED notification - triggering refresh');
             debounce('loadPrizeHistory', () => get().loadPrizeHistory(), 1000);
             debounce('loadPrizeStats', () => get().loadPrizeStats(), 1000);
             break;
           case 'BOX_REJECTED':
-          case 'BOX_EXPIRED':
-          case 'BOX_CANCELLED':
+            console.log('❌ BOX_REJECTED notification - triggering refresh');
             debounce('loadOwnedBoxes', () => get().loadOwnedBoxes(), 1000);
             break;
+          case 'BOX_EXPIRED':
+            console.log('⏰ BOX_EXPIRED notification - triggering refresh');
+            debounce('loadOwnedBoxes', () => get().loadOwnedBoxes(), 1000);
+            break;
+          case 'BOX_CANCELLED':
+            console.log('🚫 BOX_CANCELLED notification - triggering refresh');
+            debounce('loadOwnedBoxes', () => get().loadOwnedBoxes(), 1000);
+            break;
+          default:
+            console.log('🤷 Unknown notification type:', notification.type);
         }
       });
       console.log('📡 WebSocket subscription established');

@@ -168,10 +168,11 @@ function Dashboard() {
   };
 
   useEffect(() => {
+    console.log('🔄 Dashboard: Initial useEffect triggered - loading surprise boxes');
     fetchDashboardData();
     loadOwnedBoxes();
     loadReceivedBoxes();
-  }, [loadOwnedBoxes, loadReceivedBoxes]);
+  }, []); // Empty dependency array to prevent infinite loops
 
   const fetchDashboardData = async () => {
     try {
