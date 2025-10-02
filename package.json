@@ -32,7 +32,7 @@
   "author": "Ana & Zoe",
   "license": "MIT",
   "devDependencies": {
-    "concurrently": "^9.2.0"
+    "concurrently": "^9.2.1"
   },
   "dependencies": {
     "react-native-worklets": "^0.4.1",

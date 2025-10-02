@@ -95,22 +95,32 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
     // For EVENT type memories with endDate, add to all days in the range
     if (memory.type === 'event' && memory.endDate) {
       let endDay;
+      let endMonth;
+      let endYear;
+      
       if (Array.isArray(memory.endDate)) {
         endDay = memory.endDate[2];
+        endMonth = memory.endDate[1];
+        endYear = memory.endDate[0];
       } else {
         const endDateStr = memory.endDate.toString();
-        const [endYear, endMonthFromDate, endDayFromDate] = endDateStr.split('-').map(Number);
-        endDay = endDayFromDate;
-        
-        // Only show in current month if the end date is in the same month
-        if (endMonthFromDate !== (month + 1)) {
-          endDay = memoryDay; // Fallback to single day if end date is in different month
-        }
+        [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
       }
       
-      // Add memory to all days in the range
-      for (let day = memoryDay; day <= Math.min(endDay, daysInMonth); day++) {
-        addMemoryToDay(day, memory);
+      // If the event spans multiple months, only show days within the current month
+      if (endMonth === (month + 1) && endYear === year) {
+        // End date is in the same month and year - show full range
+        for (let day = memoryDay; day <= Math.min(endDay, daysInMonth); day++) {
+          addMemoryToDay(day, memory);
+        }
+      } else if (endMonth > (month + 1) || endYear > year) {
+        // End date is in a future month/year - show from start day to end of current month
+        for (let day = memoryDay; day <= daysInMonth; day++) {
+          addMemoryToDay(day, memory);
+        }
+      } else {
+        // End date is in the past or same day - show single day
+        addMemoryToDay(memoryDay, memory);
       }
     } else {
       // For non-event memories or events without endDate, add to single day
