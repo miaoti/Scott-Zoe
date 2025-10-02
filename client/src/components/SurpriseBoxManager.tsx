@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, Plus, History, Bell, X, AlertCircle } from 'lucide-react';
-import { useSurpriseBoxStore } from '../stores/surpriseBoxStore';
-import BoxCreationForm from './BoxCreationForm';
+import { useSurpriseBoxActions } from '../hooks/useSurpriseBoxActions';
 import SurpriseBoxCard from './SurpriseBoxCard';
+import BoxCreationForm from './BoxCreationForm';
 import PrizeHistory from './PrizeHistory';
 import BoxDropAnimation from './BoxDropAnimation';
 import CountdownTimer from './CountdownTimer';
@@ -30,27 +30,38 @@ const SurpriseBoxManager: React.FC = () => {
     getBoxesWaitingApproval,
     getActiveBoxesCount,
     setError
-  } = useSurpriseBoxStore();
+  } = useSurpriseBoxActions();
 
   const [activeTab, setActiveTab] = useState<'received' | 'owned'>('received');
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // Initial data loading and WebSocket connection
-  useEffect(() => {
-    console.log('🔄 SurpriseBoxManager: Initial useEffect triggered - loading data and connecting WebSocket');
+  // Memoize the store functions to prevent infinite re-renders
+  const memoizedLoadOwnedBoxes = useCallback(() => {
     loadOwnedBoxes();
+  }, [loadOwnedBoxes]);
+
+  const memoizedLoadReceivedBoxes = useCallback(() => {
     loadReceivedBoxes();
+  }, [loadReceivedBoxes]);
+
+  const memoizedLoadActiveBox = useCallback(() => {
     loadActiveBox();
-    
-    // Connect WebSocket
+  }, [loadActiveBox]);
+
+  const memoizedConnectWebSocket = useCallback((token: string) => {
+    connectWebSocket(token);
+  }, [connectWebSocket]);
+
+  useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
+      loadOwnedBoxes();
+      loadReceivedBoxes();
+      loadActiveBox();
       connectWebSocket(token);
     }
-    
-    // Cleanup on unmount
+
     return () => {
-      console.log('🧹 SurpriseBoxManager: Cleaning up WebSocket connection');
       disconnectWebSocket();
     };
   }, []); // Empty dependency array to prevent infinite loops

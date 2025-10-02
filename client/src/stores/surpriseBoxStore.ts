@@ -213,34 +213,44 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   },
   
   loadOwnedBoxes: async () => {
+    set({ isLoading: true, error: null });
     try {
-      const token = localStorage.getItem('token');
-      // Get user ID from token payload
-      const payload = JSON.parse(atob(token?.split('.')[1] || ''));
-      const userId = payload.userId; // Use userId claim, not sub (which is username)
-      
-      const response = await axios.get(`${API_BASE_URL}/surprise-boxes/owned/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch(`${API_URL}/api/surprise-boxes/owned`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
       });
-      set({ ownedBoxes: response.data });
-    } catch (error: any) {
-      set({ error: error.response?.data?.message || 'Failed to load owned boxes' });
+      
+      if (!response.ok) {
+        throw new Error('Failed to load owned boxes');
+      }
+      
+      const boxes = await response.json();
+      set({ ownedBoxes: boxes, isLoading: false });
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : 'Failed to load owned boxes', isLoading: false });
     }
   },
   
   loadReceivedBoxes: async () => {
+    set({ isLoading: true, error: null });
     try {
-      const token = localStorage.getItem('token');
-      // Get user ID from token payload
-      const payload = JSON.parse(atob(token?.split('.')[1] || ''));
-      const userId = payload.userId; // Use userId claim, not sub (which is username)
-      
-      const response = await axios.get(`${API_BASE_URL}/surprise-boxes/received/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch(`${API_BASE_URL}/surprise-boxes/received`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
       });
-      set({ receivedBoxes: response.data });
-    } catch (error: any) {
-      set({ error: error.response?.data?.message || 'Failed to load received boxes' });
+      
+      if (!response.ok) {
+        throw new Error('Failed to load received boxes');
+      }
+      
+      const boxes = await response.json();
+      set({ receivedBoxes: boxes, isLoading: false });
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : 'Failed to load received boxes', isLoading: false });
     }
   },
   

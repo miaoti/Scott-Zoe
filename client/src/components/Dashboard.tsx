@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Camera, Calendar, Heart, Clock, Gift } from 'lucide-react';
+import { Camera, Calendar, Heart, Clock, Gift, Users, Star, MapPin } from 'lucide-react';
 import api, { API_BASE_URL } from '../utils/api';
 import PrizeWheel from './PrizeWheel';
 import LoveCounter from './LoveCounter';
 import PartnerLoveCard from './PartnerLoveCard';
-import { useSurpriseBoxStore } from '../stores/surpriseBoxStore';
+import { useSurpriseBoxActions } from '../hooks/useSurpriseBoxActions';
 
 // Utility function to safely parse dates from different formats
 const parseDate = (dateString: string | null | undefined): Date | null => {
@@ -71,7 +71,7 @@ function Dashboard() {
   const [stats, setStats] = useState({ photos: 0, memories: 0, totalLove: 0 });
   const [catPositions, setCatPositions] = useState<CatPosition[]>([]);
   const [showWheel, setShowWheel] = useState(false);
-  const { ownedBoxes, receivedBoxes, activeBox, loadOwnedBoxes, loadReceivedBoxes } = useSurpriseBoxStore();
+  const { ownedBoxes, receivedBoxes, activeBox, loadOwnedBoxes, loadReceivedBoxes } = useSurpriseBoxActions();
 
   // Generate random positions for cats with minimum distance to avoid crowding
   const generateRandomPosition = (existingPositions: CatPosition[] = []): { top: string; left: string } => {
@@ -168,11 +168,10 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    console.log('🔄 Dashboard: Initial useEffect triggered - loading surprise boxes');
     fetchDashboardData();
     loadOwnedBoxes();
     loadReceivedBoxes();
-  }, []); // Empty dependency array to prevent infinite loops
+  }, [loadOwnedBoxes, loadReceivedBoxes]);
 
   const fetchDashboardData = async () => {
     try {
