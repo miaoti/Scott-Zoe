@@ -10,14 +10,15 @@ export interface SurpriseBox {
   status: 'CREATED' | 'DROPPED' | 'WAITING_APPROVAL' | 'CLAIMED' | 'EXPIRED';
   completionType: 'PHOTO' | 'TEXT' | 'LOCATION' | 'TIMER';
   completionData?: string;
-  dropAt: string;
-  expiresAt: string;
-  droppedAt?: string;
-  openedAt?: string;
-  completedAt?: string;
-  approvedAt?: string;
+  dropAt: string | number[];
+  expiresAt: string | number[];
+  droppedAt?: string | number[];
+  openedAt?: string | number[];
+  completedAt?: string | number[];
+  approvedAt?: string | number[];
   rejectionReason?: string;
   isExpired: boolean;
+  isDropping?: boolean;
   owner: {
     id: number;
     name: string;

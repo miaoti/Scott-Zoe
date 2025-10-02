@@ -19,10 +19,20 @@ import { useSurpriseBoxStore, SurpriseBox } from '../stores/surpriseBoxStore';
 import CountdownTimer from './CountdownTimer';
 
 // Utility function to safely parse dates from different formats
-const parseDate = (dateString: string | null | undefined): Date | null => {
-  if (!dateString) return null;
+const parseDate = (dateInput: string | number[] | null | undefined): Date | null => {
+  if (!dateInput) return null;
   
   try {
+    // Handle array format from backend [year, month, day, hour, minute, second, nanosecond]
+    if (Array.isArray(dateInput)) {
+      const [year, month, day, hour = 0, minute = 0, second = 0, nanosecond = 0] = dateInput;
+      // Note: JavaScript months are 0-indexed, but backend sends 1-indexed
+      return new Date(year, month - 1, day, hour, minute, second, Math.floor(nanosecond / 1000000));
+    }
+    
+    // Handle string formats
+    const dateString = dateInput as string;
+    
     // Handle ISO format with T and Z (e.g., "2025-10-02T11:50:49.491Z")
     if (dateString.includes('T')) {
       return new Date(dateString);
@@ -33,14 +43,14 @@ const parseDate = (dateString: string | null | undefined): Date | null => {
     const isoString = dateString.replace(' ', 'T');
     return new Date(isoString);
   } catch (error) {
-    console.warn('Failed to parse date:', dateString, error);
+    console.error('Failed to parse date:', dateInput, error);
     return null;
   }
 };
 
 // Utility function to format date safely
-const formatDate = (dateString: string | null | undefined, includeTime = false): string => {
-  const date = parseDate(dateString);
+const formatDate = (dateInput: string | number[] | null | undefined, includeTime = false): string => {
+  const date = parseDate(dateInput);
   if (!date || isNaN(date.getTime())) {
     return 'Invalid Date';
   }
@@ -221,7 +231,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
               </div>
             )}
             
-            {isDropped && !isExpired && (
+            {box.status === 'DROPPED' && !isExpired && (
               <div className="flex items-center text-sm text-gray-600">
                 <AlertCircle className="w-4 h-4 mr-2" />
                 <span>Expires in: </span>
