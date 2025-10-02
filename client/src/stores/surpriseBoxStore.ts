@@ -215,9 +215,14 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   loadOwnedBoxes: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`${API_URL}/api/surprise-boxes/owned`, {
+      const token = localStorage.getItem('token');
+      // Get user ID from token payload
+      const payload = JSON.parse(atob(token?.split('.')[1] || ''));
+      const userId = payload.userId; // Use userId claim, not sub (which is username)
+      
+      const response = await fetch(`${API_BASE_URL}/surprise-boxes/owned/${userId}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -236,9 +241,14 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   loadReceivedBoxes: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`${API_BASE_URL}/surprise-boxes/received`, {
+      const token = localStorage.getItem('token');
+      // Get user ID from token payload
+      const payload = JSON.parse(atob(token?.split('.')[1] || ''));
+      const userId = payload.userId; // Use userId claim, not sub (which is username)
+      
+      const response = await fetch(`${API_BASE_URL}/surprise-boxes/received/${userId}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
