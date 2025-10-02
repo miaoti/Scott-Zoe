@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 interface CountdownTimerProps {
-  targetDate: string;
+  targetDate: string | number[];
   className?: string;
   onExpire?: () => void;
   showSeconds?: boolean;
@@ -34,7 +34,35 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
   const [hasExpired, setHasExpired] = useState(false);
 
   const calculateTimeLeft = (): TimeLeft => {
-    const difference = new Date(targetDate).getTime() - new Date().getTime();
+    // Parse the target date properly
+    let targetTime: number;
+    
+    try {
+      // Handle array format from backend [year, month, day, hour, minute, second, nanosecond]
+      if (Array.isArray(targetDate)) {
+        const [year, month, day, hour = 0, minute = 0, second = 0] = targetDate as number[];
+        // Note: JavaScript months are 0-indexed, but backend sends 1-indexed
+        targetTime = new Date(year, month - 1, day, hour, minute, second).getTime();
+      } else {
+        // Handle string formats
+        const dateString = targetDate as string;
+        
+        // Handle ISO format with T and Z (e.g., "2025-10-02T11:50:49.491Z")
+        if (dateString.includes('T')) {
+          targetTime = new Date(dateString).getTime();
+        } else {
+          // Handle simple timestamp format (e.g., "2025-10-02 06:51:00")
+          // Replace space with T to make it ISO compatible
+          const isoString = dateString.replace(' ', 'T');
+          targetTime = new Date(isoString).getTime();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to parse target date:', targetDate, error);
+      targetTime = 0;
+    }
+    
+    const difference = targetTime - new Date().getTime();
     
     if (difference > 0) {
       return {

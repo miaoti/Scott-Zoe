@@ -69,11 +69,13 @@ public class SurpriseBoxService {
             box.setExpiresAt(LocalDateTime.now().plusHours(24));
         }
         
-        // Set immediate drop time and initialize intermittent dropping
+        // Set future drop time and initialize intermittent dropping
         LocalDateTime now = LocalDateTime.now();
-        box.setDropAt(now); // Drop immediately
-        box.setIsDropping(true); // Start in dropping phase
-        box.setNextDropTime(now.plusMinutes(box.getDropDurationMinutes())); // Next transition time
+        // Set dropAt to a future time (e.g., 1 minute from now) instead of immediate
+        LocalDateTime futureDropTime = now.plusMinutes(1);
+        box.setDropAt(futureDropTime);
+        box.setIsDropping(false); // Start in waiting phase, not dropping
+        box.setNextDropTime(futureDropTime.plusMinutes(box.getDropDurationMinutes())); // Next transition time
         
         return surpriseBoxRepository.save(box);
     }

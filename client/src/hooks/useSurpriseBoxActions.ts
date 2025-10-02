@@ -49,6 +49,10 @@ export const useSurpriseBoxActions = () => {
     return store.cancelBox(boxId);
   }, []);
 
+  const updateBox = useCallback((boxId: number, boxData: any) => {
+     return store.updateBox(boxId, boxData);
+   }, []);
+
   const loadPrizeHistory = useCallback(() => {
     store.loadPrizeHistory();
   }, []);
@@ -98,6 +102,7 @@ export const useSurpriseBoxActions = () => {
     approveBox,
     rejectBox,
     cancelBox,
+    updateBox,
     loadPrizeHistory,
     loadPrizeStats,
     clearNotifications,

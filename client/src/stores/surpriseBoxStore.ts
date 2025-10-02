@@ -103,6 +103,7 @@ interface SurpriseBoxState {
   approveCompletion: (boxId: number) => Promise<void>;
   rejectCompletion: (boxId: number, reason: string) => Promise<void>;
   cancelBox: (boxId: number) => Promise<void>;
+  updateBox: (boxId: number, boxData: any) => Promise<any>;
   
   // Prize history
   loadPrizeHistory: () => Promise<void>;
@@ -202,8 +203,12 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      // Don't manually refresh - WebSocket notification will handle it
-      // This prevents infinite refresh loops caused by multiple simultaneous data loads
+      // Manually refresh data after box creation since WebSocket doesn't handle BOX_CREATED events
+      await Promise.all([
+        get().loadOwnedBoxes(),
+        get().loadReceivedBoxes()
+      ]);
+      
       set({ showCreateForm: false });
     } catch (error: any) {
       set({ error: error.response?.data?.message || 'Failed to create surprise box' });
@@ -363,6 +368,47 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       await get().loadOwnedBoxes();
     } catch (error: any) {
       set({ error: error.response?.data?.message || 'Failed to cancel box' });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  
+  updateBox: async (boxId, boxData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
+      // Get user ID from token payload
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.userId;
+      
+      if (!userId) {
+        throw new Error('User information not found in token');
+      }
+      
+      // Add ownerId to the request
+      const requestData = {
+        ...boxData,
+        ownerId: userId
+      };
+      
+      const response = await axios.put(`${API_BASE_URL}/surprise-boxes/${boxId}`, requestData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Refresh data after box update
+      await Promise.all([
+        get().loadOwnedBoxes(),
+        get().loadReceivedBoxes()
+      ]);
+      
+      return response.data;
+    } catch (error: any) {
+      set({ error: error.response?.data?.message || 'Failed to update surprise box' });
+      throw error;
     } finally {
       set({ isLoading: false });
     }

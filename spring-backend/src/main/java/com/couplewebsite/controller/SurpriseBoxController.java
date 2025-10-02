@@ -66,6 +66,65 @@ public class SurpriseBoxController {
     }
     
     /**
+     * Update an existing surprise box (only owner can update)
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateBox(@PathVariable Long id, @Valid @RequestBody UpdateBoxRequest request) {
+        try {
+            SurpriseBox existingBox = surpriseBoxService.findById(id);
+            
+            // Verify owner
+            if (!existingBox.getOwner().getId().equals(request.getOwnerId())) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "You are not authorized to update this box.");
+                return ResponseEntity.status(403).body(error);
+            }
+            
+            // Only allow updates for CREATED status boxes
+            if (existingBox.getStatus() != SurpriseBox.BoxStatus.CREATED) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Box cannot be updated. Current status: " + existingBox.getStatus());
+                return ResponseEntity.status(400).body(error);
+            }
+            
+            // Update fields
+            existingBox.setPrizeName(request.getPrizeName());
+            existingBox.setPrizeDescription(request.getPrizeDescription());
+            existingBox.setPriceAmount(request.getPriceAmount());
+            existingBox.setTaskDescription(request.getTaskDescription());
+            existingBox.setExpirationMinutes(request.getExpirationMinutes());
+            existingBox.setUpdatedAt(LocalDateTime.now());
+            
+            if (request.getCompletionType() != null) {
+                SurpriseBox.CompletionType completionType = SurpriseBox.CompletionType.valueOf(request.getCompletionType().toUpperCase());
+                existingBox.setCompletionType(completionType);
+            }
+            
+            if (request.getCompletionCriteria() != null) {
+                existingBox.setCompletionCriteria(request.getCompletionCriteria());
+            }
+            
+            SurpriseBox updatedBox = surpriseBoxService.updateBox(existingBox);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Surprise box updated successfully");
+            response.put("box", createBoxResponse(updatedBox));
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(404).body(error);
+        } catch (Exception e) {
+            logger.error("Error updating surprise box", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Failed to update surprise box: " + e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
      * Get boxes owned by user
      */
     @GetMapping("/owned/{userId}")
@@ -386,5 +445,34 @@ public class SurpriseBoxController {
         public void setOwnerId(Long ownerId) { this.ownerId = ownerId; }
         public String getRejectionReason() { return rejectionReason; }
         public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
+    }
+    
+    public static class UpdateBoxRequest {
+        private Long ownerId;
+        private String prizeName;
+        private String prizeDescription;
+        private String completionType;
+        private String completionCriteria;
+        private BigDecimal priceAmount;
+        private String taskDescription;
+        private Integer expirationMinutes;
+        
+        // Getters and setters
+        public Long getOwnerId() { return ownerId; }
+        public void setOwnerId(Long ownerId) { this.ownerId = ownerId; }
+        public String getPrizeName() { return prizeName; }
+        public void setPrizeName(String prizeName) { this.prizeName = prizeName; }
+        public String getPrizeDescription() { return prizeDescription; }
+        public void setPrizeDescription(String prizeDescription) { this.prizeDescription = prizeDescription; }
+        public String getCompletionType() { return completionType; }
+        public void setCompletionType(String completionType) { this.completionType = completionType; }
+        public String getCompletionCriteria() { return completionCriteria; }
+        public void setCompletionCriteria(String completionCriteria) { this.completionCriteria = completionCriteria; }
+        public BigDecimal getPriceAmount() { return priceAmount; }
+        public void setPriceAmount(BigDecimal priceAmount) { this.priceAmount = priceAmount; }
+        public String getTaskDescription() { return taskDescription; }
+        public void setTaskDescription(String taskDescription) { this.taskDescription = taskDescription; }
+        public Integer getExpirationMinutes() { return expirationMinutes; }
+        public void setExpirationMinutes(Integer expirationMinutes) { this.expirationMinutes = expirationMinutes; }
     }
 }

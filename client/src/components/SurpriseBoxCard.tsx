@@ -13,10 +13,12 @@ import {
   Eye,
   AlertCircle,
   Trash2,
-  User
+  User,
+  Edit
 } from 'lucide-react';
 import { useSurpriseBoxStore, SurpriseBox } from '../stores/surpriseBoxStore';
 import CountdownTimer from './CountdownTimer';
+import { BoxEditForm } from './BoxEditForm';
 
 // Utility function to safely parse dates from different formats
 const parseDate = (dateInput: string | number[] | null | undefined): Date | null => {
@@ -74,6 +76,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   
   const [showOpenModal, setShowOpenModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [completionData, setCompletionData] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [showDetails, setShowDetails] = useState(false);
@@ -113,6 +116,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   const canOpen = !isOwner && box.status === 'DROPPED' && !box.isExpired;
   const canApprove = isOwner && box.status === 'WAITING_APPROVAL';
   const canCancel = isOwner && ['CREATED', 'DROPPED'].includes(box.status);
+  const canEdit = isOwner && box.status === 'CREATED';
 
   const handleOpen = async () => {
     if (!completionData.trim()) return;
@@ -309,6 +313,16 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
               </>
             )}
             
+            {canEdit && (
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="px-3 py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                title="Edit box"
+              >
+                <Edit className="w-4 h-4" />
+              </button>
+            )}
+            
             {canCancel && (
               <button
                 onClick={handleCancel}
@@ -496,6 +510,18 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Edit Box Modal */}
+      {showEditModal && (
+        <BoxEditForm
+          box={box}
+          onClose={() => setShowEditModal(false)}
+          onSuccess={() => {
+            setShowEditModal(false);
+            // Data will be refreshed automatically by the updateBox action
+          }}
+        />
+      )}
     </>
   );
 };

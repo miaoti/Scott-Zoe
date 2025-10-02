@@ -73,6 +73,7 @@ com\couplewebsite\config\WebConfig.class
 com\couplewebsite\repository\MemoryRepository.class
 com\couplewebsite\service\PrizeHistoryService.class
 com\couplewebsite\entity\Memory.class
+com\couplewebsite\controller\SurpriseBoxController$UpdateBoxRequest.class
 com\couplewebsite\controller\SurpriseBoxController.class
 com\couplewebsite\service\CategoryService.class
 com\couplewebsite\controller\WheelConfigurationController$ConfigureWheelRequest.class
