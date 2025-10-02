@@ -46,6 +46,7 @@ function Memories() {
     description: '',
     date: '',
     type: 'special_moment',
+    selectedPhotos: [],
   });
   const [submitting, setSubmitting] = useState(false);
   const [filter, setFilter] = useState<string>('all');
@@ -180,7 +181,7 @@ function Memories() {
       // Prepare data for backend - convert selectedPhotos to strings for CreateMemoryRequest
       const memoryData = {
         ...formData,
-        selectedPhotos: formData.selectedPhotos.map(id => id.toString())
+        selectedPhotos: (formData.selectedPhotos || []).map(id => id.toString())
       };
       console.log('📤 Prepared memory data for backend:', memoryData);
       
@@ -198,7 +199,7 @@ function Memories() {
       if (formData.type === 'event' && formData.selectedPhotos && formData.selectedPhotos.length > 0) {
         const memoryId = editingMemory ? editingMemory.id : memoryResponse.data.memory.id;
         // Send photo IDs as numbers (List<Long>) for the photo association endpoint
-        const photoIds = formData.selectedPhotos.map(id => Number(id));
+        const photoIds = (formData.selectedPhotos || []).map(id => Number(id));
         console.log('📸 Associating photos with memory:', { memoryId, photoIds });
         
         try {
