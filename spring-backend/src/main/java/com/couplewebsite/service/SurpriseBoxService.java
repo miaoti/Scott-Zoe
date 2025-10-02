@@ -4,6 +4,7 @@ import com.couplewebsite.entity.PrizeHistory;
 import com.couplewebsite.entity.SurpriseBox;
 import com.couplewebsite.entity.User;
 import com.couplewebsite.repository.SurpriseBoxRepository;
+import com.couplewebsite.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,9 @@ public class SurpriseBoxService {
 
     @Autowired
     private SurpriseBoxRepository surpriseBoxRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
     
     @Autowired
     private PrizeHistoryService prizeHistoryService;
@@ -251,13 +255,13 @@ public class SurpriseBoxService {
         }
         
         // Only allow claiming if box is dropped and not yet claimed
-        if (!box.getStatus().equals(BoxStatus.DROPPED)) {
+        if (!box.getStatus().equals(SurpriseBox.BoxStatus.DROPPED)) {
             throw new RuntimeException("Box cannot be claimed in current status: " + box.getStatus());
         }
         
         // Set claimed timestamp and update status
         box.setClaimedAt(LocalDateTime.now());
-        box.setStatus(BoxStatus.OPENED);
+        box.setStatus(SurpriseBox.BoxStatus.WAITING_APPROVAL);
         
         return surpriseBoxRepository.save(box);
     }

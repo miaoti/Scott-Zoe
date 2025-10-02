@@ -176,8 +176,7 @@ public class SurpriseBoxController {
     @GetMapping("/active/{userId}")
     public ResponseEntity<?> getActiveBox(@PathVariable Long userId) {
         try {
-            User owner = userService.findById(userId);
-            Optional<SurpriseBox> activeBox = surpriseBoxService.getActiveBoxByOwner(owner);
+            Optional<SurpriseBox> activeBox = surpriseBoxService.getActiveBoxByOwner(userId);
             
             if (activeBox.isPresent()) {
                 return ResponseEntity.ok(createBoxResponse(activeBox.get()));
@@ -367,12 +366,14 @@ public class SurpriseBoxController {
     }
     
     @PostMapping("/claim/{boxId}")
-    public ResponseEntity<SurpriseBoxResponse> claimBox(@PathVariable Long boxId, @RequestParam Long userId) {
+    public ResponseEntity<?> claimBox(@PathVariable Long boxId, @RequestParam Long userId) {
         try {
             SurpriseBox claimedBox = surpriseBoxService.claimBox(boxId, userId);
             return ResponseEntity.ok(createBoxResponse(claimedBox));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
         }
     }
     
