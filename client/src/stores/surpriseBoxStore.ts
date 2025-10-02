@@ -132,6 +132,19 @@ const getApiUrl = () => {
 const API_BASE_URL = `${getApiUrl()}/api`;
 const WS_URL = getApiUrl();
 
+// Debounce utility to prevent rapid successive calls
+const debounceMap = new Map<string, NodeJS.Timeout>();
+const debounce = (key: string, fn: () => void, delay: number = 1000) => {
+  if (debounceMap.has(key)) {
+    clearTimeout(debounceMap.get(key)!);
+  }
+  const timeoutId = setTimeout(() => {
+    fn();
+    debounceMap.delete(key);
+  }, delay);
+  debounceMap.set(key, timeoutId);
+};
+
 export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   // Initial state
   ownedBoxes: [],
@@ -162,19 +175,26 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
         throw new Error('No authentication token found');
       }
       
-      // Get user ID from token payload
+      // Get user info from token payload
       const payload = JSON.parse(atob(token.split('.')[1]));
       const userId = payload.userId; // Use userId claim, not sub (which is username)
+      const username = payload.sub; // Username is in sub claim
       
-      if (!userId) {
-        throw new Error('User ID not found in token');
+      if (!userId || !username) {
+        throw new Error('User information not found in token');
       }
+      
+      // Get the other user's ID (Scott's boxes go to Zoe, Zoe's boxes go to Scott)
+      const otherUserResponse = await axios.get(`${API_BASE_URL}/auth/other-user`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const recipientId = otherUserResponse.data.id;
       
       // Add ownerId and recipientId to the request
       const requestData = {
         ...boxData,
         ownerId: userId,
-        recipientId: userId // For now, using same user as both owner and recipient
+        recipientId: recipientId // Correct recipient - the other user
       };
       
       const response = await axios.post(`${API_BASE_URL}/surprise-boxes`, requestData, {
@@ -417,23 +437,23 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
         const { notifications } = get();
         set({ notifications: [notification, ...notifications] });
         
-        // Refresh relevant data based on notification type
+        // Refresh relevant data based on notification type with debouncing
         switch (notification.type) {
           case 'BOX_DROPPED':
-            get().loadReceivedBoxes();
-            get().loadActiveBox();
+            debounce('loadReceivedBoxes', () => get().loadReceivedBoxes(), 1000);
+            debounce('loadActiveBox', () => get().loadActiveBox(), 1000);
             break;
           case 'BOX_OPENED':
-            get().loadOwnedBoxes();
+            debounce('loadOwnedBoxes', () => get().loadOwnedBoxes(), 1000);
             break;
           case 'BOX_APPROVED':
-            get().loadPrizeHistory();
-            get().loadPrizeStats();
+            debounce('loadPrizeHistory', () => get().loadPrizeHistory(), 1000);
+            debounce('loadPrizeStats', () => get().loadPrizeStats(), 1000);
             break;
           case 'BOX_REJECTED':
           case 'BOX_EXPIRED':
           case 'BOX_CANCELLED':
-            get().loadOwnedBoxes();
+            debounce('loadOwnedBoxes', () => get().loadOwnedBoxes(), 1000);
             break;
         }
       });

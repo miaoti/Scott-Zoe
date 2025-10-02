@@ -18,6 +18,36 @@ import {
 import { useSurpriseBoxStore, SurpriseBox } from '../stores/surpriseBoxStore';
 import CountdownTimer from './CountdownTimer';
 
+// Utility function to safely parse dates from different formats
+const parseDate = (dateString: string | null | undefined): Date | null => {
+  if (!dateString) return null;
+  
+  try {
+    // Handle ISO format with T and Z (e.g., "2025-10-02T11:50:49.491Z")
+    if (dateString.includes('T')) {
+      return new Date(dateString);
+    }
+    
+    // Handle simple timestamp format (e.g., "2025-10-02 06:51:00")
+    // Replace space with T to make it ISO compatible
+    const isoString = dateString.replace(' ', 'T');
+    return new Date(isoString);
+  } catch (error) {
+    console.warn('Failed to parse date:', dateString, error);
+    return null;
+  }
+};
+
+// Utility function to format date safely
+const formatDate = (dateString: string | null | undefined, includeTime = false): string => {
+  const date = parseDate(dateString);
+  if (!date || isNaN(date.getTime())) {
+    return 'Invalid Date';
+  }
+  
+  return includeTime ? date.toLocaleString() : date.toLocaleDateString();
+};
+
 interface SurpriseBoxCardProps {
   box: SurpriseBox;
   isOwner?: boolean;
@@ -117,10 +147,12 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   };
 
   const CompletionIcon = getCompletionIcon(box.completionType);
-  const isExpired = box.isExpired || new Date(box.expiresAt) < new Date();
-  const isDropped = box.status === 'DROPPED';
-  const timeUntilDrop = new Date(box.dropAt).getTime() - new Date().getTime();
-  const timeUntilExpiry = new Date(box.expiresAt).getTime() - new Date().getTime();
+  const expiresDate = parseDate(box.expiresAt);
+  const dropDate = parseDate(box.dropAt);
+  const isExpired = box.isExpired || (expiresDate && expiresDate < new Date()) || false;
+  const isDropping = box.isDropping;
+  const timeUntilDrop = dropDate ? dropDate.getTime() - new Date().getTime() : 0;
+  const timeUntilExpiry = expiresDate ? expiresDate.getTime() - new Date().getTime() : 0;
 
   return (
     <>
@@ -204,7 +236,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
             {isExpired && (
               <div className="flex items-center text-sm text-red-600">
                 <X className="w-4 h-4 mr-2" />
-                <span>Expired on {box.expiresAt && !isNaN(new Date(box.expiresAt).getTime()) ? new Date(box.expiresAt).toLocaleDateString() : 'Invalid Date'}</span>
+                <span>Expired on {formatDate(box.expiresAt)}</span>
               </div>
             )}
           </div>
@@ -217,7 +249,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
             </div>
             <div className="flex items-center">
               <Calendar className="w-4 h-4 mr-1" />
-              <span>{box.dropAt && !isNaN(new Date(box.dropAt).getTime()) ? new Date(box.dropAt).toLocaleDateString() : 'Invalid Date'}</span>
+              <span>{formatDate(box.dropAt)}</span>
             </div>
           </div>
 
@@ -298,22 +330,22 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                 <div className="grid grid-cols-2 gap-4 text-xs text-gray-500">
                   <div>
                     <span className="font-medium">Created:</span>
-                    <p>{box.dropAt && !isNaN(new Date(box.dropAt).getTime()) ? new Date(box.dropAt).toLocaleString() : 'Invalid Date'}</p>
+                    <p>{formatDate(box.createdAt, true)}</p>
                   </div>
                   <div>
                     <span className="font-medium">Expires:</span>
-                    <p>{box.expiresAt && !isNaN(new Date(box.expiresAt).getTime()) ? new Date(box.expiresAt).toLocaleString() : 'Invalid Date'}</p>
+                    <p>{formatDate(box.expiresAt, true)}</p>
                   </div>
                   {box.droppedAt && (
                     <div>
                       <span className="font-medium">Dropped:</span>
-                      <p>{box.droppedAt && !isNaN(new Date(box.droppedAt).getTime()) ? new Date(box.droppedAt).toLocaleString() : 'Invalid Date'}</p>
+                      <p>{formatDate(box.droppedAt, true)}</p>
                     </div>
                   )}
                   {box.openedAt && (
                     <div>
                       <span className="font-medium">Opened:</span>
-                      <p>{box.openedAt && !isNaN(new Date(box.openedAt).getTime()) ? new Date(box.openedAt).toLocaleString() : 'Invalid Date'}</p>
+                      <p>{formatDate(box.openedAt, true)}</p>
                     </div>
                   )}
                 </div>

@@ -7,6 +7,36 @@ import LoveCounter from './LoveCounter';
 import PartnerLoveCard from './PartnerLoveCard';
 import { useSurpriseBoxStore } from '../stores/surpriseBoxStore';
 
+// Utility function to safely parse dates from different formats
+const parseDate = (dateString: string | null | undefined): Date | null => {
+  if (!dateString) return null;
+  
+  try {
+    // Handle ISO format with T and Z (e.g., "2025-10-02T11:50:49.491Z")
+    if (dateString.includes('T')) {
+      return new Date(dateString);
+    }
+    
+    // Handle simple timestamp format (e.g., "2025-10-02 06:51:00")
+    // Replace space with T to make it ISO compatible
+    const isoString = dateString.replace(' ', 'T');
+    return new Date(isoString);
+  } catch (error) {
+    console.warn('Failed to parse date:', dateString, error);
+    return null;
+  }
+};
+
+// Utility function to format date safely
+const formatDate = (dateString: string | null | undefined, options?: Intl.DateTimeFormatOptions): string => {
+  const date = parseDate(dateString);
+  if (!date || isNaN(date.getTime())) {
+    return 'Invalid Date';
+  }
+  
+  return date.toLocaleDateString('en-US', options || { month: 'short', day: 'numeric' });
+};
+
 interface CatPosition {
   id: string;
   top: string;
@@ -459,7 +489,12 @@ function Dashboard() {
             <div className="space-y-2">
               <div className="text-sm font-medium text-apple-secondary-label mb-2">Recent Activity:</div>
               {[...ownedBoxes, ...receivedBoxes]
-                .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+                .sort((a, b) => {
+                  const dateA = parseDate(a.updatedAt);
+                  const dateB = parseDate(b.updatedAt);
+                  if (!dateA || !dateB) return 0;
+                  return dateB.getTime() - dateA.getTime();
+                })
                 .slice(0, 3)
                 .map((box, index) => (
                   <div key={box.id} className="flex items-center justify-between py-2 px-3 bg-white/50 rounded-lg">
@@ -481,7 +516,7 @@ function Dashboard() {
                       </div>
                     </div>
                     <div className="text-xs text-apple-quaternary-label">
-                      {new Date(box.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      {formatDate(box.updatedAt)}
                     </div>
                   </div>
                 ))
