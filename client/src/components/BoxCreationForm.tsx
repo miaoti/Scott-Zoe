@@ -16,7 +16,6 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     prizeName: '',
     prizeDescription: '',
     completionType: 'PHOTO' as CompletionType,
-    dropAt: '',
     expiresAt: ''
   });
   
@@ -57,23 +56,14 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
       newErrors.prizeName = 'Prize name is required';
     }
     
-    if (!formData.dropAt) {
-      newErrors.dropAt = 'Drop time is required';
-    } else {
-      const dropTime = new Date(formData.dropAt);
-      const now = new Date();
-      if (dropTime <= now) {
-        newErrors.dropAt = 'Drop time must be in the future';
-      }
-    }
-    
     if (!formData.expiresAt) {
       newErrors.expiresAt = 'Expiration time is required';
-    } else if (formData.dropAt) {
-      const dropTime = new Date(formData.dropAt);
+    } else {
       const expireTime = new Date(formData.expiresAt);
-      if (expireTime <= dropTime) {
-        newErrors.expiresAt = 'Expiration time must be after drop time';
+      const now = new Date();
+      now.setHours(now.getHours() + 1); // Minimum 1 hour from now
+      if (expireTime <= now) {
+        newErrors.expiresAt = 'Expiration time must be at least 1 hour from now';
       }
     }
     
@@ -89,7 +79,13 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     }
     
     try {
-      await createBox(formData);
+      const boxData = {
+        prizeName: formData.prizeName,
+        prizeDescription: formData.prizeDescription,
+        completionType: formData.completionType,
+        expiresAt: formData.expiresAt
+      };
+      await createBox(boxData);
       onClose();
     } catch (error) {
       // Error is handled by the store
@@ -124,10 +120,9 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
   };
 
   const getMinExpirationDateTime = () => {
-    if (!formData.dropAt) return getMinDateTime();
-    const dropTime = new Date(formData.dropAt);
-    dropTime.setHours(dropTime.getHours() + 1); // Minimum 1 hour after drop
-    return dropTime.toISOString().slice(0, 16);
+    const now = new Date();
+    now.setHours(now.getHours() + 1); // Minimum 1 hour from now
+    return now.toISOString().slice(0, 16);
   };
 
   return (
@@ -309,26 +304,12 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">When should it drop?</h3>
                     
                     <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          <Calendar className="w-4 h-4 inline mr-1" />
-                          Drop Time *
-                        </label>
-                        <input
-                          type="datetime-local"
-                          value={formData.dropAt}
-                          onChange={(e) => handleInputChange('dropAt', e.target.value)}
-                          min={getMinDateTime()}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
-                            errors.dropAt ? 'border-red-300' : 'border-gray-300'
-                          }`}
-                        />
-                        {errors.dropAt && (
-                          <p className="mt-1 text-sm text-red-600 flex items-center space-x-1">
-                            <AlertCircle className="w-4 h-4" />
-                            <span>{errors.dropAt}</span>
-                          </p>
-                        )}
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <p className="text-sm text-blue-700 font-medium">Drop Time: Random (5 minutes - 2 hours after creation)</p>
+                        </div>
+                        <p className="text-xs text-blue-600 mt-1">The surprise box will be dropped at a random time to make it more exciting!</p>
                       </div>
                       
                       <div>
