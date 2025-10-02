@@ -35,6 +35,11 @@ function Memories() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [memories, setMemories] = useState<Memory[]>([]);
   const [showForm, setShowForm] = useState(false);
+  
+  // Debug log for showForm state changes
+  useEffect(() => {
+    console.log('🔄 showForm state changed:', showForm);
+  }, [showForm]);
   const [editingMemory, setEditingMemory] = useState<Memory | null>(null);
   const [formData, setFormData] = useState<MemoryFormData>({
     title: '',
@@ -155,37 +160,50 @@ function Memories() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log('🚀 handleSubmit called', { event: e, formData, submitting });
     e.preventDefault();
-    if (submitting) return;
+    if (submitting) {
+      console.log('⚠️ Already submitting, returning early');
+      return;
+    }
 
     // Check if description is empty and show validation message
     if (!formData.description.trim()) {
+      console.log('❌ Validation failed: empty description');
       alert('Please enter a description for this memory.');
       return;
     }
 
+    console.log('✅ Starting memory submission...');
     setSubmitting(true);
     try {
       let memoryResponse;
       if (editingMemory) {
+        console.log('📝 Updating existing memory:', editingMemory.id);
         memoryResponse = await api.put(`/api/memories/${editingMemory.id}`, formData);
       } else {
+        console.log('➕ Creating new memory with data:', formData);
         memoryResponse = await api.post('/api/memories', formData);
       }
+      console.log('✅ Memory API response:', memoryResponse);
       
       // Handle photo associations for event type memories
       if (formData.type === 'event' && formData.selectedPhotos && formData.selectedPhotos.length > 0) {
         const memoryId = editingMemory ? editingMemory.id : memoryResponse.data.memory.id;
+        console.log('📸 Associating photos with memory:', { memoryId, photos: formData.selectedPhotos });
         await api.post(`/api/memories/${memoryId}/photos`, formData.selectedPhotos);
       }
       
+      console.log('🔄 Refreshing memories list...');
       await fetchMemories();
+      console.log('✅ Memory created/updated successfully!');
       resetForm();
     } catch (error) {
-      console.error('Error saving memory:', error);
+      console.error('❌ Error saving memory:', error);
       alert('Error saving memory. Please try again.');
     } finally {
       setSubmitting(false);
+      console.log('🏁 Form submission completed');
     }
   };
 
@@ -350,7 +368,10 @@ function Memories() {
         </div>
         
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            console.log('🔘 "Add Memory" button clicked');
+            setShowForm(true);
+          }}
           className="flex items-center space-x-2 romantic-gradient text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity"
         >
           <Plus className="h-5 w-5" />
@@ -652,7 +673,10 @@ function Memories() {
               Start documenting your special moments and milestones!
             </p>
             <button
-              onClick={() => setShowForm(true)}
+              onClick={() => {
+                console.log('🔘 "Add First Memory" button clicked');
+                setShowForm(true);
+              }}
               className="inline-flex items-center px-6 py-3 romantic-gradient text-white rounded-lg hover:opacity-90 transition-opacity"
             >
               <Plus className="h-5 w-5 mr-2" />
@@ -995,24 +1019,27 @@ function Memories() {
                       </div>
                   )}
                 </div>
+                <div className="flex space-x-3 pt-4 md:pt-6 border-t border-gray-100 bg-gray-50">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="flex-1 px-4 md:px-6 py-2 md:py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm md:text-base"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    onClick={(e) => {
+                      console.log('🔘 Submit button clicked');
+                      console.log('📝 Form data at submit:', formData);
+                    }}
+                    className="flex-1 px-4 md:px-6 py-2 md:py-3 romantic-gradient text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm md:text-base"
+                  >
+                    {submitting ? (editingMemory ? 'Updating...' : 'Creating...') : (editingMemory ? 'Update Memory' : 'Create Memory')}
+                  </button>
+                </div>
               </form>
-            </div>
-            
-            <div className="flex space-x-3 p-4 md:p-6 border-t border-gray-100 bg-gray-50">
-              <button
-                type="button"
-                onClick={resetForm}
-                className="flex-1 px-4 md:px-6 py-2 md:py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm md:text-base"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="flex-1 px-4 md:px-6 py-2 md:py-3 romantic-gradient text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm md:text-base"
-              >
-                {submitting ? (editingMemory ? 'Updating...' : 'Creating...') : (editingMemory ? 'Update Memory' : 'Create Memory')}
-              </button>
             </div>
           </div>
         </div>
