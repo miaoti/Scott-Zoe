@@ -202,8 +202,8 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      // Refresh owned boxes
-      await get().loadOwnedBoxes();
+      // Don't manually refresh - WebSocket notification will handle it
+      // This prevents infinite refresh loops caused by multiple simultaneous data loads
       set({ showCreateForm: false });
     } catch (error: any) {
       set({ error: error.response?.data?.message || 'Failed to create surprise box' });
