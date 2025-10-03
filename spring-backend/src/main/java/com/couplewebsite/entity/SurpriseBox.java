@@ -82,7 +82,8 @@ public class SurpriseBox {
     @Column(name = "prize_description", columnDefinition = "TEXT")
     private String prizeDescription;
     
-
+    @Column(name = "completion_data", columnDefinition = "TEXT")
+    private String completionData;
     
     @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
@@ -272,7 +273,13 @@ public class SurpriseBox {
         this.prizeDescription = prizeDescription;
     }
     
-
+    public String getCompletionData() {
+        return completionData;
+    }
+    
+    public void setCompletionData(String completionData) {
+        this.completionData = completionData;
+    }
     
     public String getRejectionReason() {
         return rejectionReason;
