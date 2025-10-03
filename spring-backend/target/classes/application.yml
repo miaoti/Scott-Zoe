@@ -110,9 +110,7 @@ spring:
 
   datasource:
     # Use PostgreSQL for Railway deployment
-    url: jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:railway}
-    username: ${PGUSER:postgres}
-    password: ${PGPASSWORD:}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/railway}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 15
