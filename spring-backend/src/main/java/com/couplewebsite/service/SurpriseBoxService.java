@@ -205,10 +205,7 @@ public class SurpriseBoxService {
             throw new RuntimeException("You are not authorized to approve this box.");
         }
         
-        // Check if box is expired
-        if (box.isExpired()) {
-            throw new RuntimeException("This box has expired and cannot be approved");
-        }
+        // Removed expiration check - allow approval regardless of expiration status
         
         if (box.getStatus() != SurpriseBox.BoxStatus.WAITING_APPROVAL) {
             throw new RuntimeException("Box is not waiting for approval. Current status: " + box.getStatus());
@@ -447,11 +444,7 @@ public class SurpriseBoxService {
             throw new RuntimeException("Only the recipient can claim this box");
         }
         
-        // Check if box is expired
-        if (box.isExpired()) {
-            logger.warn("claimBox: Box {} is expired and cannot be claimed", boxId);
-            throw new RuntimeException("This box has expired and cannot be claimed");
-        }
+        // Removed expiration check - claimed boxes should be saved as history regardless of expiration
         
         // Only allow final claiming if box has been approved (status should be APPROVED)
         if (!box.getStatus().equals(SurpriseBox.BoxStatus.APPROVED)) {
