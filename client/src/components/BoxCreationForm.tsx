@@ -87,6 +87,11 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Only allow form submission on step 2
+    if (step !== 2) {
+      return;
+    }
+    
     if (!validateForm()) {
       return;
     }
@@ -109,7 +114,11 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     }
   };
 
-  const nextStep = () => {
+  const nextStep = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault(); // Prevent form submission
+    }
+    
     if (step === 1) {
       const stepErrors: Record<string, string> = {};
       
@@ -139,6 +148,13 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
 
   const prevStep = () => {
     setStep(step - 1);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && step === 1) {
+      e.preventDefault();
+      nextStep();
+    }
   };
 
 
@@ -204,7 +220,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
           <div className="p-6">
             <AnimatePresence mode="wait">
               {/* Step 1: Prize Details */}
@@ -524,7 +540,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
               {step < 2 ? (
                 <button
                   type="button"
-                  onClick={nextStep}
+                  onClick={(e) => nextStep(e)}
                   className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
                 >
                   Next
