@@ -18,7 +18,8 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     completionType: 'PHOTO' as CompletionType,
     expiresAt: '',
     taskDescription: '',
-    priceAmount: 0
+    priceAmount: 0,
+    dropDelayMinutes: 60 // Default 1 hour (60 minutes)
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -82,6 +83,12 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
       newErrors.priceAmount = 'Price cannot be negative';
     } else if (formData.priceAmount === 0) {
       newErrors.priceAmount = 'Prize price is required';
+    }
+    
+    if (!formData.dropDelayMinutes || formData.dropDelayMinutes < 6) {
+      newErrors.dropDelayMinutes = 'Drop delay must be at least 6 minutes (0.1 hours)';
+    } else if (formData.dropDelayMinutes > 10080) {
+      newErrors.dropDelayMinutes = 'Drop delay cannot exceed 168 hours (1 week)';
     }
     
     setErrors(newErrors);
@@ -366,6 +373,33 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
                       )}
                       <p className="mt-1 text-sm text-gray-500">
                         The box will drop randomly and expire if not claimed by this time
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <Timer className="w-4 h-4 inline mr-1" />
+                        Drop Delay (Hours) *
+                      </label>
+                      <input
+                        type="number"
+                        step="0.5"
+                        min="0.1"
+                        max="168"
+                        value={formData.dropDelayMinutes / 60}
+                        onChange={(e) => handleInputChange('dropDelayMinutes', parseFloat(e.target.value) * 60 || 60)}
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                          errors.dropDelayMinutes ? 'border-red-300' : 'border-gray-300'
+                        }`}
+                      />
+                      {errors.dropDelayMinutes && (
+                        <p className="mt-1 text-sm text-red-600 flex items-center space-x-1">
+                          <AlertCircle className="w-4 h-4" />
+                          <span>{errors.dropDelayMinutes}</span>
+                        </p>
+                      )}
+                      <p className="mt-1 text-sm text-gray-500">
+                        How many hours from now should the box become available to the recipient?
                       </p>
                     </div>
                   </div>

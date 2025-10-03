@@ -18,6 +18,7 @@ com\couplewebsite\controller\SettingsController$SetDateRequest.class
 com\couplewebsite\repository\WheelConfigurationRepository.class
 com\couplewebsite\repository\EarningsRepository.class
 com\couplewebsite\repository\PrizeHistoryRepository.class
+com\couplewebsite\config\DateConfig$LocalDateTimeSerializer.class
 com\couplewebsite\controller\CategoryController$CreateCategoryRequest.class
 com\couplewebsite\config\MimeTypeConfig$1.class
 com\couplewebsite\security\JwtUtil.class

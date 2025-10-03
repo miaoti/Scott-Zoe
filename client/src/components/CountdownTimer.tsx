@@ -52,8 +52,8 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
           targetTime = new Date(dateString).getTime();
         } else {
           // Handle simple timestamp format (e.g., "2025-10-02 06:51:00")
-          // Replace space with T to make it ISO compatible
-          const isoString = dateString.replace(' ', 'T');
+          // Treat as UTC by appending Z to ensure consistent timezone handling
+          const isoString = dateString.replace(' ', 'T') + 'Z';
           targetTime = new Date(isoString).getTime();
         }
       }

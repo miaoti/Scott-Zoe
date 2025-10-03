@@ -215,7 +215,8 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       // Manually refresh data after box creation since WebSocket doesn't handle BOX_CREATED events
       await Promise.all([
         get().loadOwnedBoxes(),
-        get().loadReceivedBoxes()
+        get().loadReceivedBoxes(),
+        get().loadActiveBox()
       ]);
       
       set({ showCreateForm: false });
@@ -289,15 +290,26 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       const payload = JSON.parse(atob(token?.split('.')[1] || ''));
       const userId = payload.userId; // Use userId claim, not sub (which is username)
       
-      const response = await axios.get(`${API_BASE_URL}/surprise-boxes/active/${userId}`, {
+      // First check if user has an active box using the has-active endpoint
+      const hasActiveResponse = await axios.get(`${API_BASE_URL}/surprise-boxes/has-active/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      // Check if response contains a valid box or just a message
-      if (response.data && response.data.id && response.data.owner && response.data.recipient) {
-        set({ activeBox: response.data });
+      if (hasActiveResponse.data.hasActiveBox) {
+        // User has an active box, now get the actual box data
+        const response = await axios.get(`${API_BASE_URL}/surprise-boxes/active/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        // Check if response contains a valid box or just a message
+        if (response.data && response.data.id && response.data.owner && response.data.recipient) {
+          set({ activeBox: response.data });
+        } else {
+          // Fallback: user has active box but couldn't get data, set a placeholder
+          set({ activeBox: { hasActive: true } });
+        }
       } else {
-        // No active box found or invalid response structure
+        // No active box found
         set({ activeBox: null });
       }
     } catch (error: any) {
@@ -495,7 +507,21 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${API_BASE_URL}/surprise-boxes/${boxId}/approve`, {}, {
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
+      // Get user ID from token payload
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.userId;
+      
+      if (!userId) {
+        throw new Error('User information not found in token');
+      }
+      
+      await axios.post(`${API_BASE_URL}/surprise-boxes/${boxId}/approve`, {
+        ownerId: userId
+      }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -516,8 +542,23 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
+      // Get user ID from token payload
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.userId;
+      
+      if (!userId) {
+        throw new Error('User information not found in token');
+      }
+      
       await axios.post(`${API_BASE_URL}/surprise-boxes/${boxId}/reject`, 
-        { reason },
+        { 
+          ownerId: userId,
+          rejectionReason: reason 
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       

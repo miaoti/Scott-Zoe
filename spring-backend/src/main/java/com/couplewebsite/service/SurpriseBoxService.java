@@ -43,6 +43,17 @@ public class SurpriseBoxService {
                                 String prizeDescription, SurpriseBox.CompletionType completionType, 
                                 String expiresAt, BigDecimal priceAmount, 
                                 String taskDescription) {
+        return createBox(ownerId, recipientId, prizeName, prizeDescription, completionType, 
+                        expiresAt, priceAmount, taskDescription, null);
+    }
+    
+    /**
+     * Create a new surprise box with custom drop delay
+     */
+    public SurpriseBox createBox(Long ownerId, Long recipientId, String prizeName, 
+                                String prizeDescription, SurpriseBox.CompletionType completionType, 
+                                String expiresAt, BigDecimal priceAmount, 
+                                String taskDescription, Integer dropDelayMinutes) {
         
         // Check if owner already has an active box
         User owner = userService.findById(ownerId);
@@ -80,8 +91,14 @@ public class SurpriseBoxService {
         
         // Set future drop time and initialize intermittent dropping
         LocalDateTime now = LocalDateTime.now();
-        // TEMPORARY: Set dropAt to 20 seconds from now for testing
-        LocalDateTime futureDropTime = now.plusSeconds(20);
+        
+        // Calculate drop time based on dropDelayMinutes parameter (required)
+        if (dropDelayMinutes == null || dropDelayMinutes <= 0) {
+            throw new RuntimeException("Drop delay minutes must be provided and greater than 0");
+        }
+        
+        LocalDateTime futureDropTime = now.plusMinutes(dropDelayMinutes);
+        
         box.setDropAt(futureDropTime);
         box.setIsDropping(false); // Start in waiting phase, not dropping
         

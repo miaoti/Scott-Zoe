@@ -1,9 +1,12 @@
 package com.couplewebsite.config;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +15,8 @@ import org.springframework.context.annotation.Primary;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 @Configuration
@@ -25,6 +30,7 @@ public class DateConfig {
         
         SimpleModule module = new SimpleModule();
         module.addDeserializer(LocalDate.class, new LocalDateDeserializer());
+        module.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer());
         mapper.registerModule(module);
         
         return mapper;
@@ -42,6 +48,20 @@ public class DateConfig {
             
             // Parse the date string directly without timezone conversion
             return LocalDate.parse(dateString, FORMATTER);
+        }
+    }
+    
+    public static class LocalDateTimeSerializer extends JsonSerializer<LocalDateTime> {
+        @Override
+        public void serialize(LocalDateTime value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            if (value == null) {
+                gen.writeNull();
+                return;
+            }
+            
+            // Convert LocalDateTime to UTC and format as ISO string with Z suffix
+            String utcString = value.atOffset(ZoneOffset.UTC).toString();
+            gen.writeString(utcString);
         }
     }
 }
