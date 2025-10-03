@@ -30,9 +30,9 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     boolean existsByNameIgnoreCase(@Param("name") String name);
     
     /**
-     * Find category by ID with photos
+     * Find category by ID with photos (excluding deleted photos)
      */
-    @Query("SELECT c FROM Category c LEFT JOIN FETCH c.photos p LEFT JOIN FETCH p.uploader WHERE c.id = :id")
+    @Query("SELECT c FROM Category c LEFT JOIN FETCH c.photos p LEFT JOIN FETCH p.uploader WHERE c.id = :id AND (p.isDeleted = false OR p.isDeleted IS NULL)")
     Optional<Category> findByIdWithPhotos(@Param("id") Long id);
     
     /**
