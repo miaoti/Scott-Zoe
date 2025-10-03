@@ -199,44 +199,6 @@ public class CategoryController {
     }
     
     /**
-     * Debug endpoint to check photos and category relationships
-     */
-    @GetMapping("/debug-photos")
-    public ResponseEntity<?> debugPhotos() {
-        try {
-            List<Photo> allPhotos = photoService.getAllPhotos();
-            List<Category> allCategories = categoryService.getAllCategories();
-            
-            long totalPhotos = allPhotos.size();
-            long activePhotos = allPhotos.stream().filter(p -> !p.getIsDeleted()).count();
-            long deletedPhotos = allPhotos.stream().filter(Photo::getIsDeleted).count();
-            
-            // Check photos for category 2
-            long photosInCategory2 = allPhotos.stream()
-                .filter(p -> !p.getIsDeleted())
-                .filter(p -> p.getCategories().stream().anyMatch(c -> c.getId().equals(2L)))
-                .count();
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("totalPhotos", totalPhotos);
-            response.put("activePhotos", activePhotos);
-            response.put("deletedPhotos", deletedPhotos);
-            response.put("totalCategories", allCategories.size());
-            response.put("photosInCategory2", photosInCategory2);
-            
-            logger.info("Debug photos: Total={}, Active={}, Deleted={}, InCategory2={}", 
-                totalPhotos, activePhotos, deletedPhotos, photosInCategory2);
-            
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            logger.error("Error in debug photos endpoint", e);
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Error: " + e.getMessage());
-            return ResponseEntity.status(500).body(error);
-        }
-    }
-    
-    /**
      * Debug endpoint to check raw categories
      */
     @GetMapping("/admin/debug")

@@ -243,6 +243,11 @@ public class PhotoController {
     
     private Map<String, Object> createPhotoResponseWithStats(Photo photo) {
         Map<String, Object> response = createPhotoResponse(photo);
+        response.put("path", photo.getPath());
+        response.put("size", photo.getSize());
+        response.put("mimeType", photo.getMimeType());
+        response.put("updatedAt", photo.getUpdatedAt());
+        response.put("deletedAt", photo.getDeletedAt());
         response.put("uploader", photo.getUploader() != null ? 
                 Map.of("name", photo.getUploader().getName()) : null);
         response.put("categories", photo.getCategories().stream()
