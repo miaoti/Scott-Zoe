@@ -248,16 +248,16 @@ public class SurpriseBoxService {
      */
     public Optional<SurpriseBox> getActiveBoxByOwner(Long userId) {
         User user = userService.findById(userId);
-        // Only return active boxes for recipients (claimed boxes), not for creators
-        return surpriseBoxRepository.findActiveBoxByRecipient(user);
+        // Return active boxes for owners (created boxes that are not yet claimed/expired)
+        return surpriseBoxRepository.findActiveBoxByOwner(user);
     }
     
     /**
      * Check if user has active box
      */
     public boolean hasActiveBox(User owner) {
-        // Only check for active boxes as recipient (claimed boxes), not as creator
-        return surpriseBoxRepository.hasActiveBoxAsRecipient(owner);
+        // Check for active boxes as owner (created boxes that are not yet claimed/expired)
+        return surpriseBoxRepository.hasActiveBoxAsOwner(owner);
     }
 
     /**
@@ -282,7 +282,7 @@ public class SurpriseBoxService {
         
         // Set claimed timestamp and update status
         box.setClaimedAt(LocalDateTime.now());
-        box.setStatus(SurpriseBox.BoxStatus.WAITING_APPROVAL);
+        box.setStatus(SurpriseBox.BoxStatus.CLAIMED);
         
         return surpriseBoxRepository.save(box);
     }

@@ -171,7 +171,13 @@ const SurpriseBoxManager: React.FC = () => {
               
               <button
                 onClick={() => setShowCreateForm(true)}
-                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl"
+                disabled={!!activeBox}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 shadow-lg ${
+                  activeBox
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 hover:shadow-xl'
+                }`}
+                title={activeBox ? 'You already have an active box' : 'Create a new surprise box'}
               >
                 <Plus className="w-4 h-4" />
                 <span>Create Box</span>
@@ -314,7 +320,13 @@ const SurpriseBoxManager: React.FC = () => {
                           <p className="text-gray-500 mb-4">Create your first surprise box for your partner</p>
                           <button
                             onClick={() => setShowCreateForm(true)}
-                            className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
+                            disabled={!!activeBox}
+                            className={`px-6 py-2 rounded-lg transition-all duration-200 ${
+                              activeBox
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
+                            }`}
+                            title={activeBox ? 'You already have an active box' : 'Create a new surprise box'}
                           >
                             Create Box
                           </button>
