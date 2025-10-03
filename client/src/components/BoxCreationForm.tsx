@@ -17,7 +17,8 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     prizeDescription: '',
     completionType: 'PHOTO' as CompletionType,
     expiresAt: '',
-    taskDescription: ''
+    taskDescription: '',
+    priceAmount: 0
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -77,6 +78,12 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
       }
     }
     
+    if (formData.priceAmount < 0) {
+      newErrors.priceAmount = 'Price cannot be negative';
+    } else if (formData.priceAmount === 0) {
+      newErrors.priceAmount = 'Prize price is required';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -90,8 +97,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     
     try {
       const submitData = {
-        ...formData,
-        priceAmount: 0 // Default to 0 since payment is not required
+        ...formData
       };
       await createBox(submitData);
       onClose();
@@ -100,7 +106,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -236,6 +242,35 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
                           rows={3}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors resize-none"
                         />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Prize Price *
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={formData.priceAmount || ''}
+                            onChange={(e) => handleInputChange('priceAmount', parseFloat(e.target.value) || 0)}
+                            placeholder="0.00"
+                            className={`w-full pl-8 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                              errors.priceAmount ? 'border-red-300' : 'border-gray-300'
+                            }`}
+                          />
+                        </div>
+                        {errors.priceAmount && (
+                          <p className="mt-1 text-sm text-red-600 flex items-center space-x-1">
+                            <AlertCircle className="w-4 h-4" />
+                            <span>{errors.priceAmount}</span>
+                          </p>
+                        )}
+                        <p className="mt-1 text-sm text-gray-500">
+                          Recipients can pay this amount to claim the prize without completing the task
+                        </p>
                       </div>
 
 

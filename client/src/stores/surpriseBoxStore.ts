@@ -11,6 +11,7 @@ export interface SurpriseBox {
   status: 'CREATED' | 'DROPPED' | 'OPENED' | 'WAITING_APPROVAL' | 'CLAIMED' | 'EXPIRED';
   completionType: 'PHOTO' | 'TEXT' | 'LOCATION' | 'TIMER';
   completionData?: string;
+  priceAmount?: number;
   dropAt: string | number[];
   expiresAt: string | number[];
   droppedAt?: string | number[];
