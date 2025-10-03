@@ -7,7 +7,7 @@ interface BoxCreationFormProps {
   onClose: () => void;
 }
 
-type CompletionType = 'PHOTO' | 'TEXT' | 'LOCATION' | 'TIMER';
+type CompletionType = 'PHOTO' | 'TASK' | 'LOCATION' | 'TIME' | 'PAYMENT';
 
 const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
   const { createBox, isLoading } = useSurpriseBoxStore();
@@ -32,10 +32,10 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
       description: 'Recipient must take a specific photo to claim the prize'
     },
     {
-      type: 'TEXT' as CompletionType,
+      type: 'TASK' as CompletionType,
       icon: Type,
-      title: 'Text Response',
-      description: 'Recipient must provide a text answer or message'
+      title: 'Task Completion',
+      description: 'Recipient must complete a specific task'
     },
     {
       type: 'LOCATION' as CompletionType,
@@ -44,10 +44,16 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
       description: 'Recipient must visit a specific location'
     },
     {
-      type: 'TIMER' as CompletionType,
+      type: 'TIME' as CompletionType,
       icon: Timer,
       title: 'Time Challenge',
       description: 'Recipient must wait for a specific duration'
+    },
+    {
+      type: 'PAYMENT' as CompletionType,
+      icon: Timer,
+      title: 'Payment Required',
+      description: 'Recipient must make a payment to claim the prize'
     }
   ];
 

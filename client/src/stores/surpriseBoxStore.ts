@@ -7,7 +7,8 @@ export interface SurpriseBox {
   id: number;
   prizeName: string;
   prizeDescription?: string;
-  status: 'CREATED' | 'DROPPED' | 'WAITING_APPROVAL' | 'CLAIMED' | 'EXPIRED';
+  taskDescription?: string;
+  status: 'CREATED' | 'DROPPED' | 'OPENED' | 'WAITING_APPROVAL' | 'CLAIMED' | 'EXPIRED';
   completionType: 'PHOTO' | 'TEXT' | 'LOCATION' | 'TIMER';
   completionData?: string;
   dropAt: string | number[];
@@ -104,6 +105,7 @@ interface SurpriseBoxState {
   loadDroppingBoxes: (userId: number) => Promise<SurpriseBox[]>;
   claimBox: (boxId: number) => Promise<void>;
   openBox: (boxId: number, completionData: string) => Promise<void>;
+  completeBox: (boxId: number, completionData: string) => Promise<void>;
   approveCompletion: (boxId: number) => Promise<void>;
   rejectCompletion: (boxId: number, reason: string) => Promise<void>;
   cancelBox: (boxId: number) => Promise<void>;
@@ -402,8 +404,11 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const token = localStorage.getItem('token');
+      const payload = JSON.parse(atob(token?.split('.')[1] || ''));
+      const username = payload.sub;
+      
       await axios.post(`${API_BASE_URL}/surprise-boxes/${boxId}/open`, 
-        { completionData },
+        { username },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -414,6 +419,30 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       ]);
     } catch (error: any) {
       set({ error: error.response?.data?.message || 'Failed to open box' });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  
+  completeBox: async (boxId, completionData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const token = localStorage.getItem('token');
+      const payload = JSON.parse(atob(token?.split('.')[1] || ''));
+      const username = payload.sub;
+      
+      await axios.post(`${API_BASE_URL}/surprise-boxes/${boxId}/complete`, 
+        { username, completionData },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // Refresh boxes
+      await Promise.all([
+        get().loadReceivedBoxes(),
+        get().loadActiveBox()
+      ]);
+    } catch (error: any) {
+      set({ error: error.response?.data?.message || 'Failed to complete box' });
     } finally {
       set({ isLoading: false });
     }

@@ -238,13 +238,13 @@ public class SurpriseBoxController {
      * Open a box (recipient opens it)
      */
     @PostMapping("/{id}/open")
-    public ResponseEntity<?> openBox(@PathVariable Long id, @RequestBody Map<String, Long> request) {
+    public ResponseEntity<?> openBox(@PathVariable Long id, @RequestBody Map<String, String> request) {
         try {
-            Long recipientId = request.get("recipientId");
-            SurpriseBox box = surpriseBoxService.openBox(id, recipientId);
+            String username = request.get("username");
+            SurpriseBox box = surpriseBoxService.openBox(id, username);
             
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Box opened successfully. Waiting for owner approval.");
+            response.put("message", "Box opened successfully. Complete the task to proceed.");
             response.put("box", createBoxResponse(box));
             
             return ResponseEntity.ok(response);
@@ -255,6 +255,32 @@ public class SurpriseBoxController {
             return ResponseEntity.status(400).body(error);
         } catch (Exception e) {
             logger.error("Error opening box with ID: {}", id, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+
+    /**
+     * Complete a box (recipient completes the task)
+     */
+    @PostMapping("/{id}/complete")
+    public ResponseEntity<?> completeBox(@PathVariable Long id, @RequestBody CompleteBoxRequest request) {
+        try {
+            SurpriseBox box = surpriseBoxService.completeBox(id, request.getUsername(), request.getCompletionData());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Task completed successfully. Waiting for owner approval.");
+            response.put("box", createBoxResponse(box));
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(400).body(error);
+        } catch (Exception e) {
+            logger.error("Error completing box with ID: {}", id, e);
             Map<String, String> error = new HashMap<>();
             error.put("message", "Server error");
             return ResponseEntity.status(500).body(error);
@@ -522,5 +548,16 @@ public class SurpriseBoxController {
         public void setTaskDescription(String taskDescription) { this.taskDescription = taskDescription; }
         public Integer getExpirationMinutes() { return expirationMinutes; }
         public void setExpirationMinutes(Integer expirationMinutes) { this.expirationMinutes = expirationMinutes; }
+    }
+    
+    public static class CompleteBoxRequest {
+        private String username;
+        private String completionData;
+        
+        // Getters and setters
+        public String getUsername() { return username; }
+        public void setUsername(String username) { this.username = username; }
+        public String getCompletionData() { return completionData; }
+        public void setCompletionData(String completionData) { this.completionData = completionData; }
     }
 }

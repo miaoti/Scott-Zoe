@@ -14,7 +14,8 @@ import {
   AlertCircle,
   Trash2,
   User,
-  Edit
+  Edit,
+  DollarSign
 } from 'lucide-react';
 import { useSurpriseBoxStore, SurpriseBox } from '../stores/surpriseBoxStore';
 import CountdownTimer from './CountdownTimer';
@@ -68,6 +69,7 @@ interface SurpriseBoxCardProps {
 const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false }) => {
   const {
     openBox,
+    completeBox,
     approveCompletion,
     rejectCompletion,
     cancelBox,
@@ -77,6 +79,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   const [showOpenModal, setShowOpenModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [completionData, setCompletionData] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [showDetails, setShowDetails] = useState(false);
@@ -84,9 +87,10 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   const getCompletionIcon = (type: string) => {
     switch (type) {
       case 'PHOTO': return Camera;
-      case 'TEXT': return Type;
+      case 'TASK': return Type;
       case 'LOCATION': return MapPin;
-      case 'TIMER': return Timer;
+      case 'TIME': return Timer;
+      case 'PAYMENT': return DollarSign;
       default: return Gift;
     }
   };
@@ -95,6 +99,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
     switch (status) {
       case 'CREATED': return 'bg-blue-100 text-blue-800';
       case 'DROPPED': return 'bg-green-100 text-green-800';
+      case 'OPENED': return 'bg-indigo-100 text-indigo-800';
       case 'WAITING_APPROVAL': return 'bg-amber-100 text-amber-800';
       case 'CLAIMED': return 'bg-purple-100 text-purple-800';
       case 'EXPIRED': return 'bg-red-100 text-red-800';
@@ -106,6 +111,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
     switch (status) {
       case 'CREATED': return 'Scheduled';
       case 'DROPPED': return 'Available';
+      case 'OPENED': return 'Opened';
       case 'WAITING_APPROVAL': return 'Pending Approval';
       case 'CLAIMED': return 'Claimed';
       case 'EXPIRED': return 'Expired';
@@ -114,16 +120,26 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   };
 
   const canOpen = !isOwner && box.status === 'DROPPED' && !box.isExpired;
+  const canComplete = !isOwner && box.status === 'OPENED' && !box.isExpired;
   const canApprove = isOwner && box.status === 'WAITING_APPROVAL';
   const canCancel = isOwner && ['CREATED', 'DROPPED'].includes(box.status);
   const canEdit = isOwner && box.status === 'CREATED';
 
   const handleOpen = async () => {
+    try {
+      await openBox(box.id);
+      setShowOpenModal(false);
+    } catch (error) {
+      // Error handled by store
+    }
+  };
+
+  const handleComplete = async () => {
     if (!completionData.trim()) return;
     
     try {
-      await openBox(box.id, completionData);
-      setShowOpenModal(false);
+      await completeBox(box.id, completionData);
+      setShowCompleteModal(false);
       setCompletionData('');
     } catch (error) {
       // Error handled by store
@@ -179,6 +195,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
         className={`bg-white rounded-xl shadow-lg border-2 transition-all duration-200 overflow-hidden ${
           isExpired ? 'border-red-200' : 
           canOpen ? 'border-green-200 hover:border-green-300' :
+          canComplete ? 'border-indigo-200 hover:border-indigo-300' :
           canApprove ? 'border-amber-200 hover:border-amber-300' :
           'border-gray-200 hover:border-purple-300'
         }`}
@@ -187,6 +204,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
         <div className={`p-4 ${
           isExpired ? 'bg-red-50' :
           canOpen ? 'bg-green-50' :
+          canComplete ? 'bg-indigo-50' :
           canApprove ? 'bg-amber-50' :
           'bg-purple-50'
         }`}>
@@ -195,6 +213,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
               <div className={`p-2 rounded-lg ${
                 isExpired ? 'bg-red-200 text-red-700' :
                 canOpen ? 'bg-green-200 text-green-700' :
+                canComplete ? 'bg-indigo-200 text-indigo-700' :
                 canApprove ? 'bg-amber-200 text-amber-700' :
                 'bg-purple-200 text-purple-700'
               }`}>
@@ -267,6 +286,14 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
             </div>
           </div>
 
+          {/* Task description for opened boxes */}
+          {box.status === 'OPENED' && box.taskDescription && (
+            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 mb-4">
+              <p className="text-sm text-indigo-600 mb-1">Your Task:</p>
+              <p className="text-sm text-indigo-800">{box.taskDescription}</p>
+            </div>
+          )}
+
           {/* Completion data for waiting approval */}
           {box.status === 'WAITING_APPROVAL' && box.completionData && (
             <div className="bg-gray-50 rounded-lg p-3 mb-4">
@@ -287,11 +314,32 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
           <div className="flex items-center space-x-2">
             {canOpen && (
               <button
-                onClick={() => setShowOpenModal(true)}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 font-medium"
+                onClick={handleOpen}
+                disabled={isLoading}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 font-medium disabled:opacity-50"
               >
-                Open Box
+                {isLoading ? 'Opening...' : 'Open Box'}
               </button>
+            )}
+            
+            {canComplete && (
+              <>
+                {box.completionType === 'PAYMENT' ? (
+                  <button
+                    onClick={() => setShowCompleteModal(true)}
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 font-medium"
+                  >
+                    Pay with Money
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setShowCompleteModal(true)}
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 font-medium"
+                  >
+                    Complete Task
+                  </button>
+                )}
+              </>
             )}
             
             {canApprove && (
@@ -379,15 +427,15 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
         </AnimatePresence>
       </motion.div>
 
-      {/* Open Box Modal */}
+      {/* Complete Box Modal */}
       <AnimatePresence>
-        {showOpenModal && (
+        {showCompleteModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-            onClick={(e) => e.target === e.currentTarget && setShowOpenModal(false)}
+            onClick={(e) => e.target === e.currentTarget && setShowCompleteModal(false)}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -397,17 +445,32 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
             >
               <div className="p-6">
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <CompletionIcon className="w-6 h-6 text-green-600" />
+                  <div className={`p-2 rounded-lg ${
+                    box.completionType === 'PAYMENT' ? 'bg-yellow-100' : 'bg-indigo-100'
+                  }`}>
+                    <CompletionIcon className={`w-6 h-6 ${
+                      box.completionType === 'PAYMENT' ? 'text-yellow-600' : 'text-indigo-600'
+                    }`} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800">Open Surprise Box</h3>
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      {box.completionType === 'PAYMENT' ? 'Pay for Prize' : 'Complete Task'}
+                    </h3>
                     <p className="text-sm text-gray-600">{box.prizeName}</p>
                   </div>
                 </div>
                 
+                {/* Task Description */}
+                {box.taskDescription && (
+                  <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 className="text-sm font-semibold text-blue-800 mb-2">Task:</h4>
+                    <p className="text-sm text-blue-700">{box.taskDescription}</p>
+                  </div>
+                )}
+                
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {box.completionType === 'PAYMENT' && 'Confirm payment details:'}
                     {box.completionType === 'PHOTO' && 'Describe the photo you took:'}
                     {box.completionType === 'TEXT' && 'Enter your response:'}
                     {box.completionType === 'LOCATION' && 'Confirm your location:'}
@@ -418,30 +481,37 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                     value={completionData}
                     onChange={(e) => setCompletionData(e.target.value)}
                     placeholder={
+                      box.completionType === 'PAYMENT' ? 'Enter payment confirmation or receipt details...' :
                       box.completionType === 'PHOTO' ? 'Describe what you photographed...' :
-                      box.completionType === 'TEXT' ? 'Enter your answer...' :
+                      box.completionType === 'TASK' ? 'Enter your answer...' :
                       box.completionType === 'LOCATION' ? 'Confirm you are at the location...' :
-                      box.completionType === 'TIMER' ? 'Confirm you have completed the challenge...' :
+                      box.completionType === 'TIME' ? 'Confirm you have completed the challenge...' :
                       'Enter completion details...'
                     }
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent resize-none ${
+                      box.completionType === 'PAYMENT' ? 'focus:ring-yellow-500' : 'focus:ring-indigo-500'
+                    }`}
                   />
                 </div>
                 
                 <div className="flex items-center space-x-3">
                   <button
-                    onClick={() => setShowOpenModal(false)}
+                    onClick={() => setShowCompleteModal(false)}
                     className="flex-1 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
-                    onClick={handleOpen}
+                    onClick={handleComplete}
                     disabled={!completionData.trim() || isLoading}
-                    className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`flex-1 px-4 py-2 text-white rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      box.completionType === 'PAYMENT' 
+                        ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
+                        : 'bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600'
+                    }`}
                   >
-                    {isLoading ? 'Opening...' : 'Open Box'}
+                    {isLoading ? 'Submitting...' : (box.completionType === 'PAYMENT' ? 'Confirm Payment' : 'Submit Completion')}
                   </button>
                 </div>
               </div>

@@ -120,25 +120,41 @@ public class SurpriseBoxService {
     /**
      * Open a box (recipient opens it)
      */
-    public SurpriseBox openBox(Long boxId, Long recipientId) {
-        SurpriseBox box = findById(boxId);
-        
-        // Verify recipient
-        if (!box.getRecipient().getId().equals(recipientId)) {
-            throw new RuntimeException("You are not authorized to open this box.");
+    public SurpriseBox openBox(Long boxId, String username) {
+        SurpriseBox box = surpriseBoxRepository.findById(boxId)
+                .orElseThrow(() -> new RuntimeException("Box not found"));
+
+        if (!box.getRecipient().getUsername().equals(username)) {
+            throw new RuntimeException("You are not the recipient of this box");
         }
-        
+
         if (box.getStatus() != SurpriseBox.BoxStatus.DROPPED) {
-            throw new RuntimeException("Box cannot be opened. Current status: " + box.getStatus());
+            throw new RuntimeException("Box cannot be opened");
         }
-        
-        if (box.isExpired()) {
-            throw new RuntimeException("This box has expired and cannot be opened.");
-        }
-        
-        box.setStatus(SurpriseBox.BoxStatus.WAITING_APPROVAL);
+
+        box.setStatus(SurpriseBox.BoxStatus.OPENED);
         box.setOpenedAt(LocalDateTime.now());
-        
+        return surpriseBoxRepository.save(box);
+    }
+
+    /**
+     * Complete a box (recipient completes the task)
+     */
+    public SurpriseBox completeBox(Long boxId, String username, String completionData) {
+        SurpriseBox box = surpriseBoxRepository.findById(boxId)
+                .orElseThrow(() -> new RuntimeException("Box not found"));
+
+        if (!box.getRecipient().getUsername().equals(username)) {
+            throw new RuntimeException("You are not the recipient of this box");
+        }
+
+        if (box.getStatus() != SurpriseBox.BoxStatus.OPENED) {
+            throw new RuntimeException("Box must be opened before it can be completed");
+        }
+
+        box.setStatus(SurpriseBox.BoxStatus.WAITING_APPROVAL);
+        box.setCompletionData(completionData);
+        box.setCompletedAt(LocalDateTime.now());
         return surpriseBoxRepository.save(box);
     }
     

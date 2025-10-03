@@ -88,10 +88,12 @@ const PrizeHistory: React.FC<PrizeHistoryProps> = ({
         return 'bg-blue-100 text-blue-800';
       case 'location':
         return 'bg-green-100 text-green-800';
-      case 'timer':
+      case 'time':
         return 'bg-orange-100 text-orange-800';
-      case 'text':
+      case 'task':
         return 'bg-purple-100 text-purple-800';
+      case 'payment':
+        return 'bg-yellow-100 text-yellow-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -259,8 +261,9 @@ const PrizeHistory: React.FC<PrizeHistoryProps> = ({
                   <option value="all">All Types</option>
                   <option value="photo">Photo</option>
                   <option value="location">Location</option>
-                  <option value="timer">Timer</option>
-                  <option value="text">Text</option>
+                  <option value="time">Time</option>
+                  <option value="task">Task</option>
+                  <option value="payment">Payment</option>
                 </select>
               </div>
 
