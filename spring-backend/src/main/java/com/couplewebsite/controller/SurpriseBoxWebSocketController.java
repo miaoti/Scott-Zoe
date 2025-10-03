@@ -251,7 +251,7 @@ public class SurpriseBoxWebSocketController {
         boxInfo.put("status", box.getStatus().name());
         boxInfo.put("completionType", box.getCompletionType().name());
         boxInfo.put("dropAt", box.getDropAt());
-        boxInfo.put("expiresAt", box.getExpiresAt());
+        boxInfo.put("expiresAt", box.getCalculatedExpiresAt());
         boxInfo.put("isExpired", box.isExpired());
         
         if (box.getOwner() != null) {

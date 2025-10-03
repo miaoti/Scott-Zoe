@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -580,9 +581,14 @@ public class SurpriseBoxService {
      */
     public List<SurpriseBox> findExpiredBoxes() {
         LocalDateTime now = LocalDateTime.now();
-        return surpriseBoxRepository.findByStatusIn(
-            List.of(SurpriseBox.BoxStatus.DROPPED, SurpriseBox.BoxStatus.WAITING_APPROVAL))
-            .stream()
+        List<SurpriseBox> droppedBoxes = surpriseBoxRepository.findByStatusOrderByCreatedAtDesc(SurpriseBox.BoxStatus.DROPPED);
+        List<SurpriseBox> waitingApprovalBoxes = surpriseBoxRepository.findByStatusOrderByCreatedAtDesc(SurpriseBox.BoxStatus.WAITING_APPROVAL);
+        
+        List<SurpriseBox> allBoxes = new ArrayList<>();
+        allBoxes.addAll(droppedBoxes);
+        allBoxes.addAll(waitingApprovalBoxes);
+        
+        return allBoxes.stream()
             .filter(box -> box.isExpired())
             .collect(Collectors.toList());
     }

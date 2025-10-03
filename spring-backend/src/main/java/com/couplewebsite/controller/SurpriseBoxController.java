@@ -45,7 +45,7 @@ public class SurpriseBoxController {
                 request.getPrizeName(),
                 request.getPrizeDescription(),
                 completionType,
-                request.getExpirationMinutes(),
+                request.getExpirationMinutes() != null ? request.getExpirationMinutes().toString() : null,
                 request.getPriceAmount(),
                 request.getTaskDescription(),
                 request.getIsInstantDrop()
@@ -436,7 +436,8 @@ public class SurpriseBoxController {
     @PostMapping("/claim/{boxId}")
     public ResponseEntity<?> claimBox(@PathVariable Long boxId, @RequestParam Long userId) {
         try {
-            SurpriseBox claimedBox = surpriseBoxService.claimBox(boxId, userId);
+            User claimer = userService.findById(userId);
+            SurpriseBox claimedBox = surpriseBoxService.claimBox(boxId, claimer);
             return ResponseEntity.ok(createBoxResponse(claimedBox));
         } catch (RuntimeException e) {
             Map<String, String> error = new HashMap<>();
