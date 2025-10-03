@@ -129,6 +129,16 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   const canComplete = !isOwner && box.status === 'OPENED' && !box.isExpired;
   const canClaim = !isOwner && box.status === 'APPROVED' && !box.rejectionReason && !box.isExpired; // Box is approved and ready to claim
   
+  // Debug logging for canClaim conditions
+  if (!isOwner && box.status === 'APPROVED') {
+    console.log('🔍 Debugging canClaim for box:', box.id);
+    console.log('  - isOwner:', isOwner);
+    console.log('  - box.status:', box.status);
+    console.log('  - box.rejectionReason:', box.rejectionReason, '(type:', typeof box.rejectionReason, ')');
+    console.log('  - box.isExpired:', box.isExpired);
+    console.log('  - canClaim result:', canClaim);
+  }
+  
   // For CREATORS (owner)
   const canApprove = isOwner && box.status === 'WAITING_APPROVAL';
   const canCancel = isOwner && ['CREATED', 'DROPPED'].includes(box.status);

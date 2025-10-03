@@ -202,6 +202,9 @@ public class SurpriseBoxService {
         // Set status to APPROVED so recipient can claim the prize
         box.setStatus(SurpriseBox.BoxStatus.APPROVED);
         
+        // Clear any previous rejection reason since the box is now approved
+        box.setRejectionReason(null);
+        
         return surpriseBoxRepository.save(box);
     }
     
