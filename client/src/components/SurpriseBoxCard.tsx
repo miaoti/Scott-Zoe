@@ -224,12 +224,13 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   const CompletionIcon = getCompletionIcon(box.completionType);
   const expiresDate = parseDate(box.expiresAt);
   const dropDate = parseDate(box.dropAt);
-  const isExpired = box.isExpired || false;
+  // Claimed boxes should never show as expired
+  const isExpired = box.status !== 'CLAIMED' && (box.isExpired || false);
   const isDropping = box.isDropping;
   const timeUntilDrop = dropDate ? dropDate.getTime() - new Date().getTime() : 0;
   const timeUntilExpiry = expiresDate ? expiresDate.getTime() - new Date().getTime() : 0;
   
-  // Only show expiration countdown for opened boxes
+  // Only show expiration countdown for opened boxes that are not claimed
   const shouldShowExpirationCountdown = box.openedAt && !isExpired && box.status !== 'COMPLETED' && box.status !== 'CLAIMED';
 
   return (
