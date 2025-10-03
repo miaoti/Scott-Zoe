@@ -89,28 +89,37 @@ public class SurpriseBoxService {
             box.setExpiresAt(LocalDateTime.now().plusHours(24));
         }
         
-        // Set future drop time and initialize intermittent dropping
+        // Implement immediate drop mechanism
         LocalDateTime now = LocalDateTime.now();
         
-        // Calculate drop time based on dropDelayMinutes parameter (required)
+        // For immediate drop, set status to DROPPED right away
         if (dropDelayMinutes == null || dropDelayMinutes <= 0) {
-            throw new RuntimeException("Drop delay minutes must be provided and greater than 0");
+            // Immediate drop - set status to DROPPED
+            box.setStatus(SurpriseBox.BoxStatus.DROPPED);
+            box.setDroppedAt(now);
+            box.setDropAt(now);
+            box.setIsDropping(true); // Start in dropping phase
+            
+            // Set 20-second re-drop cycle
+            box.setDropDurationMinutes(0); // Always visible when dropping
+            box.setPauseDurationMinutes(0); // 20 seconds pause = 0.33 minutes
+            box.setNextDropTime(now.plusSeconds(20)); // Next re-drop in 20 seconds
+        } else {
+            // Legacy support for delayed drops (if needed)
+            LocalDateTime futureDropTime = now.plusMinutes(dropDelayMinutes);
+            box.setDropAt(futureDropTime);
+            box.setIsDropping(false);
+            
+            // Set default drop and pause durations
+            if (box.getDropDurationMinutes() == null) {
+                box.setDropDurationMinutes(3);
+            }
+            if (box.getPauseDurationMinutes() == null) {
+                box.setPauseDurationMinutes(5);
+            }
+            
+            box.setNextDropTime(futureDropTime.plusMinutes(box.getDropDurationMinutes()));
         }
-        
-        LocalDateTime futureDropTime = now.plusMinutes(dropDelayMinutes);
-        
-        box.setDropAt(futureDropTime);
-        box.setIsDropping(false); // Start in waiting phase, not dropping
-        
-        // Set default drop and pause durations if not set
-        if (box.getDropDurationMinutes() == null) {
-            box.setDropDurationMinutes(3); // Default 3 minutes
-        }
-        if (box.getPauseDurationMinutes() == null) {
-            box.setPauseDurationMinutes(5); // Default 5 minutes
-        }
-        
-        box.setNextDropTime(futureDropTime.plusMinutes(box.getDropDurationMinutes())); // Next transition time
         
         return surpriseBoxRepository.save(box);
     }

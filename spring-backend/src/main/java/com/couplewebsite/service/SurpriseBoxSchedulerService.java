@@ -84,9 +84,9 @@ public class SurpriseBoxSchedulerService {
     
     /**
      * Handle intermittent dropping cycles for dropped boxes
-     * Runs every minute
+     * Runs every 10 seconds for faster re-drop cycles
      */
-    @Scheduled(fixedRate = 60000) // Every 60 seconds
+    @Scheduled(fixedRate = 10000) // Every 10 seconds
     public void processIntermittentDropping() {
         try {
             LocalDateTime now = LocalDateTime.now();
@@ -97,27 +97,43 @@ public class SurpriseBoxSchedulerService {
                 
                 for (SurpriseBox box : droppedBoxes) {
                     try {
-                        // Check if it's time to transition between dropping and pausing
+                        // Check if it's time for re-drop (20-second cycle)
                         if (box.getNextDropTime() != null && now.isAfter(box.getNextDropTime())) {
-                            if (box.getIsDropping()) {
-                                // Currently dropping, switch to pause
-                                box.setIsDropping(false);
-                                box.setNextDropTime(now.plusMinutes(box.getPauseDurationMinutes()));
-                                logger.debug("Box {} switched to pause phase for {} minutes", 
-                                        box.getId(), box.getPauseDurationMinutes());
-                            } else {
-                                // Currently paused, switch to dropping
-                                box.setIsDropping(true);
-                                box.setNextDropTime(now.plusMinutes(box.getDropDurationMinutes()));
-                                logger.debug("Box {} switched to dropping phase for {} minutes", 
-                                        box.getId(), box.getDropDurationMinutes());
+                            // For immediate drop boxes (dropDurationMinutes = 0), always re-drop every 20 seconds
+                            if (box.getDropDurationMinutes() != null && box.getDropDurationMinutes() == 0) {
+                                // Always visible, just update next drop time for 20-second cycle
+                                box.setNextDropTime(now.plusSeconds(20));
                                 
-                                // Send notification when switching back to dropping
+                                // Send re-drop notification
                                 try {
                                     webSocketController.sendBoxDroppedNotification(box);
+                                    logger.debug("Box {} re-dropped (20-second cycle)", box.getId());
                                 } catch (Exception wsException) {
-                                    logger.warn("Failed to send WebSocket notification for intermittent drop {}: {}", 
+                                    logger.warn("Failed to send WebSocket notification for re-drop {}: {}", 
                                             box.getId(), wsException.getMessage());
+                                }
+                            } else {
+                                // Legacy intermittent dropping logic for delayed boxes
+                                if (box.getIsDropping()) {
+                                    // Currently dropping, switch to pause
+                                    box.setIsDropping(false);
+                                    box.setNextDropTime(now.plusMinutes(box.getPauseDurationMinutes()));
+                                    logger.debug("Box {} switched to pause phase for {} minutes", 
+                                            box.getId(), box.getPauseDurationMinutes());
+                                } else {
+                                    // Currently paused, switch to dropping
+                                    box.setIsDropping(true);
+                                    box.setNextDropTime(now.plusMinutes(box.getDropDurationMinutes()));
+                                    logger.debug("Box {} switched to dropping phase for {} minutes", 
+                                            box.getId(), box.getDropDurationMinutes());
+                                    
+                                    // Send notification when switching back to dropping
+                                    try {
+                                        webSocketController.sendBoxDroppedNotification(box);
+                                    } catch (Exception wsException) {
+                                        logger.warn("Failed to send WebSocket notification for intermittent drop {}: {}", 
+                                                box.getId(), wsException.getMessage());
+                                    }
                                 }
                             }
                             
