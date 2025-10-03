@@ -163,6 +163,13 @@ public class PhotoService {
     }
     
     /**
+     * Get all photos (including deleted ones) for debugging
+     */
+    public List<Photo> getAllPhotos() {
+        return photoRepository.findAll();
+    }
+    
+    /**
      * Get all deleted photos with pagination (recycle bin)
      */
     public Page<Photo> getDeletedPhotos(int page, int size) {

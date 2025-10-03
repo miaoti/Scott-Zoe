@@ -199,6 +199,44 @@ public class CategoryController {
     }
     
     /**
+     * Debug endpoint to check photos and category relationships
+     */
+    @GetMapping("/debug-photos")
+    public ResponseEntity<?> debugPhotos() {
+        try {
+            List<Photo> allPhotos = photoService.getAllPhotos();
+            List<Category> allCategories = categoryService.getAllCategories();
+            
+            long totalPhotos = allPhotos.size();
+            long activePhotos = allPhotos.stream().filter(p -> !p.getIsDeleted()).count();
+            long deletedPhotos = allPhotos.stream().filter(Photo::getIsDeleted).count();
+            
+            // Check photos for category 2
+            long photosInCategory2 = allPhotos.stream()
+                .filter(p -> !p.getIsDeleted())
+                .filter(p -> p.getCategories().stream().anyMatch(c -> c.getId().equals(2L)))
+                .count();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("totalPhotos", totalPhotos);
+            response.put("activePhotos", activePhotos);
+            response.put("deletedPhotos", deletedPhotos);
+            response.put("totalCategories", allCategories.size());
+            response.put("photosInCategory2", photosInCategory2);
+            
+            logger.info("Debug photos: Total={}, Active={}, Deleted={}, InCategory2={}", 
+                totalPhotos, activePhotos, deletedPhotos, photosInCategory2);
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error in debug photos endpoint", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Error: " + e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
      * Debug endpoint to check raw categories
      */
     @GetMapping("/admin/debug")
@@ -231,6 +269,51 @@ public class CategoryController {
         }
     }
     
+    @GetMapping("/{categoryId}/test-photos")
+    public ResponseEntity<String> testPhotosEndpoint(@PathVariable Long categoryId) {
+        return ResponseEntity.ok("Test photos endpoint works! Category ID: " + categoryId);
+    }
+    
+    @GetMapping("/{categoryId}/debug-photos")
+    public ResponseEntity<?> debugPhotosEndpoint(@PathVariable Long categoryId) {
+        logger.info("Debug photos endpoint for category ID: {}", categoryId);
+        
+        try {
+            // Get basic category info
+            Optional<Category> categoryOpt = categoryService.getCategoryById(categoryId);
+            if (!categoryOpt.isPresent()) {
+                return ResponseEntity.ok("Category not found");
+            }
+            
+            Category category = categoryOpt.get();
+            
+            // Get all photos for this category (including deleted ones)
+            List<Photo> allPhotos = photoService.getAllPhotos();
+            long totalPhotos = allPhotos.size();
+            long deletedPhotos = allPhotos.stream().mapToLong(p -> p.getIsDeleted() ? 1 : 0).sum();
+            long activePhotos = totalPhotos - deletedPhotos;
+            
+            // Get photos specifically for this category
+            long categoryPhotos = allPhotos.stream()
+                .mapToLong(p -> p.getCategories().stream().anyMatch(c -> c.getId().equals(categoryId)) ? 1 : 0)
+                .sum();
+            
+            String result = String.format(
+                "Category: %s (ID: %d)\n" +
+                "Total photos in DB: %d\n" +
+                "Active photos: %d\n" +
+                "Deleted photos: %d\n" +
+                "Photos in this category: %d",
+                category.getName(), categoryId, totalPhotos, activePhotos, deletedPhotos, categoryPhotos
+            );
+            
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.error("Debug endpoint failed", e);
+            return ResponseEntity.ok("Error: " + e.getMessage());
+        }
+    }
+
     /**
      * Get photos by category ID
      */
