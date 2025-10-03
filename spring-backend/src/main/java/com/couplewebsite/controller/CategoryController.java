@@ -263,26 +263,38 @@ public class CategoryController {
     @GetMapping("/{categoryId}/photos")
     public ResponseEntity<?> getPhotosByCategory(@PathVariable Long categoryId) {
         try {
+            logger.info("Fetching photos for category ID: {}", categoryId);
+            
+            // First check if category exists at all
+            Optional<Category> basicCategoryOpt = categoryService.getCategoryById(categoryId);
+            if (!basicCategoryOpt.isPresent()) {
+                logger.warn("Category with ID {} not found", categoryId);
+                return ResponseEntity.notFound().build();
+            }
+            
+            logger.info("Category found: {}", basicCategoryOpt.get().getName());
+            
+            // Now try to get with photos
             Optional<Category> categoryOpt = categoryService.getCategoryByIdWithPhotos(categoryId);
             
             if (categoryOpt.isPresent()) {
                 Category category = categoryOpt.get();
+                logger.info("Category with photos found, photo count: {}", category.getPhotos().size());
+                
                 List<Map<String, Object>> photoResponses = category.getPhotos().stream()
                         .map(this::createPhotoResponseWithStats)
                         .collect(Collectors.toList());
                 
                 return ResponseEntity.ok(photoResponses);
             } else {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "Category not found");
-                return ResponseEntity.status(404).body(error);
+                logger.error("Category exists but getCategoryByIdWithPhotos returned empty for ID: {}", categoryId);
+                return ResponseEntity.status(500)
+                        .body(Map.of("error", "Category exists but failed to load with photos"));
             }
-            
         } catch (Exception e) {
-            logger.error("Error fetching photos for category ID: {}", categoryId, e);
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Server error");
-            return ResponseEntity.status(500).body(error);
+            logger.error("Error fetching photos for category: {}", categoryId, e);
+            return ResponseEntity.status(500)
+                    .body(Map.of("error", "Failed to fetch photos: " + e.getMessage()));
         }
     }
     
