@@ -59,15 +59,15 @@ public interface SurpriseBoxRepository extends JpaRepository<SurpriseBox, Long> 
     /**
      * Check if user has an active box as owner
      */
-    @Query("SELECT COUNT(sb) > 0 FROM SurpriseBox sb WHERE sb.owner = :owner AND sb.status NOT IN ('CLAIMED', 'EXPIRED') AND (sb.openedAt IS NULL OR FUNCTION('TIMESTAMPADD', MINUTE, sb.expirationMinutes, sb.openedAt) > CURRENT_TIMESTAMP)")
-    boolean hasActiveBoxAsOwner(@Param("owner") User owner);
+    @Query("SELECT COUNT(sb) > 0 FROM SurpriseBox sb WHERE sb.owner = :owner AND sb.status NOT IN ('CLAIMED', 'EXPIRED') AND (sb.openedAt IS NULL OR FUNCTION('TIMESTAMPADD', MINUTE, sb.expirationMinutes, sb.openedAt) > :currentTime)")
+    boolean hasActiveBoxAsOwner(@Param("owner") User owner, @Param("currentTime") LocalDateTime currentTime);
     
     // New method for finding active boxes for recipients (OPENED, WAITING_APPROVAL, APPROVED, or activated DROPPED boxes)
     @Query("SELECT sb FROM SurpriseBox sb WHERE sb.recipient = :recipient AND (sb.status IN ('OPENED', 'WAITING_APPROVAL', 'APPROVED') OR (sb.status = 'DROPPED' AND sb.claimedAt IS NOT NULL))")
     Optional<SurpriseBox> findActiveBoxByRecipient(@Param("recipient") User recipient);
 
-    @Query("SELECT CASE WHEN COUNT(sb) > 0 THEN true ELSE false END FROM SurpriseBox sb WHERE sb.recipient = :recipient AND (sb.status IN ('OPENED', 'WAITING_APPROVAL', 'APPROVED') OR (sb.status = 'DROPPED' AND sb.claimedAt IS NOT NULL))")
-    boolean hasActiveBoxAsRecipient(@Param("recipient") User recipient);
+    @Query("SELECT CASE WHEN COUNT(sb) > 0 THEN true ELSE false END FROM SurpriseBox sb WHERE sb.recipient = :recipient AND (sb.status IN ('OPENED', 'WAITING_APPROVAL', 'APPROVED') OR (sb.status = 'DROPPED' AND sb.claimedAt IS NOT NULL)) AND (sb.openedAt IS NULL OR FUNCTION('TIMESTAMPADD', MINUTE, sb.expirationMinutes, sb.openedAt) > :currentTime)")
+    boolean hasActiveBoxAsRecipient(@Param("recipient") User recipient, @Param("currentTime") LocalDateTime currentTime);
     
     /**
      * Find boxes that need to be re-dropped (expired but not claimed)
@@ -93,8 +93,8 @@ public interface SurpriseBoxRepository extends JpaRepository<SurpriseBox, Long> 
     /**
      * Count active boxes excluding expired ones
      */
-    @Query("SELECT COUNT(sb) FROM SurpriseBox sb WHERE sb.status IN :statuses AND (sb.openedAt IS NULL OR FUNCTION('TIMESTAMPADD', MINUTE, sb.expirationMinutes, sb.openedAt) > CURRENT_TIMESTAMP)")
-    long countActiveBoxesExcludingExpired(@Param("statuses") List<SurpriseBox.BoxStatus> statuses);
+    @Query("SELECT COUNT(sb) FROM SurpriseBox sb WHERE sb.status IN :statuses AND (sb.openedAt IS NULL OR FUNCTION('TIMESTAMPADD', MINUTE, sb.expirationMinutes, sb.openedAt) > :currentTime)")
+    long countActiveBoxesExcludingExpired(@Param("statuses") List<SurpriseBox.BoxStatus> statuses, @Param("currentTime") LocalDateTime currentTime);
     
     /**
      * Find boxes by recipient and status

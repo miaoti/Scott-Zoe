@@ -329,11 +329,12 @@ public class SurpriseBoxService {
      * Check if user has active box
      */
     public boolean hasActiveBox(User user) {
+        LocalDateTime now = LocalDateTime.now();
         // Check for active boxes as owner (created boxes that are not yet claimed/expired)
-        boolean hasActiveAsOwner = surpriseBoxRepository.hasActiveBoxAsOwner(user);
+        boolean hasActiveAsOwner = surpriseBoxRepository.hasActiveBoxAsOwner(user, now);
         
         // Also check for active boxes as recipient (OPENED, WAITING_APPROVAL, APPROVED, or activated DROPPED boxes)
-        boolean hasActiveAsRecipient = surpriseBoxRepository.hasActiveBoxAsRecipient(user);
+        boolean hasActiveAsRecipient = surpriseBoxRepository.hasActiveBoxAsRecipient(user, now);
         
         return hasActiveAsOwner || hasActiveAsRecipient;
     }
@@ -628,8 +629,9 @@ public class SurpriseBoxService {
      * Count active boxes (not completed, cancelled, or expired)
      */
     public long countActiveBoxes() {
+        LocalDateTime now = LocalDateTime.now();
         return surpriseBoxRepository.countActiveBoxesExcludingExpired(
-            List.of(SurpriseBox.BoxStatus.CREATED, SurpriseBox.BoxStatus.DROPPED, SurpriseBox.BoxStatus.WAITING_APPROVAL));
+            List.of(SurpriseBox.BoxStatus.CREATED, SurpriseBox.BoxStatus.DROPPED, SurpriseBox.BoxStatus.WAITING_APPROVAL), now);
     }
     
     /**
