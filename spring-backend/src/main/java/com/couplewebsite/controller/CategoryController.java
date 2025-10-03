@@ -66,7 +66,9 @@ public class CategoryController {
     @GetMapping
     public ResponseEntity<?> getAllCategories() {
         try {
+            logger.info("Fetching all categories with photo counts");
             List<Category> categories = categoryService.getAllCategoriesWithPhotoCounts();
+            logger.info("Found {} categories", categories.size());
             
             List<Map<String, Object>> categoryResponses = categories.stream()
                     .map(this::createCategoryResponseWithCount)
@@ -81,6 +83,8 @@ public class CategoryController {
             return ResponseEntity.status(500).body(error);
         }
     }
+    
+
     
     /**
      * Get category by ID
@@ -164,12 +168,76 @@ public class CategoryController {
     }
     
     /**
-     * Get photos by category
+     * Simple test endpoint
      */
-    @GetMapping("/{id}/photos")
-    public ResponseEntity<?> getPhotosByCategory(@PathVariable Long id) {
+    @GetMapping("/test")
+    public ResponseEntity<?> testEndpoint() {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Test endpoint working");
+        response.put("timestamp", java.time.LocalDateTime.now().toString());
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * Simple count endpoint to check if categories exist
+     */
+    @GetMapping("/admin/count")
+    public ResponseEntity<?> getCategoryCount() {
         try {
-            Optional<Category> categoryOpt = categoryService.getCategoryByIdWithPhotos(id);
+            List<Category> allCategories = categoryService.getAllCategories();
+            Map<String, Object> response = new HashMap<>();
+            response.put("totalCategories", allCategories.size());
+            response.put("message", "Total categories in database: " + allCategories.size());
+            logger.info("Category count endpoint: Found {} categories", allCategories.size());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error getting category count", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Error: " + e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Debug endpoint to check raw categories
+     */
+    @GetMapping("/admin/debug")
+    public ResponseEntity<?> debugCategories() {
+        try {
+            logger.info("Debug: Checking raw categories");
+            List<Category> allCategories = categoryService.getAllCategories();
+            logger.info("Debug: Found {} raw categories", allCategories.size());
+            
+            List<Category> categoriesWithCounts = categoryService.getAllCategoriesWithPhotoCounts();
+            logger.info("Debug: Found {} categories with counts", categoriesWithCounts.size());
+            
+            Map<String, Object> debugInfo = new HashMap<>();
+            debugInfo.put("rawCategoriesCount", allCategories.size());
+            debugInfo.put("categoriesWithCountsCount", categoriesWithCounts.size());
+            debugInfo.put("rawCategories", allCategories.stream()
+                    .map(this::createCategoryResponse)
+                    .collect(Collectors.toList()));
+            debugInfo.put("categoriesWithCounts", categoriesWithCounts.stream()
+                    .map(this::createCategoryResponseWithCount)
+                    .collect(Collectors.toList()));
+            
+            return ResponseEntity.ok(debugInfo);
+            
+        } catch (Exception e) {
+            logger.error("Error in debug endpoint", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Debug error: " + e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+    
+    /**
+     * Get photos by category ID
+     */
+    @GetMapping("/{categoryId}/photos")
+    public ResponseEntity<?> getPhotosByCategory(@PathVariable Long categoryId) {
+        try {
+            Optional<Category> categoryOpt = categoryService.getCategoryByIdWithPhotos(categoryId);
             
             if (categoryOpt.isPresent()) {
                 Category category = categoryOpt.get();
@@ -185,7 +253,7 @@ public class CategoryController {
             }
             
         } catch (Exception e) {
-            logger.error("Error fetching photos for category ID: {}", id, e);
+            logger.error("Error fetching photos for category ID: {}", categoryId, e);
             Map<String, String> error = new HashMap<>();
             error.put("message", "Server error");
             return ResponseEntity.status(500).body(error);
