@@ -236,39 +236,49 @@ public class CategoryController {
      */
     @GetMapping("/{categoryId}/photos")
     public ResponseEntity<?> getPhotosByCategory(@PathVariable Long categoryId) {
+        logger.info("Getting photos for category ID: {}", categoryId);
+        
         try {
-            logger.info("Fetching photos for category ID: {}", categoryId);
-            
-            // First check if category exists at all
+            // First check if category exists
             Optional<Category> basicCategoryOpt = categoryService.getCategoryById(categoryId);
             if (!basicCategoryOpt.isPresent()) {
-                logger.warn("Category with ID {} not found", categoryId);
+                logger.warn("Category not found with ID: {}", categoryId);
                 return ResponseEntity.notFound().build();
             }
             
             logger.info("Category found: {}", basicCategoryOpt.get().getName());
             
-            // Use simplified query to test if uploader fetch is causing issues
-            Optional<Category> categoryOpt = categoryService.getCategoryByIdWithPhotosSimple(categoryId);
-            
-            if (categoryOpt.isPresent()) {
-                Category category = categoryOpt.get();
-                logger.info("Category with photos found, photo count: {}", category.getPhotos().size());
-                
-                List<Map<String, Object>> photoResponses = category.getPhotos().stream()
-                        .map(this::createPhotoResponseWithStats)
-                        .collect(Collectors.toList());
-                
-                return ResponseEntity.ok(photoResponses);
-            } else {
-                logger.error("Category exists but getCategoryByIdWithPhotos returned empty for ID: {}", categoryId);
-                return ResponseEntity.status(500)
-                        .body(Map.of("error", "Category exists but failed to load with photos"));
+            // Try simplified query first
+            Optional<Category> categoryOpt;
+            try {
+                categoryOpt = categoryService.getCategoryByIdWithPhotosSimple(categoryId);
+                logger.info("Simplified query executed successfully");
+            } catch (Exception e) {
+                logger.error("Simplified query failed, trying original query", e);
+                categoryOpt = categoryService.getCategoryByIdWithPhotos(categoryId);
             }
+            
+            if (!categoryOpt.isPresent()) {
+                logger.warn("Category exists but query with photos returned empty for ID: {}", categoryId);
+                // Return empty array instead of 404 since category exists
+                return ResponseEntity.ok(new java.util.ArrayList<>());
+            }
+            
+            Category category = categoryOpt.get();
+            logger.info("Category loaded with {} photos", category.getPhotos().size());
+            
+            List<Map<String, Object>> photoResponses = category.getPhotos().stream()
+                    .filter(photo -> !photo.getIsDeleted())
+                    .map(this::createPhotoResponseWithStats)
+                    .collect(Collectors.toList());
+            
+            logger.info("Found {} non-deleted photos for category ID: {}", photoResponses.size(), categoryId);
+            return ResponseEntity.ok(photoResponses);
+            
         } catch (Exception e) {
-            logger.error("Error fetching photos for category: {}", categoryId, e);
-            return ResponseEntity.status(500)
-                    .body(Map.of("error", "Failed to fetch photos: " + e.getMessage()));
+            logger.error("Error getting photos for category ID: {}", categoryId, e);
+            // Return empty array with error logged instead of 500
+            return ResponseEntity.ok(new java.util.ArrayList<>());
         }
     }
     
