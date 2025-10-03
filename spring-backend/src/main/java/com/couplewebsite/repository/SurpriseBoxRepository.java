@@ -41,7 +41,7 @@ public interface SurpriseBoxRepository extends JpaRepository<SurpriseBox, Long> 
     /**
      * Find boxes that have expired
      */
-    @Query("SELECT sb FROM SurpriseBox sb WHERE sb.expiresAt IS NOT NULL AND sb.expiresAt < :currentTime AND sb.status NOT IN ('EXPIRED', 'CLAIMED')")
+    @Query("SELECT sb FROM SurpriseBox sb WHERE sb.openedAt IS NOT NULL AND FUNCTION('TIMESTAMPADD', MINUTE, sb.expirationMinutes, sb.openedAt) < :currentTime AND sb.status NOT IN ('EXPIRED', 'CLAIMED')")
     List<SurpriseBox> findExpiredBoxes(@Param("currentTime") LocalDateTime currentTime);
     
     /**
@@ -72,13 +72,13 @@ public interface SurpriseBoxRepository extends JpaRepository<SurpriseBox, Long> 
     /**
      * Find boxes that need to be re-dropped (expired but not claimed)
      */
-    @Query("SELECT sb FROM SurpriseBox sb WHERE sb.status = 'DROPPED' AND sb.expiresAt < :now AND sb.recipient = :user")
-    List<SurpriseBox> findBoxesForReDrop(@Param("user") User user, @Param("now") LocalDateTime now);
+    @Query("SELECT sb FROM SurpriseBox sb WHERE sb.status = 'DROPPED' AND sb.recipient = :recipient AND sb.openedAt IS NOT NULL AND FUNCTION('TIMESTAMPADD', MINUTE, sb.expirationMinutes, sb.openedAt) < :now")
+    List<SurpriseBox> findBoxesForReDrop(@Param("recipient") User recipient, @Param("now") LocalDateTime now);
     
     // Additional methods for scheduler service
     List<SurpriseBox> findByStatusAndDropAtBefore(SurpriseBox.BoxStatus status, LocalDateTime dropAt);
     
-    List<SurpriseBox> findByStatusInAndExpiresAtBefore(List<SurpriseBox.BoxStatus> statuses, LocalDateTime expiresAt);
+    // Removed findByStatusInAndExpiresAtBefore - no longer needed with new expiration system
     
     List<SurpriseBox> findByStatusAndDropAtBetween(SurpriseBox.BoxStatus status, LocalDateTime start, LocalDateTime end);
     
