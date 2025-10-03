@@ -111,12 +111,13 @@ const BoxDropManager: React.FC = () => {
   return (
     <div className="fixed inset-0 pointer-events-none z-40">
       {droppingBoxes.map((box) => (
-        <DroppingBox
-          key={`dropping-${box.id}`}
-          box={box}
-          onClaim={handleBoxClaim}
-          onAnimationComplete={() => handleAnimationComplete(box.id)}
-        />
+        <div key={`dropping-${box.id}`} className="pointer-events-auto">
+          <DroppingBox
+            box={box}
+            onClaim={handleBoxClaim}
+            onAnimationComplete={() => handleAnimationComplete(box.id)}
+          />
+        </div>
       ))}
     </div>
   );

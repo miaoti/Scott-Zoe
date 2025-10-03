@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Gift, X } from 'lucide-react';
 import { useSurpriseBoxStore } from '../stores/surpriseBoxStore';
+import { useToast } from '../contexts/ToastContext';
 
 interface DroppingBoxProps {
   box: {
@@ -20,6 +21,7 @@ const DroppingBox: React.FC<DroppingBoxProps> = ({ box, onClaim, onAnimationComp
   const [isVisible, setIsVisible] = useState(true);
   const [isClicked, setIsClicked] = useState(false);
   const { claimBox } = useSurpriseBoxStore();
+  const { showToast } = useToast();
 
   const handleClick = async () => {
     if (isClicked) return;
@@ -27,10 +29,14 @@ const DroppingBox: React.FC<DroppingBoxProps> = ({ box, onClaim, onAnimationComp
     setIsClicked(true);
     try {
       await claimBox(box.id);
+      // Show success message
+      showToast('You have got a box! 🎁', 'general', 3000);
       onClaim(box.id);
     } catch (error) {
       console.error('Failed to claim box:', error);
       setIsClicked(false);
+      // Show error message
+      showToast('Failed to claim box. Please try again.', 'general', 3000);
     }
   };
 
