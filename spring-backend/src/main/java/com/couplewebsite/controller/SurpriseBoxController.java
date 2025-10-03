@@ -470,6 +470,13 @@ public class SurpriseBoxController {
     
     // Helper method to create box response
     private Map<String, Object> createBoxResponse(SurpriseBox box) {
+        // Check if box is expired and update status accordingly
+        // Priority: Expired > Claimed > Opened > other statuses
+        if (box.isExpired() && !box.getStatus().equals(SurpriseBox.BoxStatus.CLAIMED) && !box.getStatus().equals(SurpriseBox.BoxStatus.EXPIRED)) {
+            box.setStatus(SurpriseBox.BoxStatus.EXPIRED);
+            surpriseBoxService.save(box); // Save the updated status
+        }
+        
         Map<String, Object> response = new HashMap<>();
         response.put("id", box.getId());
         response.put("prizeName", box.getPrizeName());
