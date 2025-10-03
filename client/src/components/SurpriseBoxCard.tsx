@@ -102,6 +102,8 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
       case 'DROPPED': return 'bg-green-100 text-green-800';
       case 'OPENED': return 'bg-indigo-100 text-indigo-800';
       case 'WAITING_APPROVAL': return 'bg-amber-100 text-amber-800';
+      case 'APPROVED': return 'bg-emerald-100 text-emerald-800';
+      case 'REJECTED': return 'bg-red-100 text-red-800';
       case 'CLAIMED': return 'bg-purple-100 text-purple-800';
       case 'EXPIRED': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
@@ -114,6 +116,8 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
       case 'DROPPED': return 'Available';
       case 'OPENED': return 'Opened';
       case 'WAITING_APPROVAL': return 'Pending Approval';
+      case 'APPROVED': return 'Approved';
+      case 'REJECTED': return 'Rejected';
       case 'CLAIMED': return 'Claimed';
       case 'EXPIRED': return 'Expired';
       default: return status;

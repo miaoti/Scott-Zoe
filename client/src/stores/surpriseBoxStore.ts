@@ -8,7 +8,7 @@ export interface SurpriseBox {
   prizeName: string;
   prizeDescription?: string;
   taskDescription?: string;
-  status: 'CREATED' | 'DROPPED' | 'OPENED' | 'WAITING_APPROVAL' | 'CLAIMED' | 'EXPIRED';
+  status: 'CREATED' | 'DROPPED' | 'OPENED' | 'WAITING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'CLAIMED' | 'EXPIRED';
   completionType: 'PHOTO' | 'TEXT' | 'LOCATION' | 'TIMER';
   completionData?: string;
   priceAmount?: number;
@@ -854,7 +854,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   getActiveBoxesCount: () => {
     const { ownedBoxes, receivedBoxes } = get();
     return [...ownedBoxes, ...receivedBoxes].filter(
-      box => !['CLAIMED', 'EXPIRED'].includes(box.status)
+      box => !['CLAIMED', 'EXPIRED', 'REJECTED'].includes(box.status)
     ).length;
   }
 }));
