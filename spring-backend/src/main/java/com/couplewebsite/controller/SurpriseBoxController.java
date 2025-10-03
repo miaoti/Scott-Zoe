@@ -190,12 +190,12 @@ public class SurpriseBoxController {
     }
     
     /**
-     * Get active box for owner
+     * Get active box for user (both as owner and recipient)
      */
     @GetMapping("/active/{userId}")
     public ResponseEntity<?> getActiveBox(@PathVariable Long userId) {
         try {
-            Optional<SurpriseBox> activeBox = surpriseBoxService.getActiveBoxByOwner(userId);
+            Optional<SurpriseBox> activeBox = surpriseBoxService.getActiveBox(userId);
             
             if (activeBox.isPresent()) {
                 return ResponseEntity.ok(createBoxResponse(activeBox.get()));

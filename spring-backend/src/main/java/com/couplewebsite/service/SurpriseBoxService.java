@@ -273,6 +273,23 @@ public class SurpriseBoxService {
     }
     
     /**
+     * Get active box for user (both as owner and recipient)
+     */
+    public Optional<SurpriseBox> getActiveBox(Long userId) {
+        User user = userService.findById(userId);
+        
+        // First check if user has an active box as owner
+        Optional<SurpriseBox> ownerBox = surpriseBoxRepository.findActiveBoxByOwner(user);
+        if (ownerBox.isPresent()) {
+            return ownerBox;
+        }
+        
+        // Then check if user has an active box as recipient (OPENED or WAITING_APPROVAL)
+        Optional<SurpriseBox> recipientBox = surpriseBoxRepository.findActiveBoxByRecipient(user);
+        return recipientBox;
+    }
+    
+    /**
      * Check if user has active box
      */
     public boolean hasActiveBox(User owner) {
