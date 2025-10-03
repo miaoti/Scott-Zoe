@@ -36,6 +36,12 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     Optional<Category> findByIdWithPhotos(@Param("id") Long id);
     
     /**
+     * Simplified version without uploader fetch to test for issues
+     */
+    @Query("SELECT DISTINCT c FROM Category c LEFT JOIN FETCH c.photos p WHERE c.id = :id AND (p IS NULL OR p.isDeleted = false)")
+    Optional<Category> findByIdWithPhotosSimple(@Param("id") Long id);
+    
+    /**
      * Find categories with photo counts (excluding deleted photos)
      */
     @Query("SELECT c, COUNT(CASE WHEN p.isDeleted = false THEN p.id END) as photoCount FROM Category c LEFT JOIN c.photos p GROUP BY c ORDER BY c.name ASC")
