@@ -34,10 +34,18 @@ public class SurpriseBoxSchedulerService {
     public void processBoxDrops() {
         try {
             LocalDateTime now = LocalDateTime.now();
+            logger.debug("[DEBUG] processBoxDrops running at {}", now);
+            
             List<SurpriseBox> boxesToDrop = surpriseBoxService.findBoxesReadyToDrop();
+            logger.debug("[DEBUG] Found {} boxes ready to drop", boxesToDrop.size());
             
             if (!boxesToDrop.isEmpty()) {
                 logger.info("Processing {} boxes ready to drop", boxesToDrop.size());
+                
+                for (SurpriseBox box : boxesToDrop) {
+                    logger.debug("[DEBUG] Box {} - Status: {}, DropAt: {}, Now: {}", 
+                            box.getId(), box.getStatus(), box.getDropAt(), now);
+                }
                 
                 for (SurpriseBox box : boxesToDrop) {
                     try {
@@ -65,6 +73,8 @@ public class SurpriseBoxSchedulerService {
                         logger.error("Error dropping box {}", box.getId(), e);
                     }
                 }
+            } else {
+                logger.debug("[DEBUG] No boxes ready to drop at {}", now);
             }
             
         } catch (Exception e) {
