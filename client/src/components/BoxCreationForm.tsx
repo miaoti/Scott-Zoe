@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Gift, Clock, Camera, Type, MapPin, Timer, AlertCircle } from 'lucide-react';
+import { X, Gift, Clock, Camera, Type, MapPin, Timer, AlertCircle, Calendar, Zap } from 'lucide-react';
 import { useSurpriseBoxStore } from '../stores/surpriseBoxStore';
 
 interface BoxCreationFormProps {
@@ -19,7 +19,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     expiresAt: '',
     taskDescription: '',
     priceAmount: 0,
-    dropDelayMinutes: 0 // Immediate drop (0 minutes)
+    isInstantDrop: true // Default to instant drop
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -372,14 +372,85 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
                       </p>
                     </div>
                     
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-center space-x-2 text-blue-700">
-                        <Timer className="w-5 h-5" />
-                        <h3 className="font-medium">Instant Drop Enabled</h3>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-4">
+                        <Zap className="w-4 h-4 inline mr-1" />
+                        Drop Timing *
+                      </label>
+                      
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <motion.button
+                          type="button"
+                          onClick={() => handleInputChange('isInstantDrop', true)}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className={`p-4 border-2 rounded-xl text-left transition-all ${
+                            formData.isInstantDrop
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-blue-300 hover:bg-blue-25'
+                          }`}
+                        >
+                          <div className="flex items-start space-x-3">
+                            <div
+                              className={`p-2 rounded-lg ${
+                                formData.isInstantDrop
+                                  ? 'bg-blue-500 text-white'
+                                  : 'bg-gray-100 text-gray-600'
+                              }`}
+                            >
+                              <Zap className="w-5 h-5" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-medium text-gray-800">Instant Drop Enabled</h4>
+                              <p className="text-sm text-gray-600 mt-1">
+                                Box drops immediately and re-appears every 20 seconds until claimed
+                              </p>
+                            </div>
+                          </div>
+                        </motion.button>
+                        
+                        <motion.button
+                          type="button"
+                          onClick={() => handleInputChange('isInstantDrop', false)}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className={`p-4 border-2 rounded-xl text-left transition-all ${
+                            !formData.isInstantDrop
+                              ? 'border-green-500 bg-green-50'
+                              : 'border-gray-200 hover:border-green-300 hover:bg-green-25'
+                          }`}
+                        >
+                          <div className="flex items-start space-x-3">
+                            <div
+                              className={`p-2 rounded-lg ${
+                                !formData.isInstantDrop
+                                  ? 'bg-green-500 text-white'
+                                  : 'bg-gray-100 text-gray-600'
+                              }`}
+                            >
+                              <Calendar className="w-5 h-5" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-medium text-gray-800">Drop Later</h4>
+                              <p className="text-sm text-gray-600 mt-1">
+                                System will automatically schedule the drop within 1-7 days for surprise timing
+                              </p>
+                            </div>
+                          </div>
+                        </motion.button>
                       </div>
-                      <p className="mt-2 text-sm text-blue-600">
-                        Your surprise box will be available to the recipient immediately after creation and will re-appear every 20 seconds until claimed.
-                      </p>
+                      
+                      {!formData.isInstantDrop && (
+                        <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
+                          <div className="flex items-center space-x-2 text-green-700">
+                            <Calendar className="w-5 h-5" />
+                            <h3 className="font-medium">Scheduled Drop</h3>
+                          </div>
+                          <p className="mt-2 text-sm text-green-600">
+                            The system will randomly schedule your surprise box to drop between 1-7 days from now, creating anticipation and surprise for the recipient.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </motion.div>

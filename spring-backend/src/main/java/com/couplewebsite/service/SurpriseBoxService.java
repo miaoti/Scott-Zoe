@@ -44,16 +44,16 @@ public class SurpriseBoxService {
                                 String expiresAt, BigDecimal priceAmount, 
                                 String taskDescription) {
         return createBox(ownerId, recipientId, prizeName, prizeDescription, completionType, 
-                        expiresAt, priceAmount, taskDescription, null);
+                        expiresAt, priceAmount, taskDescription, true);
     }
     
     /**
-     * Create a new surprise box with custom drop delay
+     * Create a new surprise box with drop scheduling options
      */
     public SurpriseBox createBox(Long ownerId, Long recipientId, String prizeName, 
                                 String prizeDescription, SurpriseBox.CompletionType completionType, 
                                 String expiresAt, BigDecimal priceAmount, 
-                                String taskDescription, Integer dropDelayMinutes) {
+                                String taskDescription, Boolean isInstantDrop) {
         
         // Check if owner already has an active box
         User owner = userService.findById(ownerId);
@@ -89,12 +89,12 @@ public class SurpriseBoxService {
             box.setExpiresAt(LocalDateTime.now().plusHours(24));
         }
         
-        // Implement immediate drop mechanism
+        // Set drop scheduling fields
         LocalDateTime now = LocalDateTime.now();
+        box.setIsInstantDrop(isInstantDrop != null ? isInstantDrop : true);
         
-        // For immediate drop, set status to DROPPED right away
-        if (dropDelayMinutes == null || dropDelayMinutes <= 0) {
-            // Immediate drop - set status to DROPPED
+        if (box.getIsInstantDrop()) {
+            // Instant drop - set status to DROPPED right away
             box.setStatus(SurpriseBox.BoxStatus.DROPPED);
             box.setDroppedAt(now);
             box.setDropAt(now);
@@ -105,20 +105,23 @@ public class SurpriseBoxService {
             box.setPauseDurationMinutes(0); // 20 seconds pause = 0.33 minutes
             box.setNextDropTime(now.plusSeconds(20)); // Next re-drop in 20 seconds
         } else {
-            // Legacy support for delayed drops (if needed)
-            LocalDateTime futureDropTime = now.plusMinutes(dropDelayMinutes);
-            box.setDropAt(futureDropTime);
+            // Drop later - calculate random drop time between 1-7 days
+            int randomDays = 1 + (int) (Math.random() * 7); // Random between 1-7 days
+            int randomHours = (int) (Math.random() * 24); // Random hour within the day
+            int randomMinutes = (int) (Math.random() * 60); // Random minute within the hour
+            
+            LocalDateTime scheduledDropTime = now.plusDays(randomDays)
+                                                .plusHours(randomHours)
+                                                .plusMinutes(randomMinutes);
+            
+            box.setScheduledDropTime(scheduledDropTime);
+            box.setDropAt(scheduledDropTime);
             box.setIsDropping(false);
             
-            // Set default drop and pause durations
-            if (box.getDropDurationMinutes() == null) {
-                box.setDropDurationMinutes(3);
-            }
-            if (box.getPauseDurationMinutes() == null) {
-                box.setPauseDurationMinutes(5);
-            }
-            
-            box.setNextDropTime(futureDropTime.plusMinutes(box.getDropDurationMinutes()));
+            // Set default drop and pause durations for when it eventually drops
+            box.setDropDurationMinutes(3);
+            box.setPauseDurationMinutes(5);
+            box.setNextDropTime(scheduledDropTime.plusMinutes(3));
         }
         
         return surpriseBoxRepository.save(box);

@@ -108,6 +108,13 @@ public class SurpriseBox {
     @Column(name = "is_dropping")
     private Boolean isDropping = false; // Whether currently in dropping phase
     
+    // Drop scheduling fields
+    @Column(name = "is_instant_drop")
+    private Boolean isInstantDrop = true; // Default to instant drop
+    
+    @Column(name = "scheduled_drop_time")
+    private LocalDateTime scheduledDropTime; // When to auto-drop the box (for "Drop Later" option)
+    
     @OneToMany(mappedBy = "box", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<PrizeHistory> prizeHistories = new ArrayList<>();
@@ -341,6 +348,22 @@ public class SurpriseBox {
     
     public void setIsDropping(Boolean isDropping) {
         this.isDropping = isDropping;
+    }
+    
+    public Boolean getIsInstantDrop() {
+        return isInstantDrop;
+    }
+    
+    public void setIsInstantDrop(Boolean isInstantDrop) {
+        this.isInstantDrop = isInstantDrop;
+    }
+    
+    public LocalDateTime getScheduledDropTime() {
+        return scheduledDropTime;
+    }
+    
+    public void setScheduledDropTime(LocalDateTime scheduledDropTime) {
+        this.scheduledDropTime = scheduledDropTime;
     }
     
     // Helper methods

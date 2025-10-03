@@ -99,10 +99,7 @@ spring:
     show-sql: true
   
   flyway:
-    enabled: true  # Enable Flyway to apply constraint fixes
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-    baseline-version: 0
+    enabled: false  # Disable Flyway for SQLite development
 
 ---
 # Production Profile
@@ -155,7 +152,7 @@ spring:
       rollback-on-commit-failure: true
   
   flyway:
-    enabled: false
+    enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
     baseline-version: 0

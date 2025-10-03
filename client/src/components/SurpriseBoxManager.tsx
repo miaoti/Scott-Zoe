@@ -5,14 +5,11 @@ import { useSurpriseBoxActions } from '../hooks/useSurpriseBoxActions';
 import SurpriseBoxCard from './SurpriseBoxCard';
 import BoxCreationForm from './BoxCreationForm';
 import PrizeHistory from './PrizeHistory';
-import BoxDropAnimation from './BoxDropAnimation';
-import CountdownTimer from './CountdownTimer';
 
 const SurpriseBoxManager: React.FC = () => {
   const {
     ownedBoxes,
     receivedBoxes,
-    activeBox,
     isLoading,
     error,
     showCreateForm,
@@ -23,7 +20,6 @@ const SurpriseBoxManager: React.FC = () => {
     setShowPrizeHistory,
     loadOwnedBoxes,
     loadReceivedBoxes,
-    loadActiveBox,
     connectWebSocket,
     disconnectWebSocket,
     clearNotifications,
@@ -44,10 +40,6 @@ const SurpriseBoxManager: React.FC = () => {
     loadReceivedBoxes();
   }, [loadReceivedBoxes]);
 
-  const memoizedLoadActiveBox = useCallback(() => {
-    loadActiveBox();
-  }, [loadActiveBox]);
-
   const memoizedConnectWebSocket = useCallback((token: string) => {
     connectWebSocket(token);
   }, [connectWebSocket]);
@@ -57,7 +49,6 @@ const SurpriseBoxManager: React.FC = () => {
     if (token) {
       loadOwnedBoxes();
       loadReceivedBoxes();
-      loadActiveBox();
       connectWebSocket(token);
     }
 
@@ -171,13 +162,8 @@ const SurpriseBoxManager: React.FC = () => {
               
               <button
                 onClick={() => setShowCreateForm(true)}
-                disabled={!!activeBox}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 shadow-lg ${
-                  activeBox
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 hover:shadow-xl'
-                }`}
-                title={activeBox ? 'You already have an active box' : 'Create a new surprise box'}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 hover:shadow-xl"
+                title="Create a new surprise box"
               >
                 <Plus className="w-4 h-4" />
                 <span>Create Box</span>
@@ -227,61 +213,7 @@ const SurpriseBoxManager: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {/* Active Box Display */}
-        {activeBox && activeBox.id && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="mb-6"
-          >
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
-                <Gift className="w-5 h-5 text-purple-600" />
-                <span>Active Surprise Box</span>
-              </h2>
-              
-              <div className="grid md:grid-cols-2 gap-6">
-                {(() => {
-                  try {
-                    const token = localStorage.getItem('token');
-                    if (!token) return null;
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    const isOwner = activeBox.owner?.id === payload.userId;
-                    
-                    // Debug logging for active box
-                    console.log('🎯 Active box rendering:', {
-                      boxId: activeBox.id,
-                      boxStatus: activeBox.status,
-                      isOwner,
-                      userId: payload.userId,
-                      ownerId: activeBox.owner?.id,
-                      rejectionReason: activeBox.rejectionReason,
-                      isExpired: activeBox.isExpired
-                    });
-                    
-                    return (
-                       <SurpriseBoxCard 
-                         box={activeBox} 
-                         isOwner={isOwner}
-                         onOpen={handleOpen}
-                         onComplete={handleComplete}
-                         onApprove={handleApprove}
-                         onReject={handleReject}
-                         onClaim={handleClaim}
-                         onActivate={handleActivate}
-                       />
-                     );
-                  } catch {
-                    return null;
-                  }
-                })()}
-                <div className="flex items-center justify-center">
-                  <BoxDropAnimation isActive={true} />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
+
 
         {/* Tabs */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
@@ -379,13 +311,8 @@ const SurpriseBoxManager: React.FC = () => {
                           <p className="text-gray-500 mb-4">Create your first surprise box for your partner</p>
                           <button
                             onClick={() => setShowCreateForm(true)}
-                            disabled={!!activeBox}
-                            className={`px-6 py-2 rounded-lg transition-all duration-200 ${
-                              activeBox
-                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
-                            }`}
-                            title={activeBox ? 'You already have an active box' : 'Create a new surprise box'}
+                            className="px-6 py-2 rounded-lg transition-all duration-200 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600"
+                            title="Create a new surprise box"
                           >
                             Create Box
                           </button>

@@ -48,7 +48,7 @@ public class SurpriseBoxController {
                 request.getExpiresAt(),
                 request.getPriceAmount(),
                 request.getTaskDescription(),
-                request.getDropDelayMinutes()
+                request.getIsInstantDrop()
             );
             
             Map<String, Object> response = new HashMap<>();
@@ -516,7 +516,7 @@ public class SurpriseBoxController {
         private String expiresAt;
         private BigDecimal priceAmount;
         private String taskDescription;
-        private Integer dropDelayMinutes;
+        private Boolean isInstantDrop;
         
         // Getters and setters
         public Long getOwnerId() { return ownerId; }
@@ -535,8 +535,8 @@ public class SurpriseBoxController {
         public void setPriceAmount(BigDecimal priceAmount) { this.priceAmount = priceAmount; }
         public String getTaskDescription() { return taskDescription; }
         public void setTaskDescription(String taskDescription) { this.taskDescription = taskDescription; }
-        public Integer getDropDelayMinutes() { return dropDelayMinutes; }
-        public void setDropDelayMinutes(Integer dropDelayMinutes) { this.dropDelayMinutes = dropDelayMinutes; }
+        public Boolean getIsInstantDrop() { return isInstantDrop; }
+        public void setIsInstantDrop(Boolean isInstantDrop) { this.isInstantDrop = isInstantDrop; }
     }
     
     public static class RejectCompletionRequest {
