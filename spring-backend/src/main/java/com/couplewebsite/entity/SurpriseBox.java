@@ -361,6 +361,11 @@ public class SurpriseBox {
     
     // Helper methods
     public boolean isExpired() {
+        // Approved boxes never expire
+        if (status == BoxStatus.APPROVED) {
+            return false;
+        }
+        
         // Box is only expired if it has been opened and the duration has passed
         if (openedAt == null) {
             return false; // Not opened yet, cannot be expired
@@ -383,6 +388,11 @@ public class SurpriseBox {
     
     public boolean canBeCompleted() {
         return status == BoxStatus.OPENED && !isExpired();
+    }
+    
+    public boolean shouldStopCountdown() {
+        // Stop countdown for approved boxes
+        return status == BoxStatus.APPROVED;
     }
     
     @Override

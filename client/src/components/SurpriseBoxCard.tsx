@@ -81,6 +81,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [showCongratsModal, setShowCongratsModal] = useState(false);
   const [completionData, setCompletionData] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [showDetails, setShowDetails] = useState(false);
@@ -216,6 +217,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   const handleClaim = async () => {
     try {
       await claimBox(box.id);
+      setShowCongratsModal(true);
     } catch (error) {
       // Error handled by store
     }
@@ -230,8 +232,8 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   const timeUntilDrop = dropDate ? dropDate.getTime() - new Date().getTime() : 0;
   const timeUntilExpiry = expiresDate ? expiresDate.getTime() - new Date().getTime() : 0;
   
-  // Only show expiration countdown for opened boxes that are not claimed
-  const shouldShowExpirationCountdown = box.openedAt && !isExpired && box.status !== 'COMPLETED' && box.status !== 'CLAIMED';
+  // Only show expiration countdown for opened boxes that are not claimed or approved
+  const shouldShowExpirationCountdown = box.openedAt && !isExpired && box.status !== 'COMPLETED' && box.status !== 'CLAIMED' && box.status !== 'APPROVED';
 
   return (
     <>
@@ -363,6 +365,28 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
               <p className="text-sm text-red-600 mb-1">Rejection reason:</p>
               <p className="text-sm text-red-800">{box.rejectionReason}</p>
+            </div>
+          )}
+
+          {/* Claimed status */}
+          {box.status === 'CLAIMED' && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+              <div className="flex items-center space-x-2 text-green-600 mb-2">
+                <Gift className="w-4 h-4" />
+                <span className="text-sm font-medium">Prize Claimed!</span>
+              </div>
+              <div className="text-sm text-gray-700">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Prize:</span>
+                  <span>{box.prizeName}</span>
+                </div>
+                {box.priceAmount && (
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="font-medium">Value:</span>
+                    <span className="text-green-600 font-semibold">${box.priceAmount}</span>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -676,6 +700,118 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
           }}
         />
       )}
+
+      {/* Congratulations Modal */}
+      <AnimatePresence>
+        {showCongratsModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            onClick={(e) => e.target === e.currentTarget && setShowCongratsModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 20 }}
+              className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden"
+            >
+              {/* Celebration Header */}
+              <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-yellow-400 p-8 text-center relative overflow-hidden">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                  className="text-6xl mb-4"
+                >
+                  🎉
+                </motion.div>
+                <motion.h2
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-2xl font-bold text-white mb-2"
+                >
+                  Congratulations!
+                </motion.h2>
+                <motion.p
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-white/90 text-lg"
+                >
+                  You've earned your prize!
+                </motion.p>
+                
+                {/* Floating particles */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  {[...Array(6)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ y: 100, opacity: 0, rotate: 0 }}
+                      animate={{ 
+                        y: -100, 
+                        opacity: [0, 1, 0], 
+                        rotate: 360,
+                        x: [0, Math.random() * 40 - 20]
+                      }}
+                      transition={{ 
+                        duration: 3, 
+                        delay: i * 0.2,
+                        repeat: Infinity,
+                        repeatDelay: 2
+                      }}
+                      className={`absolute text-2xl ${
+                        i % 3 === 0 ? 'left-1/4' : i % 3 === 1 ? 'left-1/2' : 'left-3/4'
+                      }`}
+                      style={{ top: '100%' }}
+                    >
+                      {['✨', '🎊', '💎', '🏆', '🎁', '⭐'][i]}
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Prize Details */}
+              <div className="p-6">
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-2xl p-4 mb-6"
+                >
+                  <div className="text-center">
+                    <div className="text-4xl mb-3">🎁</div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">{box.prizeName}</h3>
+                    {box.priceAmount && (
+                      <div className="text-2xl font-bold text-purple-600">
+                        ${box.priceAmount}
+                      </div>
+                    )}
+                    {box.prizeDescription && (
+                      <p className="text-gray-600 text-sm mt-2">{box.prizeDescription}</p>
+                    )}
+                  </div>
+                </motion.div>
+                
+                <motion.button
+                   initial={{ y: 20, opacity: 0 }}
+                   animate={{ y: 0, opacity: 1 }}
+                   transition={{ delay: 0.6 }}
+                   onClick={() => {
+                     setShowCongratsModal(false);
+                     toast.success('Prize claimed successfully!');
+                   }}
+                   className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-200 transform hover:scale-105"
+                 >
+                   Awesome! 🎉
+                 </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

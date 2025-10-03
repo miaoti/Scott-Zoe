@@ -494,6 +494,8 @@ public class SurpriseBoxController {
         response.put("priceAmount", box.getPriceAmount());
         response.put("taskDescription", box.getTaskDescription());
         response.put("expirationMinutes", box.getExpirationMinutes());
+        response.put("approvedAt", box.getApprovedAt());
+        response.put("shouldStopCountdown", box.shouldStopCountdown());
         
         if (box.getOwner() != null) {
             Map<String, Object> ownerMap = new HashMap<>();

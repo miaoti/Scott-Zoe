@@ -522,8 +522,11 @@ public class SurpriseBoxService {
     public void markBoxesAsExpired() {
         List<SurpriseBox> expiredBoxes = getExpiredBoxes();
         for (SurpriseBox box : expiredBoxes) {
-            box.setStatus(SurpriseBox.BoxStatus.EXPIRED);
-            surpriseBoxRepository.save(box);
+            // Don't mark approved boxes as expired
+            if (box.getStatus() != SurpriseBox.BoxStatus.APPROVED) {
+                box.setStatus(SurpriseBox.BoxStatus.EXPIRED);
+                surpriseBoxRepository.save(box);
+            }
         }
     }
     
@@ -547,7 +550,9 @@ public class SurpriseBoxService {
     @Transactional
     public SurpriseBox markAsExpired(Long boxId) {
         SurpriseBox box = findById(boxId);
-        if (box != null && !box.getStatus().equals(SurpriseBox.BoxStatus.CLAIMED) && !box.getStatus().equals(SurpriseBox.BoxStatus.EXPIRED)) {
+        if (box != null && !box.getStatus().equals(SurpriseBox.BoxStatus.CLAIMED) && 
+            !box.getStatus().equals(SurpriseBox.BoxStatus.EXPIRED) && 
+            !box.getStatus().equals(SurpriseBox.BoxStatus.APPROVED)) {
             box.setStatus(SurpriseBox.BoxStatus.EXPIRED);
             return surpriseBoxRepository.save(box);
         }
@@ -583,7 +588,7 @@ public class SurpriseBoxService {
         allBoxes.addAll(waitingApprovalBoxes);
         
         return allBoxes.stream()
-            .filter(box -> box.isExpired())
+            .filter(box -> box.isExpired() && box.getStatus() != SurpriseBox.BoxStatus.APPROVED)
             .collect(Collectors.toList());
     }
     
