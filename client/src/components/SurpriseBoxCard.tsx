@@ -126,7 +126,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
 
   // For RECIPIENTS (not owner)
   const canOpen = !isOwner && box.status === 'DROPPED' && !box.isExpired;
-  const canComplete = !isOwner && box.status === 'OPENED' && !isExpired(box.expiresAt);
+  const canComplete = !isOwner && box.status === 'OPENED' && !box.isExpired;
   
   // For recipients: can claim if box is approved and not expired
   // TEMPORARY: Simplified condition for debugging

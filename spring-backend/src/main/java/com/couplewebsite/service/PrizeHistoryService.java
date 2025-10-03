@@ -39,7 +39,7 @@ public class PrizeHistoryService {
         prizeHistory.setBox(box);
         prizeHistory.setRecipient(box.getRecipient());
         prizeHistory.setPrizeName(box.getPrizeName());
-        prizeHistory.setPrizeDescription(box.getPrizeDescription());
+        prizeHistory.setTaskDescription(box.getTaskDescription()); // Fix: Set the required taskDescription
         prizeHistory.setCompletionType(box.getCompletionType());
         prizeHistory.setClaimedAt(box.getClaimedAt() != null ? box.getClaimedAt() : LocalDateTime.now());
         
