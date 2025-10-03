@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import DroppingBox from './DroppingBox';
 import { useSurpriseBoxStore } from '../stores/surpriseBoxStore';
 import { useAuth } from "../contexts/AuthContext";
@@ -22,10 +22,21 @@ interface DroppingBoxData {
 const BoxDropManager: React.FC = () => {
   const [droppingBoxes, setDroppingBoxes] = useState<DroppingBoxData[]>([]);
   const [activeDrops, setActiveDrops] = useState<Set<number>>(new Set());
+  const activeDropsRef = useRef<Set<number>>(new Set());
+  const droppingBoxesRef = useRef<DroppingBoxData[]>([]);
   const { loadDroppingBoxes } = useSurpriseBoxStore();
   const { user } = useAuth();
   
   console.log('BoxDropManager: Component mounted/rendered, user:', user);
+  
+  // Keep refs in sync with state
+  useEffect(() => {
+    activeDropsRef.current = activeDrops;
+  }, [activeDrops]);
+  
+  useEffect(() => {
+    droppingBoxesRef.current = droppingBoxes;
+  }, [droppingBoxes]);
 
   // Check for boxes that should be dropping
   const checkForDroppingBoxes = useCallback(async () => {
@@ -45,50 +56,52 @@ const BoxDropManager: React.FC = () => {
       // Filter out boxes that are already actively dropping or have been claimed
       const boxesToDrop = boxes.filter(box => {
         // Don't add if already actively dropping
-        if (activeDrops.has(box.id)) {
+        if (activeDropsRef.current.has(box.id)) {
           return false;
         }
         
         // Don't add if already in dropping boxes list
-        const isAlreadyDropping = droppingBoxes.some(droppingBox => droppingBox.id === box.id);
+        const isAlreadyDropping = droppingBoxesRef.current.some(droppingBox => droppingBox.id === box.id);
         if (isAlreadyDropping) {
           return false;
         }
         
-        // Only add boxes with CREATED status (backend should filter this, but double-check)
+        // Only add boxes that should be dropping
         return true;
       });
       
       console.log('BoxDropManager: Boxes ready to drop (filtered):', boxesToDrop);
-      console.log('BoxDropManager: Currently active drops:', Array.from(activeDrops));
+      console.log('BoxDropManager: Currently active drops:', Array.from(activeDropsRef.current));
       
       if (boxesToDrop.length > 0) {
         console.log('BoxDropManager: Adding boxes to dropping animation');
-        setDroppingBoxes(prev => [...prev, ...boxesToDrop]);
         
-        // Mark these boxes as actively dropping
+        // Update active drops
         setActiveDrops(prev => {
           const newSet = new Set(prev);
           boxesToDrop.forEach(box => newSet.add(box.id));
           console.log('BoxDropManager: Updated active drops:', Array.from(newSet));
           return newSet;
         });
+        
+        // Add boxes to dropping list
+        setDroppingBoxes(prev => [...prev, ...boxesToDrop]);
       } else {
         console.log('BoxDropManager: No new boxes to drop');
       }
     } catch (error) {
       console.error('BoxDropManager: Error checking for dropping boxes:', error);
     }
-  }, [loadDroppingBoxes, user?.id, activeDrops, droppingBoxes]);
+  }, [loadDroppingBoxes, user?.id]);
 
   // Don't render if user is not logged in
   if (!user?.id) {
     return null;
   }
 
-  // Check for dropping boxes every 2 seconds
+  // Check for dropping boxes every 5 seconds (reduced frequency to prevent spam)
   useEffect(() => {
-    const interval = setInterval(checkForDroppingBoxes, 2000);
+    const interval = setInterval(checkForDroppingBoxes, 5000);
     
     // Initial check
     checkForDroppingBoxes();

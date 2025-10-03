@@ -306,8 +306,8 @@ public class SurpriseBoxService {
         SurpriseBox box = surpriseBoxRepository.findById(boxId)
                 .orElseThrow(() -> new RuntimeException("Box not found"));
         
-        logger.debug("activateBox: Found box {} - Current status: {}", 
-            box.getId(), box.getStatus());
+        logger.debug("activateBox: Found box {} - Current status: {}, ClaimedAt: {}", 
+            box.getId(), box.getStatus(), box.getClaimedAt());
         
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -317,17 +317,25 @@ public class SurpriseBoxService {
             throw new RuntimeException("User is not the recipient of this box");
         }
         
-        // Only allow activation if box is dropped
+        // Only allow activation if box is dropped and not already activated
         if (!box.getStatus().equals(SurpriseBox.BoxStatus.DROPPED)) {
             logger.warn("activateBox: Box {} is not in DROPPED status, current status: {}", boxId, box.getStatus());
             throw new RuntimeException("Box cannot be activated in current status: " + box.getStatus());
         }
         
-        // Keep the box in DROPPED status but mark it as available for interaction
-        // The box will become active for the recipient without being claimed
+        // Check if already activated (claimedAt is set)
+        if (box.getClaimedAt() != null) {
+            logger.debug("activateBox: Box {} is already activated at {}", boxId, box.getClaimedAt());
+            return box; // Already activated, return as-is
+        }
+        
+        // Mark as activated by setting claimedAt timestamp while keeping DROPPED status
+        // This allows the box to be considered "active" for the recipient
+        box.setClaimedAt(LocalDateTime.now());
+        
         SurpriseBox savedBox = surpriseBoxRepository.save(box);
-        logger.debug("activateBox: Successfully activated box {} - Status remains: {}", 
-            savedBox.getId(), savedBox.getStatus());
+        logger.debug("activateBox: Successfully activated box {} - Status: {}, ClaimedAt: {}", 
+            savedBox.getId(), savedBox.getStatus(), savedBox.getClaimedAt());
         
         return savedBox;
     }
@@ -390,13 +398,14 @@ public class SurpriseBoxService {
         User recipient = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
         
-        // Find DROPPED boxes that are currently in dropping phase and not claimed
+        // Find DROPPED boxes that are currently in dropping phase and not fully claimed
+        // Note: claimedAt may be set for activated boxes, but status should still be DROPPED
         List<SurpriseBox> droppingBoxes = surpriseBoxRepository.findByRecipientAndStatusAndDropAtBefore(
             recipient, 
             SurpriseBox.BoxStatus.DROPPED, 
             now
         ).stream()
-        .filter(box -> box.getIsDropping() && box.getClaimedAt() == null)
+        .filter(box -> box.getIsDropping() && box.getStatus().equals(SurpriseBox.BoxStatus.DROPPED))
         .collect(Collectors.toList());
         
         logger.debug("getDroppingBoxes: Found {} boxes ready to drop for user {}", droppingBoxes.size(), userId);
@@ -469,10 +478,10 @@ public class SurpriseBoxService {
     }
     
     public List<SurpriseBox> findDroppedBoxesForIntermittentCycle() {
-        // Only return DROPPED boxes that haven't been claimed yet
+        // Only return DROPPED boxes that haven't been fully claimed yet (status is still DROPPED)
         return surpriseBoxRepository.findByStatusAndNextDropTimeIsNotNull()
                 .stream()
-                .filter(box -> box.getClaimedAt() == null)
+                .filter(box -> box.getStatus().equals(SurpriseBox.BoxStatus.DROPPED))
                 .collect(Collectors.toList());
     }
     
