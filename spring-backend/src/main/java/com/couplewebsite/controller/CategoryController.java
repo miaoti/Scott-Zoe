@@ -179,6 +179,32 @@ public class CategoryController {
     }
     
     /**
+     * Test endpoint with path parameter to isolate Railway routing issue
+     */
+    @GetMapping("/test/{id}")
+    public ResponseEntity<?> testPathParameter(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Path parameter test working");
+        response.put("receivedId", id);
+        response.put("timestamp", java.time.LocalDateTime.now().toString());
+        logger.info("Test path parameter endpoint called with ID: {}", id);
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * Test endpoint with nested path parameters to match photos endpoint structure
+     */
+    @GetMapping("/test/{categoryId}/items")
+    public ResponseEntity<?> testNestedPathParameter(@PathVariable Long categoryId) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Nested path parameter test working");
+        response.put("receivedCategoryId", categoryId);
+        response.put("timestamp", java.time.LocalDateTime.now().toString());
+        logger.info("Test nested path parameter endpoint called with categoryId: {}", categoryId);
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
      * Simple count endpoint to check if categories exist
      */
     @GetMapping("/admin/count")
