@@ -268,23 +268,36 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
           
           {/* Desktop: Show memory details */}
           {hasMemories && (
-            <div className="hidden md:flex flex-col items-center space-y-0.5 mt-1 w-full px-1">
-              {dayMemories.slice(0, 2).map((memory, index) => (
-                <div key={memory.id} className="flex items-center justify-center w-full">
-                  <span className="text-xs mr-1">{getTypeIcon(memory.type)}</span>
-                  <span className={`text-xs truncate max-w-12 ${
-                    isToday ? 'text-white' : 'text-blue-700'
+            <div className="hidden md:flex flex-col items-center justify-center mt-1 w-full px-1 min-h-0 flex-1">
+              {dayMemories.length <= 2 ? (
+                // Show all memories when 2 or fewer
+                dayMemories.map((memory, index) => (
+                  <div key={memory.id} className="flex items-center justify-center w-full mb-0.5 last:mb-0">
+                    <span className="text-xs mr-1">{getTypeIcon(memory.type)}</span>
+                    <span className={`text-xs truncate max-w-12 ${
+                      isToday ? 'text-white' : 'text-blue-700'
+                    }`}>
+                      {memory.title}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                // Show first memory + overflow indicator when 3 or more
+                <>
+                  <div className="flex items-center justify-center w-full mb-0.5">
+                    <span className="text-xs mr-1">{getTypeIcon(dayMemories[0].type)}</span>
+                    <span className={`text-xs truncate max-w-12 ${
+                      isToday ? 'text-white' : 'text-blue-700'
+                    }`}>
+                      {dayMemories[0].title}
+                    </span>
+                  </div>
+                  <span className={`text-xs font-semibold ${
+                    isToday ? 'text-white' : 'text-blue-600'
                   }`}>
-                    {memory.title}
+                    +{dayMemories.length - 1}
                   </span>
-                </div>
-              ))}
-              {dayMemories.length > 2 && (
-                <span className={`text-xs font-medium ${
-                  isToday ? 'text-white opacity-90' : 'text-blue-500'
-                }`}>
-                  +{dayMemories.length - 2}
-                </span>
+                </>
               )}
             </div>
           )}
