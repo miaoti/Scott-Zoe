@@ -37,6 +37,7 @@ C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\config\WebSocketConfig.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\repository\SavedOpportunityRepository.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\config\DatabaseConfig.java
+C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\config\RailwayConfig.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\config\StaticResourceSecurityConfig.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\repository\WheelPrizeRepository.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\repository\SurpriseBoxRepository.java
@@ -46,6 +47,7 @@ C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\security\CustomUserDetailsService.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\dto\LoginResponse.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\controller\LoveController.java
+C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\config\JpaConfig.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\service\SurpriseBoxSchedulerService.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\controller\SurpriseBoxWebSocketController.java
 C:\Users\Miao\Documents\Scott-Zoe\spring-backend\src\main\java\com\couplewebsite\controller\CategoryController.java

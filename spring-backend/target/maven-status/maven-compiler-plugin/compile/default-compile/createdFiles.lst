@@ -27,6 +27,7 @@ com\couplewebsite\repository\PhotoRepository.class
 com\couplewebsite\security\JwtAuthenticationFilter.class
 com\couplewebsite\service\PhotoService.class
 com\couplewebsite\repository\SettingsRepository.class
+com\couplewebsite\config\JpaConfig.class
 com\couplewebsite\dto\LoginResponse$UserInfo.class
 com\couplewebsite\config\SecurityConfig.class
 com\couplewebsite\config\DatabaseConfig.class
@@ -57,6 +58,7 @@ com\couplewebsite\entity\Photo.class
 com\couplewebsite\entity\Settings.class
 com\couplewebsite\controller\LoveController.class
 com\couplewebsite\config\WebConfig$1.class
+com\couplewebsite\config\RailwayConfig.class
 com\couplewebsite\entity\User.class
 com\couplewebsite\entity\WheelPrizeTemplate.class
 com\couplewebsite\service\SavedOpportunityService.class
