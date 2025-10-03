@@ -29,7 +29,7 @@ public interface SurpriseBoxRepository extends JpaRepository<SurpriseBox, Long> 
     /**
      * Find active box owned by user (only one active box per user)
      */
-    @Query("SELECT sb FROM SurpriseBox sb WHERE sb.owner = :owner AND sb.status NOT IN ('CLAIMED', 'EXPIRED') AND (sb.openedAt IS NULL OR FUNCTION('TIMESTAMPADD', MINUTE, sb.expirationMinutes, sb.openedAt) >= CURRENT_TIMESTAMP)")
+    @Query("SELECT sb FROM SurpriseBox sb WHERE sb.owner = :owner AND sb.status NOT IN ('CLAIMED', 'EXPIRED') AND (sb.openedAt IS NULL OR FUNCTION('TIMESTAMPADD', MINUTE, sb.expirationMinutes, sb.openedAt) > CURRENT_TIMESTAMP)")
     Optional<SurpriseBox> findActiveBoxByOwner(@Param("owner") User owner);
     
     /**
@@ -59,7 +59,7 @@ public interface SurpriseBoxRepository extends JpaRepository<SurpriseBox, Long> 
     /**
      * Check if user has an active box as owner
      */
-    @Query("SELECT COUNT(sb) > 0 FROM SurpriseBox sb WHERE sb.owner = :owner AND sb.status NOT IN ('CLAIMED', 'EXPIRED') AND (sb.openedAt IS NULL OR FUNCTION('TIMESTAMPADD', MINUTE, sb.expirationMinutes, sb.openedAt) >= CURRENT_TIMESTAMP)")
+    @Query("SELECT COUNT(sb) > 0 FROM SurpriseBox sb WHERE sb.owner = :owner AND sb.status NOT IN ('CLAIMED', 'EXPIRED') AND (sb.openedAt IS NULL OR FUNCTION('TIMESTAMPADD', MINUTE, sb.expirationMinutes, sb.openedAt) > CURRENT_TIMESTAMP)")
     boolean hasActiveBoxAsOwner(@Param("owner") User owner);
     
     // New method for finding active boxes for recipients (OPENED, WAITING_APPROVAL, APPROVED, or activated DROPPED boxes)
@@ -93,7 +93,7 @@ public interface SurpriseBoxRepository extends JpaRepository<SurpriseBox, Long> 
     /**
      * Count active boxes excluding expired ones
      */
-    @Query("SELECT COUNT(sb) FROM SurpriseBox sb WHERE sb.status IN :statuses AND (sb.openedAt IS NULL OR FUNCTION('TIMESTAMPADD', MINUTE, sb.expirationMinutes, sb.openedAt) >= CURRENT_TIMESTAMP)")
+    @Query("SELECT COUNT(sb) FROM SurpriseBox sb WHERE sb.status IN :statuses AND (sb.openedAt IS NULL OR FUNCTION('TIMESTAMPADD', MINUTE, sb.expirationMinutes, sb.openedAt) > CURRENT_TIMESTAMP)")
     long countActiveBoxesExcludingExpired(@Param("statuses") List<SurpriseBox.BoxStatus> statuses);
     
     /**
