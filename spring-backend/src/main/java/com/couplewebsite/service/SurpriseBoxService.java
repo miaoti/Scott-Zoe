@@ -312,9 +312,14 @@ public class SurpriseBoxService {
     /**
      * Check if user has active box
      */
-    public boolean hasActiveBox(User owner) {
+    public boolean hasActiveBox(User user) {
         // Check for active boxes as owner (created boxes that are not yet claimed/expired)
-        return surpriseBoxRepository.hasActiveBoxAsOwner(owner);
+        boolean hasActiveAsOwner = surpriseBoxRepository.hasActiveBoxAsOwner(user);
+        
+        // Also check for active boxes as recipient (OPENED, WAITING_APPROVAL, APPROVED, or activated DROPPED boxes)
+        boolean hasActiveAsRecipient = surpriseBoxRepository.hasActiveBoxAsRecipient(user);
+        
+        return hasActiveAsOwner || hasActiveAsRecipient;
     }
 
     /**
