@@ -628,7 +628,7 @@ public class SurpriseBoxService {
      * Count active boxes (not completed, cancelled, or expired)
      */
     public long countActiveBoxes() {
-        return surpriseBoxRepository.countByStatusIn(
+        return surpriseBoxRepository.countActiveBoxesExcludingExpired(
             List.of(SurpriseBox.BoxStatus.CREATED, SurpriseBox.BoxStatus.DROPPED, SurpriseBox.BoxStatus.WAITING_APPROVAL));
     }
     
