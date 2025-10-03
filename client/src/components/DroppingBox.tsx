@@ -20,7 +20,7 @@ interface DroppingBoxProps {
 const DroppingBox: React.FC<DroppingBoxProps> = ({ box, onClaim, onAnimationComplete }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [isClicked, setIsClicked] = useState(false);
-  const { claimBox } = useSurpriseBoxStore();
+  const { activateBox } = useSurpriseBoxStore();
   const { showToast } = useToast();
 
   const handleClick = async () => {
@@ -28,12 +28,12 @@ const DroppingBox: React.FC<DroppingBoxProps> = ({ box, onClaim, onAnimationComp
     
     setIsClicked(true);
     try {
-      await claimBox(box.id);
+      await activateBox(box.id);
       // Show success message
-      showToast('You have got a box! 🎁', 'general', 3000);
+      showToast('Box is now active! Open it to see the task 📦', 'general', 3000);
       onClaim(box.id);
     } catch (error) {
-      console.error('Failed to claim box:', error);
+      console.error('Failed to activate box:', error);
       setIsClicked(false);
       // Show error message
       showToast('Failed to claim box. Please try again.', 'general', 3000);

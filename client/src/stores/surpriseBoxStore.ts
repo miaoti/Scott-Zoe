@@ -103,6 +103,7 @@ interface SurpriseBoxState {
   loadActiveBox: () => Promise<void>;
   loadDroppedBoxes: () => Promise<void>;
   loadDroppingBoxes: (userId: number) => Promise<SurpriseBox[]>;
+  activateBox: (boxId: number) => Promise<void>;
   claimBox: (boxId: number) => Promise<void>;
   openBox: (boxId: number, completionData: string) => Promise<void>;
   completeBox: (boxId: number, completionData: string) => Promise<void>;
@@ -356,6 +357,47 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
     } catch (error) {
       console.error('Failed to load dropping boxes:', error);
       return [];
+    }
+  },
+
+  activateBox: async (boxId) => {
+    console.log('activateBox: Starting activation process for boxId:', boxId);
+    set({ isLoading: true, error: null });
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
+      // Get user ID from token payload
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.userId;
+      
+      if (!userId) {
+        throw new Error('User information not found in token');
+      }
+      
+      console.log('activateBox: Calling API to activate box', boxId, 'for user', userId);
+      const response = await axios.post(`${API_BASE_URL}/surprise-boxes/activate/${boxId}?userId=${userId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      console.log('activateBox: API response:', response.data);
+      
+      // Refresh boxes and active box
+      console.log('activateBox: Refreshing box data after activation');
+      await Promise.all([
+        get().loadDroppedBoxes(),
+        get().loadReceivedBoxes(),
+        get().loadActiveBox()
+      ]);
+      
+      console.log('activateBox: Activation process completed successfully');
+    } catch (error: any) {
+      console.error('activateBox: Error during activation process:', error);
+      set({ error: error.response?.data?.message || 'Failed to activate box' });
+    } finally {
+      set({ isLoading: false });
     }
   },
 

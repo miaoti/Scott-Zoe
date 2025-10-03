@@ -410,6 +410,24 @@ public class SurpriseBoxController {
         }
     }
     
+    /**
+     * Activate a box when recipient clicks on it (makes it available for interaction without claiming)
+     */
+    @PostMapping("/activate/{boxId}")
+    public ResponseEntity<?> activateBox(@PathVariable Long boxId, @RequestParam Long userId) {
+        try {
+            SurpriseBox activatedBox = surpriseBoxService.activateBox(boxId, userId);
+            return ResponseEntity.ok(createBoxResponse(activatedBox));
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+    
+    /**
+     * Claim a box after the full workflow is completed (open -> complete -> approve)
+     */
     @PostMapping("/claim/{boxId}")
     public ResponseEntity<?> claimBox(@PathVariable Long boxId, @RequestParam Long userId) {
         try {

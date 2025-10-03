@@ -298,10 +298,45 @@ public class SurpriseBoxService {
     }
 
     /**
-     * Claim a box when recipient clicks on it from dashboard
+     * Activate a box when recipient clicks on it from dashboard (makes it available for interaction)
+     */
+    public SurpriseBox activateBox(Long boxId, Long userId) {
+        logger.debug("activateBox: Starting activation process for boxId {} by userId {}", boxId, userId);
+        
+        SurpriseBox box = surpriseBoxRepository.findById(boxId)
+                .orElseThrow(() -> new RuntimeException("Box not found"));
+        
+        logger.debug("activateBox: Found box {} - Current status: {}", 
+            box.getId(), box.getStatus());
+        
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Verify the user is the recipient
+        if (!box.getRecipient().getId().equals(userId)) {
+            throw new RuntimeException("User is not the recipient of this box");
+        }
+        
+        // Only allow activation if box is dropped
+        if (!box.getStatus().equals(SurpriseBox.BoxStatus.DROPPED)) {
+            logger.warn("activateBox: Box {} is not in DROPPED status, current status: {}", boxId, box.getStatus());
+            throw new RuntimeException("Box cannot be activated in current status: " + box.getStatus());
+        }
+        
+        // Keep the box in DROPPED status but mark it as available for interaction
+        // The box will become active for the recipient without being claimed
+        SurpriseBox savedBox = surpriseBoxRepository.save(box);
+        logger.debug("activateBox: Successfully activated box {} - Status remains: {}", 
+            savedBox.getId(), savedBox.getStatus());
+        
+        return savedBox;
+    }
+    
+    /**
+     * Actually claim a box after the full workflow is completed (open -> complete -> approve)
      */
     public SurpriseBox claimBox(Long boxId, Long userId) {
-        logger.debug("claimBox: Starting claim process for boxId {} by userId {}", boxId, userId);
+        logger.debug("claimBox: Starting final claim process for boxId {} by userId {}", boxId, userId);
         
         SurpriseBox box = surpriseBoxRepository.findById(boxId)
                 .orElseThrow(() -> new RuntimeException("Box not found"));
@@ -317,13 +352,18 @@ public class SurpriseBoxService {
             throw new RuntimeException("User is not the recipient of this box");
         }
         
-        // Only allow claiming if box is dropped and not yet claimed
-        if (!box.getStatus().equals(SurpriseBox.BoxStatus.DROPPED)) {
-            logger.warn("claimBox: Box {} is not in DROPPED status, current status: {}", boxId, box.getStatus());
+        // Only allow final claiming if box has been approved (status should be WAITING_APPROVAL and approved)
+        if (!box.getStatus().equals(SurpriseBox.BoxStatus.WAITING_APPROVAL)) {
+            logger.warn("claimBox: Box {} is not in WAITING_APPROVAL status, current status: {}", boxId, box.getStatus());
             throw new RuntimeException("Box cannot be claimed in current status: " + box.getStatus());
         }
         
-        // Set claimed timestamp and update status
+        // Check if the completion has been approved (rejectionReason should be null)
+        if (box.getRejectionReason() != null) {
+            throw new RuntimeException("Box completion was rejected and cannot be claimed");
+        }
+        
+        // Set claimed timestamp and update status to CLAIMED
         box.setClaimedAt(LocalDateTime.now());
         box.setStatus(SurpriseBox.BoxStatus.CLAIMED);
         

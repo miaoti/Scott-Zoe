@@ -73,6 +73,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
     approveCompletion,
     rejectCompletion,
     cancelBox,
+    claimBox,
     isLoading
   } = useSurpriseBoxStore();
   
@@ -122,6 +123,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   const canOpen = !isOwner && box.status === 'DROPPED' && !box.isExpired;
   const canComplete = !isOwner && box.status === 'OPENED' && !box.isExpired;
   const canApprove = isOwner && box.status === 'WAITING_APPROVAL';
+  const canClaim = !isOwner && box.status === 'WAITING_APPROVAL' && !box.rejectionReason;
   const canCancel = isOwner && ['CREATED', 'DROPPED'].includes(box.status);
   const canEdit = isOwner && box.status === 'CREATED';
 
@@ -173,6 +175,14 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
       } catch (error) {
         // Error handled by store
       }
+    }
+  };
+
+  const handleClaim = async () => {
+    try {
+      await claimBox(box.id);
+    } catch (error) {
+      // Error handled by store
     }
   };
 
@@ -359,6 +369,17 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                   <X className="w-4 h-4" />
                 </button>
               </>
+            )}
+            
+            {canClaim && (
+              <button
+                onClick={handleClaim}
+                disabled={isLoading}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 font-medium disabled:opacity-50 flex items-center justify-center space-x-1"
+              >
+                <Gift className="w-4 h-4" />
+                <span>{isLoading ? 'Claiming...' : 'Claim Prize'}</span>
+              </button>
             )}
             
             {canEdit && (
