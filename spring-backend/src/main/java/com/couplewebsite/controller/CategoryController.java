@@ -205,6 +205,19 @@ public class CategoryController {
     }
     
     /**
+     * Test endpoint that exactly mimics the photos endpoint structure
+     */
+    @GetMapping("/{categoryId}/test-photos")
+    public ResponseEntity<?> testPhotosEndpoint(@PathVariable Long categoryId) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Test photos endpoint working");
+        response.put("receivedCategoryId", categoryId);
+        response.put("timestamp", java.time.LocalDateTime.now().toString());
+        logger.info("Test photos endpoint called with categoryId: {}", categoryId);
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
      * Simple count endpoint to check if categories exist
      */
     @GetMapping("/admin/count")
