@@ -311,8 +311,8 @@ function RecycleBin() {
           {/* Photos Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {deletedPhotos.map((photo) => (
-              <div key={photo.id} className="bg-white rounded-lg shadow-md overflow-hidden border">
-                <div className="relative">
+              <div key={photo.id} className="bg-white rounded-lg shadow-md overflow-hidden border flex flex-col h-full">
+                <div className="relative flex-shrink-0">
                   <img
                     src={`/api/photos/image/${photo.filename}`}
                     alt={photo.originalName}
@@ -332,7 +332,7 @@ function RecycleBin() {
                   </div>
                 </div>
                 
-                <div className="p-4">
+                <div className="p-4 flex flex-col h-full">
                   <h3 className="font-medium text-gray-900 mb-1 truncate">
                     {photo.originalName}
                   </h3>
@@ -364,21 +364,21 @@ function RecycleBin() {
                     </div>
                   )}
                   
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mt-auto">
                     <button
                       onClick={() => handleRecoverPhoto(photo.id)}
-                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors duration-200 min-h-[36px]"
                     >
-                      <RotateCcw className="h-3 w-3" />
-                      Recover
+                      <RotateCcw className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">Recover</span>
                     </button>
                     
                     <button
                       onClick={() => handlePermanentDelete(photo.id)}
-                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors duration-200 min-h-[36px]"
                     >
-                      <Trash2 className="h-3 w-3" />
-                      Delete
+                      <Trash2 className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">Delete</span>
                     </button>
                   </div>
                 </div>
