@@ -197,6 +197,7 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
     // Create date string directly to avoid timezone conversion issues
     const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayMemories = memoriesByDay[day] || [];
+    console.log('📅 Calendar day clicked:', { day, dateString, memoriesCount: dayMemories.length, memories: dayMemories });
     onDayClick(dateString, dayMemories);
   };
   

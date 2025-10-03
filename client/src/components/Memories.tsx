@@ -262,14 +262,23 @@ function Memories() {
     if (!confirm('Are you sure you want to delete this memory?')) return;
 
     try {
+      console.log('🗑️ Deleting memory with ID:', id);
+      console.log('📋 Current selectedDayMemories before deletion:', selectedDayMemories);
+      
       await api.delete(`/api/memories/${id}`);
+      console.log('✅ Memory deleted successfully from backend');
       
       // Update selectedDayMemories to remove the deleted memory immediately
-      setSelectedDayMemories(prev => prev.filter(memory => memory.id !== id));
+      setSelectedDayMemories(prev => {
+        const updated = prev.filter(memory => memory.id !== id);
+        console.log('🔄 Updated selectedDayMemories after deletion:', updated);
+        return updated;
+      });
       
       await fetchMemories();
+      console.log('🔄 Memories refetched successfully');
     } catch (error) {
-      console.error('Error deleting memory:', error);
+      console.error('❌ Error deleting memory:', error);
       alert('Error deleting memory. Please try again.');
     }
   };
@@ -307,10 +316,12 @@ function Memories() {
     setShowPhotoModal(false);
   };
 
-  const handleDayClick = (date: string, memories: Memory[]) => {
+  const handleDayClick = (date: string, dayMemories: Memory[]) => {
+    console.log('🎯 Day clicked in Memories component:', { date, memoriesCount: dayMemories.length, memories: dayMemories });
     setSelectedDate(date);
-    setSelectedDayMemories(memories);
+    setSelectedDayMemories(dayMemories);
     setShowDayModal(true);
+    console.log('✅ Modal state updated - showDayModal: true');
   };
 
   const getTypeIcon = (type: string) => {
