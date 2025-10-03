@@ -249,6 +249,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   },
   
   loadReceivedBoxes: async () => {
+    console.log('loadReceivedBoxes: Starting to load received boxes');
     set({ isLoading: true, error: null });
     try {
       const token = localStorage.getItem('token');
@@ -256,6 +257,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       const payload = JSON.parse(atob(token?.split('.')[1] || ''));
       const userId = payload.userId; // Use userId claim, not sub (which is username)
       
+      console.log('loadReceivedBoxes: Loading for userId:', userId);
       const response = await fetch(`${API_BASE_URL}/surprise-boxes/received/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -268,8 +270,10 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       }
       
       const boxes = await response.json();
+      console.log('loadReceivedBoxes: Received boxes from API:', boxes);
       set({ receivedBoxes: boxes, isLoading: false });
     } catch (error) {
+      console.error('loadReceivedBoxes: Error loading received boxes:', error);
       set({ error: error instanceof Error ? error.message : 'Failed to load received boxes', isLoading: false });
     }
   },
@@ -354,6 +358,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   },
 
   claimBox: async (boxId) => {
+    console.log('claimBox: Starting claim process for boxId:', boxId);
     set({ isLoading: true, error: null });
     try {
       const token = localStorage.getItem('token');
@@ -369,17 +374,24 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
         throw new Error('User information not found in token');
       }
       
-      await axios.post(`${API_BASE_URL}/surprise-boxes/claim/${boxId}?userId=${userId}`, {}, {
+      console.log('claimBox: Calling API to claim box', boxId, 'for user', userId);
+      const response = await axios.post(`${API_BASE_URL}/surprise-boxes/claim/${boxId}?userId=${userId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
+      console.log('claimBox: API response:', response.data);
+      
       // Refresh boxes and active box
+      console.log('claimBox: Refreshing box data after claim');
       await Promise.all([
         get().loadDroppedBoxes(),
         get().loadReceivedBoxes(),
         get().loadActiveBox()
       ]);
+      
+      console.log('claimBox: Claim process completed successfully');
     } catch (error: any) {
+      console.error('claimBox: Error during claim process:', error);
       set({ error: error.response?.data?.message || 'Failed to claim box' });
     } finally {
       set({ isLoading: false });

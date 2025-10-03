@@ -5,6 +5,8 @@ import com.couplewebsite.entity.SurpriseBox;
 import com.couplewebsite.entity.User;
 import com.couplewebsite.repository.SurpriseBoxRepository;
 import com.couplewebsite.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,8 @@ import java.util.Random;
 @Service
 @Transactional
 public class SurpriseBoxService {
+
+    private static final Logger logger = LoggerFactory.getLogger(SurpriseBoxService.class);
 
     @Autowired
     private SurpriseBoxRepository surpriseBoxRepository;
@@ -264,8 +268,13 @@ public class SurpriseBoxService {
      * Claim a box when recipient clicks on it from dashboard
      */
     public SurpriseBox claimBox(Long boxId, Long userId) {
+        logger.debug("claimBox: Starting claim process for boxId {} by userId {}", boxId, userId);
+        
         SurpriseBox box = surpriseBoxRepository.findById(boxId)
                 .orElseThrow(() -> new RuntimeException("Box not found"));
+        
+        logger.debug("claimBox: Found box {} - Current status: {}, ClaimedAt: {}", 
+            box.getId(), box.getStatus(), box.getClaimedAt());
         
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -277,6 +286,7 @@ public class SurpriseBoxService {
         
         // Only allow claiming if box is dropped and not yet claimed
         if (!box.getStatus().equals(SurpriseBox.BoxStatus.DROPPED)) {
+            logger.warn("claimBox: Box {} is not in DROPPED status, current status: {}", boxId, box.getStatus());
             throw new RuntimeException("Box cannot be claimed in current status: " + box.getStatus());
         }
         
@@ -284,7 +294,11 @@ public class SurpriseBoxService {
         box.setClaimedAt(LocalDateTime.now());
         box.setStatus(SurpriseBox.BoxStatus.CLAIMED);
         
-        return surpriseBoxRepository.save(box);
+        SurpriseBox savedBox = surpriseBoxRepository.save(box);
+        logger.debug("claimBox: Successfully claimed box {} - New status: {}, ClaimedAt: {}", 
+            savedBox.getId(), savedBox.getStatus(), savedBox.getClaimedAt());
+        
+        return savedBox;
     }
     
     /**
@@ -298,15 +312,27 @@ public class SurpriseBoxService {
      * Get boxes that are ready to drop for a user (as recipient)
      */
     public List<SurpriseBox> getDroppingBoxes(Long userId) {
-        // Get boxes where dropAt time has passed and they're ready to drop
+        // Get boxes that are in DROPPED status and currently dropping (isDropping = true)
         LocalDateTime now = LocalDateTime.now();
         User recipient = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
-        return surpriseBoxRepository.findByRecipientAndStatusAndDropAtBefore(
+        
+        // Find DROPPED boxes that are currently in dropping phase and not claimed
+        List<SurpriseBox> droppingBoxes = surpriseBoxRepository.findByRecipientAndStatusAndDropAtBefore(
             recipient, 
-            SurpriseBox.BoxStatus.CREATED, 
+            SurpriseBox.BoxStatus.DROPPED, 
             now
-        );
+        ).stream()
+        .filter(box -> box.getIsDropping() && box.getClaimedAt() == null)
+        .collect(Collectors.toList());
+        
+        logger.debug("getDroppingBoxes: Found {} boxes ready to drop for user {}", droppingBoxes.size(), userId);
+        for (SurpriseBox box : droppingBoxes) {
+            logger.debug("getDroppingBoxes: Box {} - Status: {}, DropAt: {}, ClaimedAt: {}, IsDropping: {}", 
+                box.getId(), box.getStatus(), box.getDropAt(), box.getClaimedAt(), box.getIsDropping());
+        }
+        
+        return droppingBoxes;
     }
     
     /**
@@ -370,7 +396,11 @@ public class SurpriseBoxService {
     }
     
     public List<SurpriseBox> findDroppedBoxesForIntermittentCycle() {
-        return surpriseBoxRepository.findByStatusAndNextDropTimeIsNotNull();
+        // Only return DROPPED boxes that haven't been claimed yet
+        return surpriseBoxRepository.findByStatusAndNextDropTimeIsNotNull()
+                .stream()
+                .filter(box -> box.getClaimedAt() == null)
+                .collect(Collectors.toList());
     }
     
     /**
