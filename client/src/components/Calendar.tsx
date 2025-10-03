@@ -42,7 +42,46 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
       setMemories(response.data);
     } catch (error) {
       console.error('Error fetching memories:', error);
-      setMemories([]);
+      // Add test data to verify display logic
+      const testMemories = [
+        {
+          id: 1,
+          title: 'Test Memory 1',
+          description: 'First test memory',
+          date: new Date().toISOString().split('T')[0], // Today's date
+          type: 'special_moment',
+          createdAt: new Date().toISOString(),
+          creator: { name: 'Test User' }
+        },
+        {
+          id: 2,
+          title: 'Test Memory 2',
+          description: 'Second test memory',
+          date: new Date().toISOString().split('T')[0], // Today's date
+          type: 'anniversary',
+          createdAt: new Date().toISOString(),
+          creator: { name: 'Test User' }
+        },
+        {
+          id: 3,
+          title: 'Test Memory 3',
+          description: 'Third test memory',
+          date: new Date().toISOString().split('T')[0], // Today's date
+          type: 'milestone',
+          createdAt: new Date().toISOString(),
+          creator: { name: 'Test User' }
+        },
+        {
+          id: 4,
+          title: 'Test Memory 4',
+          description: 'Fourth test memory',
+          date: new Date().toISOString().split('T')[0], // Today's date
+          type: 'event',
+          createdAt: new Date().toISOString(),
+          creator: { name: 'Test User' }
+        }
+      ];
+      setMemories(testMemories);
     } finally {
       setLoading(false);
     }
@@ -245,6 +284,13 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
           <span className={`text-sm md:text-base font-medium ${
             isToday ? 'text-white' : hasMemories ? 'text-blue-900' : 'text-gray-700'
           }`}>{day}</span>
+          
+          {/* Debug: Show memory count */}
+          {dayMemories.length > 0 && (
+            <div className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+              {dayMemories.length}
+            </div>
+          )}
           
           {/* Mobile: Show only dots for memories */}
           {hasMemories && (
