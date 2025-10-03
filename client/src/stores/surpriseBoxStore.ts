@@ -525,9 +525,10 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      // Refresh boxes and prize history
+      // Refresh boxes and prize history for both owner and recipient
       await Promise.all([
         get().loadOwnedBoxes(),
+        get().loadReceivedBoxes(), // Add this to refresh recipient's view
         get().loadPrizeHistory(),
         get().loadPrizeStats()
       ]);
@@ -562,8 +563,11 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      // Refresh boxes
-      await get().loadOwnedBoxes();
+      // Refresh boxes for both owner and recipient
+      await Promise.all([
+        get().loadOwnedBoxes(),
+        get().loadReceivedBoxes() // Add this to refresh recipient's view
+      ]);
     } catch (error: any) {
       set({ error: error.response?.data?.message || 'Failed to reject completion' });
     } finally {
@@ -591,8 +595,11 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      // Refresh boxes
-      await get().loadOwnedBoxes();
+      // Refresh boxes for both owner and recipient
+      await Promise.all([
+        get().loadOwnedBoxes(),
+        get().loadReceivedBoxes() // Add this to refresh recipient's view
+      ]);
     } catch (error: any) {
       set({ error: error.response?.data?.message || 'Failed to cancel box' });
     } finally {
