@@ -863,7 +863,24 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   getActiveBoxesCount: () => {
     const { ownedBoxes, receivedBoxes } = get();
     return [...ownedBoxes, ...receivedBoxes].filter(
-      box => !['CLAIMED', 'EXPIRED', 'REJECTED'].includes(box.status)
+      box => {
+        // Exclude boxes with inactive statuses
+        if (['CLAIMED', 'EXPIRED', 'REJECTED'].includes(box.status)) {
+          return false;
+        }
+        
+        // Check if box is expired based on expiration time
+        if (box.openedAt && box.expirationMinutes) {
+          const openedTime = new Date(box.openedAt);
+          const expirationTime = new Date(openedTime.getTime() + box.expirationMinutes * 60000);
+          const now = new Date();
+          if (now > expirationTime) {
+            return false; // Exclude expired boxes
+          }
+        }
+        
+        return true;
+      }
     ).length;
   }
 }));

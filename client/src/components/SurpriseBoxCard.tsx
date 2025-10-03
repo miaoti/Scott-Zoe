@@ -152,7 +152,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   const canEdit = isOwner && box.status === 'CREATED';
   
   // Status messages for creators when they can't take action
-  const shouldShowWaitingMessage = isOwner && ['DROPPED', 'OPENED'].includes(box.status);
+  const shouldShowWaitingMessage = isOwner && ['DROPPED', 'OPENED'].includes(box.status) && !box.isExpired;
   
   // Messages for recipients when waiting
   const shouldShowWaitingForApprovalMessage = !isOwner && box.status === 'WAITING_APPROVAL' && box.rejectionReason === null;

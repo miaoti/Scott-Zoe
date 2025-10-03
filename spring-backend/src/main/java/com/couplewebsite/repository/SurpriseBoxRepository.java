@@ -63,7 +63,7 @@ public interface SurpriseBoxRepository extends JpaRepository<SurpriseBox, Long> 
     boolean hasActiveBoxAsOwner(@Param("owner") User owner, @Param("currentTime") LocalDateTime currentTime);
     
     // New method for finding active boxes for recipients (OPENED, WAITING_APPROVAL, APPROVED, or activated DROPPED boxes)
-    @Query("SELECT sb FROM SurpriseBox sb WHERE sb.recipient = :recipient AND (sb.status IN ('OPENED', 'WAITING_APPROVAL', 'APPROVED') OR (sb.status = 'DROPPED' AND sb.claimedAt IS NOT NULL))")
+    @Query("SELECT sb FROM SurpriseBox sb WHERE sb.recipient = :recipient AND (sb.status IN ('OPENED', 'WAITING_APPROVAL', 'APPROVED') OR (sb.status = 'DROPPED' AND sb.claimedAt IS NOT NULL)) AND (sb.openedAt IS NULL OR FUNCTION('TIMESTAMPADD', MINUTE, sb.expirationMinutes, sb.openedAt) > CURRENT_TIMESTAMP)")
     Optional<SurpriseBox> findActiveBoxByRecipient(@Param("recipient") User recipient);
 
     @Query("SELECT CASE WHEN COUNT(sb) > 0 THEN true ELSE false END FROM SurpriseBox sb WHERE sb.recipient = :recipient AND (sb.status IN ('OPENED', 'WAITING_APPROVAL', 'APPROVED') OR (sb.status = 'DROPPED' AND sb.claimedAt IS NOT NULL)) AND (sb.openedAt IS NULL OR FUNCTION('TIMESTAMPADD', MINUTE, sb.expirationMinutes, sb.openedAt) > :currentTime)")
