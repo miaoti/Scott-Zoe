@@ -32,7 +32,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     /**
      * Find category by ID with photos (excluding deleted photos)
      */
-    @Query("SELECT c FROM Category c LEFT JOIN FETCH c.photos p LEFT JOIN FETCH p.uploader WHERE c.id = :id AND (p.isDeleted = false OR p.isDeleted IS NULL)")
+    @Query("SELECT DISTINCT c FROM Category c LEFT JOIN FETCH c.photos p LEFT JOIN FETCH p.uploader WHERE c.id = :id AND (p IS NULL OR p.isDeleted = false)")
     Optional<Category> findByIdWithPhotos(@Param("id") Long id);
     
     /**
