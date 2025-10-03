@@ -303,8 +303,17 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
         
         // Check if response contains a valid box or just a message
         if (response.data && response.data.id && response.data.owner && response.data.recipient) {
+          console.log('🎯 Active box loaded:', {
+            id: response.data.id,
+            status: response.data.status,
+            rejectionReason: response.data.rejectionReason,
+            isExpired: response.data.isExpired,
+            owner: response.data.owner,
+            recipient: response.data.recipient
+          });
           set({ activeBox: response.data });
         } else {
+          console.log('⚠️ Active box response invalid:', response.data);
           // Fallback: user has active box but couldn't get data, set a placeholder
           set({ activeBox: { hasActive: true } });
         }

@@ -228,7 +228,7 @@ const SurpriseBoxManager: React.FC = () => {
         </AnimatePresence>
 
         {/* Active Box Display */}
-        {activeBox && (
+        {activeBox && activeBox.id && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -241,33 +241,40 @@ const SurpriseBoxManager: React.FC = () => {
               </h2>
               
               <div className="grid md:grid-cols-2 gap-6">
-                <SurpriseBoxCard 
-                  box={activeBox} 
-                  isOwner={(() => {
-                    try {
-                      const token = localStorage.getItem('token');
-                      if (!token) return false;
-                      const payload = JSON.parse(atob(token.split('.')[1]));
-                      const isOwner = activeBox.owner?.id === payload.userId;
-                      
-                      // Debug logging for active box
-                      console.log('🎁 Active box debug:', {
-                        boxId: activeBox.id,
-                        status: activeBox.status,
-                        isOwner,
-                        currentUserId: payload.userId,
-                        ownerId: activeBox.owner?.id,
-                        recipientId: activeBox.recipient?.id,
-                        rejectionReason: activeBox.rejectionReason,
-                        rejectionReasonType: typeof activeBox.rejectionReason
-                      });
-                      
-                      return isOwner;
-                    } catch {
-                      return false;
-                    }
-                  })()} 
-                />
+                {(() => {
+                  try {
+                    const token = localStorage.getItem('token');
+                    if (!token) return null;
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const isOwner = activeBox.owner?.id === payload.userId;
+                    
+                    // Debug logging for active box
+                    console.log('🎯 Active box rendering:', {
+                      boxId: activeBox.id,
+                      boxStatus: activeBox.status,
+                      isOwner,
+                      userId: payload.userId,
+                      ownerId: activeBox.owner?.id,
+                      rejectionReason: activeBox.rejectionReason,
+                      isExpired: activeBox.isExpired
+                    });
+                    
+                    return (
+                       <SurpriseBoxCard 
+                         box={activeBox} 
+                         isOwner={isOwner}
+                         onOpen={handleOpen}
+                         onComplete={handleComplete}
+                         onApprove={handleApprove}
+                         onReject={handleReject}
+                         onClaim={handleClaim}
+                         onActivate={handleActivate}
+                       />
+                     );
+                  } catch {
+                    return null;
+                  }
+                })()}
                 <div className="flex items-center justify-center">
                   <BoxDropAnimation isActive={true} />
                 </div>
@@ -332,17 +339,8 @@ const SurpriseBoxManager: React.FC = () => {
                       ) : (
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                           {receivedBoxes.map((box) => {
-                            // Calculate isOwner for each box
-                            const isOwner = (() => {
-                              try {
-                                const token = localStorage.getItem('token');
-                                if (!token) return false;
-                                const payload = JSON.parse(atob(token.split('.')[1]));
-                                return box.owner?.id === payload.userId;
-                              } catch {
-                                return false;
-                              }
-                            })();
+                            // For received boxes, the current user is always the recipient, not the owner
+                            const isOwner = false;
                             
                             // Debug logging for received boxes
                             console.log('📦 Received box debug:', {

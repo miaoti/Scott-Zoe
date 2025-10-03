@@ -126,17 +126,24 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
 
   // For RECIPIENTS (not owner)
   const canOpen = !isOwner && box.status === 'DROPPED' && !box.isExpired;
-  const canComplete = !isOwner && box.status === 'OPENED' && !box.isExpired;
-  const canClaim = !isOwner && box.status === 'APPROVED' && !box.rejectionReason && !box.isExpired; // Box is approved and ready to claim
+  const canComplete = !isOwner && box.status === 'OPENED' && !isExpired(box.expiresAt);
   
-  // Debug logging for canClaim conditions
+  // For recipients: can claim if box is approved and not expired
+  // TEMPORARY: Simplified condition for debugging
+  const canClaim = !isOwner && box.status === 'APPROVED';
+  
+  // Debug logging for canClaim conditions when not owner and status is APPROVED
   if (!isOwner && box.status === 'APPROVED') {
-    console.log('🔍 Debugging canClaim for box:', box.id);
-    console.log('  - isOwner:', isOwner);
-    console.log('  - box.status:', box.status);
-    console.log('  - box.rejectionReason:', box.rejectionReason, '(type:', typeof box.rejectionReason, ')');
-    console.log('  - box.isExpired:', box.isExpired);
-    console.log('  - canClaim result:', canClaim);
+    console.log('🔍 canClaim debug for APPROVED box (SIMPLIFIED):', {
+      boxId: box.id,
+      isOwner,
+      status: box.status,
+      rejectionReason: box.rejectionReason,
+      rejectionReasonType: typeof box.rejectionReason,
+      isExpired: box.isExpired,
+      isExpiredType: typeof box.isExpired,
+      canClaim
+    });
   }
   
   // For CREATORS (owner)

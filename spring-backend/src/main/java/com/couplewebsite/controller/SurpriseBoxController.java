@@ -195,11 +195,16 @@ public class SurpriseBoxController {
     @GetMapping("/active/{userId}")
     public ResponseEntity<?> getActiveBox(@PathVariable Long userId) {
         try {
+            logger.info("🎯 Getting active box for userId: {}", userId);
             Optional<SurpriseBox> activeBox = surpriseBoxService.getActiveBox(userId);
             
             if (activeBox.isPresent()) {
-                return ResponseEntity.ok(createBoxResponse(activeBox.get()));
+                SurpriseBox box = activeBox.get();
+                logger.info("🎯 Found active box: id={}, status={}, rejectionReason={}, isExpired={}", 
+                    box.getId(), box.getStatus(), box.getRejectionReason(), box.isExpired());
+                return ResponseEntity.ok(createBoxResponse(box));
             } else {
+                logger.info("🎯 No active box found for userId: {}", userId);
                 Map<String, String> response = new HashMap<>();
                 response.put("message", "No active box found");
                 return ResponseEntity.ok(response);
