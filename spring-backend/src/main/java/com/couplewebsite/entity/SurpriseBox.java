@@ -70,8 +70,7 @@ public class SurpriseBox {
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
     
-    @Column(name = "expires_at")
-    private LocalDateTime expiresAt;
+    // Removed expiresAt - expiration is now calculated from openedAt + expirationMinutes
     
     @Enumerated(EnumType.STRING)
     @Column(name = "completion_type")
@@ -246,13 +245,7 @@ public class SurpriseBox {
         this.approvedAt = approvedAt;
     }
     
-    public LocalDateTime getExpiresAt() {
-        return expiresAt;
-    }
-    
-    public void setExpiresAt(LocalDateTime expiresAt) {
-        this.expiresAt = expiresAt;
-    }
+    // Removed getExpiresAt/setExpiresAt - expiration is now calculated dynamically
     
     public CompletionType getCompletionType() {
         return completionType;
@@ -368,7 +361,20 @@ public class SurpriseBox {
     
     // Helper methods
     public boolean isExpired() {
-        return expiresAt != null && LocalDateTime.now().isAfter(expiresAt);
+        // Box is only expired if it has been opened and the duration has passed
+        if (openedAt == null) {
+            return false; // Not opened yet, cannot be expired
+        }
+        LocalDateTime expirationTime = openedAt.plusMinutes(expirationMinutes);
+        return LocalDateTime.now().isAfter(expirationTime);
+    }
+    
+    public LocalDateTime getCalculatedExpiresAt() {
+        // Calculate expiration time based on when box was opened
+        if (openedAt == null) {
+            return null; // Not opened yet
+        }
+        return openedAt.plusMinutes(expirationMinutes);
     }
     
     public boolean canBeApproved() {

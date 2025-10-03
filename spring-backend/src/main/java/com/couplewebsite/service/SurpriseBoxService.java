@@ -75,18 +75,19 @@ public class SurpriseBoxService {
         box.setStatus(SurpriseBox.BoxStatus.CREATED);
         box.setCreatedAt(LocalDateTime.now());
         
-        // Parse and set expiration date if provided
+        // Set expiration duration (default 24 hours if not provided)
         if (expiresAt != null && !expiresAt.trim().isEmpty()) {
             try {
-                LocalDateTime expirationDateTime = LocalDateTime.parse(expiresAt);
-                box.setExpiresAt(expirationDateTime);
+                // Parse expiration minutes from string
+                int expirationMinutes = Integer.parseInt(expiresAt);
+                box.setExpirationMinutes(expirationMinutes);
             } catch (Exception e) {
-                // If parsing fails, set a default expiration (24 hours from now)
-                box.setExpiresAt(LocalDateTime.now().plusHours(24));
+                // If parsing fails, set default 24 hours (1440 minutes)
+                box.setExpirationMinutes(1440);
             }
         } else {
-            // Default expiration if not provided (24 hours from now)
-            box.setExpiresAt(LocalDateTime.now().plusHours(24));
+            // Default expiration: 24 hours (1440 minutes)
+            box.setExpirationMinutes(1440);
         }
         
         // Set drop scheduling fields
@@ -140,8 +141,8 @@ public class SurpriseBoxService {
         box.setStatus(SurpriseBox.BoxStatus.DROPPED);
         box.setDroppedAt(LocalDateTime.now());
         
-        // Set expiration time (24 hours from drop)
-        box.setExpiresAt(LocalDateTime.now().plusHours(24));
+        // Expiration will be calculated from openedAt when the box is opened
+        // No need to set expiresAt here as it's calculated dynamically
         
         return surpriseBoxRepository.save(box);
     }
@@ -177,6 +178,11 @@ public class SurpriseBoxService {
             throw new RuntimeException("You are not the recipient of this box");
         }
 
+        // Check if box is expired
+        if (box.isExpired()) {
+            throw new RuntimeException("This box has expired and cannot be completed");
+        }
+
         if (box.getStatus() != SurpriseBox.BoxStatus.OPENED) {
             throw new RuntimeException("Box must be opened before it can be completed");
         }
@@ -196,6 +202,11 @@ public class SurpriseBoxService {
         // Verify owner
         if (!box.getOwner().getId().equals(ownerId)) {
             throw new RuntimeException("You are not authorized to approve this box.");
+        }
+        
+        // Check if box is expired
+        if (box.isExpired()) {
+            throw new RuntimeException("This box has expired and cannot be approved");
         }
         
         if (box.getStatus() != SurpriseBox.BoxStatus.WAITING_APPROVAL) {
@@ -229,8 +240,9 @@ public class SurpriseBoxService {
         box.setStatus(SurpriseBox.BoxStatus.DROPPED);
         box.setRejectionReason(rejectionReason);
         
-        // Extend expiration by 12 hours
-        box.setExpiresAt(LocalDateTime.now().plusHours(12));
+        // Extend expiration by 12 hours (720 minutes)
+        int currentExpiration = box.getExpirationMinutes() != null ? box.getExpirationMinutes() : 1440;
+        box.setExpirationMinutes(currentExpiration + 720);
         
         return surpriseBoxRepository.save(box);
     }
@@ -372,23 +384,72 @@ public class SurpriseBoxService {
     }
     
     /**
+     * Open a box (sets openedAt timestamp to start expiration countdown)
+     */
+    @Transactional
+    public SurpriseBox openBox(Long boxId, User opener) {
+        logger.debug("openBox: Attempting to open box {} by user {}", boxId, opener.getId());
+        
+        SurpriseBox box = findById(boxId);
+        if (box == null) {
+            logger.warn("openBox: Box {} not found", boxId);
+            throw new RuntimeException("Box not found");
+        }
+        
+        // Verify the opener is the recipient
+        if (!box.getRecipient().getId().equals(opener.getId())) {
+            logger.warn("openBox: User {} is not the recipient of box {}", opener.getId(), boxId);
+            throw new RuntimeException("Only the recipient can open this box");
+        }
+        
+        // Only allow opening if box is in DROPPED status
+        if (!box.getStatus().equals(SurpriseBox.BoxStatus.DROPPED)) {
+            logger.warn("openBox: Box {} is not in DROPPED status, current status: {}", boxId, box.getStatus());
+            throw new RuntimeException("Box cannot be opened in current status: " + box.getStatus());
+        }
+        
+        // Check if box is already expired
+        if (box.isExpired()) {
+            logger.warn("openBox: Box {} is already expired", boxId);
+            throw new RuntimeException("This box has expired and cannot be opened");
+        }
+        
+        // Set opened timestamp if not already set (start expiration countdown)
+        if (box.getOpenedAt() == null) {
+            box.setOpenedAt(LocalDateTime.now());
+            logger.debug("openBox: Set openedAt timestamp for box {} to start expiration countdown", boxId);
+        }
+        
+        SurpriseBox savedBox = surpriseBoxRepository.save(box);
+        logger.debug("openBox: Successfully opened box {} - OpenedAt: {}", 
+            savedBox.getId(), savedBox.getOpenedAt());
+        
+        return savedBox;
+    }
+    
+    /**
      * Actually claim a box after the full workflow is completed (open -> complete -> approve)
      */
-    public SurpriseBox claimBox(Long boxId, Long userId) {
-        logger.debug("claimBox: Starting final claim process for boxId {} by userId {}", boxId, userId);
+    @Transactional
+    public SurpriseBox claimBox(Long boxId, User claimer) {
+        logger.debug("claimBox: Attempting to claim box {} by user {}", boxId, claimer.getId());
         
-        SurpriseBox box = surpriseBoxRepository.findById(boxId)
-                .orElseThrow(() -> new RuntimeException("Box not found"));
+        SurpriseBox box = findById(boxId);
+        if (box == null) {
+            logger.warn("claimBox: Box {} not found", boxId);
+            throw new RuntimeException("Box not found");
+        }
         
-        logger.debug("claimBox: Found box {} - Current status: {}, ClaimedAt: {}", 
-            box.getId(), box.getStatus(), box.getClaimedAt());
+        // Verify the claimer is the recipient
+        if (!box.getRecipient().getId().equals(claimer.getId())) {
+            logger.warn("claimBox: User {} is not the recipient of box {}", claimer.getId(), boxId);
+            throw new RuntimeException("Only the recipient can claim this box");
+        }
         
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        // Verify the user is the recipient
-        if (!box.getRecipient().getId().equals(userId)) {
-            throw new RuntimeException("User is not the recipient of this box");
+        // Check if box is expired
+        if (box.isExpired()) {
+            logger.warn("claimBox: Box {} is expired and cannot be claimed", boxId);
+            throw new RuntimeException("This box has expired and cannot be claimed");
         }
         
         // Only allow final claiming if box has been approved (status should be APPROVED)
@@ -519,8 +580,11 @@ public class SurpriseBoxService {
      */
     public List<SurpriseBox> findExpiredBoxes() {
         LocalDateTime now = LocalDateTime.now();
-        return surpriseBoxRepository.findByStatusInAndExpiresAtBefore(
-            List.of(SurpriseBox.BoxStatus.DROPPED, SurpriseBox.BoxStatus.WAITING_APPROVAL), now);
+        return surpriseBoxRepository.findByStatusIn(
+            List.of(SurpriseBox.BoxStatus.DROPPED, SurpriseBox.BoxStatus.WAITING_APPROVAL))
+            .stream()
+            .filter(box -> box.isExpired())
+            .collect(Collectors.toList());
     }
     
     /**

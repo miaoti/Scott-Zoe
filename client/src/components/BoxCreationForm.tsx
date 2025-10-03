@@ -16,7 +16,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     prizeName: '',
     prizeDescription: '',
     completionType: 'PHOTO' as CompletionType,
-    expiresAt: '',
+    expirationMinutes: 1440, // Default to 24 hours (1440 minutes)
     taskDescription: '',
     priceAmount: 0,
     isInstantDrop: true // Default to instant drop
@@ -68,15 +68,8 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
       newErrors.prizeName = 'Prize name is required';
     }
     
-    if (!formData.expiresAt) {
-      newErrors.expiresAt = 'Expiration time is required';
-    } else {
-      const expireTime = new Date(formData.expiresAt);
-      const now = new Date();
-      now.setHours(now.getHours() + 1); // Minimum 1 hour from now
-      if (expireTime <= now) {
-        newErrors.expiresAt = 'Expiration time must be at least 1 hour from now';
-      }
+    if (!formData.expirationMinutes || formData.expirationMinutes < 60) {
+      newErrors.expirationMinutes = 'Expiration duration must be at least 1 hour (60 minutes)';
     }
     
     if (formData.priceAmount < 0) {
@@ -130,11 +123,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     setStep(step - 1);
   };
 
-  const getMinDateTime = () => {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() + 5); // Minimum 5 minutes from now
-    return now.toISOString().slice(0, 16);
-  };
+
 
 
 
@@ -350,25 +339,54 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <Clock className="w-4 h-4 inline mr-1" />
-                        Expiration Time *
+                        Expiration Duration *
                       </label>
-                      <input
-                        type="datetime-local"
-                        value={formData.expiresAt}
-                        onChange={(e) => handleInputChange('expiresAt', e.target.value)}
-                        min={getMinDateTime()}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
-                          errors.expiresAt ? 'border-red-300' : 'border-gray-300'
-                        }`}
-                      />
-                      {errors.expiresAt && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Hours</label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="168"
+                            value={Math.floor(formData.expirationMinutes / 60)}
+                            onChange={(e) => {
+                              const hours = parseInt(e.target.value) || 0;
+                              const minutes = formData.expirationMinutes % 60;
+                              handleInputChange('expirationMinutes', hours * 60 + minutes);
+                            }}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                              errors.expirationMinutes ? 'border-red-300' : 'border-gray-300'
+                            }`}
+                            placeholder="24"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Minutes</label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="59"
+                            value={formData.expirationMinutes % 60}
+                            onChange={(e) => {
+                              const minutes = parseInt(e.target.value) || 0;
+                              const hours = Math.floor(formData.expirationMinutes / 60);
+                              handleInputChange('expirationMinutes', hours * 60 + minutes);
+                            }}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                              errors.expirationMinutes ? 'border-red-300' : 'border-gray-300'
+                            }`}
+                            placeholder="0"
+                          />
+                        </div>
+                      </div>
+                      {errors.expirationMinutes && (
                         <p className="mt-1 text-sm text-red-600 flex items-center space-x-1">
                           <AlertCircle className="w-4 h-4" />
-                          <span>{errors.expiresAt}</span>
+                          <span>{errors.expirationMinutes}</span>
                         </p>
                       )}
                       <p className="mt-1 text-sm text-gray-500">
-                        The box will drop randomly and expire if not claimed by this time
+                        How long the recipient has to complete the box after opening it. Countdown starts when they open the box.
                       </p>
                     </div>
                     

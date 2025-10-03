@@ -224,10 +224,13 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   const CompletionIcon = getCompletionIcon(box.completionType);
   const expiresDate = parseDate(box.expiresAt);
   const dropDate = parseDate(box.dropAt);
-  const isExpired = box.isExpired || (expiresDate && expiresDate < new Date()) || false;
+  const isExpired = box.isExpired || false;
   const isDropping = box.isDropping;
   const timeUntilDrop = dropDate ? dropDate.getTime() - new Date().getTime() : 0;
   const timeUntilExpiry = expiresDate ? expiresDate.getTime() - new Date().getTime() : 0;
+  
+  // Only show expiration countdown for opened boxes
+  const shouldShowExpirationCountdown = box.openedAt && !isExpired && box.status !== 'COMPLETED' && box.status !== 'CLAIMED';
 
   return (
     <>
@@ -299,7 +302,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
               </div>
             )}
             
-            {box.status === 'DROPPED' && !isExpired && (
+            {shouldShowExpirationCountdown && (
               <div className="flex items-center text-sm text-gray-600">
                 <AlertCircle className="w-4 h-4 mr-2" />
                 <span>Expires in: </span>
@@ -308,6 +311,13 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                   className="ml-1 font-medium text-red-600" 
                   onExpire={() => window.location.reload()}
                 />
+              </div>
+            )}
+            
+            {box.status === 'DROPPED' && !box.openedAt && !isExpired && (
+              <div className="flex items-center text-sm text-blue-600">
+                <Gift className="w-4 h-4 mr-2" />
+                <span>Open the box to start the countdown timer</span>
               </div>
             )}
             
@@ -479,7 +489,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                   </div>
                   <div>
                     <span className="font-medium">Expires:</span>
-                    <p>{formatDate(box.expiresAt, true)}</p>
+                    <p>{box.openedAt ? formatDate(box.expiresAt, true) : `${box.expirationMinutes || 1440} minutes after opening`}</p>
                   </div>
                   {box.droppedAt && (
                     <div>

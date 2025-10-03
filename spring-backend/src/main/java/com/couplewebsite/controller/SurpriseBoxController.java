@@ -45,7 +45,7 @@ public class SurpriseBoxController {
                 request.getPrizeName(),
                 request.getPrizeDescription(),
                 completionType,
-                request.getExpiresAt(),
+                request.getExpirationMinutes(),
                 request.getPriceAmount(),
                 request.getTaskDescription(),
                 request.getIsInstantDrop()
@@ -480,7 +480,7 @@ public class SurpriseBoxController {
         response.put("droppedAt", box.getDroppedAt());
         response.put("openedAt", box.getOpenedAt());
         response.put("claimedAt", box.getClaimedAt());
-        response.put("expiresAt", box.getExpiresAt());
+        response.put("expiresAt", box.getCalculatedExpiresAt());
         response.put("rejectionReason", box.getRejectionReason());
         response.put("isExpired", box.isExpired());
         response.put("priceAmount", box.getPriceAmount());
@@ -513,7 +513,7 @@ public class SurpriseBoxController {
         private String prizeName;
         private String prizeDescription;
         private String completionType;
-        private String expiresAt;
+        private Integer expirationMinutes;
         private BigDecimal priceAmount;
         private String taskDescription;
         private Boolean isInstantDrop;
@@ -529,8 +529,8 @@ public class SurpriseBoxController {
         public void setPrizeDescription(String prizeDescription) { this.prizeDescription = prizeDescription; }
         public String getCompletionType() { return completionType; }
         public void setCompletionType(String completionType) { this.completionType = completionType; }
-        public String getExpiresAt() { return expiresAt; }
-        public void setExpiresAt(String expiresAt) { this.expiresAt = expiresAt; }
+        public Integer getExpirationMinutes() { return expirationMinutes; }
+        public void setExpirationMinutes(Integer expirationMinutes) { this.expirationMinutes = expirationMinutes; }
         public BigDecimal getPriceAmount() { return priceAmount; }
         public void setPriceAmount(BigDecimal priceAmount) { this.priceAmount = priceAmount; }
         public String getTaskDescription() { return taskDescription; }
