@@ -69,7 +69,7 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
       memoryYear = memoryYearFromDate;
     }
     
-    // Check if memory starts in current month
+    // Check if memory starts in current month (for anniversary repetition, ignore year)
     const startsInCurrentMonth = (memoryMonth - 1) === month;
     
     // For events with endDate, also check if they span into current month
@@ -83,16 +83,19 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
         [endYear, endMonth] = endDateStr.split('-').map(Number);
       }
       
-      // Check if event spans into current month
+      // For events, we need to check if they span into current month in the original year
+      // or if they should repeat annually (for anniversary-type events)
       const currentMonthDate = new Date(year, month, 1);
       const eventStartDate = new Date(memoryYear, memoryMonth - 1, 1);
       const eventEndDate = new Date(endYear, endMonth - 1, 31);
       
       const spansIntoCurrentMonth = eventStartDate <= currentMonthDate && eventEndDate >= currentMonthDate;
       
+      // For events, show in original year or if it's an anniversary repetition
       return startsInCurrentMonth || spansIntoCurrentMonth;
     }
     
+    // For non-event memories (anniversaries, milestones, special moments), show every year on the same date
     // Backend months are 1-indexed, JavaScript months are 0-indexed
     return startsInCurrentMonth;
   });
@@ -166,8 +169,13 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
       }
     } else {
       // For non-event memories or events without endDate, add to single day
-      // Only add if the memory actually starts in the current month
-      if ((memoryMonth - 1) === month && memoryYear === year) {
+      // For anniversary repetition, show memories every year on the same date (ignore year for non-events)
+      if ((memoryMonth - 1) === month) {
+        // For events, only show in the original year unless it's meant to repeat
+        if (memory.type === 'event' && memoryYear !== year) {
+          // Skip events from other years unless they're meant to repeat
+          return;
+        }
         addMemoryToDay(memoryDay, memory);
       }
     }
