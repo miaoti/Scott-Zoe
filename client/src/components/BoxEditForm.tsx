@@ -16,7 +16,7 @@ export const BoxEditForm: React.FC<BoxEditFormProps> = ({ box, onClose, onSucces
     prizeName: box.prizeName || '',
     prizeDescription: box.prizeDescription || '',
     completionType: box.completionType || 'TASK',
-    completionCriteria: box.completionCriteria || '',
+
     priceAmount: box.priceAmount || 0,
     taskDescription: box.taskDescription || '',
     expirationMinutes: box.expirationMinutes || 60
@@ -108,20 +108,7 @@ export const BoxEditForm: React.FC<BoxEditFormProps> = ({ box, onClose, onSucces
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Completion Criteria *
-            </label>
-            <textarea
-              name="completionCriteria"
-              value={formData.completionCriteria}
-              onChange={handleChange}
-              required
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
-              placeholder="What needs to be done to complete this?"
-            />
-          </div>
+
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

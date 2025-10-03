@@ -37,7 +37,7 @@ public class SurpriseBoxService {
      */
     public SurpriseBox createBox(Long ownerId, Long recipientId, String prizeName, 
                                 String prizeDescription, SurpriseBox.CompletionType completionType, 
-                                String completionCriteria, String expiresAt, BigDecimal priceAmount, 
+                                String expiresAt, BigDecimal priceAmount, 
                                 String taskDescription) {
         
         // Check if owner already has an active box
@@ -54,7 +54,7 @@ public class SurpriseBoxService {
         box.setPrizeName(prizeName);
         box.setPrizeDescription(prizeDescription);
         box.setCompletionType(completionType);
-        box.setCompletionCriteria(completionCriteria);
+
         box.setPriceAmount(priceAmount);
         box.setTaskDescription(taskDescription);
         box.setStatus(SurpriseBox.BoxStatus.CREATED);

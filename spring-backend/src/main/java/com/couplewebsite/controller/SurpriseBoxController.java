@@ -45,7 +45,7 @@ public class SurpriseBoxController {
                 request.getPrizeName(),
                 request.getPrizeDescription(),
                 completionType,
-                request.getCompletionCriteria(),
+
                 request.getExpiresAt(),
                 request.getPriceAmount(),
                 request.getTaskDescription()
@@ -98,10 +98,6 @@ public class SurpriseBoxController {
             if (request.getCompletionType() != null) {
                 SurpriseBox.CompletionType completionType = SurpriseBox.CompletionType.valueOf(request.getCompletionType().toUpperCase());
                 existingBox.setCompletionType(completionType);
-            }
-            
-            if (request.getCompletionCriteria() != null) {
-                existingBox.setCompletionCriteria(request.getCompletionCriteria());
             }
             
             SurpriseBox updatedBox = surpriseBoxService.updateBox(existingBox);
@@ -429,7 +425,6 @@ public class SurpriseBoxController {
         response.put("prizeName", box.getPrizeName());
         response.put("prizeDescription", box.getPrizeDescription());
         response.put("completionType", box.getCompletionType().name());
-        response.put("completionCriteria", box.getCompletionCriteria());
         response.put("status", box.getStatus().name());
         response.put("createdAt", box.getCreatedAt());
         response.put("dropAt", box.getDropAt());
@@ -439,6 +434,9 @@ public class SurpriseBoxController {
         response.put("expiresAt", box.getExpiresAt());
         response.put("rejectionReason", box.getRejectionReason());
         response.put("isExpired", box.isExpired());
+        response.put("priceAmount", box.getPriceAmount());
+        response.put("taskDescription", box.getTaskDescription());
+        response.put("expirationMinutes", box.getExpirationMinutes());
         
         if (box.getOwner() != null) {
             Map<String, Object> ownerMap = new HashMap<>();
@@ -466,7 +464,6 @@ public class SurpriseBoxController {
         private String prizeName;
         private String prizeDescription;
         private String completionType;
-        private String completionCriteria;
         private String expiresAt;
         private BigDecimal priceAmount;
         private String taskDescription;
@@ -482,8 +479,6 @@ public class SurpriseBoxController {
         public void setPrizeDescription(String prizeDescription) { this.prizeDescription = prizeDescription; }
         public String getCompletionType() { return completionType; }
         public void setCompletionType(String completionType) { this.completionType = completionType; }
-        public String getCompletionCriteria() { return completionCriteria; }
-        public void setCompletionCriteria(String completionCriteria) { this.completionCriteria = completionCriteria; }
         public String getExpiresAt() { return expiresAt; }
         public void setExpiresAt(String expiresAt) { this.expiresAt = expiresAt; }
         public BigDecimal getPriceAmount() { return priceAmount; }
@@ -508,7 +503,6 @@ public class SurpriseBoxController {
         private String prizeName;
         private String prizeDescription;
         private String completionType;
-        private String completionCriteria;
         private BigDecimal priceAmount;
         private String taskDescription;
         private Integer expirationMinutes;
@@ -522,8 +516,6 @@ public class SurpriseBoxController {
         public void setPrizeDescription(String prizeDescription) { this.prizeDescription = prizeDescription; }
         public String getCompletionType() { return completionType; }
         public void setCompletionType(String completionType) { this.completionType = completionType; }
-        public String getCompletionCriteria() { return completionCriteria; }
-        public void setCompletionCriteria(String completionCriteria) { this.completionCriteria = completionCriteria; }
         public BigDecimal getPriceAmount() { return priceAmount; }
         public void setPriceAmount(BigDecimal priceAmount) { this.priceAmount = priceAmount; }
         public String getTaskDescription() { return taskDescription; }

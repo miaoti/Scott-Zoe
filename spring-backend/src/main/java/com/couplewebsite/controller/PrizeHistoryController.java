@@ -381,7 +381,7 @@ public class PrizeHistoryController {
         if (history.getBox() != null) {
             Map<String, Object> boxMap = new HashMap<>();
             boxMap.put("id", history.getBox().getId());
-            boxMap.put("completionCriteria", history.getBox().getCompletionCriteria());
+
             boxMap.put("createdAt", history.getBox().getCreatedAt());
             
             if (history.getBox().getOwner() != null) {

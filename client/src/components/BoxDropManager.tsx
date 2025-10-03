@@ -42,21 +42,29 @@ const BoxDropManager: React.FC = () => {
       
       console.log('BoxDropManager: Received boxes from API:', boxes);
       
-      // The backend now returns only boxes that are ready to drop (dropAt time has passed)
-      // Filter out boxes that are already actively dropping
-      const boxesToDrop = boxes.filter(box => !activeDrops.has(box.id));
+      // Filter out boxes that are already actively dropping or have been claimed
+      const boxesToDrop = boxes.filter(box => {
+        // Don't add if already actively dropping
+        if (activeDrops.has(box.id)) {
+          return false;
+        }
+        
+        // Don't add if already in dropping boxes list
+        const isAlreadyDropping = droppingBoxes.some(droppingBox => droppingBox.id === box.id);
+        if (isAlreadyDropping) {
+          return false;
+        }
+        
+        // Only add boxes with CREATED status (backend should filter this, but double-check)
+        return true;
+      });
       
       console.log('BoxDropManager: Boxes ready to drop (filtered):', boxesToDrop);
       console.log('BoxDropManager: Currently active drops:', Array.from(activeDrops));
       
       if (boxesToDrop.length > 0) {
         console.log('BoxDropManager: Adding boxes to dropping animation');
-        setDroppingBoxes(prev => {
-          const existingIds = new Set(prev.map(box => box.id));
-          const newBoxes = boxesToDrop.filter(box => !existingIds.has(box.id));
-          console.log('BoxDropManager: New boxes to add:', newBoxes);
-          return [...prev, ...newBoxes];
-        });
+        setDroppingBoxes(prev => [...prev, ...boxesToDrop]);
         
         // Mark these boxes as actively dropping
         setActiveDrops(prev => {
@@ -71,7 +79,7 @@ const BoxDropManager: React.FC = () => {
     } catch (error) {
       console.error('BoxDropManager: Error checking for dropping boxes:', error);
     }
-  }, [loadDroppingBoxes, user?.id, activeDrops]);
+  }, [loadDroppingBoxes, user?.id, activeDrops, droppingBoxes]);
 
   // Don't render if user is not logged in
   if (!user?.id) {
