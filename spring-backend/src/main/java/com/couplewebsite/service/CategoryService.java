@@ -86,6 +86,13 @@ public class CategoryService {
     }
     
     /**
+     * Get category by ID with all photos (most basic version for testing)
+     */
+    public Optional<Category> getCategoryByIdWithAllPhotos(Long id) {
+        return categoryRepository.findByIdWithAllPhotos(id);
+    }
+    
+    /**
      * Update category
      */
     public Category updateCategory(Long id, String name, String description, String color) {

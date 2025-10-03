@@ -248,14 +248,22 @@ public class CategoryController {
             
             logger.info("Category found: {}", basicCategoryOpt.get().getName());
             
-            // Try simplified query first
+            // Try most basic query first
             Optional<Category> categoryOpt;
             try {
-                categoryOpt = categoryService.getCategoryByIdWithPhotosSimple(categoryId);
-                logger.info("Simplified query executed successfully");
+                categoryOpt = categoryService.getCategoryByIdWithAllPhotos(categoryId);
+                logger.info("Basic query executed successfully");
+                if (categoryOpt.isEmpty()) {
+                    logger.warn("Basic query returned empty, trying simplified query");
+                    categoryOpt = categoryService.getCategoryByIdWithPhotosSimple(categoryId);
+                    if (categoryOpt.isEmpty()) {
+                        logger.warn("Simplified query returned empty, trying original query");
+                        categoryOpt = categoryService.getCategoryByIdWithPhotos(categoryId);
+                    }
+                }
             } catch (Exception e) {
-                logger.error("Simplified query failed, trying original query", e);
-                categoryOpt = categoryService.getCategoryByIdWithPhotos(categoryId);
+                logger.error("All queries failed", e);
+                categoryOpt = Optional.empty();
             }
             
             if (!categoryOpt.isPresent()) {
