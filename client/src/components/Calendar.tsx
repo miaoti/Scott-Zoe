@@ -198,6 +198,8 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
     const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayMemories = memoriesByDay[day] || [];
     console.log('📅 Calendar day clicked:', { day, dateString, memoriesCount: dayMemories.length, memories: dayMemories });
+    console.log('🔍 Debug memoriesByDay for day', day, ':', memoriesByDay[day]);
+    console.log('🔍 Debug all memoriesByDay:', memoriesByDay);
     onDayClick(dateString, dayMemories);
   };
   
@@ -267,23 +269,41 @@ const Calendar: React.FC<CalendarProps> = ({ onDayClick }) => {
           {/* Desktop: Show memory details */}
           {hasMemories && (
             <div className="hidden md:flex flex-col items-center space-y-0.5 mt-1 w-full px-1">
-              {dayMemories.slice(0, 2).map((memory, index) => (
-                <div key={memory.id} className="flex items-center justify-center w-full">
-                  <span className="text-xs mr-1">{getTypeIcon(memory.type)}</span>
-                  <span className={`text-xs truncate max-w-12 ${
-                    isToday ? 'text-white' : 'text-blue-700'
+              {(() => {
+                console.log(`🖥️ Desktop rendering for day ${day}:`, {
+                  memoriesCount: dayMemories.length,
+                  memories: dayMemories,
+                  showingFirst2: dayMemories.slice(0, 2),
+                  shouldShowPlus: dayMemories.length > 2
+                });
+                return dayMemories.slice(0, 2).map((memory, index) => (
+                  <div key={memory.id} className="flex items-center justify-center w-full">
+                    <span className="text-xs mr-1">{getTypeIcon(memory.type)}</span>
+                    <span className={`text-xs truncate max-w-12 ${
+                      isToday ? 'text-white' : 'text-blue-700'
+                    }`}>
+                      {memory.title}
+                    </span>
+                  </div>
+                ));
+              })()}
+              {(() => {
+                const shouldShow = dayMemories.length > 2;
+                console.log(`➕ Plus indicator for day ${day}:`, {
+                  memoriesCount: dayMemories.length,
+                  shouldShow,
+                  plusCount: dayMemories.length - 2
+                });
+                // Temporarily force show +X for testing when there are memories
+                const forceShow = dayMemories.length > 0;
+                return (shouldShow || forceShow) && (
+                  <span className={`text-xs font-medium ${
+                    isToday ? 'text-white opacity-90' : 'text-blue-500'
                   }`}>
-                    {memory.title}
+                    {shouldShow ? `+${dayMemories.length - 2}` : `(${dayMemories.length} total)`}
                   </span>
-                </div>
-              ))}
-              {dayMemories.length > 2 && (
-                <span className={`text-xs ${
-                  isToday ? 'text-white opacity-90' : 'text-blue-500'
-                }`}>
-                  +{dayMemories.length - 2}
-                </span>
-              )}
+                );
+              })()}
             </div>
           )}
         </div>
