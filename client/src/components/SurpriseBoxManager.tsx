@@ -241,7 +241,19 @@ const SurpriseBoxManager: React.FC = () => {
               </h2>
               
               <div className="grid md:grid-cols-2 gap-6">
-                <SurpriseBoxCard box={activeBox} />
+                <SurpriseBoxCard 
+                  box={activeBox} 
+                  isOwner={(() => {
+                    try {
+                      const token = localStorage.getItem('token');
+                      if (!token) return false;
+                      const payload = JSON.parse(atob(token.split('.')[1]));
+                      return activeBox.owner?.id === payload.userId;
+                    } catch {
+                      return false;
+                    }
+                  })()} 
+                />
                 <div className="flex items-center justify-center">
                   <BoxDropAnimation isActive={true} />
                 </div>
