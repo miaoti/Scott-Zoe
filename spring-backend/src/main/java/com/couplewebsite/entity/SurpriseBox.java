@@ -39,9 +39,7 @@ public class SurpriseBox {
     @NotBlank(message = "Prize name is required")
     private String prizeName;
     
-    @Column(name = "price_amount", nullable = false, precision = 10, scale = 2)
-    @NotNull(message = "Price amount is required")
-    @DecimalMin(value = "0.01", message = "Price amount must be greater than 0")
+    @Column(name = "price_amount", nullable = true, precision = 10, scale = 2)
     private BigDecimal priceAmount;
     
     @Column(name = "task_description", nullable = false, columnDefinition = "TEXT")

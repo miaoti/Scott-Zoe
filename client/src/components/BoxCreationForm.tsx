@@ -17,7 +17,6 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     prizeDescription: '',
     completionType: 'PHOTO' as CompletionType,
     expiresAt: '',
-    priceAmount: '',
     taskDescription: ''
   });
   
@@ -49,20 +48,13 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
       title: 'Time Challenge',
       description: 'Recipient must wait for a specific duration'
     },
-    {
-      type: 'PAYMENT' as CompletionType,
-      icon: Timer,
-      title: 'Payment Required',
-      description: 'Recipient must make a payment to claim the prize'
-    }
+
   ];
 
   const validateStep1 = () => {
     const errors: string[] = [];
     if (!formData.prizeName.trim()) errors.push('Prize name is required');
     if (!formData.prizeDescription.trim()) errors.push('Prize description is required');
-    if (!formData.priceAmount.trim()) errors.push('Price amount is required');
-    if (formData.priceAmount && parseFloat(formData.priceAmount) < 0.01) errors.push('Price amount must be at least 0.01');
     if (!formData.taskDescription.trim()) errors.push('Task description is required');
     return errors;
   };
@@ -99,7 +91,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
     try {
       const submitData = {
         ...formData,
-        priceAmount: parseFloat(formData.priceAmount)
+        priceAmount: 0 // Default to 0 since payment is not required
       };
       await createBox(submitData);
       onClose();
@@ -246,20 +238,7 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Price Amount
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0.01"
-                          value={formData.priceAmount}
-                          onChange={(e) => handleInputChange('priceAmount', e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
-                          placeholder="Enter price amount"
-                        />
-                      </div>
+
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
