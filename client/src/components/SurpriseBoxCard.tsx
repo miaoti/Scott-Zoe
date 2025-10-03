@@ -120,12 +120,21 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
     }
   };
 
+  // For RECIPIENTS (not owner)
   const canOpen = !isOwner && box.status === 'DROPPED' && !box.isExpired;
   const canComplete = !isOwner && box.status === 'OPENED' && !box.isExpired;
+  const canClaim = !isOwner && box.status === 'WAITING_APPROVAL' && !box.rejectionReason && !box.isExpired; // Box is approved (no rejection) and ready to claim
+  
+  // For CREATORS (owner)
   const canApprove = isOwner && box.status === 'WAITING_APPROVAL';
-  const canClaim = !isOwner && box.status === 'WAITING_APPROVAL' && !box.rejectionReason;
   const canCancel = isOwner && ['CREATED', 'DROPPED'].includes(box.status);
   const canEdit = isOwner && box.status === 'CREATED';
+  
+  // Status messages for creators when they can't take action
+  const shouldShowWaitingMessage = isOwner && ['DROPPED', 'OPENED'].includes(box.status);
+  
+  // Messages for recipients when waiting
+  const shouldShowWaitingForApprovalMessage = !isOwner && box.status === 'WAITING_APPROVAL' && box.rejectionReason === null && !canClaim;
 
   const handleOpen = async () => {
     try {
@@ -327,6 +336,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
 
           {/* Actions */}
           <div className="flex items-center space-x-2">
+            {/* RECIPIENT ACTIONS */}
             {canOpen && (
               <button
                 onClick={handleOpen}
@@ -358,6 +368,32 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
               </>
             )}
             
+            {shouldShowWaitingForApprovalMessage && (
+              <div className="flex-1 px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg text-center">
+                <span className="text-amber-700 text-sm font-medium">Waiting for approval...</span>
+              </div>
+            )}
+            
+            {canClaim && (
+              <button
+                onClick={handleClaim}
+                disabled={isLoading}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 font-medium disabled:opacity-50 flex items-center justify-center space-x-1"
+              >
+                <Gift className="w-4 h-4" />
+                <span>{isLoading ? 'Claiming...' : 'Claim Prize'}</span>
+              </button>
+            )}
+            
+            {/* CREATOR ACTIONS */}
+            {shouldShowWaitingMessage && (
+              <div className="flex-1 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-center">
+                <span className="text-blue-700 text-sm font-medium">
+                  {box.status === 'DROPPED' ? 'Waiting for recipient to open...' : 'Waiting for recipient to complete task...'}
+                </span>
+              </div>
+            )}
+            
             {canApprove && (
               <>
                 <button
@@ -375,17 +411,6 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                   <X className="w-4 h-4" />
                 </button>
               </>
-            )}
-            
-            {canClaim && (
-              <button
-                onClick={handleClaim}
-                disabled={isLoading}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 font-medium disabled:opacity-50 flex items-center justify-center space-x-1"
-              >
-                <Gift className="w-4 h-4" />
-                <span>{isLoading ? 'Claiming...' : 'Claim Prize'}</span>
-              </button>
             )}
             
             {canEdit && (
