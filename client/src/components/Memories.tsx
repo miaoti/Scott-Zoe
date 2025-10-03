@@ -263,6 +263,10 @@ function Memories() {
 
     try {
       await api.delete(`/api/memories/${id}`);
+      
+      // Update selectedDayMemories to remove the deleted memory immediately
+      setSelectedDayMemories(prev => prev.filter(memory => memory.id !== id));
+      
       await fetchMemories();
     } catch (error) {
       console.error('Error deleting memory:', error);
