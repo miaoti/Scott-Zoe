@@ -123,7 +123,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   // For RECIPIENTS (not owner)
   const canOpen = !isOwner && box.status === 'DROPPED' && !box.isExpired;
   const canComplete = !isOwner && box.status === 'OPENED' && !box.isExpired;
-  const canClaim = !isOwner && box.status === 'WAITING_APPROVAL' && !box.rejectionReason && !box.isExpired; // Box is approved (no rejection) and ready to claim
+  const canClaim = !isOwner && box.status === 'APPROVED' && !box.rejectionReason && !box.isExpired; // Box is approved and ready to claim
   
   // For CREATORS (owner)
   const canApprove = isOwner && box.status === 'WAITING_APPROVAL';
@@ -134,7 +134,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   const shouldShowWaitingMessage = isOwner && ['DROPPED', 'OPENED'].includes(box.status);
   
   // Messages for recipients when waiting
-  const shouldShowWaitingForApprovalMessage = !isOwner && box.status === 'WAITING_APPROVAL' && box.rejectionReason === null && !canClaim;
+  const shouldShowWaitingForApprovalMessage = !isOwner && box.status === 'WAITING_APPROVAL' && box.rejectionReason === null;
 
   const handleOpen = async () => {
     try {

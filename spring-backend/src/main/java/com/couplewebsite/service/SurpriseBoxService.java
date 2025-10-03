@@ -173,16 +173,10 @@ public class SurpriseBoxService {
             throw new RuntimeException("Box is not waiting for approval. Current status: " + box.getStatus());
         }
         
-        box.setStatus(SurpriseBox.BoxStatus.CLAIMED);
-        box.setClaimedAt(LocalDateTime.now());
+        // Set status to APPROVED so recipient can claim the prize
+        box.setStatus(SurpriseBox.BoxStatus.APPROVED);
         
-        // Save the box first to ensure it has an ID
-        SurpriseBox savedBox = surpriseBoxRepository.save(box);
-        
-        // Create prize history record after box is saved
-        prizeHistoryService.createPrizeHistory(savedBox);
-        
-        return savedBox;
+        return surpriseBoxRepository.save(box);
     }
     
     /**
@@ -360,15 +354,10 @@ public class SurpriseBoxService {
             throw new RuntimeException("User is not the recipient of this box");
         }
         
-        // Only allow final claiming if box has been approved (status should be WAITING_APPROVAL and approved)
-        if (!box.getStatus().equals(SurpriseBox.BoxStatus.WAITING_APPROVAL)) {
-            logger.warn("claimBox: Box {} is not in WAITING_APPROVAL status, current status: {}", boxId, box.getStatus());
-            throw new RuntimeException("Box cannot be claimed in current status: " + box.getStatus());
-        }
-        
-        // Check if the completion has been approved (rejectionReason should be null)
-        if (box.getRejectionReason() != null) {
-            throw new RuntimeException("Box completion was rejected and cannot be claimed");
+        // Only allow final claiming if box has been approved (status should be APPROVED)
+        if (!box.getStatus().equals(SurpriseBox.BoxStatus.APPROVED)) {
+            logger.warn("claimBox: Box {} is not in APPROVED status, current status: {}", boxId, box.getStatus());
+            throw new RuntimeException("Box cannot be claimed in current status: " + box.getStatus() + ". Box must be approved first.");
         }
         
         // Set claimed timestamp and update status to CLAIMED
@@ -378,6 +367,9 @@ public class SurpriseBoxService {
         SurpriseBox savedBox = surpriseBoxRepository.save(box);
         logger.debug("claimBox: Successfully claimed box {} - New status: {}, ClaimedAt: {}", 
             savedBox.getId(), savedBox.getStatus(), savedBox.getClaimedAt());
+        
+        // Create prize history record after box is claimed
+        prizeHistoryService.createPrizeHistory(savedBox);
         
         return savedBox;
     }
