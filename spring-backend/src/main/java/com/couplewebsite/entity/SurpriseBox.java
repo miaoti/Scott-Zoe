@@ -47,7 +47,7 @@ public class SurpriseBox {
     private String taskDescription;
     
     @Column(name = "expiration_minutes", nullable = false)
-    @Min(value = 1, message = "Expiration minutes must be at least 1")
+    @Min(value = 5, message = "Expiration minutes must be at least 5")
     private Integer expirationMinutes = 60;
     
     @Enumerated(EnumType.STRING)

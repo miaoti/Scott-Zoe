@@ -68,8 +68,8 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
       newErrors.prizeName = 'Prize name is required';
     }
     
-    if (!formData.expirationMinutes || formData.expirationMinutes < 60) {
-      newErrors.expirationMinutes = 'Expiration duration must be at least 1 hour (60 minutes)';
+    if (!formData.expirationMinutes || formData.expirationMinutes < 5) {
+      newErrors.expirationMinutes = 'Expiration duration must be at least 5 minutes';
     }
     
     if (formData.priceAmount < 0) {
