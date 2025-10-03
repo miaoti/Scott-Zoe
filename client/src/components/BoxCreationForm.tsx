@@ -111,8 +111,26 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
 
   const nextStep = () => {
     if (step === 1) {
+      const stepErrors: Record<string, string> = {};
+      
       if (!formData.prizeName.trim()) {
-        setErrors({ prizeName: 'Prize name is required to continue' });
+        stepErrors.prizeName = 'Prize name is required to continue';
+      }
+      
+      if (!formData.prizeDescription.trim()) {
+        stepErrors.prizeDescription = 'Prize description is required to continue';
+      }
+      
+      if (!formData.taskDescription.trim()) {
+        stepErrors.taskDescription = 'Task description is required to continue';
+      }
+      
+      if (formData.priceAmount <= 0) {
+        stepErrors.priceAmount = 'Prize price must be greater than 0 to continue';
+      }
+      
+      if (Object.keys(stepErrors).length > 0) {
+        setErrors(stepErrors);
         return;
       }
     }
@@ -225,15 +243,23 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
                       
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Prize Description
+                          Prize Description *
                         </label>
                         <textarea
                           value={formData.prizeDescription}
                           onChange={(e) => handleInputChange('prizeDescription', e.target.value)}
                           placeholder="Add more details about this surprise..."
                           rows={3}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors resize-none"
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors resize-none ${
+                            errors.prizeDescription ? 'border-red-300' : 'border-gray-300'
+                          }`}
                         />
+                        {errors.prizeDescription && (
+                          <p className="mt-1 text-sm text-red-600 flex items-center space-x-1">
+                            <AlertCircle className="w-4 h-4" />
+                            <span>{errors.prizeDescription}</span>
+                          </p>
+                        )}
                       </div>
 
                       <div>
@@ -269,15 +295,23 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Task Description
+                          Task Description *
                         </label>
                         <textarea
                           value={formData.taskDescription}
                           onChange={(e) => handleInputChange('taskDescription', e.target.value)}
                           placeholder="Describe the task to complete"
                           rows={3}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors resize-none"
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors resize-none ${
+                            errors.taskDescription ? 'border-red-300' : 'border-gray-300'
+                          }`}
                         />
+                        {errors.taskDescription && (
+                          <p className="mt-1 text-sm text-red-600 flex items-center space-x-1">
+                            <AlertCircle className="w-4 h-4" />
+                            <span>{errors.taskDescription}</span>
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
