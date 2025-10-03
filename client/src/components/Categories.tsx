@@ -168,7 +168,7 @@ function Categories() {
 
               {/* View Category Button */}
               <Link
-                to={`/photos/category/${category.id}`}
+                to={`/category/${category.id}`}
                 className="flex items-center justify-center space-x-2 w-full py-2 px-4 bg-gray-800 hover:bg-gray-900 text-white rounded-lg transition-colors font-medium"
               >
                 <Eye className="h-4 w-4" />

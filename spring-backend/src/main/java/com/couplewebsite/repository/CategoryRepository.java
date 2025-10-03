@@ -36,8 +36,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     Optional<Category> findByIdWithPhotos(@Param("id") Long id);
     
     /**
-     * Find categories with photo counts
+     * Find categories with photo counts (excluding deleted photos)
      */
-    @Query("SELECT c, COUNT(p) as photoCount FROM Category c LEFT JOIN c.photos p GROUP BY c ORDER BY c.name ASC")
+    @Query("SELECT c, COUNT(p) as photoCount FROM Category c LEFT JOIN c.photos p WHERE p.isDeleted = false OR p.isDeleted IS NULL GROUP BY c ORDER BY c.name ASC")
     List<Object[]> findAllWithPhotoCounts();
 }
