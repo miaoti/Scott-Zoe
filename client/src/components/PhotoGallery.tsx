@@ -164,12 +164,12 @@ function PhotoGallery() {
     const getPreviewCount = () => {
       if (showAll) return photosToRender.length;
       
-      // Base preview count on image size and grid layout
+      // Show only one row of photos based on image size and screen size
       switch (imageSize) {
-        case 'small': return Math.min(12, photosToRender.length); // 3x4 grid
-        case 'medium': return Math.min(8, photosToRender.length);  // 2x4 grid  
-        case 'large': return Math.min(6, photosToRender.length);   // 2x3 grid
-        default: return Math.min(8, photosToRender.length);
+        case 'small': return Math.min(8, photosToRender.length); // One row for small size (8 photos on xl screens)
+        case 'medium': return Math.min(6, photosToRender.length); // One row for medium size (6 photos on xl screens)  
+        case 'large': return Math.min(5, photosToRender.length);  // One row for large size (5 photos on xl screens)
+        default: return Math.min(6, photosToRender.length);
       }
     };
     
@@ -196,7 +196,7 @@ function PhotoGallery() {
                   e.stopPropagation();
                   toggleFavorite(photo.id);
                 }}
-                className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white active:scale-95 transition-all duration-200 opacity-0 group-hover:opacity-100 shadow-sm hover:shadow-md hidden md:block"
+                className="absolute top-3 left-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white active:scale-95 transition-all duration-200 opacity-0 group-hover:opacity-100 shadow-sm hover:shadow-md hidden md:block"
               >
                 <Heart
                   className={`h-4 w-4 transition-all duration-200 ${photo.isFavorite ? 'text-red-500 fill-current scale-110' : 'text-gray-600 hover:text-red-400'}`}

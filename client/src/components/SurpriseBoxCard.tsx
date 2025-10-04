@@ -284,24 +284,8 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                   {box.prizeName}
                 </h3>
                 
-                {/* For CLAIMED boxes, show only essential information: type, prize, and price */}
-                {box.status === 'CLAIMED' ? (
-                  <div className="flex flex-col space-y-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="px-2 py-1 bg-gradient-to-r from-purple-200 to-pink-200 text-purple-700 rounded text-xs font-medium">
-                        Claimed
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      Prize: {box.prizeName}
-                    </div>
-                    {box.priceAmount && (
-                      <div className="text-sm font-medium text-green-600">
-                        ${box.priceAmount}
-                      </div>
-                    )}
-                  </div>
-                ) : (
+                {/* For CLAIMED boxes, don't show duplicate info here */}
+                {box.status !== 'CLAIMED' && (
                   <div className={`flex items-center space-x-1 ${box.status === 'OPENED' ? 'mt-1' : 'mt-0.5'}`}>
                     <span className={`px-1 py-0.5 rounded font-medium ${
                       box.status === 'OPENED' ? 'px-2 py-1 text-xs md:text-sm' : 'text-xs'
@@ -332,19 +316,20 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
 
         {/* Enhanced Content for OPENED boxes, compact for others */}
         <div className={box.status === 'OPENED' ? 'px-4 py-3 md:px-6 md:py-4' : 'px-3 py-2'}>
-          {/* For CLAIMED boxes, show only elegant prize information */}
+          {/* For CLAIMED boxes, show only Prize and Price */}
           {box.status === 'CLAIMED' ? (
             <div className="text-center py-4">
               <div className="text-4xl mb-3">🎁</div>
               <div className="bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-200 rounded-xl p-4">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">{box.prizeName}</h4>
-                {box.prizeDescription && (
-                  <p className="text-sm text-gray-600">{box.prizeDescription}</p>
-                )}
-                <div className="mt-3 flex items-center justify-center space-x-2">
-                  <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-purple-700">Successfully Claimed {box.prizeName}</span>
-                  <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse"></div>
+                <div className="space-y-2">
+                  <div className="text-sm text-gray-700">
+                    <span className="font-medium">Prize:</span> {box.prizeName}
+                  </div>
+                  {box.priceAmount && (
+                    <div className="text-sm text-gray-700">
+                      <span className="font-medium">Price:</span> ${box.priceAmount}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
