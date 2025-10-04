@@ -238,47 +238,44 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   return (
     <>
       <motion.div
-        layout
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        whileHover={{ y: -2 }}
-        className={`bg-white rounded-xl shadow-lg border-2 transition-all duration-200 overflow-hidden ${
-          isExpired ? 'border-red-200' : 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={`bg-white/90 backdrop-blur-sm rounded-xl apple-shadow border transition-all duration-200 hover:shadow-lg ${
+          isExpired ? 'border-red-200 hover:border-red-300' :
           canOpen ? 'border-green-200 hover:border-green-300' :
           canComplete ? 'border-indigo-200 hover:border-indigo-300' :
           canApprove ? 'border-amber-200 hover:border-amber-300' :
           'border-gray-200 hover:border-purple-300'
         }`}
       >
-        {/* Header */}
-        <div className={`p-4 ${
+        {/* Compact Header */}
+        <div className={`px-3 py-2 rounded-t-xl ${
           isExpired ? 'bg-red-50' :
           canOpen ? 'bg-green-50' :
           canComplete ? 'bg-indigo-50' :
           canApprove ? 'bg-amber-50' :
           'bg-purple-50'
         }`}>
-          <div className="flex items-start justify-between">
-            <div className="flex items-start space-x-3">
-              <div className={`p-2 rounded-lg ${
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 flex-1 min-w-0">
+              <div className={`p-1.5 rounded-lg flex-shrink-0 ${
                 isExpired ? 'bg-red-200 text-red-700' :
                 canOpen ? 'bg-green-200 text-green-700' :
                 canComplete ? 'bg-indigo-200 text-indigo-700' :
                 canApprove ? 'bg-amber-200 text-amber-700' :
                 'bg-purple-200 text-purple-700'
               }`}>
-                <Gift className="w-5 h-5" />
+                <Gift className="w-4 h-4" />
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-800 line-clamp-1">{box.prizeName}</h3>
-                <div className="flex items-center space-x-2 mt-1">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(box.status)}`}>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-gray-800 text-sm truncate">{box.prizeName}</h3>
+                <div className="flex items-center space-x-2 mt-0.5">
+                  <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${getStatusColor(box.status)}`}>
                     {getStatusText(box.status)}
                   </span>
                   <div className="flex items-center text-xs text-gray-500">
                     <CompletionIcon className="w-3 h-3 mr-1" />
-                    {box.completionType?.toLowerCase() || 'unknown'}
+                    <span className="truncate">{box.completionType?.toLowerCase() || 'unknown'}</span>
                   </div>
                 </div>
               </div>
@@ -286,120 +283,108 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
             
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-1 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
             >
               <Eye className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-4">
-          {/* Timing info */}
-          <div className="space-y-2 mb-4">
+        {/* Compact Content */}
+        <div className="px-3 py-2">
+          {/* Compact timing and user info */}
+          <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center">
+                <User className="w-3 h-3 mr-1" />
+                <span className="truncate max-w-20">{isOwner ? box.recipient?.name || 'Unknown' : box.owner?.name || 'Unknown'}</span>
+              </div>
+              <div className="flex items-center">
+                <Calendar className="w-3 h-3 mr-1" />
+                <span>{formatDate(box.dropAt)}</span>
+              </div>
+            </div>
+            
+            {/* Compact timing info */}
             {box.status === 'CREATED' && timeUntilDrop > 0 && (
-              <div className="flex items-center text-sm text-gray-600">
-                <Clock className="w-4 h-4 mr-2" />
-                <span>Drops in: </span>
-                <CountdownTimer targetDate={box.dropAt} className="ml-1 font-medium" />
+              <div className="flex items-center text-blue-600">
+                <Clock className="w-3 h-3 mr-1" />
+                <CountdownTimer targetDate={box.dropAt} className="font-medium text-xs" />
               </div>
             )}
             
             {shouldShowExpirationCountdown && (
-              <div className="flex items-center text-sm text-gray-600">
-                <AlertCircle className="w-4 h-4 mr-2" />
-                <span>Expires in: </span>
+              <div className="flex items-center text-red-600">
+                <AlertCircle className="w-3 h-3 mr-1" />
                 <CountdownTimer 
                   targetDate={box.expiresAt} 
-                  className="ml-1 font-medium text-red-600" 
+                  className="font-medium text-xs" 
                   onExpire={() => window.location.reload()}
                 />
               </div>
             )}
             
-            {box.status === 'DROPPED' && !box.openedAt && !isExpired && (
-              <div className="flex items-center text-sm text-blue-600">
-                <Gift className="w-4 h-4 mr-2" />
-                <span>Open the box to start the countdown timer</span>
-              </div>
-            )}
-            
             {isExpired && (
-              <div className="flex items-center text-sm text-red-600">
-                <X className="w-4 h-4 mr-2" />
-                <span>Expired on {formatDate(box.expiresAt)}</span>
+              <div className="flex items-center text-red-600">
+                <X className="w-3 h-3 mr-1" />
+                <span className="text-xs">Expired</span>
               </div>
             )}
           </div>
 
-          {/* User info */}
-          <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-            <div className="flex items-center">
-              <User className="w-4 h-4 mr-1" />
-              <span>{isOwner ? `For: ${box.recipient?.name || 'Unknown'}` : `From: ${box.owner?.name || 'Unknown'}`}</span>
+          {/* Compact status messages */}
+          {box.status === 'DROPPED' && !box.openedAt && !isExpired && (
+            <div className="bg-blue-50 rounded-lg px-2 py-1 mb-2">
+              <p className="text-xs text-blue-600">Tap to open and start timer</p>
             </div>
-            <div className="flex items-center">
-              <Calendar className="w-4 h-4 mr-1" />
-              <span>{formatDate(box.dropAt)}</span>
-            </div>
-          </div>
+          )}
 
-          {/* Task description for opened boxes */}
+          {/* Compact task description */}
           {box.status === 'OPENED' && box.taskDescription && (
-            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 mb-4">
-              <p className="text-sm text-indigo-600 mb-1">Your Task:</p>
-              <p className="text-sm text-indigo-800">{box.taskDescription}</p>
+            <div className="bg-indigo-50 border border-indigo-200 rounded-lg px-2 py-1 mb-2">
+              <p className="text-xs text-indigo-800 line-clamp-2">{box.taskDescription}</p>
             </div>
           )}
 
-          {/* Completion data for waiting approval */}
+          {/* Compact completion data */}
           {box.status === 'WAITING_APPROVAL' && box.completionData && (
-            <div className="bg-gray-50 rounded-lg p-3 mb-4">
-              <p className="text-sm text-gray-600 mb-1">Completion submission:</p>
-              <p className="text-sm text-gray-800">{box.completionData}</p>
+            <div className="bg-gray-50 rounded-lg px-2 py-1 mb-2">
+              <p className="text-xs text-gray-800 line-clamp-2">{box.completionData}</p>
             </div>
           )}
 
-          {/* Rejection reason */}
+          {/* Compact rejection reason */}
           {box.rejectionReason && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-              <p className="text-sm text-red-600 mb-1">Rejection reason:</p>
-              <p className="text-sm text-red-800">{box.rejectionReason}</p>
+            <div className="bg-red-50 border border-red-200 rounded-lg px-2 py-1 mb-2">
+              <p className="text-xs text-red-800 line-clamp-2">{box.rejectionReason}</p>
             </div>
           )}
 
-          {/* Claimed status */}
+          {/* Compact claimed status */}
           {box.status === 'CLAIMED' && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
-              <div className="flex items-center space-x-2 text-green-600 mb-2">
-                <Gift className="w-4 h-4" />
-                <span className="text-sm font-medium">Prize Claimed!</span>
-              </div>
-              <div className="text-sm text-gray-700">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Prize:</span>
-                  <span>{box.prizeName}</span>
+            <div className="bg-green-50 border border-green-200 rounded-lg px-2 py-1 mb-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1 text-green-600">
+                  <Gift className="w-3 h-3" />
+                  <span className="text-xs font-medium">Claimed!</span>
                 </div>
                 {box.priceAmount && (
-                  <div className="flex justify-between items-center mt-1">
-                    <span className="font-medium">Value:</span>
-                    <span className="text-green-600 font-semibold">${box.priceAmount}</span>
-                  </div>
+                  <span className="text-xs text-green-600 font-semibold">${box.priceAmount}</span>
                 )}
               </div>
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex items-center space-x-2">
+          {/* Compact Actions */}
+          <div className="flex items-center space-x-1.5">
             {/* RECIPIENT ACTIONS */}
             {canOpen && (
               <button
                 onClick={handleOpen}
                 disabled={isLoading}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 font-medium disabled:opacity-50"
+                className="flex-1 px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 text-sm font-medium disabled:opacity-50"
               >
-                {isLoading ? 'Opening...' : 'Open Box'}
+                {isLoading ? 'Opening...' : 'Open'}
               </button>
             )}
             
@@ -407,26 +392,26 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
               <>
                 <button
                   onClick={() => setShowCompleteModal(true)}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 font-medium"
+                  className="flex-1 px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 text-sm font-medium"
                 >
-                  Complete Task
+                  Complete
                 </button>
                 <button
                   onClick={() => {
                     setCompletionData(`Paid $${box.priceAmount} for prize`);
                     setShowCompleteModal(true);
                   }}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 font-medium flex items-center justify-center space-x-1"
+                  className="flex-1 px-3 py-1.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 text-sm font-medium flex items-center justify-center space-x-1"
                 >
-                  <DollarSign className="w-4 h-4" />
-                  <span>Pay ${box.priceAmount}</span>
+                  <DollarSign className="w-3 h-3" />
+                  <span>${box.priceAmount}</span>
                 </button>
               </>
             )}
             
             {shouldShowWaitingForApprovalMessage && (
-              <div className="flex-1 px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg text-center">
-                <span className="text-amber-700 text-sm font-medium">Waiting for approval...</span>
+              <div className="flex-1 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg text-center">
+                <span className="text-amber-700 text-xs font-medium">Pending...</span>
               </div>
             )}
             
@@ -434,18 +419,18 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
               <button
                 onClick={handleClaim}
                 disabled={isLoading}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 font-medium disabled:opacity-50 flex items-center justify-center space-x-1"
+                className="flex-1 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 text-sm font-medium disabled:opacity-50 flex items-center justify-center space-x-1"
               >
-                <Gift className="w-4 h-4" />
-                <span>{isLoading ? 'Claiming...' : 'Claim Prize'}</span>
+                <Gift className="w-3 h-3" />
+                <span>{isLoading ? 'Claiming...' : 'Claim'}</span>
               </button>
             )}
             
             {/* CREATOR ACTIONS */}
             {shouldShowWaitingMessage && (
-              <div className="flex-1 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-center">
-                <span className="text-blue-700 text-sm font-medium">
-                  {box.status === 'DROPPED' ? 'Waiting for recipient to open...' : 'Waiting for recipient to complete task...'}
+              <div className="flex-1 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-center">
+                <span className="text-blue-700 text-xs font-medium">
+                  {box.status === 'DROPPED' ? 'Waiting...' : 'In Progress...'}
                 </span>
               </div>
             )}
@@ -455,37 +440,37 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                 <button
                   onClick={handleApprove}
                   disabled={isLoading}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 font-medium disabled:opacity-50 flex items-center justify-center space-x-1"
+                  className="flex-1 px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 text-sm font-medium disabled:opacity-50"
                 >
-                  <Check className="w-4 h-4" />
-                  <span>Approve</span>
+                  {isLoading ? 'Approving...' : 'Approve'}
                 </button>
                 <button
                   onClick={() => setShowRejectModal(true)}
-                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                  className="flex-1 px-3 py-1.5 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 text-sm font-medium"
                 >
-                  <X className="w-4 h-4" />
+                  Reject
                 </button>
               </>
+            )}
+            
+            {canCancel && (
+              <button
+                onClick={() => cancelBox(box.id)}
+                disabled={isLoading}
+                className="px-2 py-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                title="Cancel box"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             )}
             
             {canEdit && (
               <button
                 onClick={() => setShowEditModal(true)}
-                className="px-3 py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                className="px-2 py-1.5 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                 title="Edit box"
               >
                 <Edit className="w-4 h-4" />
-              </button>
-            )}
-            
-            {canCancel && (
-              <button
-                onClick={handleCancel}
-                disabled={isLoading}
-                className="px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-              >
-                <Trash2 className="w-4 h-4" />
               </button>
             )}
           </div>
@@ -799,10 +784,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                    initial={{ y: 20, opacity: 0 }}
                    animate={{ y: 0, opacity: 1 }}
                    transition={{ delay: 0.6 }}
-                   onClick={() => {
-                     setShowCongratsModal(false);
-                     toast.success('Prize claimed successfully!');
-                   }}
+                   onClick={() => setShowCongratsModal(false)}
                    className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-200 transform hover:scale-105"
                  >
                    Awesome! 🎉

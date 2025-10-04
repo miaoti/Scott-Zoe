@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, Plus, Bell, X, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Gift, Plus, X, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSurpriseBoxActions } from '../hooks/useSurpriseBoxActions';
 import SurpriseBoxCard from './SurpriseBoxCard';
 import BoxCreationForm from './BoxCreationForm';
@@ -12,21 +12,19 @@ const SurpriseBoxManager: React.FC = () => {
     isLoading,
     error,
     showCreateForm,
-    notifications,
     isConnected,
     setShowCreateForm,
     loadOwnedBoxes,
     loadReceivedBoxes,
     connectWebSocket,
     disconnectWebSocket,
-    clearNotifications,
     getBoxesWaitingApproval,
     getActiveBoxesCount,
     setError
   } = useSurpriseBoxActions();
 
   const [activeTab, setActiveTab] = useState<'received' | 'owned'>('received');
-  const [showNotifications, setShowNotifications] = useState(false);
+
   
   // Pagination state
   const [receivedPage, setReceivedPage] = useState(0);
@@ -97,64 +95,6 @@ const SurpriseBoxManager: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-3 w-full sm:w-auto">
-              {/* Notifications */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  className="p-2 text-apple-secondary-label hover:text-apple-purple hover:bg-apple-purple/5 rounded-lg transition-colors relative"
-                >
-                  <Bell className="w-5 h-5" />
-                  {notifications.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                      {notifications.length}
-                    </span>
-                  )}
-                </button>
-                
-                <AnimatePresence>
-                  {showNotifications && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                      className="absolute right-0 top-12 w-80 bg-white/95 backdrop-blur-xl rounded-xl apple-shadow border border-apple-separator z-50 max-h-96 overflow-y-auto"
-                    >
-                      <div className="p-4 border-b border-apple-separator">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-medium text-apple-label">Notifications</h3>
-                          <button
-                            onClick={clearNotifications}
-                            className="text-sm text-apple-purple hover:text-apple-purple/80"
-                          >
-                            Clear all
-                          </button>
-                        </div>
-                      </div>
-                      
-                      {notifications.length === 0 ? (
-                        <div className="p-4 text-center text-apple-secondary-label">
-                          No new notifications
-                        </div>
-                      ) : (
-                        <div className="divide-y divide-apple-separator">
-                          {notifications.map((notification, index) => (
-                            <div key={index} className="p-4">
-                              <p className="text-sm text-apple-label">{notification.message}</p>
-                              <p className="text-xs text-apple-secondary-label mt-1">
-                                {notification.timestamp && !isNaN(new Date(notification.timestamp).getTime())
-                                  ? new Date(notification.timestamp).toLocaleString()
-                                  : 'Invalid Date'
-                                }
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-              
               {/* Create button - responsive */}
               <button
                 onClick={() => setShowCreateForm(true)}
@@ -272,7 +212,7 @@ const SurpriseBoxManager: React.FC = () => {
                         </div>
                       ) : (
                         <>
-                          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                             {paginatedReceivedBoxes.map((box) => {
                               const isOwner = false;
                               
@@ -346,7 +286,7 @@ const SurpriseBoxManager: React.FC = () => {
                         </div>
                       ) : (
                         <>
-                          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                             {paginatedOwnedBoxes.map((box) => (
                               <SurpriseBoxCard key={box.id} box={box} isOwner={true} />
                             ))}
@@ -394,13 +334,7 @@ const SurpriseBoxManager: React.FC = () => {
         )}
       </AnimatePresence>
       
-      {/* Click outside to close notifications */}
-      {showNotifications && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setShowNotifications(false)}
-        />
-      )}
+
     </div>
   );
 };
