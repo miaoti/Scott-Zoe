@@ -243,8 +243,8 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className={`bg-white/90 backdrop-blur-sm rounded-lg apple-shadow border transition-all duration-200 hover:shadow-md ${
-          // Make OPENED boxes larger on desktop only, single column on mobile
-          box.status === 'OPENED' ? 'md:col-span-2 md:row-span-2 border-indigo-300 shadow-lg' :
+          // Make OPENED, WAITING_APPROVAL, and APPROVED boxes larger on desktop only, single column on mobile
+          ['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'md:col-span-2 md:row-span-2 border-indigo-300 shadow-lg' :
           isExpired ? 'border-red-200 hover:border-red-300' :
           canOpen ? 'border-green-200 hover:border-green-300' :
           canComplete ? 'border-indigo-200 hover:border-indigo-300' :
@@ -252,9 +252,9 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
           'border-gray-200 hover:border-purple-300'
         }`}
       >
-        {/* Enhanced Header for OPENED boxes, compact for others */}
+        {/* Enhanced Header for OPENED, WAITING_APPROVAL, and APPROVED boxes, compact for others */}
         <div className={`${
-          box.status === 'OPENED' ? 'px-4 py-3 md:px-6 md:py-4' : 'px-3 py-2'
+          ['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'px-4 py-3 md:px-6 md:py-4' : 'px-3 py-2'
         } rounded-t-lg ${
           isExpired ? 'bg-red-50' :
           canOpen ? 'bg-green-50' :
@@ -266,7 +266,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 flex-1 min-w-0">
               <div className={`${
-                box.status === 'OPENED' ? 'p-1.5 md:p-2' : 'p-1'
+                ['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'p-1.5 md:p-2' : 'p-1'
               } rounded-md flex-shrink-0 ${
                 isExpired ? 'bg-red-200 text-red-700' :
                 canOpen ? 'bg-green-200 text-green-700' :
@@ -275,20 +275,20 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                 box.status === 'CLAIMED' ? 'bg-gradient-to-r from-purple-200 to-pink-200 text-purple-700' :
                 'bg-purple-200 text-purple-700'
               }`}>
-                <Gift className={box.status === 'OPENED' ? 'w-4 h-4 md:w-5 md:h-5' : 'w-3 h-3'} />
+                <Gift className={['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'w-4 h-4 md:w-5 md:h-5' : 'w-3 h-3'} />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className={`font-medium text-gray-800 leading-tight ${
-                  box.status === 'OPENED' ? 'text-base md:text-lg mb-1' : 'text-xs truncate'
+                  ['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'text-base md:text-lg mb-1' : 'text-xs truncate'
                 }`}>
                   {box.prizeName}
                 </h3>
                 
                 {/* For CLAIMED boxes, don't show duplicate info here */}
                 {box.status !== 'CLAIMED' && (
-                  <div className={`flex items-center space-x-1 ${box.status === 'OPENED' ? 'mt-1' : 'mt-0.5'}`}>
+                  <div className={`flex items-center space-x-1 ${['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'mt-1' : 'mt-0.5'}`}>
                     <span className={`px-1 py-0.5 rounded font-medium ${
-                      box.status === 'OPENED' ? 'px-2 py-1 text-xs md:text-sm' : 'text-xs'
+                      ['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'px-2 py-1 text-xs md:text-sm' : 'text-xs'
                     } ${getStatusColor(box.status)}`}>
                       {getStatusText(box.status)}
                     </span>
@@ -302,20 +302,20 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
               <button
                 onClick={() => setShowDetails(!showDetails)}
                 className={`text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 ${
-                  box.status === 'OPENED' ? 'p-0.5 md:p-1' : 'p-0.5'
+                  ['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'p-0.5 md:p-1' : 'p-0.5'
                 }`}
               >
                 {showDetails ? 
-                  <ChevronUp className={box.status === 'OPENED' ? 'w-3 h-3 md:w-4 md:h-4' : 'w-3 h-3'} /> : 
-                  <ChevronDown className={box.status === 'OPENED' ? 'w-3 h-3 md:w-4 md:h-4' : 'w-3 h-3'} />
+                  <ChevronUp className={['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'w-3 h-3 md:w-4 md:h-4' : 'w-3 h-3'} /> : 
+                  <ChevronDown className={['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'w-3 h-3 md:w-4 md:h-4' : 'w-3 h-3'} />
                 }
               </button>
             )}
           </div>
         </div>
 
-        {/* Enhanced Content for OPENED boxes, compact for others */}
-        <div className={box.status === 'OPENED' ? 'px-4 py-3 md:px-6 md:py-4' : 'px-3 py-2'}>
+        {/* Enhanced Content for OPENED, WAITING_APPROVAL, and APPROVED boxes, compact for others */}
+        <div className={['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'px-4 py-3 md:px-6 md:py-4' : 'px-3 py-2'}>
           {/* For CLAIMED boxes, show only Prize and Price */}
           {box.status === 'CLAIMED' ? (
             <div className="text-center py-4">
@@ -360,8 +360,8 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                   </div>
                 )}
                 
-                {/* Only show compact countdown for non-OPENED boxes */}
-                {shouldShowExpirationCountdown && box.status !== 'OPENED' && (
+                {/* Only show compact countdown for non-OPENED, non-WAITING_APPROVAL, and non-APPROVED boxes */}
+                {shouldShowExpirationCountdown && !['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) && (
                   <div className="flex items-center text-red-600">
                     <AlertCircle className="w-3 h-3 mr-0.5" />
                     <CountdownTimer 
@@ -479,15 +479,15 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                 )}
               </AnimatePresence>
 
-              {/* Expiration countdown - enhanced for OPENED boxes */}
+              {/* Expiration countdown - enhanced for OPENED, WAITING_APPROVAL, and APPROVED boxes */}
               {shouldShowExpirationCountdown && timeUntilExpiry > 0 && (
                 <div className={`mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg ${
-                  box.status === 'OPENED' ? 'mt-4 p-3' : ''
+                  ['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'mt-4 p-3' : ''
                 }`}>
                   <div className="flex items-center space-x-2">
-                    <AlertCircle className={box.status === 'OPENED' ? 'w-4 h-4 text-amber-600' : 'w-3 h-3 text-amber-600'} />
+                    <AlertCircle className={['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'w-4 h-4 text-amber-600' : 'w-3 h-3 text-amber-600'} />
                     <span className={`font-medium text-amber-800 ${
-                      box.status === 'OPENED' ? 'text-sm' : 'text-xs'
+                      ['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'text-sm' : 'text-xs'
                     }`}>
                       <CountdownTimer targetDate={expiresDate} />
                     </span>
@@ -495,9 +495,9 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                 </div>
               )}
 
-              {/* Enhanced action buttons for OPENED boxes */}
+              {/* Enhanced action buttons for OPENED, WAITING_APPROVAL, and APPROVED boxes */}
               <div className={`flex items-center gap-2 mt-2 ${
-                box.status === 'OPENED' ? 'mt-3 md:mt-4 gap-2 md:gap-3' : ''
+                ['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'mt-3 md:mt-4 gap-2 md:gap-3' : ''
               }`}>
                 {/* RECIPIENT ACTIONS */}
                 {canOpen && (
