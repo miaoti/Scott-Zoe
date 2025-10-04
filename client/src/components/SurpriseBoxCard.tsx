@@ -129,6 +129,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
 
   // For RECIPIENTS (not owner)
   const canOpen = !isOwner && box.status === 'DROPPED' && !box.isExpired;
+  // Recipients can complete if box is OPENED and not expired (including rejected boxes)
   const canComplete = !isOwner && box.status === 'OPENED' && !box.isExpired;
   
   // For recipients: can claim if box is approved and not expired
@@ -399,6 +400,18 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                 <div className="mb-3 md:mb-4 p-2 md:p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <h4 className="text-xs md:text-sm font-semibold text-blue-800 mb-1">Task:</h4>
                   <p className="text-xs md:text-sm text-blue-700">{box.taskDescription}</p>
+                </div>
+              )}
+
+              {/* Rejection reason display for OPENED boxes */}
+              {box.status === 'OPENED' && box.rejectionReason && (
+                <div className="mb-3 md:mb-4 p-2 md:p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <h4 className="text-xs md:text-sm font-semibold text-red-800 mb-1 flex items-center">
+                    <X className="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                    Rejection Feedback:
+                  </h4>
+                  <p className="text-xs md:text-sm text-red-700">{box.rejectionReason}</p>
+                  <p className="text-xs text-red-600 mt-1 italic">Please complete the task again with the feedback above.</p>
                 </div>
               )}
 

@@ -235,7 +235,7 @@ public class SurpriseBoxService {
             throw new RuntimeException("Box is not waiting for approval. Current status: " + box.getStatus());
         }
         
-        box.setStatus(SurpriseBox.BoxStatus.DROPPED);
+        box.setStatus(SurpriseBox.BoxStatus.OPENED);
         box.setRejectionReason(rejectionReason);
         
         // Extend expiration by 12 hours (720 minutes)
