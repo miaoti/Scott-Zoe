@@ -337,14 +337,14 @@ function AllPhotos() {
                   </div>
                 )}
                 
-                {/* Favorite button */}
+                {/* Favorite button - hidden on mobile, visible on desktop */}
                 {!selectionMode && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleFavorite(photo.id);
                     }}
-                    className="absolute top-2 right-2 p-2 bg-white/95 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-110"
+                    className="absolute top-2 right-2 p-2 bg-white/95 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-110 hidden md:block"
                   >
                     <Heart
                       className={`h-4 w-4 transition-colors duration-200 ${photo.isFavorite ? 'text-red-500 fill-current' : 'text-gray-600 hover:text-red-400'}`}

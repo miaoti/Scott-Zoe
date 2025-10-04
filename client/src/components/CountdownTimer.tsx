@@ -44,8 +44,8 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
         // Note: JavaScript months are 0-indexed, but backend sends 1-indexed
         targetTime = new Date(year, month - 1, day, hour, minute, second).getTime();
       } else {
-        // Handle string formats
-        const dateString = targetDate as string;
+        // Handle string formats - ensure it's actually a string
+        const dateString = String(targetDate);
         
         // Handle ISO format with T and Z (e.g., "2025-10-02T11:50:49.491Z")
         if (dateString.includes('T')) {
@@ -60,6 +60,18 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
     } catch (error) {
       console.error('Failed to parse target date:', targetDate, error);
       targetTime = 0;
+    }
+    
+    // Validate the parsed time
+    if (isNaN(targetTime) || targetTime === 0) {
+      console.error('Invalid target time calculated:', targetTime, 'from:', targetDate);
+      return {
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        total: 0
+      };
     }
     
     const difference = targetTime - new Date().getTime();

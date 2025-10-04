@@ -349,14 +349,14 @@ function CategoryPhotos() {
                   </div>
                 )}
                 
-                {/* Favorite button */}
+                {/* Favorite button - hidden on mobile, visible on desktop */}
                 {!selectionMode && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleFavorite(photo.id);
                     }}
-                    className="absolute top-2 right-2 p-1 bg-white/80 rounded-full hover:bg-white transition-colors opacity-0 group-hover:opacity-100"
+                    className="absolute top-2 right-2 p-1 bg-white/80 rounded-full hover:bg-white transition-colors opacity-0 group-hover:opacity-100 hidden md:block"
                   >
                     <Heart
                       className={`h-4 w-4 ${photo.isFavorite ? 'text-red-500 fill-current' : 'text-gray-600'}`}

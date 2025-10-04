@@ -289,7 +289,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                   <div className="flex items-center space-x-2">
                     <div className="flex items-center space-x-1">
                       <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
-                      <span className="text-sm font-medium text-purple-700">Prize Claimed</span>
+                      <span className="text-sm font-medium text-purple-700">Successfully Claimed {box.prizeName}</span>
                     </div>
                   </div>
                 ) : (
@@ -334,7 +334,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                 )}
                 <div className="mt-3 flex items-center justify-center space-x-2">
                   <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-purple-700">Successfully Claimed</span>
+                  <span className="text-sm font-medium text-purple-700">Successfully Claimed {box.prizeName}</span>
                   <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse"></div>
                 </div>
               </div>
@@ -354,7 +354,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                   </div>
                   <div className="flex items-center">
                     <DollarSign className={box.status === 'OPENED' ? 'w-3 h-3 md:w-4 md:h-4 mr-0.5 md:mr-1' : 'w-3 h-3 mr-0.5'} />
-                    <span className="font-medium">${box.priceAmount}</span>
+                    <span className="font-medium">${box.priceAmount || 0}</span>
                   </div>
                 </div>
                 
@@ -494,7 +494,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                     <span className={`font-medium text-amber-800 ${
                       box.status === 'OPENED' ? 'text-sm' : 'text-xs'
                     }`}>
-                      Expires in: <CountdownTimer targetDate={expiresDate} />
+                      <CountdownTimer targetDate={expiresDate} />
                     </span>
                   </div>
                 </div>
@@ -528,7 +528,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                     </button>
                     <button
                       onClick={() => {
-                        setCompletionData(`Paid $${box.prizeAmount} for prize`);
+                        setCompletionData(`Paid $${box.priceAmount || 0} for prize`);
                         setShowCompleteModal(true);
                       }}
                       className={`bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded font-medium hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 flex items-center space-x-1 ${
@@ -536,7 +536,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                       }`}
                     >
                       <DollarSign className={box.status === 'OPENED' ? 'w-3 h-3 md:w-4 md:h-4' : 'w-3 h-3'} />
-                      <span>${box.prizeAmount}</span>
+                      <span>${box.priceAmount || 0}</span>
                     </button>
                   </>
                 )}
@@ -547,7 +547,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                     disabled={isLoading}
                     className="flex-1 px-2 py-1 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded text-xs font-medium hover:from-emerald-600 hover:to-green-600 transition-all duration-200 disabled:opacity-50"
                   >
-                    Claim ${box.priceAmount}
+                    Claim ${box.priceAmount || 0}
                   </button>
                 )}
                 
@@ -863,7 +863,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                     <h3 className="text-xl font-bold text-gray-800 mb-2">{box.prizeName}</h3>
                     {box.priceAmount && (
                       <div className="text-2xl font-bold text-purple-600">
-                        ${box.priceAmount}
+                        ${box.priceAmount || 0}
                       </div>
                     )}
                     {box.prizeDescription && (

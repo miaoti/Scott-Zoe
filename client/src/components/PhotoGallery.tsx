@@ -152,10 +152,10 @@ function PhotoGallery() {
 
   const getGridCols = () => {
     switch (imageSize) {
-      case 'small': return 'grid-cols-4 sm:grid-cols-5 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1';
-      case 'medium': return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1';
-      case 'large': return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1';
-      default: return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1';
+      case 'small': return 'grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10';
+      case 'medium': return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7';
+      case 'large': return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6';
+      default: return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7';
     }
   };
 
@@ -190,13 +190,13 @@ function PhotoGallery() {
                 loading="lazy"
               />
               
-              {/* Favorite button */}
+              {/* Favorite button - hidden on mobile, visible on desktop */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleFavorite(photo.id);
                 }}
-                className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white active:scale-95 transition-all duration-200 opacity-0 group-hover:opacity-100 shadow-sm hover:shadow-md"
+                className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white active:scale-95 transition-all duration-200 opacity-0 group-hover:opacity-100 shadow-sm hover:shadow-md hidden md:block"
               >
                 <Heart
                   className={`h-4 w-4 transition-all duration-200 ${photo.isFavorite ? 'text-red-500 fill-current scale-110' : 'text-gray-600 hover:text-red-400'}`}
