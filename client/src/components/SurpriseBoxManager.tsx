@@ -327,6 +327,7 @@ const SurpriseBoxManager: React.FC = () => {
                             </div>
                           )}
                         </>
+                      )}
                     </div>
                   ) : (
                     <div>
@@ -376,6 +377,7 @@ const SurpriseBoxManager: React.FC = () => {
                             </div>
                           )}
                         </>
+                      )}
                     </div>
                   )}
                 </motion.div>
