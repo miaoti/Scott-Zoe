@@ -566,7 +566,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                     disabled={isLoading}
                     className="flex-1 px-2 py-1 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded text-xs font-medium hover:from-emerald-600 hover:to-green-600 transition-all duration-200 disabled:opacity-50"
                   >
-                    Claim Prize
+                    Claim ${box.prizeName || 0}
                   </button>
                 )}
                 
