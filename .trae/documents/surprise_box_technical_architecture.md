@@ -36,103 +36,127 @@ graph TD
 
 ## 2. Technology Description
 
-- **Frontend**: React@18 + TypeScript + Tailwind CSS + Framer Motion (animations) + Socket.IO Client
-- **Backend**: Spring Boot@3 + Spring WebSocket + Spring Data JPA + Spring Security
-- **Database**: PostgreSQL (via existing setup)
-- **Real-time**: WebSocket for live state synchronization
-- **Scheduling**: Spring @Scheduled for box drop timing
+* **Frontend**: React\@18 + TypeScript + Tailwind CSS + Framer Motion (animations) + Socket.IO Client
+
+* **Backend**: Spring Boot\@3 + Spring WebSocket + Spring Data JPA + Spring Security
+
+* **Database**: PostgreSQL (via existing setup)
+
+* **Real-time**: WebSocket for live state synchronization
+
+* **Scheduling**: Spring @Scheduled for box drop timing
 
 ## 3. Route Definitions
 
-| Route | Purpose |
-|-------|----------|
-| /settings | Settings page with box creation and prize history |
-| /home | Home page with box drops and surprise box cards |
-| /surprise-box/:id | Individual box detail view (if needed) |
+| Route             | Purpose                                           |
+| ----------------- | ------------------------------------------------- |
+| /settings         | Settings page with box creation and prize history |
+| /home             | Home page with box drops and surprise box cards   |
+| /surprise-box/:id | Individual box detail view (if needed)            |
 
 ## 4. API Definitions
 
 ### 4.1 Core API
 
 **Box Management**
+
 ```
 POST /api/surprise-boxes
 ```
+
 Request:
-| Param Name | Param Type | isRequired | Description |
-|------------|------------|------------|-------------|
-| recipientId | Long | true | ID of the user who will receive the box |
-| prizeName | String | true | Name of the prize |
-| priceAmount | BigDecimal | true | Price for the prize option |
-| taskDescription | String | true | Description of the task to complete |
-| expirationMinutes | Integer | true | Minutes until expiration after opening |
+
+| Param Name        | Param Type | isRequired | Description                             |
+| ----------------- | ---------- | ---------- | --------------------------------------- |
+| recipientId       | Long       | true       | ID of the user who will receive the box |
+| prizeName         | String     | true       | Name of the prize                       |
+| priceAmount       | BigDecimal | true       | Price for the prize option              |
+| taskDescription   | String     | true       | Description of the task to complete     |
+| expirationMinutes | Integer    | true       | Minutes until expiration after opening  |
 
 Response:
-| Param Name | Param Type | Description |
-|------------|------------|-------------|
-| id | Long | Unique box identifier |
-| status | String | Box status (CREATED, DROPPED, OPENED, WAITING_APPROVAL, APPROVED, REJECTED, EXPIRED) |
-| createdAt | LocalDateTime | Box creation timestamp |
+
+| Param Name | Param Type    | Description                                                                           |
+| ---------- | ------------- | ------------------------------------------------------------------------------------- |
+| id         | Long          | Unique box identifier                                                                 |
+| status     | String        | Box status (CREATED, DROPPED, OPENED, WAITING\_APPROVAL, APPROVED, REJECTED, EXPIRED) |
+| createdAt  | LocalDateTime | Box creation timestamp                                                                |
 
 ```
 GET /api/surprise-boxes/owned
 ```
+
 Response: List of boxes owned by current user
 
 ```
 GET /api/surprise-boxes/received
 ```
+
 Response: List of boxes received by current user
 
 ```
 PUT /api/surprise-boxes/{id}
 ```
+
 Request: Same as POST (for editing existing box)
 
 **Box Interactions**
+
 ```
 POST /api/surprise-boxes/{id}/open
 ```
+
 Marks box as opened by recipient
 
 ```
 POST /api/surprise-boxes/{id}/complete-task
 ```
+
 Recipient completes the task
 
 ```
 POST /api/surprise-boxes/{id}/pay-cash
 ```
+
 Recipient chooses to pay for prize
 
 ```
 POST /api/surprise-boxes/{id}/approve
 ```
+
 Owner approves recipient's action
 
 ```
 POST /api/surprise-boxes/{id}/reject
 ```
+
 Owner rejects recipient's action
 
 ```
 POST /api/surprise-boxes/{id}/claim-prize
 ```
+
 Recipient claims approved prize
 
 **Prize History**
+
 ```
 GET /api/prize-history
 ```
+
 Response: List of claimed prizes for current user
 
 ### 4.2 WebSocket Events
 
 **Box Drop Events**
-- `box-drop-countdown`: 5-second countdown before drop
-- `box-drop-start`: Box drop animation begins
-- `box-status-update`: Real-time status changes
-- `approval-update`: Owner approval/rejection notifications
+
+* `box-drop-countdown`: 5-second countdown before drop
+
+* `box-drop-start`: Box drop animation begins
+
+* `box-status-update`: Real-time status changes
+
+* `approval-update`: Owner approval/rejection notifications
 
 ## 5. Server Architecture Diagram
 
@@ -209,6 +233,7 @@ erDiagram
 ### 6.2 Data Definition Language
 
 **Surprise Boxes Table**
+
 ```sql
 -- Create surprise_boxes table
 CREATE TABLE surprise_boxes (
@@ -310,11 +335,15 @@ enum BoxStatus {
 
 ### 7.3 Animation Specifications
 
-- **Box Drop**: CSS transform with easing, 3-5 second duration, random horizontal positioning
-- **Card Expansion**: Framer Motion spring animation, scale and opacity transitions
-- **Countdown Timer**: Circular progress indicator with color changes (green → yellow → red)
-- **Prize Reveal**: Confetti effect with bounce animation and sparkle particles
-- **Button States**: Hover effects, loading spinners, success/error feedback animations
+* **Box Drop**: CSS transform with easing, 3-5 second duration, random horizontal positioning
+
+* **Card Expansion**: Framer Motion spring animation, scale and opacity transitions
+
+* **Countdown Timer**: Circular progress indicator with color changes (green → yellow → red)
+
+* **Prize Reveal**: Confetti effect with bounce animation and sparkle particles
+
+* **Button States**: Hover effects, loading spinners, success/error feedback animations
 
 ## 8. Real-time Synchronization
 
@@ -360,8 +389,13 @@ public class BoxDropScheduler {
 
 ## 9. Security Considerations
 
-- **Authorization**: Users can only create boxes for existing users, only interact with their own boxes
-- **Validation**: Server-side validation for all box creation and interaction requests
-- **Rate Limiting**: Prevent spam box creation and rapid-fire interactions
-- **State Integrity**: Ensure box status transitions follow valid state machine rules
-- **WebSocket Security**: Authenticate WebSocket connections and validate message sources
+* **Authorization**: Users can only create boxes for existing users, only interact with their own boxes
+
+* **Validation**: Server-side validation for all box creation and interaction requests
+
+* **Rate Limiting**: Prevent spam box creation and rapid-fire interactions
+
+* **State Integrity**: Ensure box status transitions follow valid state machine rules
+
+* **WebSocket Security**: Authenticate WebSocket connections and validate message sources
+

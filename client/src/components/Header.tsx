@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Heart, Camera, Calendar, Home, Settings, LogOut, ChevronDown, Trash2, Gift } from 'lucide-react';
+import { Heart, Camera, Calendar, Home, Settings, LogOut, ChevronDown, Trash2, Gift, Menu, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 
@@ -22,6 +22,7 @@ function Header() {
   const location = useLocation();
   const [relationshipInfo, setRelationshipInfo] = useState<RelationshipInfo | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState<TimeElapsed>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   const calculateTimeElapsed = useCallback(() => {
@@ -87,16 +88,19 @@ function Header() {
       if (showDropdown && !(event.target as Element).closest('.relationship-dropdown')) {
         setShowDropdown(false);
       }
+      if (showMobileMenu && !(event.target as Element).closest('.mobile-menu')) {
+        setShowMobileMenu(false);
+      }
     };
 
-    if (showDropdown) {
+    if (showDropdown || showMobileMenu) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showDropdown]);
+  }, [showDropdown, showMobileMenu]);
 
 
 
@@ -106,25 +110,25 @@ function Header() {
 
   return (
     <header className="apple-glass-effect border-b border-apple-separator sticky top-0 z-40 backdrop-blur-xl">
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 group">
+          <Link to="/" className="flex items-center space-x-3 group flex-shrink-0">
             <Heart 
-              className="h-7 w-7 text-apple-purple animate-heart-bounce hover-glow transition-all duration-500" 
+              className="h-6 w-6 sm:h-7 sm:w-7 text-apple-purple animate-heart-bounce hover-glow transition-all duration-500" 
               fill="currentColor"
               style={{
                 filter: 'drop-shadow(0 0 12px rgba(168, 85, 247, 0.4))'
               }}
             />
-            <span className="font-semibold text-xl text-apple-label group-hover:text-apple-purple transition-colors duration-300">
+            <span className="font-semibold text-lg sm:text-xl text-apple-label group-hover:text-apple-purple transition-colors duration-300 hidden xs:block">
               Scott &amp; Zoe
             </span>
           </Link>
 
-          {/* Relationship Counter Dropdown */}
+          {/* Relationship Counter Dropdown - Desktop */}
           {relationshipInfo && (
-            <div className="relative hidden md:block relationship-dropdown">
+            <div className="relative hidden lg:block relationship-dropdown">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center space-x-2 apple-glass-background rounded-xl px-4 py-2 apple-shadow hover:bg-apple-gray-6/10 transition-all duration-200"
@@ -167,83 +171,176 @@ function Header() {
             </div>
           )}
 
-          {/* Navigation */}
-          <nav className="flex items-center space-x-2">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-1">
             <Link
               to="/"
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
                 isActive('/') 
                   ? 'bg-apple-purple/10 text-apple-purple' 
                   : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
               }`}
             >
               <Home className="h-4 w-4" />
-              <span className="hidden sm:inline font-medium">Home</span>
+              <span className="hidden lg:inline font-medium">Home</span>
             </Link>
             
             <Link
               to="/gallery"
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
                 isActive('/gallery') 
                   ? 'bg-apple-purple/10 text-apple-purple' 
                   : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
               }`}
             >
               <Camera className="h-4 w-4" />
-              <span className="hidden sm:inline font-medium">Gallery</span>
+              <span className="hidden lg:inline font-medium">Gallery</span>
             </Link>
-            
-
             
             <Link
               to="/memories"
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
                 isActive('/memories') 
                   ? 'bg-apple-purple/10 text-apple-purple' 
                   : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
               }`}
             >
               <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline font-medium">Memories</span>
+              <span className="hidden lg:inline font-medium">Memories</span>
             </Link>
             
             <Link
               to="/surprise-boxes"
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
                 isActive('/surprise-boxes') 
                   ? 'bg-apple-purple/10 text-apple-purple' 
                   : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
               }`}
             >
               <Gift className="h-4 w-4" />
-              <span className="hidden sm:inline font-medium">Surprises</span>
+              <span className="hidden lg:inline font-medium">Surprises</span>
             </Link>
             
             <Link
               to="/settings"
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
                 isActive('/settings') 
                   ? 'bg-apple-purple/10 text-apple-purple' 
                   : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
               }`}
             >
               <Settings className="h-4 w-4" />
-              <span className="hidden sm:inline font-medium">Settings</span>
+              <span className="hidden lg:inline font-medium">Settings</span>
             </Link>
             
             <button
               onClick={logout}
-              className="flex items-center space-x-2 px-4 py-2 rounded-lg text-apple-secondary-label hover:bg-red-500/10 hover:text-red-500 transition-all duration-200"
+              className="flex items-center space-x-2 px-3 py-2 rounded-lg text-apple-secondary-label hover:bg-red-500/10 hover:text-red-500 transition-all duration-200"
             >
               <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline font-medium">Logout</span>
+              <span className="hidden lg:inline font-medium">Logout</span>
             </button>
           </nav>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden mobile-menu">
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="p-2 text-apple-secondary-label hover:text-apple-purple hover:bg-apple-purple/5 rounded-lg transition-colors"
+            >
+              {showMobileMenu ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+
+            {/* Mobile Menu Dropdown */}
+            {showMobileMenu && (
+              <div className="absolute top-full right-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-xl apple-shadow border border-apple-separator z-50">
+                <div className="p-2">
+                  <Link
+                    to="/"
+                    onClick={() => setShowMobileMenu(false)}
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                      isActive('/') 
+                        ? 'bg-apple-purple/10 text-apple-purple' 
+                        : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
+                    }`}
+                  >
+                    <Home className="h-4 w-4" />
+                    <span className="font-medium">Home</span>
+                  </Link>
+                  
+                  <Link
+                    to="/gallery"
+                    onClick={() => setShowMobileMenu(false)}
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                      isActive('/gallery') 
+                        ? 'bg-apple-purple/10 text-apple-purple' 
+                        : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
+                    }`}
+                  >
+                    <Camera className="h-4 w-4" />
+                    <span className="font-medium">Gallery</span>
+                  </Link>
+                  
+                  <Link
+                    to="/memories"
+                    onClick={() => setShowMobileMenu(false)}
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                      isActive('/memories') 
+                        ? 'bg-apple-purple/10 text-apple-purple' 
+                        : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
+                    }`}
+                  >
+                    <Calendar className="h-4 w-4" />
+                    <span className="font-medium">Memories</span>
+                  </Link>
+                  
+                  <Link
+                    to="/surprise-boxes"
+                    onClick={() => setShowMobileMenu(false)}
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                      isActive('/surprise-boxes') 
+                        ? 'bg-apple-purple/10 text-apple-purple' 
+                        : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
+                    }`}
+                  >
+                    <Gift className="h-4 w-4" />
+                    <span className="font-medium">Surprises</span>
+                  </Link>
+                  
+                  <Link
+                    to="/settings"
+                    onClick={() => setShowMobileMenu(false)}
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                      isActive('/settings') 
+                        ? 'bg-apple-purple/10 text-apple-purple' 
+                        : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
+                    }`}
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span className="font-medium">Settings</span>
+                  </Link>
+                  
+                  <div className="border-t border-apple-separator my-2"></div>
+                  
+                  <button
+                    onClick={() => {
+                      setShowMobileMenu(false);
+                      logout();
+                    }}
+                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-apple-secondary-label hover:bg-red-500/10 hover:text-red-500 transition-all duration-200"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span className="font-medium">Logout</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Mobile Relationship Counter Dropdown */}
-        {relationshipInfo && (
-          <div className="md:hidden pb-4 text-center">
+        {/* Mobile Relationship Counter - Only show when menu is closed */}
+        {relationshipInfo && !showMobileMenu && (
+          <div className="lg:hidden pb-4 text-center">
             <div className="relative inline-block relationship-dropdown">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
