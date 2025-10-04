@@ -284,14 +284,23 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                   {box.prizeName}
                 </h3>
                 
-                {/* For CLAIMED boxes, show elegant prize display without price */}
+                {/* For CLAIMED boxes, show only essential information: type, prize, and price */}
                 {box.status === 'CLAIMED' ? (
-                  // <div className="flex items-center space-x-2">
-                  //   <div className="flex items-center space-x-1">
-                  //     <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
-                  //     <span className="text-sm font-medium text-purple-700">Successfully Claimed {box.prizeName}</span>
-                  //   </div>
-                  // </div>
+                  <div className="flex flex-col space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <span className="px-2 py-1 bg-gradient-to-r from-purple-200 to-pink-200 text-purple-700 rounded text-xs font-medium">
+                        Claimed
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      Prize: {box.prizeName}
+                    </div>
+                    {box.priceAmount && (
+                      <div className="text-sm font-medium text-green-600">
+                        ${box.priceAmount}
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className={`flex items-center space-x-1 ${box.status === 'OPENED' ? 'mt-1' : 'mt-0.5'}`}>
                     <span className={`px-1 py-0.5 rounded font-medium ${
