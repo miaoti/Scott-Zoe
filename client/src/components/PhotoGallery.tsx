@@ -152,10 +152,10 @@ function PhotoGallery() {
 
   const getGridCols = () => {
     switch (imageSize) {
-      case 'small': return 'grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10';
-      case 'medium': return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7';
-      case 'large': return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6';
-      default: return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7';
+      case 'small': return 'grid-cols-4 sm:grid-cols-5 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1';
+      case 'medium': return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1';
+      case 'large': return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1';
+      default: return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1';
     }
   };
 

@@ -15,7 +15,9 @@ import {
   Trash2,
   User,
   Edit,
-  DollarSign
+  DollarSign,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useSurpriseBoxStore, SurpriseBox } from '../stores/surpriseBoxStore';
 import CountdownTimer from './CountdownTimer';
@@ -240,7 +242,9 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`bg-white/90 backdrop-blur-sm rounded-xl apple-shadow border transition-all duration-200 hover:shadow-lg ${
+        className={`bg-white/90 backdrop-blur-sm rounded-lg apple-shadow border transition-all duration-200 hover:shadow-md ${
+          // Make OPENED boxes larger on desktop only, single column on mobile
+          box.status === 'OPENED' ? 'md:col-span-2 md:row-span-2 border-indigo-300 shadow-lg' :
           isExpired ? 'border-red-200 hover:border-red-300' :
           canOpen ? 'border-green-200 hover:border-green-300' :
           canComplete ? 'border-indigo-200 hover:border-indigo-300' :
@@ -248,276 +252,364 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
           'border-gray-200 hover:border-purple-300'
         }`}
       >
-        {/* Compact Header */}
-        <div className={`px-3 py-2 rounded-t-xl ${
+        {/* Enhanced Header for OPENED boxes, compact for others */}
+        <div className={`${
+          box.status === 'OPENED' ? 'px-4 py-3 md:px-6 md:py-4' : 'px-3 py-2'
+        } rounded-t-lg ${
           isExpired ? 'bg-red-50' :
           canOpen ? 'bg-green-50' :
           canComplete ? 'bg-indigo-50' :
           canApprove ? 'bg-amber-50' :
+          box.status === 'CLAIMED' ? 'bg-gradient-to-r from-purple-50 to-pink-50' :
           'bg-purple-50'
         }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 flex-1 min-w-0">
-              <div className={`p-1.5 rounded-lg flex-shrink-0 ${
+              <div className={`${
+                box.status === 'OPENED' ? 'p-1.5 md:p-2' : 'p-1'
+              } rounded-md flex-shrink-0 ${
                 isExpired ? 'bg-red-200 text-red-700' :
                 canOpen ? 'bg-green-200 text-green-700' :
                 canComplete ? 'bg-indigo-200 text-indigo-700' :
                 canApprove ? 'bg-amber-200 text-amber-700' :
+                box.status === 'CLAIMED' ? 'bg-gradient-to-r from-purple-200 to-pink-200 text-purple-700' :
                 'bg-purple-200 text-purple-700'
               }`}>
-                <Gift className="w-4 h-4" />
+                <Gift className={box.status === 'OPENED' ? 'w-4 h-4 md:w-5 md:h-5' : 'w-3 h-3'} />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-gray-800 text-sm truncate">{box.prizeName}</h3>
-                <div className="flex items-center space-x-2 mt-0.5">
-                  <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${getStatusColor(box.status)}`}>
-                    {getStatusText(box.status)}
-                  </span>
-                  <div className="flex items-center text-xs text-gray-500">
-                    <CompletionIcon className="w-3 h-3 mr-1" />
-                    <span className="truncate">{box.completionType?.toLowerCase() || 'unknown'}</span>
+                <h3 className={`font-medium text-gray-800 leading-tight ${
+                  box.status === 'OPENED' ? 'text-base md:text-lg mb-1' : 'text-xs truncate'
+                }`}>
+                  {box.prizeName}
+                </h3>
+                
+                {/* For CLAIMED boxes, show elegant prize display without price */}
+                {box.status === 'CLAIMED' ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
+                      <span className="text-sm font-medium text-purple-700">Prize Claimed</span>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
-            
-            <button
-              onClick={() => setShowDetails(!showDetails)}
-              className="p-1 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
-            >
-              <Eye className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Compact Content */}
-        <div className="px-3 py-2">
-          {/* Compact timing and user info */}
-          <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center">
-                <User className="w-3 h-3 mr-1" />
-                <span className="truncate max-w-20">{isOwner ? box.recipient?.name || 'Unknown' : box.owner?.name || 'Unknown'}</span>
-              </div>
-              <div className="flex items-center">
-                <Calendar className="w-3 h-3 mr-1" />
-                <span>{formatDate(box.dropAt)}</span>
-              </div>
-            </div>
-            
-            {/* Compact timing info */}
-            {box.status === 'CREATED' && timeUntilDrop > 0 && (
-              <div className="flex items-center text-blue-600">
-                <Clock className="w-3 h-3 mr-1" />
-                <CountdownTimer targetDate={box.dropAt} className="font-medium text-xs" />
-              </div>
-            )}
-            
-            {shouldShowExpirationCountdown && (
-              <div className="flex items-center text-red-600">
-                <AlertCircle className="w-3 h-3 mr-1" />
-                <CountdownTimer 
-                  targetDate={box.expiresAt} 
-                  className="font-medium text-xs" 
-                  onExpire={() => window.location.reload()}
-                />
-              </div>
-            )}
-            
-            {isExpired && (
-              <div className="flex items-center text-red-600">
-                <X className="w-3 h-3 mr-1" />
-                <span className="text-xs">Expired</span>
-              </div>
-            )}
-          </div>
-
-          {/* Compact status messages */}
-          {box.status === 'DROPPED' && !box.openedAt && !isExpired && (
-            <div className="bg-blue-50 rounded-lg px-2 py-1 mb-2">
-              <p className="text-xs text-blue-600">Tap to open and start timer</p>
-            </div>
-          )}
-
-          {/* Compact task description */}
-          {box.status === 'OPENED' && box.taskDescription && (
-            <div className="bg-indigo-50 border border-indigo-200 rounded-lg px-2 py-1 mb-2">
-              <p className="text-xs text-indigo-800 line-clamp-2">{box.taskDescription}</p>
-            </div>
-          )}
-
-          {/* Compact completion data */}
-          {box.status === 'WAITING_APPROVAL' && box.completionData && (
-            <div className="bg-gray-50 rounded-lg px-2 py-1 mb-2">
-              <p className="text-xs text-gray-800 line-clamp-2">{box.completionData}</p>
-            </div>
-          )}
-
-          {/* Compact rejection reason */}
-          {box.rejectionReason && (
-            <div className="bg-red-50 border border-red-200 rounded-lg px-2 py-1 mb-2">
-              <p className="text-xs text-red-800 line-clamp-2">{box.rejectionReason}</p>
-            </div>
-          )}
-
-          {/* Compact claimed status */}
-          {box.status === 'CLAIMED' && (
-            <div className="bg-green-50 border border-green-200 rounded-lg px-2 py-1 mb-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-1 text-green-600">
-                  <Gift className="w-3 h-3" />
-                  <span className="text-xs font-medium">Claimed!</span>
-                </div>
-                {box.priceAmount && (
-                  <span className="text-xs text-green-600 font-semibold">${box.priceAmount}</span>
+                ) : (
+                  <div className={`flex items-center space-x-1 ${box.status === 'OPENED' ? 'mt-1' : 'mt-0.5'}`}>
+                    <span className={`px-1 py-0.5 rounded font-medium ${
+                      box.status === 'OPENED' ? 'px-2 py-1 text-xs md:text-sm' : 'text-xs'
+                    } ${getStatusColor(box.status)}`}>
+                      {getStatusText(box.status)}
+                    </span>
+                  </div>
                 )}
               </div>
             </div>
-          )}
-
-          {/* Compact Actions */}
-          <div className="flex items-center space-x-1.5">
-            {/* RECIPIENT ACTIONS */}
-            {canOpen && (
+            
+            {/* Hide expand button for CLAIMED boxes, make it larger for OPENED boxes */}
+            {box.status !== 'CLAIMED' && (
               <button
-                onClick={handleOpen}
-                disabled={isLoading}
-                className="flex-1 px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 text-sm font-medium disabled:opacity-50"
+                onClick={() => setShowDetails(!showDetails)}
+                className={`text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 ${
+                  box.status === 'OPENED' ? 'p-0.5 md:p-1' : 'p-0.5'
+                }`}
               >
-                {isLoading ? 'Opening...' : 'Open'}
-              </button>
-            )}
-            
-            {canComplete && (
-              <>
-                <button
-                  onClick={() => setShowCompleteModal(true)}
-                  className="flex-1 px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 text-sm font-medium"
-                >
-                  Complete
-                </button>
-                <button
-                  onClick={() => {
-                    setCompletionData(`Paid $${box.priceAmount} for prize`);
-                    setShowCompleteModal(true);
-                  }}
-                  className="flex-1 px-3 py-1.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 text-sm font-medium flex items-center justify-center space-x-1"
-                >
-                  <DollarSign className="w-3 h-3" />
-                  <span>${box.priceAmount}</span>
-                </button>
-              </>
-            )}
-            
-            {shouldShowWaitingForApprovalMessage && (
-              <div className="flex-1 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg text-center">
-                <span className="text-amber-700 text-xs font-medium">Pending...</span>
-              </div>
-            )}
-            
-            {canClaim && (
-              <button
-                onClick={handleClaim}
-                disabled={isLoading}
-                className="flex-1 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 text-sm font-medium disabled:opacity-50 flex items-center justify-center space-x-1"
-              >
-                <Gift className="w-3 h-3" />
-                <span>{isLoading ? 'Claiming...' : 'Claim'}</span>
-              </button>
-            )}
-            
-            {/* CREATOR ACTIONS */}
-            {shouldShowWaitingMessage && (
-              <div className="flex-1 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-center">
-                <span className="text-blue-700 text-xs font-medium">
-                  {box.status === 'DROPPED' ? 'Waiting...' : 'In Progress...'}
-                </span>
-              </div>
-            )}
-            
-            {canApprove && (
-              <>
-                <button
-                  onClick={handleApprove}
-                  disabled={isLoading}
-                  className="flex-1 px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 text-sm font-medium disabled:opacity-50"
-                >
-                  {isLoading ? 'Approving...' : 'Approve'}
-                </button>
-                <button
-                  onClick={() => setShowRejectModal(true)}
-                  className="flex-1 px-3 py-1.5 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 text-sm font-medium"
-                >
-                  Reject
-                </button>
-              </>
-            )}
-            
-            {canCancel && (
-              <button
-                onClick={() => cancelBox(box.id)}
-                disabled={isLoading}
-                className="px-2 py-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                title="Cancel box"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            )}
-            
-            {canEdit && (
-              <button
-                onClick={() => setShowEditModal(true)}
-                className="px-2 py-1.5 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                title="Edit box"
-              >
-                <Edit className="w-4 h-4" />
+                {showDetails ? 
+                  <ChevronUp className={box.status === 'OPENED' ? 'w-3 h-3 md:w-4 md:h-4' : 'w-3 h-3'} /> : 
+                  <ChevronDown className={box.status === 'OPENED' ? 'w-3 h-3 md:w-4 md:h-4' : 'w-3 h-3'} />
+                }
               </button>
             )}
           </div>
         </div>
 
-        {/* Expanded details */}
-        <AnimatePresence>
-          {showDetails && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="border-t bg-gray-50 overflow-hidden"
-            >
-              <div className="p-4 space-y-2 text-sm">
+        {/* Enhanced Content for OPENED boxes, compact for others */}
+        <div className={box.status === 'OPENED' ? 'px-4 py-3 md:px-6 md:py-4' : 'px-3 py-2'}>
+          {/* For CLAIMED boxes, show only elegant prize information */}
+          {box.status === 'CLAIMED' ? (
+            <div className="text-center py-4">
+              <div className="text-4xl mb-3">🎁</div>
+              <div className="bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-200 rounded-xl p-4">
+                <h4 className="text-lg font-semibold text-gray-800 mb-2">{box.prizeName}</h4>
                 {box.prizeDescription && (
-                  <div>
-                    <span className="font-medium text-gray-700">Description:</span>
-                    <p className="text-gray-600 mt-1">{box.prizeDescription}</p>
-                  </div>
+                  <p className="text-sm text-gray-600">{box.prizeDescription}</p>
                 )}
-                <div className="grid grid-cols-2 gap-4 text-xs text-gray-500">
-                  <div>
-                    <span className="font-medium">Created:</span>
-                    <p>{formatDate(box.createdAt, true)}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium">Expires:</span>
-                    <p>{box.openedAt ? formatDate(box.expiresAt, true) : `${box.expirationMinutes || 1440} minutes after opening`}</p>
-                  </div>
-                  {box.droppedAt && (
-                    <div>
-                      <span className="font-medium">Dropped:</span>
-                      <p>{formatDate(box.droppedAt, true)}</p>
-                    </div>
-                  )}
-                  {box.openedAt && (
-                    <div>
-                      <span className="font-medium">Opened:</span>
-                      <p>{formatDate(box.openedAt, true)}</p>
-                    </div>
-                  )}
+                <div className="mt-3 flex items-center justify-center space-x-2">
+                  <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-purple-700">Successfully Claimed</span>
+                  <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse"></div>
                 </div>
               </div>
-            </motion.div>
+            </div>
+          ) : (
+            <>
+              {/* Essential info - enhanced for OPENED boxes */}
+              <div className={`flex items-center justify-between text-gray-600 mb-1 ${
+                box.status === 'OPENED' ? 'text-xs md:text-sm mb-2 md:mb-3' : 'text-xs'
+              }`}>
+                <div className="flex items-center space-x-1 md:space-x-2">
+                  <div className="flex items-center">
+                    <User className={box.status === 'OPENED' ? 'w-3 h-3 md:w-4 md:h-4 mr-0.5 md:mr-1' : 'w-3 h-3 mr-0.5'} />
+                    <span className={box.status === 'OPENED' ? 'max-w-20 md:max-w-32 truncate' : 'truncate max-w-16'}>
+                      {isOwner ? box.recipient?.name || 'Unknown' : box.owner?.name || 'Unknown'}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <DollarSign className={box.status === 'OPENED' ? 'w-3 h-3 md:w-4 md:h-4 mr-0.5 md:mr-1' : 'w-3 h-3 mr-0.5'} />
+                    <span className="font-medium">${box.priceAmount}</span>
+                  </div>
+                </div>
+                
+                {/* Compact timing info */}
+                {box.status === 'CREATED' && timeUntilDrop > 0 && (
+                  <div className="flex items-center text-blue-600">
+                    <Clock className="w-3 h-3 mr-0.5" />
+                    <CountdownTimer targetDate={box.dropAt} className="font-medium text-xs" />
+                  </div>
+                )}
+                
+                {shouldShowExpirationCountdown && (
+                  <div className="flex items-center text-red-600">
+                    <AlertCircle className="w-3 h-3 mr-0.5" />
+                    <CountdownTimer 
+                      targetDate={box.expiresAt} 
+                      className="font-medium text-xs" 
+                      onExpire={() => window.location.reload()}
+                    />
+                  </div>
+                )}
+                
+                {isExpired && (
+                  <div className="flex items-center text-red-600">
+                    <X className="w-3 h-3 mr-0.5" />
+                    <span className="text-xs">Expired</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Enhanced description for OPENED boxes */}
+              {box.status === 'OPENED' && box.prizeDescription && (
+                <div className="mb-3 md:mb-4 p-2 md:p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
+                  <p className="text-xs md:text-sm text-indigo-700">{box.prizeDescription}</p>
+                </div>
+              )}
+
+              {/* Enhanced task description for OPENED boxes */}
+              {box.status === 'OPENED' && box.taskDescription && (
+                <div className="mb-3 md:mb-4 p-2 md:p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h4 className="text-xs md:text-sm font-semibold text-blue-800 mb-1">Task:</h4>
+                  <p className="text-xs md:text-sm text-blue-700">{box.taskDescription}</p>
+                </div>
+              )}
+
+              {/* Expandable details */}
+              <AnimatePresence>
+                {showDetails && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className={`border-t border-gray-100 mt-2 pt-2 space-y-1 ${
+                      box.status === 'OPENED' ? 'mt-4 pt-4 space-y-2' : ''
+                    }`}
+                  >
+                    {box.prizeDescription && box.status !== 'OPENED' && (
+                      <div>
+                        <span className={`font-medium text-gray-700 ${
+                          box.status === 'OPENED' ? 'text-sm' : 'text-xs'
+                        }`}>Prize: </span>
+                        <span className={box.status === 'OPENED' ? 'text-sm text-gray-600' : 'text-xs text-gray-600'}>
+                          {box.prizeDescription}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {box.taskDescription && box.status !== 'OPENED' && (
+                      <div>
+                        <span className={`font-medium text-gray-700 ${
+                          box.status === 'OPENED' ? 'text-sm' : 'text-xs'
+                        }`}>Task: </span>
+                        <span className={box.status === 'OPENED' ? 'text-sm text-gray-600' : 'text-xs text-gray-600'}>
+                          {box.taskDescription}
+                        </span>
+                      </div>
+                    )}
+                    
+                    <div className={`flex items-center justify-between ${
+                      box.status === 'OPENED' ? 'text-sm' : 'text-xs'
+                    } text-gray-500`}>
+                      <div className="flex items-center">
+                        <Calendar className={box.status === 'OPENED' ? 'w-4 h-4 mr-1' : 'w-3 h-3 mr-0.5'} />
+                        <span>Drops: {formatDate(box.dropAt)}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Clock className={box.status === 'OPENED' ? 'w-4 h-4 mr-1' : 'w-3 h-3 mr-0.5'} />
+                        <span>Expires: {formatDate(box.expiresAt)}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Completion type */}
+                    <div className={`flex items-center text-gray-500 ${
+                      box.status === 'OPENED' ? 'text-sm' : 'text-xs'
+                    }`}>
+                      <CompletionIcon className={box.status === 'OPENED' ? 'w-4 h-4 mr-1' : 'w-3 h-3 mr-1'} />
+                      <span>{box.completionType?.toLowerCase() || 'unknown'}</span>
+                    </div>
+
+                    {/* Status messages */}
+                    {box.status === 'DROPPED' && !box.openedAt && !isExpired && (
+                      <div className="bg-blue-50 rounded px-2 py-1">
+                        <p className={box.status === 'OPENED' ? 'text-sm text-blue-600' : 'text-xs text-blue-600'}>
+                          Tap to open and start timer
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Completion data */}
+                    {box.status === 'WAITING_APPROVAL' && box.completionData && (
+                      <div className="bg-gray-50 rounded px-2 py-1">
+                        <p className={box.status === 'OPENED' ? 'text-sm text-gray-800' : 'text-xs text-gray-800 line-clamp-2'}>
+                          {box.completionData}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Rejection reason */}
+                    {box.rejectionReason && (
+                      <div className="bg-red-50 border border-red-200 rounded px-2 py-1">
+                        <p className={box.status === 'OPENED' ? 'text-sm text-red-800' : 'text-xs text-red-800 line-clamp-2'}>
+                          {box.rejectionReason}
+                        </p>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Expiration countdown - enhanced for OPENED boxes */}
+              {shouldShowExpirationCountdown && timeUntilExpiry > 0 && (
+                <div className={`mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg ${
+                  box.status === 'OPENED' ? 'mt-4 p-3' : ''
+                }`}>
+                  <div className="flex items-center space-x-2">
+                    <AlertCircle className={box.status === 'OPENED' ? 'w-4 h-4 text-amber-600' : 'w-3 h-3 text-amber-600'} />
+                    <span className={`font-medium text-amber-800 ${
+                      box.status === 'OPENED' ? 'text-sm' : 'text-xs'
+                    }`}>
+                      Expires in: <CountdownTimer targetDate={expiresDate} />
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Enhanced action buttons for OPENED boxes */}
+              <div className={`flex items-center gap-2 mt-2 ${
+                box.status === 'OPENED' ? 'mt-3 md:mt-4 gap-2 md:gap-3' : ''
+              }`}>
+                {/* RECIPIENT ACTIONS */}
+                {canOpen && (
+                  <button
+                    onClick={handleOpen}
+                    disabled={isLoading}
+                    className="flex-1 px-2 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded text-xs font-medium disabled:opacity-50 hover:from-green-600 hover:to-emerald-600 transition-all duration-200"
+                  >
+                    {isLoading ? 'Opening...' : 'Open'}
+                  </button>
+                )}
+                
+                {canComplete && (
+                  <>
+                    <button
+                      onClick={() => setShowCompleteModal(true)}
+                      className={`flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded font-medium hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 ${
+                        box.status === 'OPENED' ? 'px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm' : 'px-2 py-1 text-xs'
+                      }`}
+                    >
+                      <span className="hidden sm:inline">Complete Task</span>
+                      <span className="sm:hidden">Complete</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCompletionData(`Paid $${box.prizeAmount} for prize`);
+                        setShowCompleteModal(true);
+                      }}
+                      className={`bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded font-medium hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 flex items-center space-x-1 ${
+                        box.status === 'OPENED' ? 'px-2 py-1.5 md:px-3 md:py-2 text-xs md:text-sm' : 'px-2 py-1 text-xs'
+                      }`}
+                    >
+                      <DollarSign className={box.status === 'OPENED' ? 'w-3 h-3 md:w-4 md:h-4' : 'w-3 h-3'} />
+                      <span>${box.prizeAmount}</span>
+                    </button>
+                  </>
+                )}
+                
+                {canClaim && (
+                  <button
+                    onClick={handleClaim}
+                    disabled={isLoading}
+                    className="flex-1 px-2 py-1 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded text-xs font-medium hover:from-emerald-600 hover:to-green-600 transition-all duration-200 disabled:opacity-50"
+                  >
+                    Claim ${box.priceAmount}
+                  </button>
+                )}
+                
+                {/* CREATOR ACTIONS */}
+                {canApprove && (
+                  <>
+                    <button
+                      onClick={handleApprove}
+                      disabled={isLoading}
+                      className="flex-1 px-2 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded text-xs font-medium hover:from-green-600 hover:to-emerald-600 transition-all duration-200 disabled:opacity-50"
+                    >
+                      {isLoading ? 'Approving...' : 'Approve'}
+                    </button>
+                    <button
+                      onClick={() => setShowRejectModal(true)}
+                      className="px-2 py-1 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </>
+                )}
+                
+                {canEdit && (
+                  <button
+                    onClick={() => setShowEditModal(true)}
+                    className="px-2 py-1 text-blue-600 hover:text-blue-700 rounded text-xs"
+                  >
+                    <Edit className="w-3 h-3" />
+                  </button>
+                )}
+                
+                {canCancel && (
+                  <button
+                    onClick={handleCancel}
+                    disabled={isLoading}
+                    className="px-2 py-1 text-red-600 hover:text-red-700 rounded text-xs disabled:opacity-50"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                )}
+                
+                {/* Waiting messages for creators */}
+                {shouldShowWaitingMessage && (
+                  <div className="flex-1 text-center">
+                    <span className="text-xs text-gray-500">
+                      {box.status === 'DROPPED' ? 'Waiting for recipient to open' : 'Waiting for completion'}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Waiting message for recipients */}
+                {shouldShowWaitingForApprovalMessage && (
+                  <div className="flex-1 text-center">
+                    <span className="text-xs text-amber-600">Waiting for approval</span>
+                  </div>
+                )}
+              </div>
+            </>
           )}
-        </AnimatePresence>
+        </div>
+
+
       </motion.div>
 
       {/* Complete Box Modal */}

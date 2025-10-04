@@ -24,12 +24,10 @@ const SurpriseBoxManager: React.FC = () => {
   } = useSurpriseBoxActions();
 
   const [activeTab, setActiveTab] = useState<'received' | 'owned'>('received');
-
-  
-  // Pagination state
   const [receivedPage, setReceivedPage] = useState(0);
   const [ownedPage, setOwnedPage] = useState(0);
-  const BOXES_PER_PAGE = 6;
+
+  const BOXES_PER_PAGE = 20;
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -73,19 +71,19 @@ const SurpriseBoxManager: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/80 backdrop-blur-xl rounded-2xl apple-shadow border border-apple-separator p-6 mb-6"
+          className="bg-white/80 backdrop-blur-xl rounded-2xl apple-shadow border border-apple-separator p-4 mb-6"
         >
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-apple-purple/10 rounded-xl">
-                <Gift className="w-8 h-8 text-apple-purple" />
+              <div className="p-2 bg-apple-purple/10 rounded-xl">
+                <Gift className="w-6 h-6 text-apple-purple" />
               </div>
               <div>
-                <h1 className="text-2xl font-semibold text-apple-label">Surprise Boxes</h1>
-                <p className="text-apple-secondary-label text-sm">
-                  {activeBoxesCount > 0 ? `${activeBoxesCount} active boxes` : 'No active boxes'}
+                <h1 className="text-xl font-semibold text-apple-label">Surprise Boxes</h1>
+                <p className="text-sm text-apple-secondary-label flex items-center">
+                  Create and manage surprise boxes for each other
                   {isConnected && (
-                    <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                    <span className="ml-2 flex items-center text-green-600">
                       <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse" />
                       Live
                     </span>
@@ -106,22 +104,6 @@ const SurpriseBoxManager: React.FC = () => {
               </button>
             </div>
           </div>
-          
-          {/* Approval notifications */}
-          {boxesWaitingApproval.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg"
-            >
-              <div className="flex items-center space-x-2 text-amber-800">
-                <AlertCircle className="w-4 h-4" />
-                <span className="text-sm font-medium">
-                  {boxesWaitingApproval.length} box{boxesWaitingApproval.length > 1 ? 'es' : ''} waiting for your approval
-                </span>
-              </div>
-            </motion.div>
-          )}
         </motion.div>
 
         {/* Error display */}
@@ -159,7 +141,7 @@ const SurpriseBoxManager: React.FC = () => {
                 setActiveTab('received');
                 setReceivedPage(0);
               }}
-              className={`flex-1 px-6 py-4 text-center font-medium transition-colors ${
+              className={`flex-1 px-6 py-3 text-center font-medium transition-colors ${
                 activeTab === 'received'
                   ? 'bg-apple-purple/5 text-apple-purple border-b-2 border-apple-purple'
                   : 'text-apple-secondary-label hover:text-apple-purple hover:bg-apple-purple/5'
@@ -172,7 +154,7 @@ const SurpriseBoxManager: React.FC = () => {
                 setActiveTab('owned');
                 setOwnedPage(0);
               }}
-              className={`flex-1 px-6 py-4 text-center font-medium transition-colors ${
+              className={`flex-1 px-6 py-3 text-center font-medium transition-colors ${
                 activeTab === 'owned'
                   ? 'bg-apple-purple/5 text-apple-purple border-b-2 border-apple-purple'
                   : 'text-apple-secondary-label hover:text-apple-purple hover:bg-apple-purple/5'
@@ -188,7 +170,7 @@ const SurpriseBoxManager: React.FC = () => {
           </div>
 
           {/* Content */}
-          <div className="p-6">
+          <div className="p-4">
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-apple-purple" />
@@ -212,7 +194,7 @@ const SurpriseBoxManager: React.FC = () => {
                         </div>
                       ) : (
                         <>
-                          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 auto-rows-min">
                             {paginatedReceivedBoxes.map((box) => {
                               const isOwner = false;
                               
@@ -244,7 +226,7 @@ const SurpriseBoxManager: React.FC = () => {
                           
                           {/* Pagination for received boxes */}
                           {receivedTotalPages > 1 && (
-                            <div className="flex items-center justify-center space-x-4 mt-6">
+                            <div className="flex items-center justify-center space-x-4 mt-4">
                               <button
                                 onClick={() => setReceivedPage(Math.max(0, receivedPage - 1))}
                                 disabled={receivedPage === 0}
@@ -286,7 +268,7 @@ const SurpriseBoxManager: React.FC = () => {
                         </div>
                       ) : (
                         <>
-                          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 auto-rows-min">
                             {paginatedOwnedBoxes.map((box) => (
                               <SurpriseBoxCard key={box.id} box={box} isOwner={true} />
                             ))}
@@ -294,7 +276,7 @@ const SurpriseBoxManager: React.FC = () => {
                           
                           {/* Pagination for owned boxes */}
                           {ownedTotalPages > 1 && (
-                            <div className="flex items-center justify-center space-x-4 mt-6">
+                            <div className="flex items-center justify-center space-x-4 mt-4">
                               <button
                                 onClick={() => setOwnedPage(Math.max(0, ownedPage - 1))}
                                 disabled={ownedPage === 0}
@@ -326,14 +308,6 @@ const SurpriseBoxManager: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Modals */}
-      <AnimatePresence>
-        {showCreateForm && (
-          <BoxCreationForm onClose={() => setShowCreateForm(false)} />
-        )}
-      </AnimatePresence>
-      
 
     </div>
   );
