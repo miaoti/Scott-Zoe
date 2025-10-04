@@ -309,6 +309,15 @@ const SurpriseBoxManager: React.FC = () => {
         </div>
       </div>
 
+      {/* Create Box Modal */}
+      <AnimatePresence>
+        {showCreateForm && (
+          <BoxCreationForm
+            onClose={() => setShowCreateForm(false)}
+          />
+        )}
+      </AnimatePresence>
+
     </div>
   );
 };
