@@ -256,7 +256,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
         {/* Enhanced Header for OPENED, WAITING_APPROVAL, and APPROVED boxes, compact for others */}
         <div className={`${
           box.status === 'OPENED' ? 'px-4 py-3 md:px-6 md:py-4' :
-          ['WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'px-4 py-2 md:px-6 md:py-3' :
+          ['WAITING_APPROVAL', 'APPROVED', 'AVALIABLE'].includes(box.status) ? 'px-4 py-2 md:px-6 md:py-3' :
           'px-3 py-2'
         } rounded-t-lg ${
           isExpired ? 'bg-red-50' :
