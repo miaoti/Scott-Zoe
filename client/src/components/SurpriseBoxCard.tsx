@@ -286,12 +286,12 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                 
                 {/* For CLAIMED boxes, show elegant prize display without price */}
                 {box.status === 'CLAIMED' ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-1">
-                      <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
-                      <span className="text-sm font-medium text-purple-700">Successfully Claimed {box.prizeName}</span>
-                    </div>
-                  </div>
+                  // <div className="flex items-center space-x-2">
+                  //   <div className="flex items-center space-x-1">
+                  //     <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
+                  //     <span className="text-sm font-medium text-purple-700">Successfully Claimed {box.prizeName}</span>
+                  //   </div>
+                  // </div>
                 ) : (
                   <div className={`flex items-center space-x-1 ${box.status === 'OPENED' ? 'mt-1' : 'mt-0.5'}`}>
                     <span className={`px-1 py-0.5 rounded font-medium ${
@@ -366,7 +366,8 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                   </div>
                 )}
                 
-                {shouldShowExpirationCountdown && (
+                {/* Only show compact countdown for non-OPENED boxes */}
+                {shouldShowExpirationCountdown && box.status !== 'OPENED' && (
                   <div className="flex items-center text-red-600">
                     <AlertCircle className="w-3 h-3 mr-0.5" />
                     <CountdownTimer 
