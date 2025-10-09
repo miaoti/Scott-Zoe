@@ -459,59 +459,68 @@ function calculateOperation(
   });
   
   if (newContent.length > oldContent.length) {
-    // Insertion - use cursor position for more accurate insertion point
+    // Insertion - find where the text was actually inserted
     const insertedLength = newContent.length - oldContent.length;
     
     console.log('INSERTION detected:', {
       insertedLength,
       cursorPos,
-      calculatedInsertPosition: cursorPos - insertedLength
+      oldContentLength: oldContent.length,
+      newContentLength: newContent.length
     });
     
-    // For single character insertions, use cursor position - insertedLength as insertion point
-    let insertPosition = cursorPos - insertedLength;
+    // Find the insertion position by comparing old and new content
+    let insertPosition = 0;
+    let insertedText = '';
+    
+    // Find the first position where old and new content differ
+    for (let i = 0; i < Math.min(oldContent.length, newContent.length); i++) {
+      if (oldContent[i] !== newContent[i]) {
+        insertPosition = i;
+        break;
+      }
+    }
+    
+    // If no difference found in overlapping part, insertion is at the end
+    if (insertPosition === 0 && oldContent.length > 0) {
+      // Check if insertion is at the end
+      if (newContent.startsWith(oldContent)) {
+        insertPosition = oldContent.length;
+        insertedText = newContent.slice(oldContent.length);
+      } else {
+        // Find insertion position by checking from the end
+        let endMatch = 0;
+        for (let i = 1; i <= Math.min(oldContent.length, newContent.length); i++) {
+          if (oldContent[oldContent.length - i] === newContent[newContent.length - i]) {
+            endMatch = i;
+          } else {
+            break;
+          }
+        }
+        insertPosition = oldContent.length - endMatch;
+        insertedText = newContent.slice(insertPosition, insertPosition + insertedLength);
+      }
+    } else {
+      // Extract the inserted text at the found position
+      insertedText = newContent.slice(insertPosition, insertPosition + insertedLength);
+    }
     
     // Ensure position is within bounds
     insertPosition = Math.max(0, Math.min(insertPosition, oldContent.length));
     
-    console.log('Insert position after bounds check:', insertPosition);
-    
-    // Find the actual inserted text by comparing old and new content
-    // Use a simple diff approach to find what was actually inserted
-    let insertedText = '';
-    
-    // Check if the insertion happened at the calculated position
-    const beforeInsert = newContent.slice(0, insertPosition);
-    const afterInsert = newContent.slice(insertPosition + insertedLength);
-    const expectedOldContent = beforeInsert + afterInsert;
-    
     console.log('Insertion analysis:', {
-      beforeInsert: `"${beforeInsert}"`,
-      afterInsert: `"${afterInsert}"`,
-      expectedOldContent: `"${expectedOldContent}"`,
-      actualOldContent: `"${oldContent}"`,
-      matches: expectedOldContent === oldContent
-    });
-    
-    if (expectedOldContent === oldContent) {
-      // Perfect match - extract the inserted text
-      insertedText = newContent.slice(insertPosition, insertPosition + insertedLength);
-      console.log('Perfect match - extracted text:', `"${insertedText}"`);
-    } else {
-      // Fallback: find the difference more carefully
-      console.log('No perfect match, using fallback logic');
-      
-      // For simple cases, just get the character that was typed
-      if (insertedLength === 1) {
-        // Single character insertion - get the character at cursor position - 1
-        insertedText = newContent.charAt(insertPosition);
-        console.log('Single character fallback - extracted text:', `"${insertedText}"`);
-      } else {
-        // Multiple character insertion - extract from the difference
-        insertedText = newContent.slice(insertPosition, insertPosition + insertedLength);
-        console.log('Multiple character fallback - extracted text:', `"${insertedText}"`);
+      insertPosition,
+      insertedText: `"${insertedText}"`,
+      oldContent: `"${oldContent}"`,
+      newContent: `"${newContent}"`,
+      verification: {
+        before: `"${oldContent.slice(0, insertPosition)}"`,
+        inserted: `"${insertedText}"`,
+        after: `"${oldContent.slice(insertPosition)}"`,
+        reconstructed: `"${oldContent.slice(0, insertPosition) + insertedText + oldContent.slice(insertPosition)}"`,
+        matches: (oldContent.slice(0, insertPosition) + insertedText + oldContent.slice(insertPosition)) === newContent
       }
-    }
+    });
     
     const operation = {
       operationType: 'INSERT' as const,
