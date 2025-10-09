@@ -99,4 +99,23 @@ public class SharedNoteService {
         note.setContent(synchronizedContent);
         return sharedNoteRepository.save(note);
     }
+    
+    public SharedNote getCurrentSharedNote() {
+        return getOrCreateSharedNote();
+    }
+    
+    public NoteOperation saveNoteOperation(SharedNote note, User user, NoteOperation.OperationType operationType, 
+                                         Integer position, String content, Integer length) {
+        Integer nextSequenceNumber = noteOperationRepository.findMaxSequenceNumberByNoteId(note.getId()) + 1;
+        
+        NoteOperation operation = new NoteOperation(note, user, operationType, position, content, length, nextSequenceNumber);
+        return noteOperationRepository.save(operation);
+    }
+    
+    public SharedNote applyOperation(SharedNote note, NoteOperation operation) {
+        String currentContent = note.getContent();
+        String newContent = applyOperations(currentContent, List.of(operation));
+        note.setContent(newContent);
+        return sharedNoteRepository.save(note);
+    }
 }

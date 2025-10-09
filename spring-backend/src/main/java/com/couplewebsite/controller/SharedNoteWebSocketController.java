@@ -101,7 +101,8 @@ public class SharedNoteWebSocketController {
             );
             
             // Apply operation to note content
-            String updatedContent = sharedNoteService.applyOperation(sharedNote, operation);
+            SharedNote updatedNote = sharedNoteService.applyOperation(sharedNote, operation);
+            String updatedContent = updatedNote.getContent();
             
             // Broadcast operation to all connected users except sender
             Map<String, Object> broadcast = new HashMap<>();
@@ -211,7 +212,7 @@ public class SharedNoteWebSocketController {
             
             // Update window position
             WindowPosition position = windowPositionService.updateWindowPosition(
-                user, positionDto.getXPosition(), positionDto.getYPosition(),
+                user.getId(), positionDto.getXPosition(), positionDto.getYPosition(),
                 positionDto.getWidth(), positionDto.getHeight()
             );
             

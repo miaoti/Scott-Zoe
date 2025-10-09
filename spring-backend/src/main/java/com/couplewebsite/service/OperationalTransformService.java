@@ -1,7 +1,7 @@
 package com.couplewebsite.service;
 
 import com.couplewebsite.entity.NoteOperation;
-import com.couplewebsite.entity.OperationType;
+import com.couplewebsite.entity.NoteOperation.OperationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
