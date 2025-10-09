@@ -128,37 +128,29 @@ public class SharedNoteWebSocketController {
             NoteOperationDto operationDtoWithClientId = convertToDto(operation);
             operationDtoWithClientId.setClientId(operationDto.getClientId());
             
-            // Send confirmation back to sender (local echo)
-            Map<String, Object> senderBroadcast = new HashMap<>();
-            senderBroadcast.put("type", "OPERATION");
-            senderBroadcast.put("operation", operationDtoWithClientId);
-            senderBroadcast.put("content", updatedContent);
-            senderBroadcast.put("userId", user.getId());
-            senderBroadcast.put("username", username);
-            senderBroadcast.put("timestamp", LocalDateTime.now());
-            senderBroadcast.put("revision", operation.getSequenceNumber());
+            // Create operation broadcast message
+            Map<String, Object> operationBroadcast = new HashMap<>();
+            operationBroadcast.put("type", "OPERATION");
+            operationBroadcast.put("operation", operationDtoWithClientId);
+            operationBroadcast.put("content", updatedContent);
+            operationBroadcast.put("userId", user.getId());
+            operationBroadcast.put("username", username);
+            operationBroadcast.put("timestamp", LocalDateTime.now());
+            operationBroadcast.put("revision", operation.getSequenceNumber());
             
             logger.info("Sending confirmation to sender: clientId={}, content='{}'", 
                 operationDto.getClientId(), updatedContent);
             
-            // Send confirmation to sender
-            messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/shared-note/operations", senderBroadcast);
-            
-            // Broadcast operation to OTHER connected users (excluding sender)
-            Map<String, Object> othersBroadcast = new HashMap<>();
-            othersBroadcast.put("type", "OPERATION");
-            othersBroadcast.put("operation", operationDtoWithClientId);
-            othersBroadcast.put("content", updatedContent);
-            othersBroadcast.put("userId", user.getId());
-            othersBroadcast.put("username", username);
-            othersBroadcast.put("timestamp", LocalDateTime.now());
-            othersBroadcast.put("revision", operation.getSequenceNumber());
+            // Send confirmation to sender (local echo) - ONLY to sender's personal queue
+            messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/shared-note/operations", operationBroadcast);
             
             logger.info("Broadcasting operation to other users: clientId={}, content='{}'", 
                 operationDto.getClientId(), updatedContent);
             
-            // Send to all other users via topic (sender will ignore based on clientId)
-            messagingTemplate.convertAndSend("/topic/shared-note/operations", othersBroadcast);
+            // Broadcast operation to OTHER connected users via topic
+            // Note: The sender is also subscribed to this topic, but should ignore this message
+            // since they already received it via their personal queue
+            messagingTemplate.convertAndSend("/topic/shared-note/operations", operationBroadcast);
             
             logger.info("Processed note operation from user {}: {} at position {}", 
                 username, operationDto.getOperationType(), operationDto.getPosition());

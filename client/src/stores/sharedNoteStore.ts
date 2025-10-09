@@ -409,19 +409,32 @@ function handleOperationMessage(data: any) {
     const isOwnOperation = pendingOperations.some(op => op.clientId === data.operation.clientId);
     console.log('Is own operation?', isOwnOperation, 'clientId:', data.operation.clientId);
     
-    // For duplicate detection, we need to handle own operations differently
-    // Own operations should be processed once for local echo, others should be deduplicated
-    if (!isOwnOperation && data.operation.id && processedOperationIds.has(data.operation.id)) {
-      console.log('=== DUPLICATE OPERATION DETECTED - SKIPPING ===');
-      console.log('Operation ID already processed:', data.operation.id);
-      console.log('=== handleOperationMessage DEBUG END (DUPLICATE) ===');
-      return;
-    }
-    
-    // Add operation ID to processed set only for other user operations
-    if (!isOwnOperation && data.operation.id) {
-      processedOperationIds.add(data.operation.id);
-      console.log('Added operation ID to processed set:', data.operation.id);
+    // Improved duplicate detection logic:
+    // 1. For own operations: Only process if we have a matching pending operation (local echo)
+    // 2. For other operations: Use processedOperationIds to prevent duplicates
+    if (isOwnOperation) {
+      // This is our own operation - only process if we have a matching pending operation
+      const matchingPendingOp = pendingOperations.find(op => op.clientId === data.operation.clientId);
+      if (!matchingPendingOp) {
+        console.log('=== OWN OPERATION ALREADY PROCESSED - SKIPPING ===');
+        console.log('No matching pending operation found for clientId:', data.operation.clientId);
+        console.log('=== handleOperationMessage DEBUG END (ALREADY PROCESSED) ===');
+        return;
+      }
+    } else {
+      // This is another user's operation - check for duplicates using operation ID
+      if (data.operation.id && processedOperationIds.has(data.operation.id)) {
+        console.log('=== DUPLICATE OPERATION DETECTED - SKIPPING ===');
+        console.log('Operation ID already processed:', data.operation.id);
+        console.log('=== handleOperationMessage DEBUG END (DUPLICATE) ===');
+        return;
+      }
+      
+      // Add operation ID to processed set for other user operations
+      if (data.operation.id) {
+        processedOperationIds.add(data.operation.id);
+        console.log('Added operation ID to processed set:', data.operation.id);
+      }
     }
     
     if (isOwnOperation) {
