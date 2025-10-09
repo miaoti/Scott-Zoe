@@ -71,8 +71,8 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
     const operation = calculateOperation(currentContent, newContent, cursorPosition);
     
     if (operation) {
-      // Update local content immediately for responsiveness
-      setContent(newContent);
+      // DON'T update local content immediately - let the server handle it
+      // This prevents duplicate characters and local echo issues
       
       // Send operation to server
       sendOperation(operation);
@@ -94,7 +94,7 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
       sendTypingIndicator(false);
     }, 1000);
     
-  }, [content, cursorPosition, isTyping, setContent, sendOperation, sendTypingIndicator]);
+  }, [content, cursorPosition, isTyping, sendOperation, sendTypingIndicator]);
   
   // Handle cursor position changes
   const handleCursorChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {

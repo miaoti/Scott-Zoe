@@ -71,6 +71,10 @@ interface SharedNoteState {
   isLoading: boolean;
   error: string | null;
   
+  // Revision tracking for OT
+  revision: number;
+  pendingOperations: (NoteOperation & { clientId: string })[];
+  
   // Window state
   windowPosition: WindowPosition | null;
   isWindowVisible: boolean;
@@ -115,6 +119,10 @@ export const useSharedNoteStore = create<SharedNoteState>((set, get) => ({
   isConnected: false,
   isLoading: false,
   error: null,
+  
+  // Revision tracking
+  revision: 0,
+  pendingOperations: [],
   
   windowPosition: null,
   isWindowVisible: false,
@@ -232,10 +240,22 @@ export const useSharedNoteStore = create<SharedNoteState>((set, get) => ({
       console.warn('Cannot send operation: not connected');
       return;
     }
-    
+
+    // Add revision number and client ID to operation
+    const operationWithRevision = {
+      ...operation,
+      revision: state.revision,
+      clientId: Date.now() + Math.random().toString(36), // Unique client operation ID
+    };
+
+    // Add to pending operations
+    set((state) => ({
+      pendingOperations: [...state.pendingOperations, operationWithRevision],
+    }));
+
     state.stompClient.publish({
       destination: '/app/shared-note/operation',
-      body: JSON.stringify(operation),
+      body: JSON.stringify(operationWithRevision),
     });
   },
   
@@ -313,12 +333,37 @@ export const useSharedNoteStore = create<SharedNoteState>((set, get) => ({
 
 // Message handlers
 function handleOperationMessage(data: any) {
-  const { setContent, content } = useSharedNoteStore.getState();
+  const { content, pendingOperations, revision } = useSharedNoteStore.getState();
   
   if (data.type === 'OPERATION') {
-    // Apply the operation to current content
-    const newContent = applyOperation(content, data.operation);
-    setContent(newContent);
+    // Check if this is our own operation coming back (local echo)
+    const isOwnOperation = pendingOperations.some(op => op.clientId === data.operation.clientId);
+    
+    if (isOwnOperation) {
+      // Remove from pending operations and update revision
+      useSharedNoteStore.setState((state) => ({
+        pendingOperations: state.pendingOperations.filter(op => op.clientId !== data.operation.clientId),
+        revision: Math.max(state.revision, data.revision || 0),
+      }));
+      // Apply our own operation to maintain consistency with server
+      // This ensures the client state matches the server state
+    }
+
+    // Transform the incoming operation against pending operations
+    let transformedOperation = data.operation;
+    const state = useSharedNoteStore.getState();
+    
+    for (const pendingOp of state.pendingOperations) {
+      transformedOperation = transformOperation(transformedOperation, pendingOp, false);
+    }
+
+    // Apply the transformed operation to current content
+    const newContent = applyOperation(content, transformedOperation);
+    
+    useSharedNoteStore.setState({
+      content: newContent,
+      revision: Math.max(revision, data.revision || 0),
+    });
   }
 }
 
@@ -363,6 +408,104 @@ function handlePersonalMessage(data: any) {
   if (data.type === 'INITIAL_CONTENT') {
     setContent(data.content);
     setNoteId(data.noteId);
+  }
+}
+
+// Operational Transformation functions
+function transformOperation(op1: NoteOperation, op2: NoteOperation, op1HasPriority: boolean): NoteOperation {
+  if (!op1 || !op2) return op1;
+
+  const transformed = { ...op1 };
+
+  switch (op1.operationType) {
+    case 'INSERT':
+      transformed.position = transformInsertPosition(op1, op2, op1HasPriority);
+      break;
+    case 'DELETE':
+      const deleteTransform = transformDeleteOperation(op1, op2, op1HasPriority);
+      transformed.position = deleteTransform.position;
+      transformed.length = deleteTransform.length;
+      break;
+    case 'RETAIN':
+      transformed.position = transformRetainPosition(op1, op2);
+      break;
+  }
+
+  return transformed;
+}
+
+function transformInsertPosition(insertOp: NoteOperation, otherOp: NoteOperation, insertHasPriority: boolean): number {
+  switch (otherOp.operationType) {
+    case 'INSERT':
+      if (insertOp.position <= otherOp.position) {
+        if (insertOp.position === otherOp.position && !insertHasPriority) {
+          return insertOp.position + (otherOp.content?.length || 0);
+        }
+        return insertOp.position;
+      } else {
+        return insertOp.position + (otherOp.content?.length || 0);
+      }
+    case 'DELETE':
+      if (insertOp.position <= otherOp.position) {
+        return insertOp.position;
+      } else if (insertOp.position > otherOp.position + otherOp.length) {
+        return insertOp.position - otherOp.length;
+      } else {
+        return otherOp.position;
+      }
+    default:
+      return insertOp.position;
+  }
+}
+
+function transformDeleteOperation(deleteOp: NoteOperation, otherOp: NoteOperation, deleteHasPriority: boolean): { position: number; length: number } {
+  switch (otherOp.operationType) {
+    case 'INSERT':
+      if (deleteOp.position < otherOp.position) {
+        return { position: deleteOp.position, length: deleteOp.length };
+      } else {
+        return { position: deleteOp.position + (otherOp.content?.length || 0), length: deleteOp.length };
+      }
+    case 'DELETE':
+      if (deleteOp.position <= otherOp.position) {
+        if (deleteOp.position + deleteOp.length <= otherOp.position) {
+          return { position: deleteOp.position, length: deleteOp.length };
+        } else {
+          const overlap = Math.min(deleteOp.position + deleteOp.length, otherOp.position + otherOp.length) - 
+                         Math.max(deleteOp.position, otherOp.position);
+          return { position: deleteOp.position, length: Math.max(0, deleteOp.length - overlap) };
+        }
+      } else {
+        if (deleteOp.position >= otherOp.position + otherOp.length) {
+          return { position: deleteOp.position - otherOp.length, length: deleteOp.length };
+        } else {
+          const newLength = Math.max(0, (deleteOp.position + deleteOp.length) - (otherOp.position + otherOp.length));
+          return { position: otherOp.position, length: newLength };
+        }
+      }
+    default:
+      return { position: deleteOp.position, length: deleteOp.length };
+  }
+}
+
+function transformRetainPosition(retainOp: NoteOperation, otherOp: NoteOperation): number {
+  switch (otherOp.operationType) {
+    case 'INSERT':
+      if (retainOp.position < otherOp.position) {
+        return retainOp.position;
+      } else {
+        return retainOp.position + (otherOp.content?.length || 0);
+      }
+    case 'DELETE':
+      if (retainOp.position <= otherOp.position) {
+        return retainOp.position;
+      } else if (retainOp.position >= otherOp.position + otherOp.length) {
+        return retainOp.position - otherOp.length;
+      } else {
+        return otherOp.position;
+      }
+    default:
+      return retainOp.position;
   }
 }
 

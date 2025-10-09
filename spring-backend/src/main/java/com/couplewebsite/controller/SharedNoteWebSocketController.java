@@ -104,7 +104,8 @@ public class SharedNoteWebSocketController {
             SharedNote updatedNote = sharedNoteService.applyOperation(sharedNote, operation);
             String updatedContent = updatedNote.getContent();
             
-            // Broadcast operation to all connected users except sender
+            // Broadcast operation to ALL connected users (including sender)
+            // This ensures consistent state across all clients
             Map<String, Object> broadcast = new HashMap<>();
             broadcast.put("type", "OPERATION");
             broadcast.put("operation", convertToDto(operation));
