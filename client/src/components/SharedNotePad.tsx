@@ -539,53 +539,78 @@ function calculateOperation(
       newContentLength: newContent.length
     });
     
-    // Find the insertion position by comparing adjusted old content and new content
-    let insertPosition = 0;
+    // For rapid typing with pending operations, use cursor position directly
+    // This avoids the mismatch between new content and adjusted content
+    let insertPosition = cursorPos;
     let insertedText = '';
     
-    // Use adjusted content for comparison to account for pending operations
-    const contentToCompare = adjustedOldContent.length > 0 ? adjustedOldContent : oldContent;
-    
-    // Find the first position where content differs
-    for (let i = 0; i < Math.min(contentToCompare.length, newContent.length); i++) {
-      if (contentToCompare[i] !== newContent[i]) {
-        insertPosition = i;
-        break;
-      }
-    }
-    
-    // If no difference found in overlapping part, insertion is at the end
-    if (insertPosition === 0 && contentToCompare.length > 0) {
-      // Check if insertion is at the end
-      if (newContent.startsWith(contentToCompare)) {
-        insertPosition = contentToCompare.length;
-        insertedText = newContent.slice(contentToCompare.length);
-      } else {
-        // Find insertion position by checking from the end
-        let endMatch = 0;
-        for (let i = 1; i <= Math.min(contentToCompare.length, newContent.length); i++) {
-          if (contentToCompare[contentToCompare.length - i] === newContent[newContent.length - i]) {
-            endMatch = i;
-          } else {
-            break;
-          }
+    if (pendingOperations.length > 0) {
+      // When there are pending operations, use cursor position as insertion point
+      // The cursor position represents where the user is actually typing
+      insertPosition = cursorPos;
+      
+      // Extract the inserted text by comparing old and new content at cursor position
+      // Find the actual inserted text by looking at the difference
+      if (cursorPos <= oldContent.length) {
+        // Insert in the middle or at the end
+        const beforeCursor = oldContent.slice(0, cursorPos);
+        const afterCursor = oldContent.slice(cursorPos);
+        
+        // The new content should be: beforeCursor + insertedText + afterCursor
+        if (newContent.startsWith(beforeCursor) && newContent.endsWith(afterCursor)) {
+          insertedText = newContent.slice(beforeCursor.length, newContent.length - afterCursor.length);
+        } else {
+          // Fallback: extract from the position where cursor was
+          insertedText = newContent.slice(cursorPos, cursorPos + insertedLength);
         }
-        insertPosition = contentToCompare.length - endMatch;
+      } else {
+        // Cursor is beyond content, append at the end
+        insertedText = newContent.slice(oldContent.length);
+        insertPosition = oldContent.length;
+      }
+      
+      console.log('Using cursor-based insertion for pending operations:', {
+        cursorPos,
+        insertPosition,
+        insertedText: `"${insertedText}"`,
+        pendingOpsCount: pendingOperations.length
+      });
+    } else {
+      // No pending operations, use content comparison method
+      // Find the insertion position by comparing old and new content
+      for (let i = 0; i < Math.min(oldContent.length, newContent.length); i++) {
+        if (oldContent[i] !== newContent[i]) {
+          insertPosition = i;
+          break;
+        }
+      }
+      
+      // If no difference found in overlapping part, insertion is at the end
+      if (insertPosition === 0 && oldContent.length > 0) {
+        if (newContent.startsWith(oldContent)) {
+          insertPosition = oldContent.length;
+          insertedText = newContent.slice(oldContent.length);
+        } else {
+          // Find insertion position by checking from the end
+          let endMatch = 0;
+          for (let i = 1; i <= Math.min(oldContent.length, newContent.length); i++) {
+            if (oldContent[oldContent.length - i] === newContent[newContent.length - i]) {
+              endMatch = i;
+            } else {
+              break;
+            }
+          }
+          insertPosition = oldContent.length - endMatch;
+          insertedText = newContent.slice(insertPosition, insertPosition + insertedLength);
+        }
+      } else {
+        // Extract the inserted text at the found position
         insertedText = newContent.slice(insertPosition, insertPosition + insertedLength);
       }
-    } else {
-      // Extract the inserted text at the found position
-      insertedText = newContent.slice(insertPosition, insertPosition + insertedLength);
     }
     
-    // Adjust position back to original content coordinates by subtracting pending operation offsets
-    // But only for operations that were applied before this position
+    // The final position is the insertion position in the original content
     let finalPosition = insertPosition;
-    for (const pendingOp of sortedPendingOps) {
-      if (pendingOp.position <= insertPosition) {
-        finalPosition -= pendingOp.length;
-      }
-    }
     
     // Ensure position is within bounds of original content
     finalPosition = Math.max(0, Math.min(finalPosition, oldContent.length));
