@@ -92,9 +92,20 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
       cursorPosition
     });
     
+    // Get current pending operations from store to ensure we have the latest state
+    const currentPendingOps = useSharedNoteStore.getState().pendingOperations;
+    
+    console.log('Current pending operations before calculation:', currentPendingOps.map(op => ({
+      clientId: op.clientId,
+      operationType: op.operationType,
+      position: op.position,
+      content: op.content,
+      length: op.length
+    })));
+    
     // Calculate the operation BEFORE updating local content
-    // Pass pendingOperations to account for pending INSERT operations
-    const operation = calculateOperation(currentContent, newContent, cursorPosition, pendingOperations);
+    // Pass current pendingOperations to account for pending INSERT operations
+    const operation = calculateOperation(currentContent, newContent, cursorPosition, currentPendingOps);
     
     console.log('Calculated operation:', operation);
     
