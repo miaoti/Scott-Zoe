@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import PhotoGallery from './components/PhotoGallery';
@@ -13,11 +15,14 @@ import Header from './components/Header';
 import Scott from './components/Scott';
 import Zoe from './components/Zoe';
 import SurpriseBoxManager from './components/SurpriseBoxManager';
+import SharedNotePad from './components/SharedNotePad';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
+import { useSharedNoteStore } from './stores/sharedNoteStore';
 
 function AppContent() {
   const { isAuthenticated, loading } = useAuth();
+  const { isWindowVisible, setWindowVisible } = useSharedNoteStore();
 
   if (loading) {
     return (
@@ -44,6 +49,9 @@ function AppContent() {
           <main className="container mx-auto px-4 py-8">
             <Dashboard />
           </main>
+          {isWindowVisible && (
+            <SharedNotePad onClose={() => setWindowVisible(false)} />
+          )}
         </div>
       ) : <Navigate to="/login" replace />} />
       <Route path="/dashboard" element={isAuthenticated ? (
@@ -52,6 +60,9 @@ function AppContent() {
           <main className="container mx-auto px-4 py-8">
             <Dashboard />
           </main>
+          {isWindowVisible && (
+            <SharedNotePad onClose={() => setWindowVisible(false)} />
+          )}
         </div>
       ) : <Navigate to="/login" replace />} />
       <Route path="/gallery" element={isAuthenticated ? (
@@ -135,9 +146,11 @@ function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <Router>
-          <AppContent />
-        </Router>
+        <DndProvider backend={HTML5Backend}>
+          <Router>
+            <AppContent />
+          </Router>
+        </DndProvider>
       </ToastProvider>
     </AuthProvider>
   );

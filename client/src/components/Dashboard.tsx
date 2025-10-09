@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Camera, Calendar, Heart, Clock, Gift, Users, Star, MapPin } from 'lucide-react';
+import { Camera, Calendar, Heart, Clock, Gift, Users, Star, MapPin, FileText } from 'lucide-react';
 import api, { API_BASE_URL } from '../utils/api';
 import PrizeWheel from './PrizeWheel';
 import LoveCounter from './LoveCounter';
 import PartnerLoveCard from './PartnerLoveCard';
 import { useSurpriseBoxActions } from '../hooks/useSurpriseBoxActions';
 import BoxDropManager from './BoxDropManager';
+import { useSharedNoteStore } from '../stores/sharedNoteStore';
 
 // Utility function to safely parse dates from different formats
 const parseDate = (dateString: string | null | undefined): Date | null => {
@@ -454,7 +455,7 @@ function Dashboard() {
           <h2 className="text-2xl font-semibold text-apple-label mb-6 text-center">
             Create New Memories
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Link
               to="/gallery"
               className="bg-apple-blue/5 border border-apple-blue/20 rounded-xl p-6 hover:bg-apple-blue/10 transition-all duration-300 group pointer-events-auto"
@@ -485,6 +486,20 @@ function Dashboard() {
               </div>
             </Link>
 
+            <button
+              onClick={() => useSharedNoteStore.getState().setWindowVisible(true)}
+              className="bg-apple-purple/5 border border-apple-purple/20 rounded-xl p-6 hover:bg-apple-purple/10 transition-all duration-300 group pointer-events-auto"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="bg-apple-purple/10 p-3 rounded-xl group-hover:bg-apple-purple/20 transition-colors">
+                  <FileText className="h-6 w-6 text-apple-purple" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-apple-label">Shared Notes</h3>
+                  <p className="text-sm text-apple-secondary-label">Collaborate on notes together</p>
+                </div>
+              </div>
+            </button>
 
           </div>
         </div>
