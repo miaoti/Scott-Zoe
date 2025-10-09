@@ -627,6 +627,12 @@ function calculateOperation(
     // The final position is the insertion position in the original content
     let finalPosition = insertPosition;
     
+    // When we have pending operations, use the original cursor position
+    // This ensures characters are inserted in the correct order based on where the user is typing
+    if (pendingOperations.length > 0) {
+      finalPosition = cursorPos;
+    }
+    
     // Ensure position is within bounds of original content
     finalPosition = Math.max(0, Math.min(finalPosition, oldContent.length));
     
