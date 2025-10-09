@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import api, { API_BASE_URL } from '../utils/api';
 import PhotoDetailModal from './PhotoDetailModal';
 import PhotoUpload from './PhotoUpload';
-import ProgressiveImage from './ProgressiveImage';
 
 interface Photo {
   id: number;
@@ -184,11 +183,11 @@ function PhotoGallery() {
               className={`${getImageSizeClass()} relative overflow-hidden rounded-lg cursor-pointer transition-transform hover:scale-105`}
               onClick={() => openPhotoDetail(photo)}
             >
-              <ProgressiveImage
-                placeholderSrc={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=thumbnail`}
-                src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=medium`}
+              <img
+                src={`${API_BASE_URL}/api/photos/image/${photo.filename}`}
                 alt={photo.originalName}
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
               
               {/* Favorite button - hidden on mobile, visible on desktop */}
@@ -352,11 +351,10 @@ function PhotoGallery() {
                     <div className="grid grid-cols-3 gap-2 mb-3">
                       {categoryPhotos.slice(0, 3).map((photo) => (
                         <div key={photo.id} className="aspect-square relative overflow-hidden rounded-lg">
-                          <ProgressiveImage
-                            placeholderSrc={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=thumbnail`}
-                            src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=medium`}
+                          <img
+                            src={`${API_BASE_URL}/api/photos/image/${photo.filename}`}
                             alt={photo.originalName}
-                            className="w-full h-full object-cover hover:scale-110 transition-all duration-300 cursor-pointer"
+                            className="w-full h-full object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
                             onClick={() => openPhotoDetail(photo)}
                           />
                         </div>

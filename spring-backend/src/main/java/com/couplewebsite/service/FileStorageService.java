@@ -3,17 +3,10 @@ package com.couplewebsite.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -136,92 +129,5 @@ public class FileStorageService {
      */
     public Path getUploadDirectory() {
         return this.fileStorageLocation;
-    }
-    
-    /**
-     * Generate thumbnail image with specified dimensions
-     */
-    public Resource getThumbnailImage(String fileName, int width, int height) throws IOException {
-        return getResizedImage(fileName, width, height, "thumbnail");
-    }
-    
-    /**
-     * Generate medium-sized image with specified dimensions
-     */
-    public Resource getMediumImage(String fileName, int width, int height) throws IOException {
-        return getResizedImage(fileName, width, height, "medium");
-    }
-    
-    /**
-     * Generate resized image and return as Resource
-     */
-    private Resource getResizedImage(String fileName, int width, int height, String sizeType) throws IOException {
-        // Check if cached resized image exists
-        String resizedFileName = getResizedFileName(fileName, sizeType, width, height);
-        Path resizedPath = this.fileStorageLocation.resolve("cache").resolve(resizedFileName);
-        
-        // Create cache directory if it doesn't exist
-        Files.createDirectories(resizedPath.getParent());
-        
-        // If cached version exists, return it
-        if (Files.exists(resizedPath)) {
-            return new UrlResource(resizedPath.toUri());
-        }
-        
-        // Load original image
-        Path originalPath = this.fileStorageLocation.resolve(fileName);
-        if (!Files.exists(originalPath)) {
-            throw new IOException("Original image not found: " + fileName);
-        }
-        
-        BufferedImage originalImage = ImageIO.read(originalPath.toFile());
-        if (originalImage == null) {
-            throw new IOException("Could not read image: " + fileName);
-        }
-        
-        // Calculate dimensions maintaining aspect ratio
-        Dimension newDimension = calculateDimensions(originalImage.getWidth(), originalImage.getHeight(), width, height);
-        
-        // Create resized image
-        BufferedImage resizedImage = new BufferedImage(newDimension.width, newDimension.height, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2d = resizedImage.createGraphics();
-        
-        // Set rendering hints for better quality
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        
-        g2d.drawImage(originalImage, 0, 0, newDimension.width, newDimension.height, null);
-        g2d.dispose();
-        
-        // Save resized image to cache
-        ImageIO.write(resizedImage, "jpg", resizedPath.toFile());
-        
-        return new UrlResource(resizedPath.toUri());
-    }
-    
-    /**
-     * Calculate new dimensions maintaining aspect ratio
-     */
-    private Dimension calculateDimensions(int originalWidth, int originalHeight, int maxWidth, int maxHeight) {
-        double aspectRatio = (double) originalWidth / originalHeight;
-        
-        int newWidth = maxWidth;
-        int newHeight = (int) (maxWidth / aspectRatio);
-        
-        if (newHeight > maxHeight) {
-            newHeight = maxHeight;
-            newWidth = (int) (maxHeight * aspectRatio);
-        }
-        
-        return new Dimension(newWidth, newHeight);
-    }
-    
-    /**
-     * Generate filename for resized image
-     */
-    private String getResizedFileName(String originalFileName, String sizeType, int width, int height) {
-        String nameWithoutExtension = originalFileName.substring(0, originalFileName.lastIndexOf('.'));
-        return nameWithoutExtension + "_" + sizeType + "_" + width + "x" + height + ".jpg";
     }
 }

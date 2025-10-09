@@ -206,22 +206,9 @@ function PhotoDetail() {
         {/* Photo */}
         <div className="glass-effect rounded-xl overflow-hidden love-shadow">
           <img
-            src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=medium`}
+            src={`${API_BASE_URL}/api/photos/image/${photo.filename}`}
             alt={photo.originalName}
-            className="w-full h-auto max-h-96 object-contain bg-gray-50 transition-opacity duration-300"
-            loading="eager"
-            onLoad={(e) => {
-              e.currentTarget.style.opacity = '1';
-            }}
-            style={{ opacity: 0 }}
-            onClick={() => {
-              // Load full-size image when clicked
-              const fullSizeImg = new Image();
-              fullSizeImg.onload = () => {
-                e.currentTarget.src = `${API_BASE_URL}/api/photos/image/${photo.filename}`;
-              };
-              fullSizeImg.src = `${API_BASE_URL}/api/photos/image/${photo.filename}`;
-            }}
+            className="w-full h-auto max-h-96 object-contain bg-gray-50"
           />
         </div>
 
