@@ -48,14 +48,21 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
   
   // Connect to WebSocket on mount
   useEffect(() => {
-    if (token) {
-      connect(token);
+    try {
+      const token = localStorage.getItem('token');
+      if (token && token.trim() !== '') {
+        connect(token);
+      } else {
+        console.warn('SharedNotePad: No valid token found for WebSocket connection');
+      }
+    } catch (error) {
+      console.error('SharedNotePad: Error connecting to WebSocket:', error);
     }
     
     return () => {
       disconnect();
     };
-  }, [token, connect, disconnect]);
+  }, [connect, disconnect]);
   
   // Handle text changes
   const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
