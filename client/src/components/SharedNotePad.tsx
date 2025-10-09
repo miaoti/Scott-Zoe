@@ -101,9 +101,9 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
       // Send operation to server for synchronization
       sendOperation(operation);
       
-      // Update local content immediately for responsiveness
-      // The server will echo back and we'll handle deduplication there
-      setContent(newContent);
+      // DON'T update local content immediately - wait for server confirmation
+      // This prevents double application of operations
+      console.log('Operation sent to server, waiting for confirmation before updating content');
     } else if (!isConnected) {
       // If not connected, just update locally
       setContent(newContent);
@@ -459,14 +459,35 @@ function calculateOperation(
     // Insertion - use cursor position for more accurate insertion point
     const insertedLength = newContent.length - oldContent.length;
     
-    // For single character insertions, use cursor position - 1 as insertion point
+    // For single character insertions, use cursor position - insertedLength as insertion point
     let insertPosition = cursorPos - insertedLength;
     
     // Ensure position is within bounds
     insertPosition = Math.max(0, Math.min(insertPosition, oldContent.length));
     
-    // Extract the inserted text
-    const insertedText = newContent.slice(insertPosition, insertPosition + insertedLength);
+    // Find the actual inserted text by comparing old and new content
+    // Use a simple diff approach to find what was actually inserted
+    let insertedText = '';
+    
+    // Check if the insertion happened at the calculated position
+    const beforeInsert = newContent.slice(0, insertPosition);
+    const afterInsert = newContent.slice(insertPosition + insertedLength);
+    const expectedOldContent = beforeInsert + afterInsert;
+    
+    if (expectedOldContent === oldContent) {
+      // Perfect match - extract the inserted text
+      insertedText = newContent.slice(insertPosition, insertPosition + insertedLength);
+    } else {
+      // Fallback: find the difference more carefully
+      // For simple cases, just get the character that was typed
+      if (insertedLength === 1) {
+        // Single character insertion - get the character at cursor position - 1
+        insertedText = newContent.charAt(insertPosition);
+      } else {
+        // Multiple character insertion - extract from the difference
+        insertedText = newContent.slice(insertPosition, insertPosition + insertedLength);
+      }
+    }
     
     console.log('INSERT operation:', {
       position: insertPosition,
@@ -474,7 +495,10 @@ function calculateOperation(
       length: insertedLength,
       oldContent,
       newContent,
-      cursorPos
+      cursorPos,
+      beforeInsert,
+      afterInsert,
+      expectedOldContent
     });
     
     return {

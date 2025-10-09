@@ -390,11 +390,11 @@ function handleOperationMessage(data: any) {
       useSharedNoteStore.setState((state) => ({
         pendingOperations: state.pendingOperations.filter(op => op.clientId !== data.operation.clientId),
         revision: Math.max(state.revision, data.revision || 0),
+        content: data.content || state.content, // Update content with server's confirmed content
       }));
       
-      // For own operations, don't update content since we already updated it locally
-      // This prevents double application
-      console.log('Own operation acknowledged by server, not updating content');
+      // For own operations, update content with server's confirmed content
+      console.log('Own operation acknowledged by server, updating content with server confirmation:', data.content);
       return;
     }
 
