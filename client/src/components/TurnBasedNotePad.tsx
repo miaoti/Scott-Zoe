@@ -79,7 +79,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
       console.log('TurnBasedNotePad: Component unmounting');
       disconnect();
     };
-  }, [connect, disconnect, isConnected, isLoading]);
+  }, []); // Remove dependencies to prevent infinite loop
   
   // Handle text changes (only when user has edit permission)
   const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {

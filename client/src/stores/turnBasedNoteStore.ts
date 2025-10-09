@@ -344,8 +344,8 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
     console.log('TurnBasedNoteStore: connect() called');
     
     const state = get();
-    if (state.stompClient?.connected) {
-      console.log('Already connected to WebSocket, skipping connection');
+    if (state.stompClient?.connected || state.isLoading) {
+      console.log('Already connected or connecting to WebSocket, skipping connection');
       return;
     }
     
@@ -404,9 +404,11 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
           handleTypingUpdate(data);
         });
         
-        // Fetch initial edit status and content
-        get().fetchEditStatus();
-        get().fetchNoteContent();
+        // Fetch initial edit status and content after a short delay
+        setTimeout(() => {
+          get().fetchEditStatus();
+          get().fetchNoteContent();
+        }, 100);
       };
       
       client.onStompError = (frame) => {

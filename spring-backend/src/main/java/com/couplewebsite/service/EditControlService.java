@@ -23,9 +23,12 @@ public class EditControlService {
     
     @Autowired
     private EditSessionRepository editSessionRepository;
-    
+
     @Autowired
     private UserSessionRepository userSessionRepository;
+    
+    @Autowired
+    private UserService userService;
     
     /**
      * Request edit control for a note
@@ -169,8 +172,6 @@ public class EditControlService {
      * Create user session with userId and sessionId
      */
     public UserSession createUserSession(Long userId, String sessionId) {
-        // Find user by ID
-        // Note: This would typically require UserService injection, but for now we'll create a minimal implementation
         Optional<UserSession> existingSession = userSessionRepository.findBySessionId(sessionId);
         
         if (existingSession.isPresent()) {
@@ -179,9 +180,10 @@ public class EditControlService {
             session.updatePing();
             return userSessionRepository.save(session);
         } else {
-            // Create new session - this would need proper User entity creation
-            // For now, we'll throw an exception to indicate this needs proper implementation
-            throw new UnsupportedOperationException("createUserSession(Long, String) needs proper User entity handling");
+            // Create new session with proper User entity
+            User user = userService.findById(userId);
+            UserSession newSession = new UserSession(user, sessionId);
+            return userSessionRepository.save(newSession);
         }
     }
     
