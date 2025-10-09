@@ -545,9 +545,21 @@ function calculateOperation(
     let insertedText = '';
     
     if (pendingOperations.length > 0) {
-      // When there are pending operations, use cursor position as insertion point
-      // The cursor position represents where the user is actually typing
-      insertPosition = cursorPos;
+      // When there are pending operations, calculate the adjusted insertion position
+      // by accounting for pending operations at or before the cursor position
+      let adjustedInsertPosition = cursorPos;
+      
+      // Calculate cumulative offset from pending operations at or before cursor position
+      let cumulativeOffset = 0;
+      for (const pendingOp of sortedPendingOps) {
+        if (pendingOp.position <= cursorPos) {
+          cumulativeOffset += pendingOp.length;
+        }
+      }
+      
+      // Adjust the insertion position by the cumulative offset
+      adjustedInsertPosition = cursorPos + cumulativeOffset;
+      insertPosition = adjustedInsertPosition;
       
       // Extract the inserted text by comparing old and new content at cursor position
       // Find the actual inserted text by looking at the difference
@@ -566,14 +578,17 @@ function calculateOperation(
       } else {
         // Cursor is beyond content, append at the end
         insertedText = newContent.slice(oldContent.length);
-        insertPosition = oldContent.length;
+        insertPosition = oldContent.length + cumulativeOffset;
       }
       
       console.log('Using cursor-based insertion for pending operations:', {
         cursorPos,
+        cumulativeOffset,
+        adjustedInsertPosition,
         insertPosition,
         insertedText: `"${insertedText}"`,
-        pendingOpsCount: pendingOperations.length
+        pendingOpsCount: pendingOperations.length,
+        pendingOpsAtOrBeforeCursor: sortedPendingOps.filter(op => op.position <= cursorPos).length
       });
     } else {
       // No pending operations, use content comparison method
