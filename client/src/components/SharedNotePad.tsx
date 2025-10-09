@@ -255,7 +255,7 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
       )}
       
       {/* Typing Indicators */}
-      {typingIndicators.length > 0 && (
+      {typingIndicators.filter(indicator => indicator.userId !== user?.id).length > 0 && (
         <div className="bg-blue-50 border-b border-blue-200 px-4 py-2">
           <div className="flex items-center space-x-2 text-sm text-blue-700">
             <div className="flex space-x-1">
@@ -264,8 +264,8 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
               <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
             </div>
             <span>
-              {typingIndicators.map(t => t.username).join(', ')} 
-              {typingIndicators.length === 1 ? ' is' : ' are'} typing...
+              {typingIndicators.filter(indicator => indicator.userId !== user?.id).map(t => t.username).join(', ')} 
+              {typingIndicators.filter(indicator => indicator.userId !== user?.id).length === 1 ? ' is' : ' are'} typing...
             </span>
           </div>
         </div>
@@ -282,7 +282,7 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
           onClick={handleCursorChange}
           placeholder="Start typing your shared notes here..."
           className="w-full h-full p-4 border-none outline-none resize-none font-mono text-sm leading-relaxed"
-          disabled={!isConnected}
+          disabled={false}
         />
         
         {/* Collaborator Cursors */}
