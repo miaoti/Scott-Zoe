@@ -14,6 +14,7 @@ public class NoteOperationDto {
     private LocalDateTime createdAt;
     private Integer sequenceNumber;
     private String clientId;
+    private Integer revision;
     
     // Constructors
     public NoteOperationDto() {}
@@ -111,5 +112,13 @@ public class NoteOperationDto {
     
     public void setClientId(String clientId) {
         this.clientId = clientId;
+    }
+    
+    public Integer getRevision() {
+        return revision;
+    }
+    
+    public void setRevision(Integer revision) {
+        this.revision = revision;
     }
 }
