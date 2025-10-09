@@ -472,25 +472,43 @@ function calculateOperation(
   let adjustedOldContent = oldContent;
   let positionOffset = 0;
   
-  // Apply pending INSERT operations to calculate the correct position
-  for (const pendingOp of pendingOperations) {
-    if (pendingOp.operationType === 'INSERT') {
-      console.log('Applying pending INSERT operation:', {
-        position: pendingOp.position,
-        content: pendingOp.content,
-        length: pendingOp.length
-      });
-      
-      // If the pending operation is before our cursor position, adjust the position
-      if (pendingOp.position <= cursorPos) {
-        positionOffset += pendingOp.length;
-      }
-      
-      // Apply the pending operation to the content
-      adjustedOldContent = adjustedOldContent.slice(0, pendingOp.position) + 
-                          (pendingOp.content || '') + 
-                          adjustedOldContent.slice(pendingOp.position);
+  // Sort pending operations by position to apply them in the correct order
+  const sortedPendingOps = [...pendingOperations]
+    .filter(op => op.operationType === 'INSERT')
+    .sort((a, b) => a.position - b.position);
+  
+  console.log('Sorted pending INSERT operations:', sortedPendingOps.map(op => ({
+    position: op.position,
+    content: op.content,
+    length: op.length
+  })));
+  
+  // Apply pending INSERT operations in order, adjusting positions as we go
+  let cumulativeOffset = 0;
+  for (const pendingOp of sortedPendingOps) {
+    console.log('Applying pending INSERT operation:', {
+      originalPosition: pendingOp.position,
+      adjustedPosition: pendingOp.position + cumulativeOffset,
+      content: pendingOp.content,
+      length: pendingOp.length,
+      cumulativeOffset
+    });
+    
+    // Calculate the actual position in the adjusted content
+    const adjustedPosition = pendingOp.position + cumulativeOffset;
+    
+    // If the pending operation is before our cursor position, adjust the position
+    if (pendingOp.position <= cursorPos) {
+      positionOffset += pendingOp.length;
     }
+    
+    // Apply the pending operation to the content at the adjusted position
+    adjustedOldContent = adjustedOldContent.slice(0, adjustedPosition) + 
+                        (pendingOp.content || '') + 
+                        adjustedOldContent.slice(adjustedPosition);
+    
+    // Update cumulative offset for next operations
+    cumulativeOffset += pendingOp.length;
   }
   
   console.log('After applying pending operations:', {
@@ -552,8 +570,8 @@ function calculateOperation(
     // Adjust position back to original content coordinates by subtracting pending operation offsets
     // But only for operations that were applied before this position
     let finalPosition = insertPosition;
-    for (const pendingOp of pendingOperations) {
-      if (pendingOp.operationType === 'INSERT' && pendingOp.position <= insertPosition) {
+    for (const pendingOp of sortedPendingOps) {
+      if (pendingOp.position <= insertPosition) {
         finalPosition -= pendingOp.length;
       }
     }
