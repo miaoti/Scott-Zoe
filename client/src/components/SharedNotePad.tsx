@@ -444,26 +444,37 @@ function calculateOperation(
 ): { operationType: 'INSERT' | 'DELETE' | 'RETAIN'; position: number; content?: string; length: number } | null {
   
   if (oldContent === newContent) {
+    console.log('calculateOperation: No change detected, returning null');
     return null;
   }
   
+  console.log('=== calculateOperation DEBUG START ===');
   console.log('calculateOperation called:', {
-    oldContent,
-    newContent,
+    oldContent: `"${oldContent}"`,
+    newContent: `"${newContent}"`,
     cursorPos,
     oldLength: oldContent.length,
-    newLength: newContent.length
+    newLength: newContent.length,
+    lengthDiff: newContent.length - oldContent.length
   });
   
   if (newContent.length > oldContent.length) {
     // Insertion - use cursor position for more accurate insertion point
     const insertedLength = newContent.length - oldContent.length;
     
+    console.log('INSERTION detected:', {
+      insertedLength,
+      cursorPos,
+      calculatedInsertPosition: cursorPos - insertedLength
+    });
+    
     // For single character insertions, use cursor position - insertedLength as insertion point
     let insertPosition = cursorPos - insertedLength;
     
     // Ensure position is within bounds
     insertPosition = Math.max(0, Math.min(insertPosition, oldContent.length));
+    
+    console.log('Insert position after bounds check:', insertPosition);
     
     // Find the actual inserted text by comparing old and new content
     // Use a simple diff approach to find what was actually inserted
@@ -474,39 +485,45 @@ function calculateOperation(
     const afterInsert = newContent.slice(insertPosition + insertedLength);
     const expectedOldContent = beforeInsert + afterInsert;
     
+    console.log('Insertion analysis:', {
+      beforeInsert: `"${beforeInsert}"`,
+      afterInsert: `"${afterInsert}"`,
+      expectedOldContent: `"${expectedOldContent}"`,
+      actualOldContent: `"${oldContent}"`,
+      matches: expectedOldContent === oldContent
+    });
+    
     if (expectedOldContent === oldContent) {
       // Perfect match - extract the inserted text
       insertedText = newContent.slice(insertPosition, insertPosition + insertedLength);
+      console.log('Perfect match - extracted text:', `"${insertedText}"`);
     } else {
       // Fallback: find the difference more carefully
+      console.log('No perfect match, using fallback logic');
+      
       // For simple cases, just get the character that was typed
       if (insertedLength === 1) {
         // Single character insertion - get the character at cursor position - 1
         insertedText = newContent.charAt(insertPosition);
+        console.log('Single character fallback - extracted text:', `"${insertedText}"`);
       } else {
         // Multiple character insertion - extract from the difference
         insertedText = newContent.slice(insertPosition, insertPosition + insertedLength);
+        console.log('Multiple character fallback - extracted text:', `"${insertedText}"`);
       }
     }
     
-    console.log('INSERT operation:', {
-      position: insertPosition,
-      content: insertedText,
-      length: insertedLength,
-      oldContent,
-      newContent,
-      cursorPos,
-      beforeInsert,
-      afterInsert,
-      expectedOldContent
-    });
-    
-    return {
-      operationType: 'INSERT',
+    const operation = {
+      operationType: 'INSERT' as const,
       position: insertPosition,
       content: insertedText,
       length: insertedLength,
     };
+    
+    console.log('=== FINAL INSERT OPERATION ===:', operation);
+    console.log('=== calculateOperation DEBUG END ===');
+    
+    return operation;
   } else if (newContent.length < oldContent.length) {
     // Deletion - use cursor position for deletion point
     const deletedLength = oldContent.length - newContent.length;
@@ -518,8 +535,8 @@ function calculateOperation(
     console.log('DELETE operation:', {
       position: deletePosition,
       length: deletedLength,
-      oldContent,
-      newContent,
+      oldContent: `"${oldContent}"`,
+      newContent: `"${newContent}"`,
       cursorPos
     });
     
@@ -530,6 +547,7 @@ function calculateOperation(
     };
   }
   
+  console.log('calculateOperation: No operation type matched, returning null');
   return null;
 }
 

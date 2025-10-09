@@ -135,17 +135,45 @@ public class SharedNoteService {
     
     public NoteOperation saveNoteOperation(SharedNote note, User user, NoteOperation.OperationType operationType, 
                                          Integer position, String content, Integer length) {
+        logger.info("=== BACKEND saveNoteOperation DEBUG START ===");
+        logger.info("Saving operation: type={}, position={}, content='{}', length={}, noteId={}, userId={}", 
+            operationType, position, content, length, note.getId(), user.getId());
+        
         Integer nextSequenceNumber = noteOperationRepository.findMaxSequenceNumberByNoteId(note.getId()) + 1;
+        logger.info("Next sequence number: {}", nextSequenceNumber);
         
         NoteOperation operation = new NoteOperation(note, user, operationType, position, content, length, nextSequenceNumber);
-        return noteOperationRepository.save(operation);
+        NoteOperation savedOperation = noteOperationRepository.save(operation);
+        
+        logger.info("Saved operation with ID: {}, sequenceNumber: {}", 
+            savedOperation.getId(), savedOperation.getSequenceNumber());
+        logger.info("=== BACKEND saveNoteOperation DEBUG END ===");
+        
+        return savedOperation;
     }
     
     public SharedNote applyOperation(SharedNote note, NoteOperation operation) {
+        logger.info("=== BACKEND applyOperation DEBUG START ===");
+        logger.info("Applying operation to note ID: {}, current content: '{}'", note.getId(), note.getContent());
+        logger.info("Operation details: type={}, position={}, content='{}', length={}, sequenceNumber={}", 
+            operation.getOperationType(), operation.getPosition(), operation.getContent(), 
+            operation.getLength(), operation.getSequenceNumber());
+        
         // Instead of applying to current content, reconstruct from all operations
         List<NoteOperation> allOperations = getOperationsByNoteId(note.getId());
+        logger.info("Total operations for reconstruction: {}", allOperations.size());
+        
         String synchronizedContent = applyOperations("", allOperations);
+        logger.info("Reconstructed content: '{}' (length: {})", synchronizedContent, synchronizedContent.length());
+        logger.info("Content change: '{}' -> '{}' (length change: {} -> {})", 
+            note.getContent(), synchronizedContent, note.getContent().length(), synchronizedContent.length());
+        
         note.setContent(synchronizedContent);
-        return sharedNoteRepository.save(note);
+        SharedNote savedNote = sharedNoteRepository.save(note);
+        
+        logger.info("Saved note with updated content: '{}'", savedNote.getContent());
+        logger.info("=== BACKEND applyOperation DEBUG END ===");
+        
+        return savedNote;
     }
 }

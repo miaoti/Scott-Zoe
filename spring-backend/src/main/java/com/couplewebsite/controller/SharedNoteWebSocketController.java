@@ -81,6 +81,11 @@ public class SharedNoteWebSocketController {
     @MessageMapping("/shared-note/operation")
     public void handleNoteOperation(@Payload NoteOperationDto operationDto, Principal principal) {
         try {
+            logger.info("=== BACKEND handleNoteOperation DEBUG START ===");
+            logger.info("Received operation: type={}, position={}, content='{}', length={}, clientId={}", 
+                operationDto.getOperationType(), operationDto.getPosition(), 
+                operationDto.getContent(), operationDto.getLength(), operationDto.getClientId());
+            
             if (principal == null) {
                 logger.warn("Principal is null - user not authenticated for note operation");
                 return;
@@ -94,8 +99,11 @@ public class SharedNoteWebSocketController {
                 return;
             }
             
+            logger.info("Processing operation for user: {} (ID: {})", username, user.getId());
+            
             // Get current shared note
             SharedNote sharedNote = sharedNoteService.getCurrentSharedNote();
+            logger.info("Current shared note content before operation: '{}'", sharedNote.getContent());
             
             // Save the operation
             NoteOperation operation = sharedNoteService.saveNoteOperation(
@@ -104,9 +112,17 @@ public class SharedNoteWebSocketController {
                 operationDto.getLength()
             );
             
+            logger.info("Saved operation with ID: {}, sequenceNumber: {}", 
+                operation.getId(), operation.getSequenceNumber());
+            
             // Apply operation to note content
             SharedNote updatedNote = sharedNoteService.applyOperation(sharedNote, operation);
             String updatedContent = updatedNote.getContent();
+            
+            logger.info("Updated note content after applying operation: '{}'", updatedContent);
+            logger.info("Content length change: {} -> {} (diff: {})", 
+                sharedNote.getContent().length(), updatedContent.length(), 
+                updatedContent.length() - sharedNote.getContent().length());
             
             // Broadcast operation to ALL connected users (including sender)
             // This ensures consistent state across all clients
@@ -124,11 +140,15 @@ public class SharedNoteWebSocketController {
             broadcast.put("timestamp", LocalDateTime.now());
             broadcast.put("revision", operation.getSequenceNumber()); // Add revision for OT
             
+            logger.info("Broadcasting operation to all clients: clientId={}, content='{}'", 
+                operationDto.getClientId(), updatedContent);
+            
             // Send immediately to ensure real-time synchronization
             messagingTemplate.convertAndSend("/topic/shared-note/operations", broadcast);
             
             logger.info("Processed note operation from user {}: {} at position {}", 
                 username, operationDto.getOperationType(), operationDto.getPosition());
+            logger.info("=== BACKEND handleNoteOperation DEBUG END ===");
             
         } catch (Exception e) {
             logger.error("Error handling note operation", e);

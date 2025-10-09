@@ -373,9 +373,23 @@ export const useSharedNoteStore = create<SharedNoteState>((set, get) => ({
 
 // Message handlers
 function handleOperationMessage(data: any) {
+  console.log('=== handleOperationMessage DEBUG START ===');
   console.log('handleOperationMessage received data:', data);
   
   const { content, pendingOperations, revision } = useSharedNoteStore.getState();
+  
+  console.log('Current state before processing:', {
+    currentContent: `"${content}"`,
+    pendingOperationsCount: pendingOperations.length,
+    currentRevision: revision,
+    pendingOperations: pendingOperations.map(op => ({
+      clientId: op.clientId,
+      operationType: op.operationType,
+      position: op.position,
+      content: op.content,
+      length: op.length
+    }))
+  });
   
   if (data.type === 'OPERATION') {
     console.log('Processing OPERATION message');
@@ -385,7 +399,10 @@ function handleOperationMessage(data: any) {
     console.log('Is own operation?', isOwnOperation, 'clientId:', data.operation.clientId);
     
     if (isOwnOperation) {
+      console.log('=== PROCESSING OWN OPERATION (LOCAL ECHO) ===');
       console.log('Removing own operation from pending operations');
+      console.log('Server confirmed content:', `"${data.content}"`);
+      
       // Remove from pending operations and update revision
       useSharedNoteStore.setState((state) => ({
         pendingOperations: state.pendingOperations.filter(op => op.clientId !== data.operation.clientId),
@@ -394,10 +411,12 @@ function handleOperationMessage(data: any) {
       }));
       
       // For own operations, update content with server's confirmed content
-      console.log('Own operation acknowledged by server, updating content with server confirmation:', data.content);
+      console.log('Own operation acknowledged by server, updating content with server confirmation:', `"${data.content}"`);
+      console.log('=== handleOperationMessage DEBUG END (OWN OPERATION) ===');
       return;
     }
 
+    console.log('=== PROCESSING OTHER USER OPERATION ===');
     console.log('Applying operation from another user:', data.operation);
     
     // This is an operation from another user - apply it
@@ -405,24 +424,57 @@ function handleOperationMessage(data: any) {
     let transformedOperation = data.operation;
     const state = useSharedNoteStore.getState();
     
+    console.log('Transforming operation against pending operations...');
     for (const pendingOp of state.pendingOperations) {
+      console.log('Transforming against pending op:', {
+        pendingOp: {
+          operationType: pendingOp.operationType,
+          position: pendingOp.position,
+          content: pendingOp.content,
+          length: pendingOp.length
+        },
+        beforeTransform: {
+          operationType: transformedOperation.operationType,
+          position: transformedOperation.position,
+          content: transformedOperation.content,
+          length: transformedOperation.length
+        }
+      });
+      
       transformedOperation = transformOperation(transformedOperation, pendingOp, false);
+      
+      console.log('After transform:', {
+        operationType: transformedOperation.operationType,
+        position: transformedOperation.position,
+        content: transformedOperation.content,
+        length: transformedOperation.length
+      });
     }
 
-    console.log('Transformed operation:', transformedOperation);
-    console.log('Current content before applying operation:', content);
+    console.log('Final transformed operation:', transformedOperation);
+    console.log('Current content before applying operation:', `"${content}"`);
 
     // Apply the transformed operation to current content
     const newContent = applyOperation(content, transformedOperation);
     
-    console.log('New content after applying operation:', newContent);
+    console.log('New content after applying operation:', `"${newContent}"`);
+    console.log('Content change:', {
+      before: `"${content}"`,
+      after: `"${newContent}"`,
+      lengthBefore: content.length,
+      lengthAfter: newContent.length,
+      lengthDiff: newContent.length - content.length
+    });
     
     useSharedNoteStore.setState({
       content: newContent,
       revision: Math.max(revision, data.revision || 0),
     });
+    
+    console.log('=== handleOperationMessage DEBUG END (OTHER USER OPERATION) ===');
   } else {
     console.log('Received non-OPERATION message:', data.type);
+    console.log('=== handleOperationMessage DEBUG END (NON-OPERATION) ===');
   }
 }
 
@@ -599,18 +651,55 @@ function transformRetainPosition(retainOp: NoteOperation, otherOp: NoteOperation
 
 // Helper function to apply operations to content
 function applyOperation(content: string, operation: NoteOperation): string {
+  console.log('=== applyOperation DEBUG START ===');
+  console.log('Applying operation:', {
+    operationType: operation.operationType,
+    position: operation.position,
+    content: operation.content,
+    length: operation.length,
+    currentContent: `"${content}"`,
+    currentContentLength: content.length
+  });
+  
   try {
     switch (operation.operationType) {
       case 'INSERT':
         const insertPos = Math.max(0, Math.min(operation.position, content.length));
-        return content.slice(0, insertPos) + (operation.content || '') + content.slice(insertPos);
+        const insertContent = operation.content || '';
+        const result = content.slice(0, insertPos) + insertContent + content.slice(insertPos);
+        
+        console.log('INSERT operation result:', {
+          insertPos,
+          insertContent: `"${insertContent}"`,
+          before: `"${content.slice(0, insertPos)}"`,
+          after: `"${content.slice(insertPos)}"`,
+          result: `"${result}"`,
+          resultLength: result.length,
+          lengthChange: result.length - content.length
+        });
+        
+        return result;
       
       case 'DELETE':
         const deletePos = Math.max(0, Math.min(operation.position, content.length));
         const deleteLength = Math.max(0, Math.min(operation.length, content.length - deletePos));
-        return content.slice(0, deletePos) + content.slice(deletePos + deleteLength);
+        const deleteResult = content.slice(0, deletePos) + content.slice(deletePos + deleteLength);
+        
+        console.log('DELETE operation result:', {
+          deletePos,
+          deleteLength,
+          deletedText: `"${content.slice(deletePos, deletePos + deleteLength)}"`,
+          before: `"${content.slice(0, deletePos)}"`,
+          after: `"${content.slice(deletePos + deleteLength)}"`,
+          result: `"${deleteResult}"`,
+          resultLength: deleteResult.length,
+          lengthChange: deleteResult.length - content.length
+        });
+        
+        return deleteResult;
       
       case 'RETAIN':
+        console.log('RETAIN operation - no content change');
         return content; // RETAIN doesn't change content
       
       default:
@@ -620,5 +709,7 @@ function applyOperation(content: string, operation: NoteOperation): string {
   } catch (error) {
     console.error('Error applying operation:', error);
     return content;
+  } finally {
+    console.log('=== applyOperation DEBUG END ===');
   }
 }
