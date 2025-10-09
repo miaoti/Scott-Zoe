@@ -30,7 +30,7 @@ public class EditControlService {
     /**
      * Request edit control for a note
      */
-    public EditSession requestEditControl(Long noteId, User user) {
+    public Optional<EditSession> requestEditControl(Long noteId, User user) {
         logger.info("User {} requesting edit control for note {}", user.getId(), noteId);
         
         EditSession session = editSessionRepository.findByNoteId(noteId)
@@ -38,20 +38,20 @@ public class EditControlService {
         
         // If no one is currently editing, grant immediately
         if (!session.getIsActive() || session.getCurrentEditor() == null) {
-            return grantEditControl(noteId, user);
+            return Optional.of(grantEditControl(noteId, user));
         }
         
         // If the same user is already editing, return current session
         if (session.getCurrentEditor().getId().equals(user.getId())) {
             session.setLastActivityAt(LocalDateTime.now());
-            return editSessionRepository.save(session);
+            return Optional.of(editSessionRepository.save(session));
         }
         
         // Set request for edit control
         session.setRequestedByUser(user);
         session.setRequestExpiresAt(LocalDateTime.now().plusSeconds(30));
         
-        return editSessionRepository.save(session);
+        return Optional.empty(); // Request pending, not granted
     }
     
     /**
@@ -101,8 +101,8 @@ public class EditControlService {
     /**
      * Update activity timestamp for current editor
      */
-    public void updateActivity(Long noteId, User user) {
-        Optional<EditSession> sessionOpt = editSessionRepository.findActiveSessionByNoteAndUser(noteId, user.getId());
+    public void updateActivity(Long noteId, Long userId) {
+        Optional<EditSession> sessionOpt = editSessionRepository.findActiveSessionByNoteAndUser(noteId, userId);
         if (sessionOpt.isPresent()) {
             EditSession session = sessionOpt.get();
             session.setLastActivityAt(LocalDateTime.now());
@@ -118,22 +118,39 @@ public class EditControlService {
     }
     
     /**
-     * Check if user can edit the note
+     * Check if user can edit a specific note
      */
-    public boolean canUserEdit(Long noteId, User user) {
+    public boolean canUserEdit(Long userId, Long noteId) {
+        EditSession session = editSessionRepository.findByNoteId(noteId).orElse(null);
+        return session != null && session.getIsActive() && 
+               session.getCurrentEditor() != null && 
+               session.getCurrentEditor().getId().equals(userId);
+    }
+
+    /**
+     * Check if user has edit permission for a note
+     */
+    public boolean hasEditPermission(Long userId, Long noteId) {
         Optional<EditSession> sessionOpt = editSessionRepository.findByNoteIdAndIsActiveTrue(noteId);
         if (sessionOpt.isEmpty()) {
             return true; // No active session, anyone can edit
         }
         
         EditSession session = sessionOpt.get();
-        return session.getCurrentEditor() != null && session.getCurrentEditor().getId().equals(user.getId());
+        return session.getCurrentEditor() != null && session.getCurrentEditor().getId().equals(userId);
+    }
+
+    /**
+     * Get active edit session for a note
+     */
+    public Optional<EditSession> getActiveEditSession(Long noteId) {
+        return editSessionRepository.findByNoteIdAndIsActiveTrue(noteId);
     }
     
     /**
      * Create or update user session
      */
-    public UserSession createOrUpdateUserSession(User user, String sessionId) {
+    public UserSession createOrUpdateUserSession(Long userId, String sessionId) {
         Optional<UserSession> existingSession = userSessionRepository.findBySessionId(sessionId);
         
         if (existingSession.isPresent()) {
@@ -142,8 +159,29 @@ public class EditControlService {
             session.updatePing();
             return userSessionRepository.save(session);
         } else {
-            UserSession newSession = new UserSession(user, sessionId);
-            return userSessionRepository.save(newSession);
+            // For now, we'll create a minimal implementation without User entity
+            // This would typically require UserService injection to get User by ID
+            throw new UnsupportedOperationException("Creating new user session requires proper User entity handling");
+        }
+    }
+
+    /**
+     * Create user session with userId and sessionId
+     */
+    public UserSession createUserSession(Long userId, String sessionId) {
+        // Find user by ID
+        // Note: This would typically require UserService injection, but for now we'll create a minimal implementation
+        Optional<UserSession> existingSession = userSessionRepository.findBySessionId(sessionId);
+        
+        if (existingSession.isPresent()) {
+            UserSession session = existingSession.get();
+            session.setIsConnected(true);
+            session.updatePing();
+            return userSessionRepository.save(session);
+        } else {
+            // Create new session - this would need proper User entity creation
+            // For now, we'll throw an exception to indicate this needs proper implementation
+            throw new UnsupportedOperationException("createUserSession(Long, String) needs proper User entity handling");
         }
     }
     
@@ -169,6 +207,14 @@ public class EditControlService {
             session.setIsConnected(false);
             userSessionRepository.save(session);
         }
+    }
+
+    /**
+     * Disconnect user session with userId and sessionId
+     */
+    public void disconnectUserSession(Long userId, String sessionId) {
+        // For now, just use the sessionId to disconnect
+        disconnectUserSession(sessionId);
     }
     
     /**

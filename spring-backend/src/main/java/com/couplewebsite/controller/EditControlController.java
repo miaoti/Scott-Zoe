@@ -102,10 +102,10 @@ public class EditControlController {
             }
             
             // Update user session
-            editControlService.updateUserSession(user.getId(), sessionId);
+            editControlService.createOrUpdateUserSession(user.getId(), sessionId);
             
             // Request edit control
-            Optional<EditSession> sessionOpt = editControlService.requestEditControl(user.getId(), noteId);
+            Optional<EditSession> sessionOpt = editControlService.requestEditControl(noteId, user);
             
             Map<String, Object> response = new HashMap<>();
             response.put("noteId", noteId);
@@ -165,7 +165,7 @@ public class EditControlController {
                 return ResponseEntity.status(404).body(Map.of("error", "User not found"));
             }
             
-            editControlService.releaseEditControl(user.getId(), noteId);
+            editControlService.releaseEditControl(noteId, user);
             
             Map<String, Object> response = new HashMap<>();
             response.put("noteId", noteId);
@@ -214,7 +214,7 @@ public class EditControlController {
             SharedNote note = sharedNoteService.updateNoteContent(noteId, content);
             
             // Update activity
-            editControlService.updateActivity(user.getId(), noteId);
+            editControlService.updateActivity(noteId, user.getId());
             
             Map<String, Object> response = new HashMap<>();
             response.put("noteId", noteId);

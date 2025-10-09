@@ -136,16 +136,16 @@ public class SharedNoteWebSocketController {
             logger.info("Handling edit control message: {} from user: {}", message.getType(), username);
             
             switch (message.getType()) {
-                case REQUEST_EDIT_CONTROL:
+                case EditControlMessage.REQUEST_EDIT_CONTROL:
                     handleRequestEditControl(message, user);
                     break;
-                case RELEASE_EDIT_CONTROL:
+                case EditControlMessage.RELEASE_EDIT_CONTROL:
                     handleReleaseEditControl(message, user);
                     break;
-                case CONTENT_UPDATE:
+                case EditControlMessage.CONTENT_UPDATE:
                     handleContentUpdate(message, user);
                     break;
-                case TYPING_STATUS:
+                case EditControlMessage.TYPING_STATUS:
                     handleTypingStatus(message, user);
                     break;
                 default:
@@ -159,18 +159,18 @@ public class SharedNoteWebSocketController {
     
     private void handleRequestEditControl(EditControlMessage message, User user) {
         try {
-            // Update user session
-            editControlService.updateUserSession(user.getId(), message.getSessionId());
+            // Create or update user session
+            editControlService.createOrUpdateUserSession(user.getId(), message.getSessionId());
             
             // Request edit control
-            Optional<EditSession> sessionOpt = editControlService.requestEditControl(user.getId(), message.getNoteId());
+            Optional<EditSession> sessionOpt = editControlService.requestEditControl(message.getNoteId(), user);
             
             if (sessionOpt.isPresent()) {
                 EditSession session = sessionOpt.get();
-                
+                if (session.getCurrentEditor() != null && session.getCurrentEditor().getId().equals(user.getId())) {
                 // Send grant message to requesting user
-                EditControlMessage grantMessage = EditControlMessage.grantEditControl(
-                    message.getNoteId(), user.getId(), user.getUsername()
+                EditControlMessage grantMessage = EditControlMessage.editControlGranted(
+                    user.getId(), message.getNoteId(), message.getSessionId()
                 );
                 messagingTemplate.convertAndSendToUser(
                     user.getUsername(), "/queue/shared-note/edit-control", grantMessage
@@ -178,21 +178,25 @@ public class SharedNoteWebSocketController {
                 
                 // Notify other users that edit control has been granted
                 EditControlMessage notifyMessage = EditControlMessage.editControlGranted(
-                    message.getNoteId(), user.getId(), user.getUsername()
+                    user.getId(), message.getNoteId(), message.getSessionId()
                 );
                 messagingTemplate.convertAndSend("/topic/shared-note/edit-control", notifyMessage);
                 
-                logger.info("Granted edit control to user: {} for note: {}", user.getUsername(), message.getNoteId());
+                    logger.info("Granted edit control to user: {} for note: {}", user.getUsername(), message.getNoteId());
+                } else {
+                    // Edit control denied (someone else is editing)
+                    EditControlMessage denyMessage = EditControlMessage.denyEditControl(
+                        user.getId(), message.getNoteId(), "Another user is currently editing"
+                    );
+                    messagingTemplate.convertAndSendToUser(
+                        user.getUsername(), "/queue/shared-note/edit-control", denyMessage
+                    );
+                    
+                    logger.info("Denied edit control to user: {} for note: {} (already in use)", user.getUsername(), message.getNoteId());
+                }
             } else {
-                // Edit control denied (someone else is editing)
-                EditControlMessage denyMessage = EditControlMessage.denyEditControl(
-                    message.getNoteId(), user.getId(), "Another user is currently editing"
-                );
-                messagingTemplate.convertAndSendToUser(
-                    user.getUsername(), "/queue/shared-note/edit-control", denyMessage
-                );
-                
-                logger.info("Denied edit control to user: {} for note: {} (already in use)", user.getUsername(), message.getNoteId());
+                // Request is pending
+                logger.info("Edit control request pending for user: {} for note: {}", user.getUsername(), message.getNoteId());
             }
             
         } catch (Exception e) {
@@ -202,11 +206,11 @@ public class SharedNoteWebSocketController {
     
     private void handleReleaseEditControl(EditControlMessage message, User user) {
         try {
-            editControlService.releaseEditControl(user.getId(), message.getNoteId());
+            editControlService.releaseEditControl(message.getNoteId(), user);
             
             // Notify all users that edit control has been released
             EditControlMessage releaseMessage = EditControlMessage.editControlReleased(
-                message.getNoteId(), user.getId(), user.getUsername()
+                user.getId(), message.getNoteId()
             );
             messagingTemplate.convertAndSend("/topic/shared-note/edit-control", releaseMessage);
             
@@ -220,7 +224,7 @@ public class SharedNoteWebSocketController {
     private void handleContentUpdate(EditControlMessage message, User user) {
         try {
             // Verify user has edit permission
-            if (!editControlService.hasEditPermission(user.getId(), message.getNoteId())) {
+            if (!editControlService.canUserEdit(user.getId(), message.getNoteId())) {
                 logger.warn("User {} attempted to update content without edit permission for note {}", 
                     user.getUsername(), message.getNoteId());
                 return;
@@ -234,7 +238,7 @@ public class SharedNoteWebSocketController {
             sharedNoteRepository.save(note);
             
             // Update activity
-            editControlService.updateActivity(user.getId(), message.getNoteId());
+            editControlService.updateActivity(message.getNoteId(), user.getId());
             
             // Broadcast content update to all users except sender
             EditControlMessage updateMessage = EditControlMessage.contentUpdate(
@@ -252,16 +256,16 @@ public class SharedNoteWebSocketController {
     private void handleTypingStatus(EditControlMessage message, User user) {
         try {
             // Verify user has edit permission
-            if (!editControlService.hasEditPermission(user.getId(), message.getNoteId())) {
+            if (!editControlService.canUserEdit(user.getId(), message.getNoteId())) {
                 return;
             }
             
             // Update activity
-            editControlService.updateActivity(user.getId(), message.getNoteId());
+            editControlService.updateActivity(message.getNoteId(), user.getId());
             
             // Broadcast typing status to all users except sender
             EditControlMessage typingMessage = EditControlMessage.typingStatus(
-                message.getNoteId(), user.getId(), user.getUsername(), message.isTyping()
+                user.getId(), message.getNoteId(), user.getUsername(), message.getIsTyping()
             );
             messagingTemplate.convertAndSend("/topic/shared-note/typing", typingMessage);
             
@@ -308,7 +312,7 @@ public class SharedNoteWebSocketController {
             if (principal != null) {
                 User user = userService.findByUsername(principal.getName());
                 if (user != null) {
-                    editControlService.disconnectUserSession(user.getId(), sessionId);
+                    editControlService.disconnectUserSession(sessionId);
                     logger.info("User {} disconnected with session {}", principal.getName(), sessionId);
                 }
             }
@@ -336,7 +340,7 @@ public class SharedNoteWebSocketController {
             try {
                 User user = userService.findByUsername(principal.getName());
                 if (user != null && payload.containsKey("sessionId")) {
-                    editControlService.updateUserSession(user.getId(), (String) payload.get("sessionId"));
+                    editControlService.createOrUpdateUserSession(user.getId(), (String) payload.get("sessionId"));
                 }
             } catch (Exception e) {
                 logger.error("Error updating user session ping", e);

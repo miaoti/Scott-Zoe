@@ -3,6 +3,11 @@ package com.couplewebsite.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class EditControlMessage {
+    // Message type constants
+    public static final String REQUEST_EDIT_CONTROL = "REQUEST_EDIT_CONTROL";
+    public static final String RELEASE_EDIT_CONTROL = "RELEASE_EDIT_CONTROL";
+    public static final String CONTENT_UPDATE = "CONTENT_UPDATE";
+    public static final String TYPING_STATUS = "TYPING_STATUS";
     private String type;
     private Long userId;
     private Long noteId;
@@ -18,6 +23,7 @@ public class EditControlMessage {
     private String timestamp;
     private String userName;
     private Boolean isTyping;
+    private String sessionId;
 
     // Constructors
     public EditControlMessage() {}
@@ -148,6 +154,18 @@ public class EditControlMessage {
         this.isTyping = isTyping;
     }
 
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public Boolean isTyping() {
+        return isTyping;
+    }
+
     // Static factory methods for common message types
     public static EditControlMessage requestEditControl(Long userId, Long noteId) {
         EditControlMessage message = new EditControlMessage("REQUEST_EDIT_CONTROL");
@@ -212,10 +230,11 @@ public class EditControlMessage {
         return message;
     }
 
-    public static EditControlMessage typingStatus(Long userId, Long noteId, Boolean isTyping) {
+    public static EditControlMessage typingStatus(Long noteId, Long userId, String userName, Boolean isTyping) {
         EditControlMessage message = new EditControlMessage("TYPING_STATUS");
         message.setUserId(userId);
         message.setNoteId(noteId);
+        message.setUserName(userName);
         message.setIsTyping(isTyping);
         return message;
     }
@@ -227,4 +246,37 @@ public class EditControlMessage {
         message.setIsTyping(isTyping);
         return message;
     }
+
+    public static EditControlMessage editControlGranted(Long userId, Long noteId, String sessionId) {
+        EditControlMessage message = new EditControlMessage("EDIT_CONTROL_GRANTED");
+        message.setUserId(userId);
+        message.setNoteId(noteId);
+        message.setSessionId(sessionId);
+        return message;
+    }
+
+    public static EditControlMessage denyEditControl(Long userId, Long noteId, String reason) {
+        EditControlMessage message = new EditControlMessage("EDIT_CONTROL_DENIED");
+        message.setUserId(userId);
+        message.setNoteId(noteId);
+        message.setContent(reason); // Using content field for reason
+        return message;
+    }
+
+    // Additional overloaded methods for compatibility
+    public static EditControlMessage editControlGranted(Long userId, Long noteId) {
+        EditControlMessage message = new EditControlMessage("EDIT_CONTROL_GRANTED");
+        message.setUserId(userId);
+        message.setNoteId(noteId);
+        return message;
+    }
+
+    public static EditControlMessage denyEditControl(Long userId, Long noteId) {
+        EditControlMessage message = new EditControlMessage("EDIT_CONTROL_DENIED");
+        message.setUserId(userId);
+        message.setNoteId(noteId);
+        return message;
+    }
+
+
 }
