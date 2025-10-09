@@ -97,11 +97,10 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
     if (operation && isConnected) {
       console.log('Sending operation to server:', operation);
       // Send operation to server for synchronization
-      // The server will echo back the operation which will update the content
       sendOperation(operation);
       
-      // Update local content immediately for responsiveness (optimistic update)
-      setContent(newContent);
+      // DO NOT update local content here - let the server's response handle it
+      // This prevents duplicate application of operations
     } else if (!isConnected) {
       // If not connected, just update locally
       setContent(newContent);
@@ -443,22 +442,48 @@ function calculateOperation(
     return null;
   }
   
-  // Simple diff algorithm - can be improved with more sophisticated algorithms
+  // Find the first difference position
+  let diffStart = 0;
+  while (diffStart < Math.min(oldContent.length, newContent.length) && 
+         oldContent[diffStart] === newContent[diffStart]) {
+    diffStart++;
+  }
+  
   if (newContent.length > oldContent.length) {
     // Insertion
-    const insertedText = newContent.slice(cursorPos - (newContent.length - oldContent.length), cursorPos);
+    const insertedLength = newContent.length - oldContent.length;
+    const insertedText = newContent.slice(diffStart, diffStart + insertedLength);
+    
+    console.log('INSERT operation:', {
+      position: diffStart,
+      content: insertedText,
+      length: insertedLength,
+      oldContent,
+      newContent,
+      cursorPos
+    });
+    
     return {
       operationType: 'INSERT',
-      position: cursorPos - (newContent.length - oldContent.length),
+      position: diffStart,
       content: insertedText,
-      length: insertedText.length,
+      length: insertedLength,
     };
   } else if (newContent.length < oldContent.length) {
     // Deletion
     const deletedLength = oldContent.length - newContent.length;
+    
+    console.log('DELETE operation:', {
+      position: diffStart,
+      length: deletedLength,
+      oldContent,
+      newContent,
+      cursorPos
+    });
+    
     return {
       operationType: 'DELETE',
-      position: cursorPos,
+      position: diffStart,
       length: deletedLength,
     };
   }

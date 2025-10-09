@@ -390,14 +390,11 @@ function handleOperationMessage(data: any) {
       useSharedNoteStore.setState((state) => ({
         pendingOperations: state.pendingOperations.filter(op => op.clientId !== data.operation.clientId),
         revision: Math.max(state.revision, data.revision || 0),
+        // Update content to match server's authoritative state
+        content: data.content || state.content,
       }));
       
-      // For our own operations, we should still update the content to match the server's authoritative state
-      // This ensures consistency in case there were any transformations or corrections on the server
-      console.log('Updating content to match server state for own operation');
-      useSharedNoteStore.setState({
-        content: data.content || content,
-      });
+      console.log('Updated content to match server state for own operation:', data.content);
       return;
     }
 
