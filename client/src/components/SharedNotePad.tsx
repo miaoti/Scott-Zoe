@@ -3,7 +3,6 @@ import { useDrag } from 'react-dnd';
 import { 
   Minimize2, 
   Maximize2, 
-  X, 
   Users, 
   Wifi, 
   WifiOff,
@@ -108,12 +107,7 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
     setMaximized(!isMaximized);
   };
   
-  const handleClose = () => {
-    disconnect();
-    if (onClose) {
-      onClose();
-    }
-  };
+
   
   // Drag functionality
   const [{ isDragging }, drag, dragPreview] = useDrag(() => ({
@@ -208,13 +202,7 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
           >
             <Maximize2 className="w-3 h-3" />
           </button>
-          <button
-            onClick={handleClose}
-            className="p-1 hover:bg-red-500 rounded transition-colors"
-            title="Close"
-          >
-            <X className="w-3 h-3" />
-          </button>
+
         </div>
       </div>
       

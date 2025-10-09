@@ -15,14 +15,14 @@ import Header from './components/Header';
 import Scott from './components/Scott';
 import Zoe from './components/Zoe';
 import SurpriseBoxManager from './components/SurpriseBoxManager';
-import SharedNotePad from './components/SharedNotePad';
+
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
-import { useSharedNoteStore } from './stores/sharedNoteStore';
+
 
 function AppContent() {
   const { isAuthenticated, loading } = useAuth();
-  const { isWindowVisible, setWindowVisible } = useSharedNoteStore();
+
 
   if (loading) {
     return (
@@ -49,9 +49,7 @@ function AppContent() {
           <main className="container mx-auto px-4 py-8">
             <Dashboard />
           </main>
-          {isWindowVisible && (
-            <SharedNotePad onClose={() => setWindowVisible(false)} />
-          )}
+
         </div>
       ) : <Navigate to="/login" replace />} />
       <Route path="/dashboard" element={isAuthenticated ? (
@@ -60,9 +58,7 @@ function AppContent() {
           <main className="container mx-auto px-4 py-8">
             <Dashboard />
           </main>
-          {isWindowVisible && (
-            <SharedNotePad onClose={() => setWindowVisible(false)} />
-          )}
+
         </div>
       ) : <Navigate to="/login" replace />} />
       <Route path="/gallery" element={isAuthenticated ? (

@@ -8,6 +8,7 @@ import PartnerLoveCard from './PartnerLoveCard';
 import { useSurpriseBoxActions } from '../hooks/useSurpriseBoxActions';
 import BoxDropManager from './BoxDropManager';
 import { useSharedNoteStore } from '../stores/sharedNoteStore';
+import SharedNotePad from './SharedNotePad';
 
 // Utility function to safely parse dates from different formats
 const parseDate = (dateString: string | null | undefined): Date | null => {
@@ -73,6 +74,7 @@ function Dashboard() {
   const [stats, setStats] = useState({ photos: 0, memories: 0, totalLove: 0 });
   const [catPositions, setCatPositions] = useState<CatPosition[]>([]);
   const [showWheel, setShowWheel] = useState(false);
+  const { connect } = useSharedNoteStore();
   const {
     ownedBoxes,
     receivedBoxes,
@@ -189,7 +191,13 @@ function Dashboard() {
     loadReceivedBoxes();
     loadDroppedBoxes();
     loadActiveBox();
-  }, [loadOwnedBoxes, loadReceivedBoxes, loadDroppedBoxes, loadActiveBox]);
+    
+    // Auto-connect to shared notes
+    const token = localStorage.getItem('token');
+    if (token) {
+      connect(token);
+    }
+  }, [loadOwnedBoxes, loadReceivedBoxes, loadDroppedBoxes, loadActiveBox, connect]);
 
   // Handle claiming a box
   const handleClaimBox = async (boxId: number) => {
@@ -486,20 +494,7 @@ function Dashboard() {
               </div>
             </Link>
 
-            <button
-              onClick={() => useSharedNoteStore.getState().setWindowVisible(true)}
-              className="bg-apple-purple/5 border border-apple-purple/20 rounded-xl p-6 hover:bg-apple-purple/10 transition-all duration-300 group pointer-events-auto"
-            >
-              <div className="flex items-center space-x-4">
-                <div className="bg-apple-purple/10 p-3 rounded-xl group-hover:bg-apple-purple/20 transition-colors">
-                  <FileText className="h-6 w-6 text-apple-purple" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-apple-label">Shared Notes</h3>
-                  <p className="text-sm text-apple-secondary-label">Collaborate on notes together</p>
-                </div>
-              </div>
-            </button>
+
 
           </div>
         </div>
@@ -536,6 +531,9 @@ function Dashboard() {
           }}
         />
       )}
+
+      {/* Persistent Shared Notes Window */}
+      <SharedNotePad />
     </div>
   );
 }
