@@ -7,8 +7,7 @@ import LoveCounter from './LoveCounter';
 import PartnerLoveCard from './PartnerLoveCard';
 import { useSurpriseBoxActions } from '../hooks/useSurpriseBoxActions';
 import BoxDropManager from './BoxDropManager';
-import { useSharedNoteStore } from '../stores/sharedNoteStore';
-import SharedNotePad from './SharedNotePad';
+import TurnBasedNotePad from './TurnBasedNotePad';
 
 // Utility function to safely parse dates from different formats
 const parseDate = (dateString: string | null | undefined): Date | null => {
@@ -74,7 +73,7 @@ function Dashboard() {
   const [stats, setStats] = useState({ photos: 0, memories: 0, totalLove: 0 });
   const [catPositions, setCatPositions] = useState<CatPosition[]>([]);
   const [showWheel, setShowWheel] = useState(false);
-  const { connect } = useSharedNoteStore();
+
   const {
     ownedBoxes,
     receivedBoxes,
@@ -192,18 +191,8 @@ function Dashboard() {
     loadDroppedBoxes();
     loadActiveBox();
     
-    // Auto-connect to shared notes with proper error handling
-    try {
-      const token = localStorage.getItem('token');
-      if (token && token.trim() !== '') {
-        connect(token);
-      } else {
-        console.warn('SharedNotePad: No valid token found for WebSocket connection');
-      }
-    } catch (error) {
-      console.error('SharedNotePad: Error connecting to WebSocket:', error);
-    }
-  }, [loadOwnedBoxes, loadReceivedBoxes, loadDroppedBoxes, loadActiveBox, connect]);
+
+  }, [loadOwnedBoxes, loadReceivedBoxes, loadDroppedBoxes, loadActiveBox]);
 
   // Handle claiming a box
   const handleClaimBox = async (boxId: number) => {
@@ -538,10 +527,10 @@ function Dashboard() {
         />
       )}
 
-      {/* Persistent Shared Notes Window */}
+      {/* Persistent Turn-Based Notes Window */}
       <div style={{ border: '2px solid red', padding: '10px', margin: '10px' }}>
-        <h3>DEBUG: SharedNotePad Container</h3>
-        <SharedNotePad />
+        <h3>DEBUG: TurnBasedNotePad Container</h3>
+        <TurnBasedNotePad />
       </div>
     </div>
   );

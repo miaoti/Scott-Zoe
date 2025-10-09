@@ -1,14 +1,15 @@
 package com.couplewebsite.controller;
 
-import com.couplewebsite.dto.NoteOperationDto;
+import com.couplewebsite.dto.EditControlMessage;
 import com.couplewebsite.dto.WindowPositionDto;
-import com.couplewebsite.entity.NoteOperation;
+import com.couplewebsite.entity.EditSession;
 import com.couplewebsite.entity.SharedNote;
 import com.couplewebsite.entity.User;
 import com.couplewebsite.entity.WindowPosition;
-import com.couplewebsite.service.SharedNoteService;
+import com.couplewebsite.service.EditControlService;
 import com.couplewebsite.service.UserService;
 import com.couplewebsite.service.WindowPositionService;
+import com.couplewebsite.repository.SharedNoteRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +17,17 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
+import org.springframework.context.event.EventListener;
+import org.springframework.web.socket.messaging.SessionConnectedEvent;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 public class SharedNoteWebSocketController {
@@ -33,13 +38,16 @@ public class SharedNoteWebSocketController {
     private SimpMessagingTemplate messagingTemplate;
     
     @Autowired
-    private SharedNoteService sharedNoteService;
+    private SharedNoteRepository sharedNoteRepository;
     
     @Autowired
     private WindowPositionService windowPositionService;
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private EditControlService editControlService;
     
     /**
      * Handle subscription to shared note updates
@@ -55,16 +63,13 @@ public class SharedNoteWebSocketController {
             String username = principal.getName();
             logger.info("User {} subscribed to shared note updates", username);
             
-            // Get current note and synchronize content from all operations
-            SharedNote currentNote = sharedNoteService.getCurrentSharedNote();
-            
-            // Ensure content is synchronized from all operations
-            SharedNote synchronizedNote = sharedNoteService.synchronizeContent(currentNote.getId());
+            // Get current note
+            SharedNote currentNote = getOrCreateSharedNote();
             
             Map<String, Object> response = new HashMap<>();
             response.put("type", "INITIAL_CONTENT");
-            response.put("content", synchronizedNote.getContent());
-            response.put("noteId", synchronizedNote.getId());
+            response.put("content", currentNote.getContent());
+            response.put("noteId", currentNote.getId());
             response.put("timestamp", LocalDateTime.now());
             
             String userDestination = "/user/" + username + "/queue/shared-note/updates";
@@ -72,170 +77,6 @@ public class SharedNoteWebSocketController {
             
         } catch (Exception e) {
             logger.error("Error handling shared note subscription", e);
-        }
-    }
-    
-    /**
-     * Handle note operation (insert, delete, retain)
-     */
-    @MessageMapping("/shared-note/operation")
-    public void handleNoteOperation(@Payload NoteOperationDto operationDto, Principal principal) {
-        try {
-            logger.info("=== BACKEND handleNoteOperation DEBUG START ===");
-            logger.info("Received operation: type={}, position={}, content='{}', length={}, clientId={}", 
-                operationDto.getOperationType(), operationDto.getPosition(), 
-                operationDto.getContent(), operationDto.getLength(), operationDto.getClientId());
-            
-            if (principal == null) {
-                logger.warn("Principal is null - user not authenticated for note operation");
-                return;
-            }
-            
-            String username = principal.getName();
-            User user = userService.findByUsername(username);
-            
-            if (user == null) {
-                logger.warn("User not found: {}", username);
-                return;
-            }
-            
-            logger.info("Processing operation for user: {} (ID: {})", username, user.getId());
-            
-            // Get current shared note
-            SharedNote sharedNote = sharedNoteService.getCurrentSharedNote();
-            logger.info("Current shared note content before operation: '{}'", sharedNote.getContent());
-            
-            // Save the operation
-            NoteOperation operation = sharedNoteService.saveNoteOperation(
-                sharedNote, user, operationDto.getOperationType(), 
-                operationDto.getPosition(), operationDto.getContent(), 
-                operationDto.getLength()
-            );
-            
-            logger.info("Saved operation with ID: {}, sequenceNumber: {}", 
-                operation.getId(), operation.getSequenceNumber());
-            
-            // Apply operation to note content
-            SharedNote updatedNote = sharedNoteService.applyOperation(sharedNote, operation);
-            String updatedContent = updatedNote.getContent();
-            
-            logger.info("Updated note content after applying operation: '{}'", updatedContent);
-            logger.info("Content length change: {} -> {} (diff: {})", 
-                sharedNote.getContent().length(), updatedContent.length(), 
-                updatedContent.length() - sharedNote.getContent().length());
-            
-            // Create operation DTO with clientId from the incoming operation
-            NoteOperationDto operationDtoWithClientId = convertToDto(operation);
-            operationDtoWithClientId.setClientId(operationDto.getClientId());
-            
-            // Create operation broadcast message
-            Map<String, Object> operationBroadcast = new HashMap<>();
-            operationBroadcast.put("type", "OPERATION");
-            operationBroadcast.put("operation", operationDtoWithClientId);
-            operationBroadcast.put("content", updatedContent);
-            operationBroadcast.put("userId", user.getId());
-            operationBroadcast.put("username", username);
-            operationBroadcast.put("timestamp", LocalDateTime.now());
-            operationBroadcast.put("revision", operation.getSequenceNumber());
-            
-            logger.info("Sending confirmation to sender: clientId={}, content='{}'", 
-                operationDto.getClientId(), updatedContent);
-            
-            // Send confirmation to sender (local echo) - ONLY to sender's personal queue
-            messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/shared-note/operations", operationBroadcast);
-            
-            logger.info("Broadcasting operation to other users (excluding sender): clientId={}, content='{}'", 
-                operationDto.getClientId(), updatedContent);
-            
-            // Create a separate broadcast message for other users (without sender's clientId to avoid confusion)
-            Map<String, Object> otherUsersBroadcast = new HashMap<>();
-            otherUsersBroadcast.put("type", "OPERATION");
-            otherUsersBroadcast.put("operation", operationDtoWithClientId);
-            otherUsersBroadcast.put("content", updatedContent);
-            otherUsersBroadcast.put("userId", user.getId());
-            otherUsersBroadcast.put("username", username);
-            otherUsersBroadcast.put("timestamp", LocalDateTime.now());
-            otherUsersBroadcast.put("revision", operation.getSequenceNumber());
-            otherUsersBroadcast.put("fromUser", username); // Add sender identification for other users
-            
-            // Broadcast operation to OTHER connected users via topic
-            // The sender should NOT process this message as they already received confirmation via personal queue
-            messagingTemplate.convertAndSend("/topic/shared-note/operations", otherUsersBroadcast);
-            
-            logger.info("Processed note operation from user {}: {} at position {}", 
-                username, operationDto.getOperationType(), operationDto.getPosition());
-            logger.info("=== BACKEND handleNoteOperation DEBUG END ===");
-            
-        } catch (Exception e) {
-            logger.error("Error handling note operation", e);
-        }
-    }
-    
-    /**
-     * Handle cursor position updates
-     */
-    @MessageMapping("/shared-note/cursor")
-    public void handleCursorPosition(@Payload Map<String, Object> payload, Principal principal) {
-        try {
-            if (principal == null) {
-                logger.warn("Principal is null - user not authenticated for cursor update");
-                return;
-            }
-            
-            String username = principal.getName();
-            User user = userService.findByUsername(username);
-            
-            if (user == null) {
-                logger.warn("User not found: {}", username);
-                return;
-            }
-            
-            // Broadcast cursor position to all users except sender
-            Map<String, Object> broadcast = new HashMap<>();
-            broadcast.put("type", "CURSOR_POSITION");
-            broadcast.put("userId", user.getId());
-            broadcast.put("username", username);
-            broadcast.put("position", payload.get("position"));
-            broadcast.put("timestamp", LocalDateTime.now());
-            
-            messagingTemplate.convertAndSend("/topic/shared-note/cursors", broadcast);
-            
-        } catch (Exception e) {
-            logger.error("Error handling cursor position update", e);
-        }
-    }
-    
-    /**
-     * Handle typing indicator
-     */
-    @MessageMapping("/shared-note/typing")
-    public void handleTypingIndicator(@Payload Map<String, Object> payload, Principal principal) {
-        try {
-            if (principal == null) {
-                logger.warn("Principal is null - user not authenticated for typing indicator");
-                return;
-            }
-            
-            String username = principal.getName();
-            User user = userService.findByUsername(username);
-            
-            if (user == null) {
-                logger.warn("User not found: {}", username);
-                return;
-            }
-            
-            // Broadcast typing status to all users except sender
-            Map<String, Object> broadcast = new HashMap<>();
-            broadcast.put("type", "TYPING_STATUS");
-            broadcast.put("userId", user.getId());
-            broadcast.put("username", username);
-            broadcast.put("isTyping", payload.get("isTyping"));
-            broadcast.put("timestamp", LocalDateTime.now());
-            
-            messagingTemplate.convertAndSend("/topic/shared-note/typing", broadcast);
-            
-        } catch (Exception e) {
-            logger.error("Error handling typing indicator", e);
         }
     }
     
@@ -274,6 +115,210 @@ public class SharedNoteWebSocketController {
     }
     
     /**
+     * Handle edit control messages (REQUEST_EDIT_CONTROL, RELEASE_EDIT_CONTROL, etc.)
+     */
+    @MessageMapping("/shared-note/edit-control")
+    public void handleEditControl(@Payload EditControlMessage message, Principal principal) {
+        try {
+            if (principal == null) {
+                logger.warn("Principal is null - user not authenticated for edit control");
+                return;
+            }
+            
+            String username = principal.getName();
+            User user = userService.findByUsername(username);
+            
+            if (user == null) {
+                logger.warn("User not found: {}", username);
+                return;
+            }
+            
+            logger.info("Handling edit control message: {} from user: {}", message.getType(), username);
+            
+            switch (message.getType()) {
+                case REQUEST_EDIT_CONTROL:
+                    handleRequestEditControl(message, user);
+                    break;
+                case RELEASE_EDIT_CONTROL:
+                    handleReleaseEditControl(message, user);
+                    break;
+                case CONTENT_UPDATE:
+                    handleContentUpdate(message, user);
+                    break;
+                case TYPING_STATUS:
+                    handleTypingStatus(message, user);
+                    break;
+                default:
+                    logger.warn("Unknown edit control message type: {}", message.getType());
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error handling edit control message", e);
+        }
+    }
+    
+    private void handleRequestEditControl(EditControlMessage message, User user) {
+        try {
+            // Update user session
+            editControlService.updateUserSession(user.getId(), message.getSessionId());
+            
+            // Request edit control
+            Optional<EditSession> sessionOpt = editControlService.requestEditControl(user.getId(), message.getNoteId());
+            
+            if (sessionOpt.isPresent()) {
+                EditSession session = sessionOpt.get();
+                
+                // Send grant message to requesting user
+                EditControlMessage grantMessage = EditControlMessage.grantEditControl(
+                    message.getNoteId(), user.getId(), user.getUsername()
+                );
+                messagingTemplate.convertAndSendToUser(
+                    user.getUsername(), "/queue/shared-note/edit-control", grantMessage
+                );
+                
+                // Notify other users that edit control has been granted
+                EditControlMessage notifyMessage = EditControlMessage.editControlGranted(
+                    message.getNoteId(), user.getId(), user.getUsername()
+                );
+                messagingTemplate.convertAndSend("/topic/shared-note/edit-control", notifyMessage);
+                
+                logger.info("Granted edit control to user: {} for note: {}", user.getUsername(), message.getNoteId());
+            } else {
+                // Edit control denied (someone else is editing)
+                EditControlMessage denyMessage = EditControlMessage.denyEditControl(
+                    message.getNoteId(), user.getId(), "Another user is currently editing"
+                );
+                messagingTemplate.convertAndSendToUser(
+                    user.getUsername(), "/queue/shared-note/edit-control", denyMessage
+                );
+                
+                logger.info("Denied edit control to user: {} for note: {} (already in use)", user.getUsername(), message.getNoteId());
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error handling request edit control", e);
+        }
+    }
+    
+    private void handleReleaseEditControl(EditControlMessage message, User user) {
+        try {
+            editControlService.releaseEditControl(user.getId(), message.getNoteId());
+            
+            // Notify all users that edit control has been released
+            EditControlMessage releaseMessage = EditControlMessage.editControlReleased(
+                message.getNoteId(), user.getId(), user.getUsername()
+            );
+            messagingTemplate.convertAndSend("/topic/shared-note/edit-control", releaseMessage);
+            
+            logger.info("Released edit control from user: {} for note: {}", user.getUsername(), message.getNoteId());
+            
+        } catch (Exception e) {
+            logger.error("Error handling release edit control", e);
+        }
+    }
+    
+    private void handleContentUpdate(EditControlMessage message, User user) {
+        try {
+            // Verify user has edit permission
+            if (!editControlService.hasEditPermission(user.getId(), message.getNoteId())) {
+                logger.warn("User {} attempted to update content without edit permission for note {}", 
+                    user.getUsername(), message.getNoteId());
+                return;
+            }
+            
+            // Update the shared note content
+            SharedNote note = sharedNoteRepository.findById(message.getNoteId())
+                .orElseThrow(() -> new RuntimeException("Shared note not found"));
+            
+            note.setContent(message.getContent());
+            sharedNoteRepository.save(note);
+            
+            // Update activity
+            editControlService.updateActivity(user.getId(), message.getNoteId());
+            
+            // Broadcast content update to all users except sender
+            EditControlMessage updateMessage = EditControlMessage.contentUpdate(
+                message.getNoteId(), user.getId(), message.getContent(), message.getCursorPosition()
+            );
+            messagingTemplate.convertAndSend("/topic/shared-note/content", updateMessage);
+            
+            logger.debug("Broadcasted content update from user: {} for note: {}", user.getUsername(), message.getNoteId());
+            
+        } catch (Exception e) {
+            logger.error("Error handling content update", e);
+        }
+    }
+    
+    private void handleTypingStatus(EditControlMessage message, User user) {
+        try {
+            // Verify user has edit permission
+            if (!editControlService.hasEditPermission(user.getId(), message.getNoteId())) {
+                return;
+            }
+            
+            // Update activity
+            editControlService.updateActivity(user.getId(), message.getNoteId());
+            
+            // Broadcast typing status to all users except sender
+            EditControlMessage typingMessage = EditControlMessage.typingStatus(
+                message.getNoteId(), user.getId(), user.getUsername(), message.isTyping()
+            );
+            messagingTemplate.convertAndSend("/topic/shared-note/typing", typingMessage);
+            
+            logger.debug("Broadcasted typing status from user: {} for note: {}", user.getUsername(), message.getNoteId());
+            
+        } catch (Exception e) {
+            logger.error("Error handling typing status", e);
+        }
+    }
+    
+    /**
+     * Handle user connection events
+     */
+    @EventListener
+    public void handleWebSocketConnectListener(SessionConnectedEvent event) {
+        try {
+            StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+            String sessionId = headerAccessor.getSessionId();
+            Principal principal = headerAccessor.getUser();
+            
+            if (principal != null) {
+                User user = userService.findByUsername(principal.getName());
+                if (user != null) {
+                    editControlService.createUserSession(user.getId(), sessionId);
+                    logger.info("User {} connected with session {}", principal.getName(), sessionId);
+                }
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error handling WebSocket connect event", e);
+        }
+    }
+    
+    /**
+     * Handle user disconnection events
+     */
+    @EventListener
+    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
+        try {
+            StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+            String sessionId = headerAccessor.getSessionId();
+            Principal principal = headerAccessor.getUser();
+            
+            if (principal != null) {
+                User user = userService.findByUsername(principal.getName());
+                if (user != null) {
+                    editControlService.disconnectUserSession(user.getId(), sessionId);
+                    logger.info("User {} disconnected with session {}", principal.getName(), sessionId);
+                }
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error handling WebSocket disconnect event", e);
+        }
+    }
+    
+    /**
      * Handle heartbeat/ping messages
      */
     @MessageMapping("/shared-note/ping")
@@ -286,6 +331,16 @@ public class SharedNoteWebSocketController {
         if (principal != null) {
             response.put("user", principal.getName());
             logger.debug("Ping received from user: {}", principal.getName());
+            
+            // Update user session ping
+            try {
+                User user = userService.findByUsername(principal.getName());
+                if (user != null && payload.containsKey("sessionId")) {
+                    editControlService.updateUserSession(user.getId(), (String) payload.get("sessionId"));
+                }
+            } catch (Exception e) {
+                logger.error("Error updating user session ping", e);
+            }
         } else {
             logger.warn("Ping received from unauthenticated user");
         }
@@ -294,21 +349,18 @@ public class SharedNoteWebSocketController {
     }
     
     /**
-     * Convert NoteOperation entity to DTO
+     * Get or create shared note
      */
-    private NoteOperationDto convertToDto(NoteOperation operation) {
-        return new NoteOperationDto(
-            operation.getId(),
-            operation.getNote().getId(),
-            operation.getUser().getId(),
-            operation.getOperationType(),
-            operation.getPosition(),
-            operation.getContent(),
-            operation.getLength(),
-            operation.getCreatedAt(),
-            operation.getSequenceNumber(),
-            null // clientId will be set separately when needed
-        );
+    private SharedNote getOrCreateSharedNote() {
+        Optional<SharedNote> existingNote = sharedNoteRepository.findCurrentSharedNote();
+        if (existingNote.isPresent()) {
+            return existingNote.get();
+        }
+        
+        // Create default shared note if none exists
+        SharedNote newNote = new SharedNote();
+        newNote.setContent("Welcome to your shared notes! Start typing here...");
+        return sharedNoteRepository.save(newNote);
     }
     
     /**

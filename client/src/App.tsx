@@ -15,6 +15,8 @@ import Header from './components/Header';
 import Scott from './components/Scott';
 import Zoe from './components/Zoe';
 import SurpriseBoxManager from './components/SurpriseBoxManager';
+import TurnBasedNotePad from './components/TurnBasedNotePad';
+import NotificationManager from './components/NotificationManager';
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -36,22 +38,22 @@ function AppContent() {
   }
 
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/scott" element={<Scott />} />
-      <Route path="/zoe" element={<Zoe />} />
-      
-      {/* Private Routes */}
-      <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} />
-      <Route path="/" element={isAuthenticated ? (
-        <div className="min-h-screen">
-          <Header />
-          <main className="container mx-auto px-4 py-8">
-            <Dashboard />
-          </main>
-
-        </div>
-      ) : <Navigate to="/login" replace />} />
+    <>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/scott" element={<Scott />} />
+        <Route path="/zoe" element={<Zoe />} />
+        
+        {/* Private Routes */}
+        <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} />
+        <Route path="/" element={isAuthenticated ? (
+          <div className="min-h-screen">
+            <Header />
+            <main className="container mx-auto px-4 py-8">
+              <Dashboard />
+            </main>
+          </div>
+        ) : <Navigate to="/login" replace />} />
       <Route path="/dashboard" element={isAuthenticated ? (
         <div className="min-h-screen">
           <Header />
@@ -135,6 +137,9 @@ function AppContent() {
       ) : <Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
+    {/* Only show TurnBasedNotePad on authenticated pages */}
+    {isAuthenticated && <TurnBasedNotePad />}
+  </>
   );
 }
 
@@ -145,6 +150,7 @@ function App() {
         <DndProvider backend={HTML5Backend}>
           <Router>
             <AppContent />
+            <NotificationManager />
           </Router>
         </DndProvider>
       </ToastProvider>

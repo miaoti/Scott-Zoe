@@ -34,9 +34,7 @@ public class SharedNote {
     @JoinColumn(name = "created_by_user_id")
     private User createdBy;
     
-    @OneToMany(mappedBy = "note", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<NoteOperation> operations = new ArrayList<>();
+
     
     // Constructors
     public SharedNote() {}
@@ -87,13 +85,7 @@ public class SharedNote {
         this.createdBy = createdBy;
     }
     
-    public List<NoteOperation> getOperations() {
-        return operations;
-    }
-    
-    public void setOperations(List<NoteOperation> operations) {
-        this.operations = operations;
-    }
+
     
     @Override
     public String toString() {
