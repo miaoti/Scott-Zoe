@@ -124,27 +124,41 @@ public class SharedNoteWebSocketController {
                 sharedNote.getContent().length(), updatedContent.length(), 
                 updatedContent.length() - sharedNote.getContent().length());
             
-            // Broadcast operation to ALL connected users (including sender)
-            // This ensures consistent state across all clients
-            Map<String, Object> broadcast = new HashMap<>();
-            broadcast.put("type", "OPERATION");
-            
             // Create operation DTO with clientId from the incoming operation
             NoteOperationDto operationDtoWithClientId = convertToDto(operation);
             operationDtoWithClientId.setClientId(operationDto.getClientId());
             
-            broadcast.put("operation", operationDtoWithClientId);
-            broadcast.put("content", updatedContent);
-            broadcast.put("userId", user.getId());
-            broadcast.put("username", username);
-            broadcast.put("timestamp", LocalDateTime.now());
-            broadcast.put("revision", operation.getSequenceNumber()); // Add revision for OT
+            // Send confirmation back to sender (local echo)
+            Map<String, Object> senderBroadcast = new HashMap<>();
+            senderBroadcast.put("type", "OPERATION");
+            senderBroadcast.put("operation", operationDtoWithClientId);
+            senderBroadcast.put("content", updatedContent);
+            senderBroadcast.put("userId", user.getId());
+            senderBroadcast.put("username", username);
+            senderBroadcast.put("timestamp", LocalDateTime.now());
+            senderBroadcast.put("revision", operation.getSequenceNumber());
             
-            logger.info("Broadcasting operation to all clients: clientId={}, content='{}'", 
+            logger.info("Sending confirmation to sender: clientId={}, content='{}'", 
                 operationDto.getClientId(), updatedContent);
             
-            // Send immediately to ensure real-time synchronization
-            messagingTemplate.convertAndSend("/topic/shared-note/operations", broadcast);
+            // Send confirmation to sender
+            messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/shared-note/operations", senderBroadcast);
+            
+            // Broadcast operation to OTHER connected users (excluding sender)
+            Map<String, Object> othersBroadcast = new HashMap<>();
+            othersBroadcast.put("type", "OPERATION");
+            othersBroadcast.put("operation", operationDtoWithClientId);
+            othersBroadcast.put("content", updatedContent);
+            othersBroadcast.put("userId", user.getId());
+            othersBroadcast.put("username", username);
+            othersBroadcast.put("timestamp", LocalDateTime.now());
+            othersBroadcast.put("revision", operation.getSequenceNumber());
+            
+            logger.info("Broadcasting operation to other users: clientId={}, content='{}'", 
+                operationDto.getClientId(), updatedContent);
+            
+            // Send to all other users via topic (sender will ignore based on clientId)
+            messagingTemplate.convertAndSend("/topic/shared-note/operations", othersBroadcast);
             
             logger.info("Processed note operation from user {}: {} at position {}", 
                 username, operationDto.getOperationType(), operationDto.getPosition());

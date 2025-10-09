@@ -184,10 +184,18 @@ export const useSharedNoteStore = create<SharedNoteState>((set, get) => ({
         console.log('WebSocket connection established successfully!');
         set({ isConnected: true, isLoading: false, stompClient: client });
         
-        // Subscribe to shared note operations
+        // Subscribe to shared note operations (for other users' operations)
         console.log('Setting up subscription to /topic/shared-note/operations...');
         client.subscribe('/topic/shared-note/operations', (message) => {
           console.log('Received message on /topic/shared-note/operations:', message.body);
+          const data = JSON.parse(message.body);
+          handleOperationMessage(data);
+        });
+        
+        // Subscribe to personal queue for operation confirmations (local echo)
+        console.log('Setting up subscription to /user/queue/shared-note/operations...');
+        client.subscribe('/user/queue/shared-note/operations', (message) => {
+          console.log('Received personal message on /user/queue/shared-note/operations:', message.body);
           const data = JSON.parse(message.body);
           handleOperationMessage(data);
         });
@@ -371,6 +379,9 @@ export const useSharedNoteStore = create<SharedNoteState>((set, get) => ({
   },
 }));
 
+// Track processed operation IDs to prevent double processing
+const processedOperationIds = new Set<number>();
+
 // Message handlers
 function handleOperationMessage(data: any) {
   console.log('=== handleOperationMessage DEBUG START ===');
@@ -393,6 +404,20 @@ function handleOperationMessage(data: any) {
   
   if (data.type === 'OPERATION') {
     console.log('Processing OPERATION message');
+    
+    // Check for operation deduplication using operation ID
+    if (data.operation.id && processedOperationIds.has(data.operation.id)) {
+      console.log('=== DUPLICATE OPERATION DETECTED - SKIPPING ===');
+      console.log('Operation ID already processed:', data.operation.id);
+      console.log('=== handleOperationMessage DEBUG END (DUPLICATE) ===');
+      return;
+    }
+    
+    // Add operation ID to processed set
+    if (data.operation.id) {
+      processedOperationIds.add(data.operation.id);
+      console.log('Added operation ID to processed set:', data.operation.id);
+    }
     
     // Check if this is our own operation coming back (local echo)
     const isOwnOperation = pendingOperations.some(op => op.clientId === data.operation.clientId);

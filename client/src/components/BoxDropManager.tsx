@@ -27,7 +27,7 @@ const BoxDropManager: React.FC = () => {
   const { loadDroppingBoxes } = useSurpriseBoxStore();
   const { user } = useAuth();
   
-  console.log('BoxDropManager: Component mounted/rendered, user:', user);
+  // console.log('BoxDropManager: Component mounted/rendered, user:', user);
   
   // Keep refs in sync with state
   useEffect(() => {
