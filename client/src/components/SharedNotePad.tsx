@@ -15,6 +15,8 @@ interface SharedNotePadProps {
 }
 
 const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
+  console.log('SharedNotePad: Component function called');
+  
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [cursorPosition, setCursorPosition] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
@@ -44,20 +46,33 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
     updateWindowPosition,
   } = useSharedNoteStore();
   
+  console.log('SharedNotePad: Store state - isConnected:', isConnected, 'isLoading:', isLoading, 'error:', error);
+  
   // Connect to WebSocket on mount
   useEffect(() => {
-    try {
+    console.log('SharedNotePad component mounted');
+    console.log('isConnected:', isConnected);
+    console.log('isLoading:', isLoading);
+    console.log('error:', error);
+    
+    // Check if we have window and localStorage
+    if (typeof window !== 'undefined' && window.localStorage) {
       const token = localStorage.getItem('token');
-      if (token && token.trim() !== '') {
+      console.log('Token from localStorage:', token ? `${token.substring(0, 20)}...` : 'null');
+      
+      if (token && token.trim() !== '' && !isConnected && !isLoading) {
+        console.log('Attempting to connect to WebSocket...');
+        console.log('WebSocket URL will be:', 'ws://localhost:8080/ws');
         connect(token);
-      } else {
+      } else if (!token) {
         console.warn('SharedNotePad: No valid token found for WebSocket connection');
+      } else {
+        console.log('SharedNotePad: Connection not attempted - isConnected:', isConnected, 'isLoading:', isLoading);
       }
-    } catch (error) {
-      console.error('SharedNotePad: Error connecting to WebSocket:', error);
     }
     
     return () => {
+      console.log('SharedNotePad: Component unmounting');
       disconnect();
     };
   }, [connect, disconnect]);
@@ -67,15 +82,27 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
     const newContent = e.target.value;
     const currentContent = content;
     
+    console.log('Text change detected:', {
+      oldLength: currentContent.length,
+      newLength: newContent.length,
+      isConnected,
+      cursorPosition
+    });
+    
     // Update local content immediately for responsiveness
     setContent(newContent);
     
     // Calculate the operation
     const operation = calculateOperation(currentContent, newContent, cursorPosition);
     
+    console.log('Calculated operation:', operation);
+    
     if (operation) {
+      console.log('Sending operation to server:', operation);
       // Send operation to server for synchronization
       sendOperation(operation);
+    } else {
+      console.log('No operation calculated - content unchanged or invalid');
     }
     
     // Handle typing indicator
@@ -94,7 +121,7 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
       sendTypingIndicator(false);
     }, 1000);
     
-  }, [content, cursorPosition, isTyping, setContent, sendOperation, sendTypingIndicator]);
+  }, [content, cursorPosition, isTyping, isConnected, setContent, sendOperation, sendTypingIndicator]);
   
   // Handle cursor position changes
   const handleCursorChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {

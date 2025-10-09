@@ -6,6 +6,7 @@ com\couplewebsite\controller\SettingsController$SetSettingRequest.class
 com\couplewebsite\controller\SurpriseBoxController$CreateBoxRequest.class
 com\couplewebsite\entity\NoteOperation.class
 com\couplewebsite\repository\WheelPrizeTemplateRepository.class
+com\couplewebsite\controller\SharedNoteRestController.class
 com\couplewebsite\service\MemoryService$AnniversaryInfo.class
 com\couplewebsite\dto\SharedNoteDto.class
 com\couplewebsite\repository\SavedOpportunityRepository.class

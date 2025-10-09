@@ -146,16 +146,24 @@ export const useSharedNoteStore = create<SharedNoteState>((set, get) => ({
   
   // WebSocket connection
   connect: async (token: string) => {
+    console.log('connect() called with token:', token ? 'Token present' : 'No token');
+    
     const state = get();
     if (state.stompClient?.connected) {
+      console.log('Already connected to WebSocket, skipping connection');
       return;
     }
     
+    console.log('Starting WebSocket connection process...');
     set({ isLoading: true, error: null });
     
     try {
       const wsUrl = getWebSocketUrl();
+      console.log('WebSocket URL:', wsUrl);
+      
       const socket = new SockJS(`${wsUrl}/ws`);
+      console.log('SockJS socket created');
+      
       const client = new Client({
         webSocketFactory: () => socket,
         connectHeaders: {
@@ -169,42 +177,62 @@ export const useSharedNoteStore = create<SharedNoteState>((set, get) => ({
         heartbeatOutgoing: 4000,
       });
       
-      client.onConnect = () => {
-        console.log('Connected to shared note WebSocket');
+      console.log('STOMP client created, setting up event handlers...');
+      
+      client.onConnect = (frame) => {
+        console.log('Connected to shared note WebSocket:', frame);
+        console.log('WebSocket connection established successfully!');
         set({ isConnected: true, isLoading: false, stompClient: client });
         
-        // Subscribe to shared note updates
+        // Subscribe to shared note operations
+        console.log('Setting up subscription to /topic/shared-note/operations...');
         client.subscribe('/topic/shared-note/operations', (message) => {
+          console.log('Received message on /topic/shared-note/operations:', message.body);
           const data = JSON.parse(message.body);
           handleOperationMessage(data);
         });
         
+        // Subscribe to cursor positions
+        console.log('Setting up subscription to /topic/shared-note/cursors...');
         client.subscribe('/topic/shared-note/cursors', (message) => {
+          console.log('Received message on /topic/shared-note/cursors:', message.body);
           const data = JSON.parse(message.body);
           handleCursorMessage(data);
         });
         
+        // Subscribe to typing indicators
+        console.log('Setting up subscription to /topic/shared-note/typing...');
         client.subscribe('/topic/shared-note/typing', (message) => {
+          console.log('Received message on /topic/shared-note/typing:', message.body);
           const data = JSON.parse(message.body);
           handleTypingMessage(data);
         });
         
+        // Subscribe to sync messages
+        console.log('Setting up subscription to /topic/shared-note/sync...');
         client.subscribe('/topic/shared-note/sync', (message) => {
+          console.log('Received message on /topic/shared-note/sync:', message.body);
           const data = JSON.parse(message.body);
           handleSyncMessage(data);
         });
         
         // Subscribe to personal updates
+        console.log('Setting up subscription to /user/queue/shared-note/updates...');
         client.subscribe('/user/queue/shared-note/updates', (message) => {
+          console.log('Received message on /user/queue/shared-note/updates:', message.body);
           const data = JSON.parse(message.body);
           handlePersonalMessage(data);
         });
+        
+        console.log('All subscriptions set up, sending subscription message...');
         
         // Send subscription message
         client.publish({
           destination: '/app/shared-note/subscribe',
           body: JSON.stringify({ timestamp: new Date().toISOString() }),
         });
+        
+        console.log('Subscription message sent to /app/shared-note/subscribe');
       };
       
       client.onStompError = (frame) => {
@@ -217,6 +245,7 @@ export const useSharedNoteStore = create<SharedNoteState>((set, get) => ({
         set({ isConnected: false });
       };
       
+      console.log('Activating STOMP client...');
       client.activate();
       
     } catch (error) {
@@ -241,6 +270,8 @@ export const useSharedNoteStore = create<SharedNoteState>((set, get) => ({
       return;
     }
 
+    console.log('sendOperation called with:', operation);
+
     // Add revision number and client ID to operation
     const operationWithRevision = {
       ...operation,
@@ -248,15 +279,24 @@ export const useSharedNoteStore = create<SharedNoteState>((set, get) => ({
       clientId: Date.now() + Math.random().toString(36), // Unique client operation ID
     };
 
+    console.log('Sending operation with revision and clientId:', operationWithRevision);
+
     // Add to pending operations
     set((state) => ({
       pendingOperations: [...state.pendingOperations, operationWithRevision],
     }));
 
-    state.stompClient.publish({
-      destination: '/app/shared-note/operation',
-      body: JSON.stringify(operationWithRevision),
-    });
+    console.log('Added to pending operations. Current pending count:', get().pendingOperations.length);
+
+    try {
+      state.stompClient.publish({
+        destination: '/app/shared-note/operation',
+        body: JSON.stringify(operationWithRevision),
+      });
+      console.log('Operation published to WebSocket successfully');
+    } catch (error) {
+      console.error('Error publishing operation to WebSocket:', error);
+    }
   },
   
   sendCursorPosition: (position: number) => {
@@ -333,13 +373,19 @@ export const useSharedNoteStore = create<SharedNoteState>((set, get) => ({
 
 // Message handlers
 function handleOperationMessage(data: any) {
+  console.log('handleOperationMessage received data:', data);
+  
   const { content, pendingOperations, revision } = useSharedNoteStore.getState();
   
   if (data.type === 'OPERATION') {
+    console.log('Processing OPERATION message');
+    
     // Check if this is our own operation coming back (local echo)
     const isOwnOperation = pendingOperations.some(op => op.clientId === data.operation.clientId);
+    console.log('Is own operation?', isOwnOperation, 'clientId:', data.operation.clientId);
     
     if (isOwnOperation) {
+      console.log('Removing own operation from pending operations');
       // Remove from pending operations and update revision
       useSharedNoteStore.setState((state) => ({
         pendingOperations: state.pendingOperations.filter(op => op.clientId !== data.operation.clientId),
@@ -349,6 +395,8 @@ function handleOperationMessage(data: any) {
       return;
     }
 
+    console.log('Applying operation from another user:', data.operation);
+    
     // This is an operation from another user - apply it
     // Transform the incoming operation against pending operations
     let transformedOperation = data.operation;
@@ -358,13 +406,20 @@ function handleOperationMessage(data: any) {
       transformedOperation = transformOperation(transformedOperation, pendingOp, false);
     }
 
+    console.log('Transformed operation:', transformedOperation);
+    console.log('Current content before applying operation:', content);
+
     // Apply the transformed operation to current content
     const newContent = applyOperation(content, transformedOperation);
+    
+    console.log('New content after applying operation:', newContent);
     
     useSharedNoteStore.setState({
       content: newContent,
       revision: Math.max(revision, data.revision || 0),
     });
+  } else {
+    console.log('Received non-OPERATION message:', data.type);
   }
 }
 

@@ -40,18 +40,18 @@ const BoxDropManager: React.FC = () => {
 
   // Check for boxes that should be dropping
   const checkForDroppingBoxes = useCallback(async () => {
-    console.log('BoxDropManager: Checking for dropping boxes, user:', user);
+    // console.log('BoxDropManager: Checking for dropping boxes, user:', user);
     
     if (!user?.id) {
-      console.log('BoxDropManager: No user ID, skipping check');
+      // console.log('BoxDropManager: No user ID, skipping check');
       return;
     }
     
     try {
-      console.log('BoxDropManager: Loading dropping boxes for user ID:', user.id);
+      // console.log('BoxDropManager: Loading dropping boxes for user ID:', user.id);
       const boxes = await loadDroppingBoxes(user.id);
       
-      console.log('BoxDropManager: Received boxes from API:', boxes);
+      // console.log('BoxDropManager: Received boxes from API:', boxes);
       
       // Filter out boxes that are already actively dropping or have been claimed
       const boxesToDrop = boxes.filter(box => {
@@ -70,27 +70,27 @@ const BoxDropManager: React.FC = () => {
         return true;
       });
       
-      console.log('BoxDropManager: Boxes ready to drop (filtered):', boxesToDrop);
-      console.log('BoxDropManager: Currently active drops:', Array.from(activeDropsRef.current));
+      // console.log('BoxDropManager: Boxes ready to drop (filtered):', boxesToDrop);
+      // console.log('BoxDropManager: Currently active drops:', Array.from(activeDropsRef.current));
       
       if (boxesToDrop.length > 0) {
-        console.log('BoxDropManager: Adding boxes to dropping animation');
+        // console.log('BoxDropManager: Adding boxes to dropping animation');
         
         // Update active drops
         setActiveDrops(prev => {
           const newSet = new Set(prev);
           boxesToDrop.forEach(box => newSet.add(box.id));
-          console.log('BoxDropManager: Updated active drops:', Array.from(newSet));
+          // console.log('BoxDropManager: Updated active drops:', Array.from(newSet));
           return newSet;
         });
         
         // Add boxes to dropping list
         setDroppingBoxes(prev => [...prev, ...boxesToDrop]);
       } else {
-        console.log('BoxDropManager: No new boxes to drop');
+        // console.log('BoxDropManager: No new boxes to drop');
       }
     } catch (error) {
-      console.error('BoxDropManager: Error checking for dropping boxes:', error);
+
     }
   }, [loadDroppingBoxes, user?.id]);
 

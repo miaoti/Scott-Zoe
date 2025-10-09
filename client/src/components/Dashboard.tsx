@@ -539,7 +539,10 @@ function Dashboard() {
       )}
 
       {/* Persistent Shared Notes Window */}
-      <SharedNotePad />
+      <div style={{ border: '2px solid red', padding: '10px', margin: '10px' }}>
+        <h3>DEBUG: SharedNotePad Container</h3>
+        <SharedNotePad />
+      </div>
     </div>
   );
 }

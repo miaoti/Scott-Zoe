@@ -14,16 +14,22 @@ function Login() {
     setError('');
     setLoading(true);
 
+    console.log('Login attempt with username:', username, 'password:', password);
+
     try {
       const success = await login(username, password);
+      console.log('Login result:', success);
       if (success) {
+        console.log('Login successful, clearing password');
         setPassword('');
         setLoading(false);
         return;
       } else {
+        console.log('Login failed - invalid credentials');
         setError('Invalid credentials. Please try again.');
       }
     } catch (error) {
+      console.error('Login error:', error);
       setError('Connection failed. Please try again.');
     } finally {
       setLoading(false);
@@ -148,6 +154,8 @@ function Login() {
                 {error}
               </div>
             )}
+
+
 
             <button
               type="submit"
