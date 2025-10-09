@@ -71,38 +71,56 @@ public class SharedNoteService {
     public String applyOperations(String baseContent, List<NoteOperation> operations) {
         StringBuilder content = new StringBuilder(baseContent);
         
-        for (NoteOperation operation : operations) {
+        // Track position adjustments for concurrent operations at the same position
+        int[] positionAdjustments = new int[operations.size()];
+        
+        for (int i = 0; i < operations.size(); i++) {
+            NoteOperation operation = operations.get(i);
             try {
-                int position = operation.getPosition();
+                int originalPosition = operation.getPosition();
                 String operationContent = operation.getContent();
                 int contentLength = content.length();
                 
-                logger.debug("Applying operation: type={}, position={}, content='{}', currentContentLength={}", 
-                    operation.getOperationType(), position, operationContent, contentLength);
+                // Calculate adjusted position for INSERT operations
+                int adjustedPosition = originalPosition;
+                if (operation.getOperationType() == NoteOperation.OperationType.INSERT) {
+                    // For INSERT operations, check if there are previous INSERT operations at the same position
+                    for (int j = 0; j < i; j++) {
+                        NoteOperation prevOp = operations.get(j);
+                        if (prevOp.getOperationType() == NoteOperation.OperationType.INSERT && 
+                            prevOp.getPosition().equals(originalPosition)) {
+                            // Adjust position by the length of previous INSERT operations at the same position
+                            adjustedPosition += prevOp.getContent() != null ? prevOp.getContent().length() : 0;
+                        }
+                    }
+                }
+                
+                logger.debug("Applying operation: type={}, originalPosition={}, adjustedPosition={}, content='{}', currentContentLength={}", 
+                    operation.getOperationType(), originalPosition, adjustedPosition, operationContent, contentLength);
                 
                 switch (operation.getOperationType()) {
                     case INSERT:
-                        // Validate position is within valid bounds (0 to content.length())
-                        if (position >= 0 && position <= contentLength) {
-                            content.insert(position, operationContent != null ? operationContent : "");
+                        // Validate adjusted position is within valid bounds (0 to content.length())
+                        if (adjustedPosition >= 0 && adjustedPosition <= contentLength) {
+                            content.insert(adjustedPosition, operationContent != null ? operationContent : "");
                         } else {
-                            logger.warn("Invalid INSERT position: {} for content length: {}. Skipping operation.", 
-                                position, contentLength);
+                            logger.warn("Invalid INSERT position: {} (adjusted from {}) for content length: {}. Skipping operation.", 
+                                adjustedPosition, originalPosition, contentLength);
                         }
                         break;
                     case DELETE:
                         // Validate position and length for DELETE operations
-                        if (position >= 0 && position < contentLength && operation.getLength() > 0) {
-                            int endPos = Math.min(position + operation.getLength(), contentLength);
-                            content.delete(position, endPos);
+                        if (originalPosition >= 0 && originalPosition < contentLength && operation.getLength() > 0) {
+                            int endPos = Math.min(originalPosition + operation.getLength(), contentLength);
+                            content.delete(originalPosition, endPos);
                         } else {
                             logger.warn("Invalid DELETE operation: position={}, length={}, contentLength={}. Skipping operation.", 
-                                position, operation.getLength(), contentLength);
+                                originalPosition, operation.getLength(), contentLength);
                         }
                         break;
                     case RETAIN:
                         // RETAIN operations don't modify content, they're used for cursor positioning
-                        logger.debug("RETAIN operation at position: {}", position);
+                        logger.debug("RETAIN operation at position: {}", originalPosition);
                         break;
                     default:
                         logger.warn("Unknown operation type: {}", operation.getOperationType());
