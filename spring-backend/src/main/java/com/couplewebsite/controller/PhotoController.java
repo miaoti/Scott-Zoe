@@ -350,20 +350,36 @@ public class PhotoController {
     }
     
     /**
-     * Serve photo images
+     * Serve photo images with optional size parameter
      */
     @GetMapping("/image/{fileName:.+}")
-    public ResponseEntity<Resource> getPhotoImage(@PathVariable String fileName) {
+    public ResponseEntity<Resource> getPhotoImage(
+            @PathVariable String fileName,
+            @RequestParam(value = "size", defaultValue = "full") String size) {
         try {
-            // Load file as Resource
-            Path filePath = fileStorageService.getFilePath(fileName);
-            Resource resource = new UrlResource(filePath.toUri());
+            Resource resource;
+            
+            // Generate thumbnail or medium size if requested
+            if ("thumbnail".equals(size)) {
+                resource = fileStorageService.getThumbnailImage(fileName, 300, 300);
+            } else if ("medium".equals(size)) {
+                resource = fileStorageService.getMediumImage(fileName, 800, 600);
+            } else {
+                // Load original file as Resource
+                Path filePath = fileStorageService.getFilePath(fileName);
+                resource = new UrlResource(filePath.toUri());
+            }
             
             if (resource.exists() && resource.isReadable()) {
                 // Try to determine file's content type
                 String contentType = null;
                 try {
-                    contentType = java.nio.file.Files.probeContentType(filePath);
+                    if ("thumbnail".equals(size) || "medium".equals(size)) {
+                        contentType = "image/jpeg"; // Thumbnails are always JPEG
+                    } else {
+                        Path filePath = fileStorageService.getFilePath(fileName);
+                        contentType = java.nio.file.Files.probeContentType(filePath);
+                    }
                 } catch (IOException ex) {
                     logger.info("Could not determine file type for: {}", fileName);
                 }
@@ -376,13 +392,14 @@ public class PhotoController {
                 return ResponseEntity.ok()
                         .contentType(MediaType.parseMediaType(contentType))
                         .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                        .header(HttpHeaders.CACHE_CONTROL, "public, max-age=31536000") // Cache for 1 year
                         .body(resource);
             } else {
                 logger.warn("Photo file not found or not readable: {}", fileName);
                 return ResponseEntity.notFound().build();
             }
-        } catch (MalformedURLException ex) {
-            logger.error("Photo file not found: {}", fileName, ex);
+        } catch (Exception ex) {
+            logger.error("Error serving photo: {}", fileName, ex);
             return ResponseEntity.notFound().build();
         }
     }
