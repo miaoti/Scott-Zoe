@@ -114,12 +114,19 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
   
   // Mouse drag handlers
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
     setIsDragging(true);
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    setDragOffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
+    
+    // Get the window's current position from the parent element (the actual window div)
+    const titleBar = e.currentTarget as HTMLElement;
+    const windowElement = titleBar.parentElement;
+    if (windowElement) {
+      const windowRect = windowElement.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - windowRect.left,
+        y: e.clientY - windowRect.top,
+      });
+    }
   }, []);
   
   const handleMouseMove = useCallback((e: MouseEvent) => {
