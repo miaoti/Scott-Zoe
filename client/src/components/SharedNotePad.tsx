@@ -101,9 +101,15 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
       // Send operation to server for synchronization
       sendOperation(operation);
       
-      // DON'T update local content immediately - wait for server confirmation
-      // This prevents double application of operations
-      console.log('Operation sent to server, waiting for confirmation before updating content');
+      // For DELETE operations, update local content immediately for better UX
+      // The server confirmation will ensure consistency
+      if (operation.operationType === 'DELETE') {
+        console.log('DELETE operation - updating local content immediately for better UX');
+        setContent(newContent);
+      } else {
+        // For INSERT operations, wait for server confirmation to prevent double application
+        console.log('Operation sent to server, waiting for confirmation before updating content');
+      }
     } else if (!isConnected) {
       // If not connected, just update locally
       setContent(newContent);
