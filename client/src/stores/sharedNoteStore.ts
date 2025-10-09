@@ -405,28 +405,42 @@ function handleOperationMessage(data: any) {
   if (data.type === 'OPERATION') {
     console.log('Processing OPERATION message');
     
-    // Check for operation deduplication using operation ID
-    if (data.operation.id && processedOperationIds.has(data.operation.id)) {
+    // Check if this is our own operation coming back (local echo)
+    const isOwnOperation = pendingOperations.some(op => op.clientId === data.operation.clientId);
+    console.log('Is own operation?', isOwnOperation, 'clientId:', data.operation.clientId);
+    
+    // For duplicate detection, we need to handle own operations differently
+    // Own operations should be processed once for local echo, others should be deduplicated
+    if (!isOwnOperation && data.operation.id && processedOperationIds.has(data.operation.id)) {
       console.log('=== DUPLICATE OPERATION DETECTED - SKIPPING ===');
       console.log('Operation ID already processed:', data.operation.id);
       console.log('=== handleOperationMessage DEBUG END (DUPLICATE) ===');
       return;
     }
     
-    // Add operation ID to processed set
-    if (data.operation.id) {
+    // Add operation ID to processed set only for other user operations
+    if (!isOwnOperation && data.operation.id) {
       processedOperationIds.add(data.operation.id);
       console.log('Added operation ID to processed set:', data.operation.id);
     }
     
-    // Check if this is our own operation coming back (local echo)
-    const isOwnOperation = pendingOperations.some(op => op.clientId === data.operation.clientId);
-    console.log('Is own operation?', isOwnOperation, 'clientId:', data.operation.clientId);
-    
     if (isOwnOperation) {
       console.log('=== PROCESSING OWN OPERATION (LOCAL ECHO) ===');
+      console.log('Operation type:', data.operation.operationType);
       console.log('Removing own operation from pending operations');
       console.log('Server confirmed content:', `"${data.content}"`);
+      console.log('Current local content before update:', `"${content}"`);
+      
+      // For DELETE operations, we need to ensure the local content is updated immediately
+      if (data.operation.operationType === 'DELETE') {
+        console.log('DELETE operation local echo - applying to local content');
+        console.log('DELETE operation details:', {
+          position: data.operation.position,
+          length: data.operation.length,
+          currentContent: `"${content}"`,
+          serverContent: `"${data.content}"`
+        });
+      }
       
       // Remove from pending operations and update revision
       useSharedNoteStore.setState((state) => ({
@@ -437,6 +451,7 @@ function handleOperationMessage(data: any) {
       
       // For own operations, update content with server's confirmed content
       console.log('Own operation acknowledged by server, updating content with server confirmation:', `"${data.content}"`);
+      console.log('Content updated from', `"${content}"`, 'to', `"${data.content}"`);
       console.log('=== handleOperationMessage DEBUG END (OWN OPERATION) ===');
       return;
     }
