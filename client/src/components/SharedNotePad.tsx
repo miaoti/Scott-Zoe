@@ -83,6 +83,8 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
     const currentContent = content;
     
     console.log('Text change detected:', {
+      oldContent: currentContent,
+      newContent: newContent,
       oldLength: currentContent.length,
       newLength: newContent.length,
       isConnected,
@@ -99,14 +101,17 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
       // Send operation to server for synchronization
       sendOperation(operation);
       
-      // DO NOT update local content here - let the server's response handle it
-      // This prevents duplicate application of operations
+      // Update local content immediately for responsiveness
+      // The server will echo back and we'll handle deduplication there
+      setContent(newContent);
     } else if (!isConnected) {
       // If not connected, just update locally
       setContent(newContent);
       console.log('Not connected - only updating local content');
     } else {
       console.log('No operation calculated - content unchanged or invalid');
+      // Still update content even if no operation (e.g., for cursor movements)
+      setContent(newContent);
     }
     
     // Handle typing indicator
