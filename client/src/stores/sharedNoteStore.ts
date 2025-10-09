@@ -345,10 +345,11 @@ function handleOperationMessage(data: any) {
         pendingOperations: state.pendingOperations.filter(op => op.clientId !== data.operation.clientId),
         revision: Math.max(state.revision, data.revision || 0),
       }));
-      // Apply our own operation to maintain consistency with server
-      // This ensures the client state matches the server state
+      // Don't apply our own operation again since it's already applied locally
+      return;
     }
 
+    // This is an operation from another user - apply it
     // Transform the incoming operation against pending operations
     let transformedOperation = data.operation;
     const state = useSharedNoteStore.getState();
