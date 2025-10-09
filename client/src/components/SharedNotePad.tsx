@@ -34,6 +34,7 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
     isMaximized,
     collaborators,
     typingIndicators,
+    pendingOperations,
     
     setContent,
     setMinimized,
@@ -92,7 +93,8 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
     });
     
     // Calculate the operation BEFORE updating local content
-    const operation = calculateOperation(currentContent, newContent, cursorPosition);
+    // Pass pendingOperations to account for pending INSERT operations
+    const operation = calculateOperation(currentContent, newContent, cursorPosition, pendingOperations);
     
     console.log('Calculated operation:', operation);
     
@@ -446,7 +448,8 @@ const CollaboratorCursor: React.FC<CollaboratorCursorProps> = ({ collaborator, t
 function calculateOperation(
   oldContent: string, 
   newContent: string, 
-  cursorPos: number
+  cursorPos: number,
+  pendingOperations: any[] = []
 ): { operationType: 'INSERT' | 'DELETE' | 'RETAIN'; position: number; content?: string; length: number } | null {
   
   if (oldContent === newContent) {
@@ -461,7 +464,39 @@ function calculateOperation(
     cursorPos,
     oldLength: oldContent.length,
     newLength: newContent.length,
-    lengthDiff: newContent.length - oldContent.length
+    lengthDiff: newContent.length - oldContent.length,
+    pendingOperationsCount: pendingOperations.length
+  });
+  
+  // Apply pending INSERT operations to get the expected content state
+  let adjustedOldContent = oldContent;
+  let positionOffset = 0;
+  
+  // Apply pending INSERT operations to calculate the correct position
+  for (const pendingOp of pendingOperations) {
+    if (pendingOp.operationType === 'INSERT') {
+      console.log('Applying pending INSERT operation:', {
+        position: pendingOp.position,
+        content: pendingOp.content,
+        length: pendingOp.length
+      });
+      
+      // If the pending operation is before our cursor position, adjust the position
+      if (pendingOp.position <= cursorPos) {
+        positionOffset += pendingOp.length;
+      }
+      
+      // Apply the pending operation to the content
+      adjustedOldContent = adjustedOldContent.slice(0, pendingOp.position) + 
+                          (pendingOp.content || '') + 
+                          adjustedOldContent.slice(pendingOp.position);
+    }
+  }
+  
+  console.log('After applying pending operations:', {
+    adjustedOldContent: `"${adjustedOldContent}"`,
+    positionOffset,
+    adjustedCursorPos: cursorPos + positionOffset
   });
   
   if (newContent.length > oldContent.length) {
@@ -475,35 +510,38 @@ function calculateOperation(
       newContentLength: newContent.length
     });
     
-    // Find the insertion position by comparing old and new content
+    // Find the insertion position by comparing adjusted old content and new content
     let insertPosition = 0;
     let insertedText = '';
     
-    // Find the first position where old and new content differ
-    for (let i = 0; i < Math.min(oldContent.length, newContent.length); i++) {
-      if (oldContent[i] !== newContent[i]) {
+    // Use adjusted content for comparison to account for pending operations
+    const contentToCompare = adjustedOldContent.length > 0 ? adjustedOldContent : oldContent;
+    
+    // Find the first position where content differs
+    for (let i = 0; i < Math.min(contentToCompare.length, newContent.length); i++) {
+      if (contentToCompare[i] !== newContent[i]) {
         insertPosition = i;
         break;
       }
     }
     
     // If no difference found in overlapping part, insertion is at the end
-    if (insertPosition === 0 && oldContent.length > 0) {
+    if (insertPosition === 0 && contentToCompare.length > 0) {
       // Check if insertion is at the end
-      if (newContent.startsWith(oldContent)) {
-        insertPosition = oldContent.length;
-        insertedText = newContent.slice(oldContent.length);
+      if (newContent.startsWith(contentToCompare)) {
+        insertPosition = contentToCompare.length;
+        insertedText = newContent.slice(contentToCompare.length);
       } else {
         // Find insertion position by checking from the end
         let endMatch = 0;
-        for (let i = 1; i <= Math.min(oldContent.length, newContent.length); i++) {
-          if (oldContent[oldContent.length - i] === newContent[newContent.length - i]) {
+        for (let i = 1; i <= Math.min(contentToCompare.length, newContent.length); i++) {
+          if (contentToCompare[contentToCompare.length - i] === newContent[newContent.length - i]) {
             endMatch = i;
           } else {
             break;
           }
         }
-        insertPosition = oldContent.length - endMatch;
+        insertPosition = contentToCompare.length - endMatch;
         insertedText = newContent.slice(insertPosition, insertPosition + insertedLength);
       }
     } else {
@@ -511,26 +549,38 @@ function calculateOperation(
       insertedText = newContent.slice(insertPosition, insertPosition + insertedLength);
     }
     
-    // Ensure position is within bounds
-    insertPosition = Math.max(0, Math.min(insertPosition, oldContent.length));
+    // Adjust position back to original content coordinates by subtracting pending operation offsets
+    // But only for operations that were applied before this position
+    let finalPosition = insertPosition;
+    for (const pendingOp of pendingOperations) {
+      if (pendingOp.operationType === 'INSERT' && pendingOp.position <= insertPosition) {
+        finalPosition -= pendingOp.length;
+      }
+    }
+    
+    // Ensure position is within bounds of original content
+    finalPosition = Math.max(0, Math.min(finalPosition, oldContent.length));
     
     console.log('Insertion analysis:', {
       insertPosition,
+      finalPosition,
       insertedText: `"${insertedText}"`,
       oldContent: `"${oldContent}"`,
       newContent: `"${newContent}"`,
+      adjustedOldContent: `"${adjustedOldContent}"`,
+      pendingOperationsApplied: pendingOperations.filter(op => op.operationType === 'INSERT').length,
       verification: {
-        before: `"${oldContent.slice(0, insertPosition)}"`,
+        before: `"${oldContent.slice(0, finalPosition)}"`,
         inserted: `"${insertedText}"`,
-        after: `"${oldContent.slice(insertPosition)}"`,
-        reconstructed: `"${oldContent.slice(0, insertPosition) + insertedText + oldContent.slice(insertPosition)}"`,
-        matches: (oldContent.slice(0, insertPosition) + insertedText + oldContent.slice(insertPosition)) === newContent
+        after: `"${oldContent.slice(finalPosition)}"`,
+        reconstructed: `"${oldContent.slice(0, finalPosition) + insertedText + oldContent.slice(finalPosition)}"`,
+        matches: (oldContent.slice(0, finalPosition) + insertedText + oldContent.slice(finalPosition)) === newContent
       }
     });
     
     const operation = {
       operationType: 'INSERT' as const,
-      position: insertPosition,
+      position: finalPosition,
       content: insertedText,
       length: insertedLength,
     };
