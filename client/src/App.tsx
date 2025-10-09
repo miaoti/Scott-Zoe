@@ -138,7 +138,8 @@ function AppContent() {
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
     {/* Only show TurnBasedNotePad on authenticated pages */}
-    {isAuthenticated && <TurnBasedNotePad />}
+    {/* TEMPORARILY DISABLED - Will be re-enabled later */}
+    {/* {isAuthenticated && <TurnBasedNotePad />} */}
   </>
   );
 }
