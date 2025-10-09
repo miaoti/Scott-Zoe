@@ -381,6 +381,8 @@ export const useSharedNoteStore = create<SharedNoteState>((set, get) => ({
 
 // Track processed operation IDs to prevent double processing
 const processedOperationIds = new Set<number>();
+// Track processed client IDs for own operations to prevent double processing
+const processedOwnOperationIds = new Set<string>();
 
 // Message handlers
 function handleOperationMessage(data: any) {
@@ -409,18 +411,30 @@ function handleOperationMessage(data: any) {
     const isOwnOperation = pendingOperations.some(op => op.clientId === data.operation.clientId);
     console.log('Is own operation?', isOwnOperation, 'clientId:', data.operation.clientId);
     
-    // Improved duplicate detection logic:
-    // 1. For own operations: Only process if we have a matching pending operation (local echo)
+    // Enhanced duplicate detection logic:
+    // 1. For own operations: Check both pending operations AND processed own operation IDs
     // 2. For other operations: Use processedOperationIds to prevent duplicates
-    if (isOwnOperation) {
-      // This is our own operation - only process if we have a matching pending operation
-      const matchingPendingOp = pendingOperations.find(op => op.clientId === data.operation.clientId);
-      if (!matchingPendingOp) {
+    if (isOwnOperation || processedOwnOperationIds.has(data.operation.clientId)) {
+      // This is our own operation - check if already processed
+      if (processedOwnOperationIds.has(data.operation.clientId)) {
         console.log('=== OWN OPERATION ALREADY PROCESSED - SKIPPING ===');
-        console.log('No matching pending operation found for clientId:', data.operation.clientId);
+        console.log('ClientId already processed:', data.operation.clientId);
         console.log('=== handleOperationMessage DEBUG END (ALREADY PROCESSED) ===');
         return;
       }
+      
+      // Check if we have a matching pending operation
+      const matchingPendingOp = pendingOperations.find(op => op.clientId === data.operation.clientId);
+      if (!matchingPendingOp) {
+        console.log('=== OWN OPERATION NO PENDING MATCH - SKIPPING ===');
+        console.log('No matching pending operation found for clientId:', data.operation.clientId);
+        console.log('=== handleOperationMessage DEBUG END (NO PENDING MATCH) ===');
+        return;
+      }
+      
+      // Mark this own operation as processed
+      processedOwnOperationIds.add(data.operation.clientId);
+      console.log('Added own operation clientId to processed set:', data.operation.clientId);
     } else {
       // This is another user's operation - check for duplicates using operation ID
       if (data.operation.id && processedOperationIds.has(data.operation.id)) {

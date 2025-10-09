@@ -144,13 +144,23 @@ public class SharedNoteWebSocketController {
             // Send confirmation to sender (local echo) - ONLY to sender's personal queue
             messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/shared-note/operations", operationBroadcast);
             
-            logger.info("Broadcasting operation to other users: clientId={}, content='{}'", 
+            logger.info("Broadcasting operation to other users (excluding sender): clientId={}, content='{}'", 
                 operationDto.getClientId(), updatedContent);
             
+            // Create a separate broadcast message for other users (without sender's clientId to avoid confusion)
+            Map<String, Object> otherUsersBroadcast = new HashMap<>();
+            otherUsersBroadcast.put("type", "OPERATION");
+            otherUsersBroadcast.put("operation", operationDtoWithClientId);
+            otherUsersBroadcast.put("content", updatedContent);
+            otherUsersBroadcast.put("userId", user.getId());
+            otherUsersBroadcast.put("username", username);
+            otherUsersBroadcast.put("timestamp", LocalDateTime.now());
+            otherUsersBroadcast.put("revision", operation.getSequenceNumber());
+            otherUsersBroadcast.put("fromUser", username); // Add sender identification for other users
+            
             // Broadcast operation to OTHER connected users via topic
-            // Note: The sender is also subscribed to this topic, but should ignore this message
-            // since they already received it via their personal queue
-            messagingTemplate.convertAndSend("/topic/shared-note/operations", operationBroadcast);
+            // The sender should NOT process this message as they already received confirmation via personal queue
+            messagingTemplate.convertAndSend("/topic/shared-note/operations", otherUsersBroadcast);
             
             logger.info("Processed note operation from user {}: {} at position {}", 
                 username, operationDto.getOperationType(), operationDto.getPosition());
