@@ -142,9 +142,10 @@ public class SharedNoteService {
     }
     
     public SharedNote applyOperation(SharedNote note, NoteOperation operation) {
-        String currentContent = note.getContent();
-        String newContent = applyOperations(currentContent, List.of(operation));
-        note.setContent(newContent);
+        // Instead of applying to current content, reconstruct from all operations
+        List<NoteOperation> allOperations = getOperationsByNoteId(note.getId());
+        String synchronizedContent = applyOperations("", allOperations);
+        note.setContent(synchronizedContent);
         return sharedNoteRepository.save(note);
     }
 }

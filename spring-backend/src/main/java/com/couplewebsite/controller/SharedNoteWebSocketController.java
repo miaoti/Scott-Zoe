@@ -55,12 +55,16 @@ public class SharedNoteWebSocketController {
             String username = principal.getName();
             logger.info("User {} subscribed to shared note updates", username);
             
-            // Send current note content to the subscribing user
+            // Get current note and synchronize content from all operations
             SharedNote currentNote = sharedNoteService.getCurrentSharedNote();
+            
+            // Ensure content is synchronized from all operations
+            SharedNote synchronizedNote = sharedNoteService.synchronizeContent(currentNote.getId());
+            
             Map<String, Object> response = new HashMap<>();
             response.put("type", "INITIAL_CONTENT");
-            response.put("content", currentNote.getContent());
-            response.put("noteId", currentNote.getId());
+            response.put("content", synchronizedNote.getContent());
+            response.put("noteId", synchronizedNote.getId());
             response.put("timestamp", LocalDateTime.now());
             
             String userDestination = "/user/" + username + "/queue/shared-note/updates";

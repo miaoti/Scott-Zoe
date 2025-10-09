@@ -447,20 +447,29 @@ function calculateOperation(
     return null;
   }
   
-  // Find the first difference position
-  let diffStart = 0;
-  while (diffStart < Math.min(oldContent.length, newContent.length) && 
-         oldContent[diffStart] === newContent[diffStart]) {
-    diffStart++;
-  }
+  console.log('calculateOperation called:', {
+    oldContent,
+    newContent,
+    cursorPos,
+    oldLength: oldContent.length,
+    newLength: newContent.length
+  });
   
   if (newContent.length > oldContent.length) {
-    // Insertion
+    // Insertion - use cursor position for more accurate insertion point
     const insertedLength = newContent.length - oldContent.length;
-    const insertedText = newContent.slice(diffStart, diffStart + insertedLength);
+    
+    // For single character insertions, use cursor position - 1 as insertion point
+    let insertPosition = cursorPos - insertedLength;
+    
+    // Ensure position is within bounds
+    insertPosition = Math.max(0, Math.min(insertPosition, oldContent.length));
+    
+    // Extract the inserted text
+    const insertedText = newContent.slice(insertPosition, insertPosition + insertedLength);
     
     console.log('INSERT operation:', {
-      position: diffStart,
+      position: insertPosition,
       content: insertedText,
       length: insertedLength,
       oldContent,
@@ -470,16 +479,20 @@ function calculateOperation(
     
     return {
       operationType: 'INSERT',
-      position: diffStart,
+      position: insertPosition,
       content: insertedText,
       length: insertedLength,
     };
   } else if (newContent.length < oldContent.length) {
-    // Deletion
+    // Deletion - use cursor position for deletion point
     const deletedLength = oldContent.length - newContent.length;
+    let deletePosition = cursorPos;
+    
+    // Ensure position is within bounds
+    deletePosition = Math.max(0, Math.min(deletePosition, oldContent.length - deletedLength));
     
     console.log('DELETE operation:', {
-      position: diffStart,
+      position: deletePosition,
       length: deletedLength,
       oldContent,
       newContent,
@@ -488,7 +501,7 @@ function calculateOperation(
     
     return {
       operationType: 'DELETE',
-      position: diffStart,
+      position: deletePosition,
       length: deletedLength,
     };
   }
