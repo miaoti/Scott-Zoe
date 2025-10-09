@@ -185,8 +185,8 @@ function PhotoGallery() {
               onClick={() => openPhotoDetail(photo)}
             >
               <ProgressiveImage
-                thumbnailSrc={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=thumbnail`}
-                fullSrc={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=medium`}
+                placeholderSrc={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=thumbnail`}
+                src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=medium`}
                 alt={photo.originalName}
                 className="w-full h-full object-cover"
               />
@@ -353,8 +353,8 @@ function PhotoGallery() {
                       {categoryPhotos.slice(0, 3).map((photo) => (
                         <div key={photo.id} className="aspect-square relative overflow-hidden rounded-lg">
                           <ProgressiveImage
-                            thumbnailSrc={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=thumbnail`}
-                            fullSrc={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=medium`}
+                            placeholderSrc={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=thumbnail`}
+                            src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=medium`}
                             alt={photo.originalName}
                             className="w-full h-full object-cover hover:scale-110 transition-all duration-300 cursor-pointer"
                             onClick={() => openPhotoDetail(photo)}
