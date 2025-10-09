@@ -177,7 +177,8 @@ public class SharedNoteController {
             operation.getContent(),
             operation.getLength(),
             operation.getCreatedAt(),
-            operation.getSequenceNumber()
+            operation.getSequenceNumber(),
+            null // clientId not needed for REST API responses
         );
     }
     

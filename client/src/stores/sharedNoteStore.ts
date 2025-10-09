@@ -385,12 +385,41 @@ function handleTypingMessage(data: any) {
   const { updateTypingIndicator } = useSharedNoteStore.getState();
   
   if (data.type === 'TYPING_STATUS') {
-    updateTypingIndicator({
-      userId: data.userId,
-      username: data.username,
-      isTyping: data.isTyping,
-      timestamp: data.timestamp,
-    });
+    // Get current user ID from token to filter out self-typing indicators
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const currentUserId = payload.userId;
+        
+        // Only update typing indicator if it's not from the current user
+        if (data.userId !== currentUserId) {
+          updateTypingIndicator({
+            userId: data.userId,
+            username: data.username,
+            isTyping: data.isTyping,
+            timestamp: data.timestamp,
+          });
+        }
+      } catch (error) {
+        console.error('Error parsing token for typing indicator filtering:', error);
+        // Fallback: still update the typing indicator if token parsing fails
+        updateTypingIndicator({
+          userId: data.userId,
+          username: data.username,
+          isTyping: data.isTyping,
+          timestamp: data.timestamp,
+        });
+      }
+    } else {
+      // Fallback: still update the typing indicator if no token found
+      updateTypingIndicator({
+        userId: data.userId,
+        username: data.username,
+        isTyping: data.isTyping,
+        timestamp: data.timestamp,
+      });
+    }
   }
 }
 

@@ -108,7 +108,12 @@ public class SharedNoteWebSocketController {
             // This ensures consistent state across all clients
             Map<String, Object> broadcast = new HashMap<>();
             broadcast.put("type", "OPERATION");
-            broadcast.put("operation", convertToDto(operation));
+            
+            // Create operation DTO with clientId from the incoming operation
+            NoteOperationDto operationDtoWithClientId = convertToDto(operation);
+            operationDtoWithClientId.setClientId(operationDto.getClientId());
+            
+            broadcast.put("operation", operationDtoWithClientId);
             broadcast.put("content", updatedContent);
             broadcast.put("userId", user.getId());
             broadcast.put("username", username);
@@ -259,7 +264,8 @@ public class SharedNoteWebSocketController {
             operation.getContent(),
             operation.getLength(),
             operation.getCreatedAt(),
-            operation.getSequenceNumber()
+            operation.getSequenceNumber(),
+            null // clientId will be set separately when needed
         );
     }
     

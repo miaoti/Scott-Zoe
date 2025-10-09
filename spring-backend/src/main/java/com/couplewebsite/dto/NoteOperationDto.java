@@ -13,12 +13,13 @@ public class NoteOperationDto {
     private Integer length;
     private LocalDateTime createdAt;
     private Integer sequenceNumber;
+    private String clientId;
     
     // Constructors
     public NoteOperationDto() {}
     
     public NoteOperationDto(Long id, Long noteId, Long userId, NoteOperation.OperationType operationType,
-                           Integer position, String content, Integer length, LocalDateTime createdAt, Integer sequenceNumber) {
+                           Integer position, String content, Integer length, LocalDateTime createdAt, Integer sequenceNumber, String clientId) {
         this.id = id;
         this.noteId = noteId;
         this.userId = userId;
@@ -28,6 +29,7 @@ public class NoteOperationDto {
         this.length = length;
         this.createdAt = createdAt;
         this.sequenceNumber = sequenceNumber;
+        this.clientId = clientId;
     }
     
     // Getters and Setters
@@ -101,5 +103,13 @@ public class NoteOperationDto {
     
     public void setSequenceNumber(Integer sequenceNumber) {
         this.sequenceNumber = sequenceNumber;
+    }
+    
+    public String getClientId() {
+        return clientId;
+    }
+    
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 }
