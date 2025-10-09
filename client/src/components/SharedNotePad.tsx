@@ -89,18 +89,23 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
       cursorPosition
     });
     
-    // Update local content immediately for responsiveness
-    setContent(newContent);
-    
-    // Calculate the operation
+    // Calculate the operation BEFORE updating local content
     const operation = calculateOperation(currentContent, newContent, cursorPosition);
     
     console.log('Calculated operation:', operation);
     
-    if (operation) {
+    if (operation && isConnected) {
       console.log('Sending operation to server:', operation);
       // Send operation to server for synchronization
+      // The server will echo back the operation which will update the content
       sendOperation(operation);
+      
+      // Update local content immediately for responsiveness (optimistic update)
+      setContent(newContent);
+    } else if (!isConnected) {
+      // If not connected, just update locally
+      setContent(newContent);
+      console.log('Not connected - only updating local content');
     } else {
       console.log('No operation calculated - content unchanged or invalid');
     }

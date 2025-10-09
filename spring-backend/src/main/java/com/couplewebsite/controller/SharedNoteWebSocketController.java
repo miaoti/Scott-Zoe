@@ -118,7 +118,9 @@ public class SharedNoteWebSocketController {
             broadcast.put("userId", user.getId());
             broadcast.put("username", username);
             broadcast.put("timestamp", LocalDateTime.now());
+            broadcast.put("revision", operation.getSequenceNumber()); // Add revision for OT
             
+            // Send immediately to ensure real-time synchronization
             messagingTemplate.convertAndSend("/topic/shared-note/operations", broadcast);
             
             logger.info("Processed note operation from user {}: {} at position {}", 
