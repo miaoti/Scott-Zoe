@@ -192,10 +192,16 @@ function Dashboard() {
     loadDroppedBoxes();
     loadActiveBox();
     
-    // Auto-connect to shared notes
-    const token = localStorage.getItem('token');
-    if (token) {
-      connect(token);
+    // Auto-connect to shared notes with proper error handling
+    try {
+      const token = localStorage.getItem('token');
+      if (token && token.trim() !== '') {
+        connect(token);
+      } else {
+        console.warn('SharedNotePad: No valid token found for WebSocket connection');
+      }
+    } catch (error) {
+      console.error('SharedNotePad: Error connecting to WebSocket:', error);
     }
   }, [loadOwnedBoxes, loadReceivedBoxes, loadDroppedBoxes, loadActiveBox, connect]);
 
