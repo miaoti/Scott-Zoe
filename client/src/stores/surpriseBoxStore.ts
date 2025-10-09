@@ -139,8 +139,28 @@ const getApiUrl = () => {
   return import.meta.env.VITE_API_URL || 'http://localhost:8080';
 };
 
+// Helper function to get the proper WebSocket URL
+const getWebSocketUrl = () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  
+  // If we have a custom API URL, use it
+  if (apiUrl) {
+    // Convert HTTP to WS and HTTPS to WSS
+    return apiUrl.replace(/^http/, 'ws').replace(/^https/, 'wss');
+  }
+  
+  // For production (non-localhost), use the same protocol as the current page
+  if (window.location.hostname !== 'localhost') {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//${window.location.host}`;
+  }
+  
+  // Local development default
+  return 'ws://localhost:8080';
+};
+
 const API_BASE_URL = `${getApiUrl()}/api`;
-const WS_URL = getApiUrl();
+const WS_URL = getWebSocketUrl();
 
 // Debounce utility to prevent rapid successive calls
 const debounceMap = new Map<string, NodeJS.Timeout>();

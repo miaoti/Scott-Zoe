@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useDrag } from 'react-dnd';
 import { 
   Minimize2, 
-  Maximize2, 
   Users, 
   Wifi, 
   WifiOff,
@@ -110,27 +108,65 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
     setMinimized(!isMinimized);
   };
   
-  const handleMaximize = () => {
-    setMaximized(!isMaximized);
-  };
+  // Drag functionality state
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   
-
+  // Mouse drag handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    setIsDragging(true);
+    const rect = (e.currentTarget.parentElement as HTMLElement).getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  }, []);
   
-  // Drag functionality
-  const [{ isDragging }, drag, dragPreview] = useDrag(() => ({
-    type: 'window',
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  }));
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDragging) return;
+    
+    const newX = e.clientX - dragOffset.x;
+    const newY = e.clientY - dragOffset.y;
+    
+    // Ensure window stays within viewport bounds
+    const maxX = window.innerWidth - (windowPosition?.width || 400);
+    const maxY = window.innerHeight - (windowPosition?.height || 300);
+    
+    const clampedX = Math.max(0, Math.min(newX, maxX));
+    const clampedY = Math.max(0, Math.min(newY, maxY));
+    
+    updateWindowPosition({
+      xPosition: clampedX,
+      yPosition: clampedY,
+      width: windowPosition?.width || 400,
+      height: windowPosition?.height || 300,
+    });
+  }, [isDragging, dragOffset, windowPosition, updateWindowPosition]);
   
-  // Window position and size
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+  
+  // Add global mouse event listeners for dragging
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp]);
+  
+  // Window position and size - default to top-right corner
   const windowStyle = {
     position: 'fixed' as const,
-    left: windowPosition?.xPosition || 100,
-    top: windowPosition?.yPosition || 100,
-    width: isMaximized ? '100vw' : (windowPosition?.width || 400),
-    height: isMaximized ? '100vh' : (windowPosition?.height || 300),
+    right: windowPosition?.xPosition !== undefined ? `${window.innerWidth - windowPosition.xPosition - (windowPosition?.width || 400)}px` : '20px',
+    top: windowPosition?.yPosition || 80,
+    width: windowPosition?.width || 400,
+    height: windowPosition?.height || 300,
     zIndex: 1000,
     opacity: isDragging ? 0.8 : 1,
   };
@@ -162,13 +198,12 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
   
   return (
     <div
-      ref={dragPreview}
       style={windowStyle}
       className="bg-white border border-gray-300 rounded-lg shadow-2xl flex flex-col overflow-hidden"
     >
       {/* Title Bar */}
       <div
-        ref={drag}
+        onMouseDown={handleMouseDown}
         className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 flex items-center justify-between cursor-move select-none"
       >
         <div className="flex items-center space-x-2">
@@ -202,14 +237,6 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
           >
             <Minimize2 className="w-3 h-3" />
           </button>
-          <button
-            onClick={handleMaximize}
-            className="p-1 hover:bg-white/20 rounded transition-colors"
-            title={isMaximized ? "Restore" : "Maximize"}
-          >
-            <Maximize2 className="w-3 h-3" />
-          </button>
-
         </div>
       </div>
       

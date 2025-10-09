@@ -2,6 +2,26 @@ import { create } from 'zustand';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
+// Helper function to get the proper WebSocket URL
+const getWebSocketUrl = () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  
+  // If we have a custom API URL, use it
+  if (apiUrl) {
+    // Convert HTTP to WS and HTTPS to WSS
+    return apiUrl.replace(/^http/, 'ws').replace(/^https/, 'wss');
+  }
+  
+  // For production (non-localhost), use the same protocol as the current page
+  if (window.location.hostname !== 'localhost') {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//${window.location.host}`;
+  }
+  
+  // Local development default
+  return 'ws://localhost:8080';
+};
+
 export interface NoteOperation {
   id?: number;
   noteId: number;
@@ -121,7 +141,8 @@ export const useSharedNoteStore = create<SharedNoteState>((set, get) => ({
     set({ isLoading: true, error: null });
     
     try {
-      const socket = new SockJS(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/ws`);
+      const wsUrl = getWebSocketUrl();
+      const socket = new SockJS(`${wsUrl}/ws`);
       const client = new Client({
         webSocketFactory: () => socket,
         connectHeaders: {
