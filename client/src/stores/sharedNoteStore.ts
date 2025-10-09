@@ -6,20 +6,18 @@ import SockJS from 'sockjs-client';
 const getWebSocketUrl = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
   
-  // If we have a custom API URL, use it
+  // If we have a custom API URL, use it as-is (SockJS handles protocol conversion)
   if (apiUrl) {
-    // Convert HTTP to WS and HTTPS to WSS
-    return apiUrl.replace(/^http/, 'ws').replace(/^https/, 'wss');
+    return apiUrl;
   }
   
   // For production (non-localhost), use the same protocol as the current page
   if (window.location.hostname !== 'localhost') {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    return `${protocol}//${window.location.host}`;
+    return window.location.origin;
   }
   
   // Local development default
-  return 'ws://localhost:8080';
+  return 'http://localhost:8080';
 };
 
 export interface NoteOperation {

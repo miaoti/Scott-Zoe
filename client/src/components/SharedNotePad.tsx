@@ -135,12 +135,12 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
     const clampedX = Math.max(0, Math.min(newX, maxX));
     const clampedY = Math.max(0, Math.min(newY, maxY));
     
-    updateWindowPosition({
-      xPosition: clampedX,
-      yPosition: clampedY,
-      width: windowPosition?.width || 400,
-      height: windowPosition?.height || 300,
-    });
+    updateWindowPosition(
+      clampedX,
+      clampedY,
+      windowPosition?.width || 400,
+      windowPosition?.height || 300
+    );
   }, [isDragging, dragOffset, windowPosition, updateWindowPosition]);
   
   const handleMouseUp = useCallback(() => {
@@ -163,7 +163,7 @@ const SharedNotePad: React.FC<SharedNotePadProps> = ({ onClose }) => {
   // Window position and size - default to top-right corner
   const windowStyle = {
     position: 'fixed' as const,
-    right: windowPosition?.xPosition !== undefined ? `${window.innerWidth - windowPosition.xPosition - (windowPosition?.width || 400)}px` : '20px',
+    left: windowPosition?.xPosition !== undefined ? windowPosition.xPosition : window.innerWidth - 420,
     top: windowPosition?.yPosition || 80,
     width: windowPosition?.width || 400,
     height: windowPosition?.height || 300,
