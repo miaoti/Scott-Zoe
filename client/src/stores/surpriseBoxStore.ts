@@ -143,8 +143,12 @@ const getApiUrl = () => {
 const getWebSocketUrl = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
   
-  // If we have a custom API URL, use it as-is (SockJS handles protocol conversion)
+  // If we have a custom API URL, ensure it matches the current page's protocol for security
   if (apiUrl) {
+    // If the page is loaded over HTTPS, ensure the API URL is also HTTPS
+    if (window.location.protocol === 'https:' && apiUrl.startsWith('http:')) {
+      return apiUrl.replace('http:', 'https:');
+    }
     return apiUrl;
   }
   
@@ -153,7 +157,11 @@ const getWebSocketUrl = () => {
     return window.location.origin;
   }
   
-  // Local development default
+  // Local development - use HTTPS if the page is loaded over HTTPS
+  if (window.location.protocol === 'https:') {
+    return 'https://localhost:8080';
+  }
+  
   return 'http://localhost:8080';
 };
 
