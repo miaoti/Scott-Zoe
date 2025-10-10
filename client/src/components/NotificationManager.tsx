@@ -94,17 +94,19 @@ const NotificationManager: React.FC = () => {
       };
       
       setNotifications(prev => [...prev, notification]);
-    } else if (!isLocked && !hasEditPermission) {
-      const notification: Notification = {
-        id: `released-${Date.now()}`,
-        type: 'released',
-        message: 'Document is now available for editing.',
-        timestamp: Date.now(),
-        duration: 3000
-      };
-      
-      setNotifications(prev => [...prev, notification]);
     }
+    // Removed "Document is now available for editing" notification as requested
+    // } else if (!isLocked && !hasEditPermission) {
+    //   const notification: Notification = {
+    //     id: `released-${Date.now()}`,
+    //     type: 'released',
+    //     message: 'Document is now available for editing.',
+    //     timestamp: Date.now(),
+    //     duration: 3000
+    //   };
+    //   
+    //   setNotifications(prev => [...prev, notification]);
+    // }
   }, [isLocked, currentEditor, hasEditPermission]);
 
   const handleAcceptRequest = (notificationId: string) => {
