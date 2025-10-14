@@ -320,8 +320,8 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
         throw new Error('No authentication token');
       }
       
-      // Update local content immediately for better UX
-      set({ content });
+      // Don't update local content here - it's already updated in the component
+      // This prevents overwriting user input during fast typing
       
       // Send to server
       const response = await fetch(`${getApiUrl()}/edit-control/content/${state.noteId}`, {
@@ -383,7 +383,7 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
           Authorization: `Bearer ${token}`,
         },
         debug: (str) => {
-          console.log('STOMP Debug:', str);
+          // console.log('STOMP Debug:', str);
         },
         reconnectDelay: 5000,
         heartbeatIncoming: 4000,
@@ -616,7 +616,10 @@ function handleEditControlBroadcast(data: EditControlMessage) {
 function handleContentUpdate(data: EditControlMessage) {
   console.log('Received content update:', data);
   
-  if (data.content !== undefined) {
+  // Only update content from WebSocket if we don't have edit permission
+  // This prevents overwriting local changes during fast typing
+  const state = useTurnBasedNoteStore.getState();
+  if (data.content !== undefined && !state.hasEditPermission) {
     set({ content: data.content });
   }
 }

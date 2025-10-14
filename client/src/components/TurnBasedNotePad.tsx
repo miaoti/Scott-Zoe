@@ -21,7 +21,7 @@ interface TurnBasedNotePadProps {
 }
 
 const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
-  console.log('TurnBasedNotePad: Component function called');
+  // console.log('TurnBasedNotePad: Component function called');
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [cursorPosition, setCursorPosition] = useState(0);
@@ -57,11 +57,11 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
     updateWindowPosition,
   } = useTurnBasedNoteStore();
   
-  console.log('TurnBasedNotePad: Store state - isConnected:', isConnected, 'hasEditPermission:', hasEditPermission);
+  // console.log('TurnBasedNotePad: Store state - isConnected:', isConnected, 'hasEditPermission:', hasEditPermission);
   
   // Connect to WebSocket on mount
   useEffect(() => {
-    console.log('TurnBasedNotePad component mounted');
+    // console.log('TurnBasedNotePad component mounted');
     
     if (typeof window !== 'undefined' && window.localStorage) {
       const token = localStorage.getItem('token');
@@ -71,15 +71,18 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
         console.log('Attempting to connect to WebSocket...');
         connect(token);
       } else if (!token) {
-        console.warn('TurnBasedNotePad: No valid token found for WebSocket connection');
+        // console.warn('TurnBasedNotePad: No valid token found for WebSocket connection');
       }
     }
     
     return () => {
-      console.log('TurnBasedNotePad: Component unmounting');
+      // console.log('TurnBasedNotePad: Component unmounting');
       disconnect();
     };
   }, []); // Remove dependencies to prevent infinite loop
+  
+  // Debounced content update to prevent race conditions during fast typing
+  const debouncedUpdateRef = useRef<NodeJS.Timeout>();
   
   // Handle text changes (only when user has edit permission)
   const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -91,8 +94,18 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
     const newContent = e.target.value;
     console.log('Text change detected:', { newContent, hasEditPermission });
     
-    // Update content locally and send to server
-    updateContent(newContent);
+    // Update local content immediately for responsive UI
+    setContent(newContent);
+    
+    // Clear existing debounced update
+    if (debouncedUpdateRef.current) {
+      clearTimeout(debouncedUpdateRef.current);
+    }
+    
+    // Debounce server updates to prevent race conditions during fast typing
+    debouncedUpdateRef.current = setTimeout(() => {
+      updateContent(newContent);
+    }, 300); // 300ms debounce delay
     
     // Handle typing indicator
     if (!isTyping) {
@@ -110,7 +123,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
       sendTypingIndicator(false);
     }, 1000);
     
-  }, [hasEditPermission, updateContent, isTyping, sendTypingIndicator]);
+  }, [hasEditPermission, setContent, updateContent, isTyping, sendTypingIndicator]);
   
   // Handle cursor position changes
   const handleCursorChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -429,7 +442,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
             padding: '16px',
             paddingBottom: '60px', // Extra padding for floating buttons
             backgroundColor: 'transparent',
-            color: hasEditPermission ? 'var(--apple-label)' : 'var(--apple-secondary-label)',
+            color: 'var(--apple-label)', // Always use normal text color, not grayed out
             cursor: 'text', // Always allow text cursor for selection
           }}
           readOnly={!hasEditPermission} // Use readOnly instead of disabled to allow text selection
