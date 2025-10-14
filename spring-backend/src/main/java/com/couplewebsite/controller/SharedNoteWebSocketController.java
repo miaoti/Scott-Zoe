@@ -180,6 +180,7 @@ public class SharedNoteWebSocketController {
                 EditControlMessage notifyMessage = EditControlMessage.editControlGranted(
                     user.getId(), message.getNoteId(), message.getSessionId()
                 );
+                notifyMessage.setUserName(user.getUsername()); // Add username to the message
                 messagingTemplate.convertAndSend("/topic/shared-note/edit-control", notifyMessage);
                 
                     logger.info("Granted edit control to user: {} for note: {}", user.getUsername(), message.getNoteId());
@@ -212,6 +213,7 @@ public class SharedNoteWebSocketController {
             EditControlMessage releaseMessage = EditControlMessage.editControlReleased(
                 user.getId(), message.getNoteId()
             );
+            releaseMessage.setUserName(user.getUsername()); // Add username to the message
             messagingTemplate.convertAndSend("/topic/shared-note/edit-control", releaseMessage);
             
             logger.info("Released edit control from user: {} for note: {}", user.getUsername(), message.getNoteId());

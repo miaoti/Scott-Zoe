@@ -163,7 +163,7 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
     return {
       userId: 0, // Will be updated when user is available
       xPosition: window.innerWidth - 370, // 350px width + 20px margin
-      yPosition: 100, // Below page header
+      yPosition: 140, // Increased clearance for page header (Chrome compatibility)
       width: 350,
       height: 600,
       updatedAt: new Date().toISOString(),
@@ -222,7 +222,7 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
           isLocked: true,
           currentEditor: result.session.currentEditor,
           isRequestingEdit: false,
-          editRequestMessage: 'Edit control granted',
+          editRequestMessage: null, // Remove the message
         });
         
         // Send WebSocket message for real-time updates
@@ -284,7 +284,7 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
         hasEditPermission: false,
         isLocked: false,
         currentEditor: null,
-        editRequestMessage: 'Edit control released',
+        editRequestMessage: null, // Remove the message
       });
       
       // Send WebSocket message for real-time updates
@@ -579,7 +579,7 @@ function handleEditControlMessage(data: EditControlMessage) {
         isLocked: true,
         currentEditor: { id: data.userId, username: data.username || 'Unknown' },
         isRequestingEdit: false,
-        editRequestMessage: 'Edit control granted',
+        editRequestMessage: null, // Remove the message
       });
       break;
       
@@ -600,7 +600,7 @@ function handleEditControlBroadcast(data: EditControlMessage) {
     case 'EDIT_CONTROL_GRANTED':
       set({
         isLocked: true,
-        currentEditor: { id: data.userId, username: data.username || 'Unknown' },
+        currentEditor: { id: data.userId, username: data.userName || data.username || 'Unknown' },
       });
       break;
       

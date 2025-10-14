@@ -267,7 +267,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
               fontFamily: 'var(--font-body)'
             }}
           >
-            Shared Notes
+            Notes
           </span>
         </div>
       </div>
@@ -310,7 +310,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
       >
         <div className="flex items-center space-x-4">
           <span className="font-semibold text-base">
-            Shared Notes
+            Notes
           </span>
           <div className="flex items-center space-x-2">
             <div className="flex items-center space-x-1">
@@ -430,9 +430,9 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
             paddingBottom: '60px', // Extra padding for floating buttons
             backgroundColor: 'transparent',
             color: hasEditPermission ? 'var(--apple-label)' : 'var(--apple-secondary-label)',
-            cursor: !hasEditPermission ? 'not-allowed' : 'text',
+            cursor: 'text', // Always allow text cursor for selection
           }}
-          disabled={!hasEditPermission}
+          readOnly={!hasEditPermission} // Use readOnly instead of disabled to allow text selection
         />
         
         {/* Floating Edit Control Buttons */}
@@ -539,7 +539,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
         }}
       >
         <div className="flex items-center space-x-4">
-          <span>Shared Notes</span>
+          {/* <span>Shared Notes</span> */}
           {user && (
             <span>{user.username}</span>
           )}
