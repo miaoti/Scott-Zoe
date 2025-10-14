@@ -404,11 +404,12 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
           handleTypingUpdate(data);
         });
         
-        // Fetch initial edit status and content after a short delay
-        setTimeout(() => {
-          get().fetchEditStatus();
-          get().fetchNoteContent();
-        }, 100);
+        // Removed automatic edit status and content fetching
+        // Edit control should only be requested when user clicks edit button
+        // setTimeout(() => {
+        //   get().fetchEditStatus();
+        //   get().fetchNoteContent();
+        // }, 100);
       };
       
       client.onStompError = (frame) => {

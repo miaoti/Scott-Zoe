@@ -162,9 +162,10 @@ public class EditControlService {
             session.updatePing();
             return userSessionRepository.save(session);
         } else {
-            // For now, we'll create a minimal implementation without User entity
-            // This would typically require UserService injection to get User by ID
-            throw new UnsupportedOperationException("Creating new user session requires proper User entity handling");
+            // Create new session with proper User entity
+            User user = userService.findById(userId);
+            UserSession newSession = new UserSession(user, sessionId);
+            return userSessionRepository.save(newSession);
         }
     }
 
