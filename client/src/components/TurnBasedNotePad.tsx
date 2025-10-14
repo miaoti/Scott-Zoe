@@ -278,8 +278,8 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
     <div 
       className="fixed z-50 flex flex-col apple-shadow"
       style={{
-        left: windowPosition?.xPosition || 100,
-        top: windowPosition?.yPosition || 100,
+        left: windowPosition?.xPosition || (window.innerWidth - 370), // Top-right corner (350px width + 20px margin)
+        top: windowPosition?.yPosition || 80, // Below typical page header
         width: windowPosition?.width || 350,
         height: windowPosition?.height || 600,
         minWidth: 300,
@@ -309,13 +309,22 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
         }}
       >
         <div className="flex items-center space-x-3">
-          <StatusIcon className={`w-5 h-5 ${statusInfo.color} ${statusInfo.spin ? 'animate-spin' : ''}`} />
           <span className="font-semibold text-base">
-            Shared Notes - {statusInfo.text}
+            Shared Notes
           </span>
         </div>
         
         <div className="flex items-center space-x-2">
+          {/* Connection Status in Header */}
+          <div className="flex items-center space-x-1 px-2 py-1 rounded-md" style={{
+            backgroundColor: 'var(--apple-gray-6)',
+            border: '1px solid var(--apple-separator)',
+          }}>
+            <StatusIcon className={`w-3 h-3 ${statusInfo.color} ${statusInfo.spin ? 'animate-spin' : ''}`} />
+            <span className="text-xs font-medium" style={{ color: 'var(--apple-secondary-label)' }}>
+              {statusInfo.text}
+            </span>
+          </div>
           <button
             onClick={handleMinimize}
             className="p-2 rounded-full transition-all duration-200"
@@ -396,34 +405,8 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
           )}
         </div>
         
-        {/* Edit Control Buttons */}
+        {/* Edit Control Buttons - Only show Stop Editing button here */}
         <div className="flex items-center space-x-2">
-          {!hasEditPermission && !isLocked && (
-            <button
-              onClick={handleRequestEdit}
-              disabled={isRequestingEdit}
-              className="apple-button-primary px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-              style={{
-                backgroundColor: isRequestingEdit ? 'var(--apple-gray-3)' : 'var(--apple-blue)',
-                color: 'white',
-                border: 'none',
-                fontFamily: 'var(--font-body)',
-              }}
-            >
-              {isRequestingEdit ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Requesting...</span>
-                </>
-              ) : (
-                <>
-                  <Edit3 className="w-4 h-4" />
-                  <span>Request Edit</span>
-                </>
-              )}
-            </button>
-          )}
-          
           {hasEditPermission && (
             <button
               onClick={handleReleaseEdit}
@@ -486,7 +469,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
               ? "Start writing your shared notes here..." 
               : isLocked 
                 ? `${currentEditor?.username || 'Another user'} is currently editing. You can read but not edit.`
-                : "Click 'Request Edit' to start editing..."
+                : "Click the edit button to start writing..."
           }
           className="w-full h-full resize-none border-none outline-none"
           style={{ 
@@ -500,6 +483,55 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
           }}
           disabled={!hasEditPermission}
         />
+        
+        {/* Floating Request Edit Button inside textarea */}
+        {!hasEditPermission && !isLocked && (
+          <button
+            onClick={handleRequestEdit}
+            disabled={isRequestingEdit}
+            className="absolute transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg"
+            style={{
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              backgroundColor: isRequestingEdit ? 'var(--apple-gray-3)' : 'var(--apple-blue)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              padding: '12px 20px',
+              fontFamily: 'var(--font-body)',
+              fontSize: '14px',
+              fontWeight: '500',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              zIndex: 10,
+            }}
+            onMouseEnter={(e) => {
+              if (!isRequestingEdit) {
+                e.currentTarget.style.backgroundColor = '#0056D6';
+                e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1.05)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isRequestingEdit) {
+                e.currentTarget.style.backgroundColor = 'var(--apple-blue)';
+                e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1)';
+              }
+            }}
+          >
+            {isRequestingEdit ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Requesting...</span>
+              </>
+            ) : (
+              <>
+                <Edit3 className="w-4 h-4" />
+                <span>Start Editing</span>
+              </>
+            )}
+          </button>
+        )}
         
         {/* Typing Indicators */}
         {typingText && (
