@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { isMobileDevice, getMobileWindowDimensions, getMobileWindowPosition } from '../utils/deviceDetection';
 
 // Helper function to get the proper WebSocket URL
 const getWebSocketUrl = () => {
@@ -159,7 +160,23 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
     } catch (error) {
       console.warn('Failed to restore window position from localStorage:', error);
     }
-    // Default position: top-right corner, below page header
+    
+    // Check if mobile device and set appropriate default position
+    if (isMobileDevice()) {
+      const mobilePosition = getMobileWindowPosition();
+      const mobileDimensions = getMobileWindowDimensions();
+      
+      return {
+        userId: 0, // Will be updated when user is available
+        xPosition: mobilePosition.x,
+        yPosition: mobilePosition.y,
+        width: mobileDimensions.width,
+        height: mobileDimensions.height,
+        updatedAt: new Date().toISOString(),
+      };
+    }
+    
+    // Default position for desktop: top-right corner, below page header
     return {
       userId: 0, // Will be updated when user is available
       xPosition: window.innerWidth - 370, // 350px width + 20px margin

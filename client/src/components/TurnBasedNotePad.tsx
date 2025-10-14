@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useTurnBasedNoteStore } from '../stores/turnBasedNoteStore';
 import { useAuth } from '../contexts/AuthContext';
+import { isMobileDevice, getMobileWindowDimensions, getMobileWindowPosition } from '../utils/deviceDetection';
 
 interface TurnBasedNotePadProps {
   onClose?: () => void;
@@ -168,7 +169,24 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
       });
     }
   }, []);
-  
+
+  // Touch drag handlers for mobile
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    
+    const touch = e.touches[0];
+    const titleBar = e.currentTarget as HTMLElement;
+    const windowElement = titleBar.parentElement;
+    if (windowElement) {
+      const windowRect = windowElement.getBoundingClientRect();
+      setDragOffset({
+        x: touch.clientX - windowRect.left,
+        y: touch.clientY - windowRect.top,
+      });
+    }
+  }, []);
+
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging) return;
     
@@ -193,23 +211,57 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
       currentHeight
     );
   }, [isDragging, dragOffset, windowPosition, updateWindowPosition]);
-  
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!isDragging) return;
+    
+    const touch = e.touches[0];
+    const newX = touch.clientX - dragOffset.x;
+    const newY = touch.clientY - dragOffset.y;
+    
+    // Get current window dimensions (preserve existing size)
+    const currentWidth = windowPosition?.width || 350;
+    const currentHeight = windowPosition?.height || 600;
+    
+    // Ensure window stays within viewport bounds
+    const maxX = window.innerWidth - currentWidth;
+    const maxY = window.innerHeight - currentHeight;
+    
+    const clampedX = Math.max(0, Math.min(newX, maxX));
+    const clampedY = Math.max(0, Math.min(newY, maxY));
+    
+    updateWindowPosition(
+      clampedX,
+      clampedY,
+      currentWidth,
+      currentHeight
+    );
+  }, [isDragging, dragOffset, windowPosition, updateWindowPosition]);
+
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
   }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
   
-  // Add mouse event listeners for dragging
+  // Add mouse and touch event listeners for dragging
   useEffect(() => {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleTouchMove);
+      document.addEventListener('touchend', handleTouchEnd);
       
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
       };
     }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
+  }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
   
   // Get status indicator
   const getStatusIndicator = () => {
@@ -287,31 +339,43 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
     );
   }
   
+  // Mobile detection and dimensions
+  const isMobile = isMobileDevice();
+  const mobileWindowDimensions = isMobile ? getMobileWindowDimensions() : null;
+  
   return (
     <div 
       className="fixed z-50 flex flex-col apple-shadow"
       style={{
         left: windowPosition?.xPosition || 100,
         top: windowPosition?.yPosition || 100,
-        width: windowPosition?.width || 350,
-        height: windowPosition?.height || 600,
-        minWidth: 300,
-        minHeight: 400,
-        maxWidth: '90vw',
-        maxHeight: '90vh',
+        width: isMobile ? (mobileWindowDimensions?.width || 280) : (windowPosition?.width || 350),
+        height: isMobile ? (mobileWindowDimensions?.height || 400) : (windowPosition?.height || 600),
+        minWidth: isMobile ? 250 : 300,
+        minHeight: isMobile ? 300 : 400,
+        maxWidth: isMobile ? '95vw' : '90vw',
+        maxHeight: isMobile ? '85vh' : '90vh',
         backgroundColor: 'var(--apple-system-background)',
         border: '1px solid var(--apple-glass-border)',
-        borderRadius: '12px',
+        borderRadius: isMobile ? '8px' : '12px',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         fontFamily: 'var(--font-body)',
         overflow: 'hidden',
+        // Mobile-specific touch optimizations
+        ...(isMobile && {
+          touchAction: 'manipulation',
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none',
+          userSelect: 'none',
+        }),
       }}
     >
       {/* Header/Title Bar */}
       <div 
         className="cursor-move flex items-center justify-between select-none"
         onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
         style={{
           backgroundColor: 'var(--apple-secondary-background)',
           color: 'var(--apple-label)',
