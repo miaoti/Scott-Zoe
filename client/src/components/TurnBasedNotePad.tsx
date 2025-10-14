@@ -235,16 +235,36 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
   if (isMinimized) {
     return (
       <div 
-        className="fixed bottom-4 right-4 bg-white border border-gray-300 rounded-lg shadow-lg cursor-pointer hover:shadow-xl transition-shadow z-50"
+        className="fixed bottom-4 right-4 cursor-pointer z-50 apple-shadow"
         onClick={handleMinimize}
         style={{
-          left: windowPosition?.xPosition || 'auto',
-          top: windowPosition?.yPosition || 'auto',
+          backgroundColor: 'var(--apple-glass-bg)',
+          border: '1px solid var(--apple-glass-border)',
+          borderRadius: '12px',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          transition: 'all 0.3s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = 'var(--apple-glass-shadow)';
         }}
       >
         <div className="p-3 flex items-center space-x-2">
           <StatusIcon className={`w-4 h-4 ${statusInfo.color} ${statusInfo.spin ? 'animate-spin' : ''}`} />
-          <span className="text-sm font-medium text-gray-700">Shared Notes</span>
+          <span 
+            className="text-sm font-medium"
+            style={{ 
+              color: 'var(--apple-label)',
+              fontFamily: 'var(--font-body)'
+            }}
+          >
+            Shared Notes
+          </span>
         </div>
       </div>
     );
@@ -252,57 +272,82 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
   
   return (
     <div 
-      className="fixed z-50 flex flex-col notebook-container"
+      className="fixed z-50 flex flex-col apple-shadow"
       style={{
         left: windowPosition?.xPosition || 100,
         top: windowPosition?.yPosition || 100,
-        width: windowPosition?.width || 600,
-        height: windowPosition?.height || 500,
+        width: windowPosition?.width || 500,
+        height: windowPosition?.height || 400,
         minWidth: 400,
         minHeight: 300,
-        backgroundColor: '#f8f0e0',
-        border: '1px solid #d4c5a9',
-        borderRadius: '8px',
-        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2), inset 0 0 20px rgba(0, 0, 0, 0.05)',
-        fontFamily: '"Courier New", "American Typewriter", Courier, monospace',
+        maxWidth: '90vw',
+        maxHeight: '90vh',
+        backgroundColor: 'var(--apple-system-background)',
+        border: '1px solid var(--apple-glass-border)',
+        borderRadius: '12px',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        fontFamily: 'var(--font-body)',
+        overflow: 'hidden',
       }}
     >
-      {/* Notebook Header/Title Bar */}
+      {/* Header/Title Bar */}
       <div 
-        className="cursor-move flex items-center justify-between select-none notebook-header"
+        className="cursor-move flex items-center justify-between select-none"
         onMouseDown={handleMouseDown}
         style={{
-          backgroundColor: '#8b5a2b',
-          color: '#f8f0e0',
+          backgroundColor: 'var(--apple-secondary-background)',
+          color: 'var(--apple-label)',
           padding: '12px 16px',
-          borderRadius: '8px 8px 0 0',
-          borderBottom: '2px solid #6b4425',
-          background: 'linear-gradient(45deg, #8b5a2b 0%, #a0672f 50%, #8b5a2b 100%)',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1)',
+          borderRadius: '12px 12px 0 0',
+          borderBottom: '1px solid var(--apple-separator)',
+          fontFamily: 'var(--font-heading)',
         }}
       >
         <div className="flex items-center space-x-3">
-          <StatusIcon className={`w-5 h-5 ${statusInfo.spin ? 'animate-spin' : ''}`} />
-          <span className="font-bold text-lg tracking-wide" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.3)' }}>
-            📝 Shared Notebook - {statusInfo.text}
+          <StatusIcon className={`w-5 h-5 ${statusInfo.color} ${statusInfo.spin ? 'animate-spin' : ''}`} />
+          <span className="font-semibold text-base">
+            Shared Notes - {statusInfo.text}
           </span>
         </div>
         
         <div className="flex items-center space-x-2">
           <button
             onClick={handleMinimize}
-            className="p-2 hover:bg-black/20 rounded transition-colors"
+            className="p-2 rounded-full transition-all duration-200"
             title="Minimize"
-            style={{ color: '#f8f0e0' }}
+            style={{ 
+              color: 'var(--apple-secondary-label)',
+              backgroundColor: 'transparent'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--apple-gray-5)';
+              e.currentTarget.style.color = 'var(--apple-label)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--apple-secondary-label)';
+            }}
           >
             <Minimize2 className="w-4 h-4" />
           </button>
           {onClose && (
             <button
               onClick={onClose}
-              className="p-2 hover:bg-black/20 rounded transition-colors text-xl font-bold"
+              className="p-2 rounded-full transition-all duration-200 text-lg font-medium"
               title="Close"
-              style={{ color: '#f8f0e0' }}
+              style={{ 
+                color: 'var(--apple-secondary-label)',
+                backgroundColor: 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--apple-gray-5)';
+                e.currentTarget.style.color = 'var(--apple-label)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'var(--apple-secondary-label)';
+              }}
             >
               ×
             </button>
@@ -310,60 +355,55 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
         </div>
       </div>
       
-      {/* Status Bar - Styled like notebook tab */}
+      {/* Status Bar */}
       <div 
         className="flex items-center justify-between text-sm"
         style={{
-          backgroundColor: '#e8daba',
+          backgroundColor: 'var(--apple-tertiary-background)',
           padding: '8px 16px',
-          borderBottom: '1px solid #d4c5a9',
-          color: '#5d4e37',
+          borderBottom: '1px solid var(--apple-separator)',
+          color: 'var(--apple-secondary-label)',
         }}
       >
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             {isConnected ? (
-              <Wifi className="w-4 h-4 text-green-600" />
+              <Wifi className="w-4 h-4" style={{ color: 'var(--apple-blue)' }} />
             ) : (
-              <WifiOff className="w-4 h-4 text-red-600" />
+              <WifiOff className="w-4 h-4" style={{ color: '#FF3B30' }} />
             )}
-            <span className={isConnected ? 'text-green-700 font-medium' : 'text-red-700 font-medium'}>
-              {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
+            <span 
+              className="font-medium"
+              style={{ 
+                color: isConnected ? 'var(--apple-blue)' : '#FF3B30'
+              }}
+            >
+              {isConnected ? 'Connected' : 'Disconnected'}
             </span>
           </div>
           
           {isLocked && currentEditor && (
             <div className="flex items-center space-x-2">
-              <Lock className="w-4 h-4 text-orange-600" />
-              <span className="text-orange-700 font-medium">
-                {currentEditor.id === user?.id ? '✏️ You are writing' : `✏️ ${currentEditor.username} is writing`}
+              <Lock className="w-4 h-4" style={{ color: '#FF9500' }} />
+              <span className="font-medium" style={{ color: '#FF9500' }}>
+                {currentEditor.id === user?.id ? 'You are editing' : `${currentEditor.username} is editing`}
               </span>
             </div>
           )}
         </div>
         
-        {/* Edit Control Buttons - Styled like notebook elements */}
+        {/* Edit Control Buttons */}
         <div className="flex items-center space-x-2">
           {!hasEditPermission && !isLocked && (
             <button
               onClick={handleRequestEdit}
               disabled={isRequestingEdit}
-              className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+              className="apple-button-primary px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
               style={{
-                backgroundColor: '#8b5a2b',
-                color: '#f8f0e0',
-                border: '1px solid #6b4425',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              }}
-              onMouseEnter={(e) => {
-                if (!isRequestingEdit) {
-                  e.currentTarget.style.backgroundColor = '#a0672f';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isRequestingEdit) {
-                  e.currentTarget.style.backgroundColor = '#8b5a2b';
-                }
+                backgroundColor: isRequestingEdit ? 'var(--apple-gray-3)' : 'var(--apple-blue)',
+                color: 'white',
+                border: 'none',
+                fontFamily: 'var(--font-body)',
               }}
             >
               {isRequestingEdit ? (
@@ -374,7 +414,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
               ) : (
                 <>
                   <Edit3 className="w-4 h-4" />
-                  <span>Request to Write</span>
+                  <span>Request Edit</span>
                 </>
               )}
             </button>
@@ -383,22 +423,22 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
           {hasEditPermission && (
             <button
               onClick={handleReleaseEdit}
-              className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-2"
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2"
               style={{
-                backgroundColor: '#a34c4c',
-                color: '#f8f0e0',
-                border: '1px solid #8b3a3a',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                backgroundColor: '#FF3B30',
+                color: 'white',
+                border: 'none',
+                fontFamily: 'var(--font-body)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#b85555';
+                e.currentTarget.style.backgroundColor = '#FF6B60';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#a34c4c';
+                e.currentTarget.style.backgroundColor = '#FF3B30';
               }}
             >
               <Unlock className="w-4 h-4" />
-              <span>Stop Writing</span>
+              <span>Stop Editing</span>
             </button>
           )}
         </div>
@@ -410,32 +450,26 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
           className="flex items-center space-x-2 text-sm"
           style={{
             padding: '8px 16px',
-            borderBottom: '1px solid #d4c5a9',
-            backgroundColor: error ? '#f8d7da' : '#d1ecf1',
-            color: error ? '#721c24' : '#0c5460',
+            borderBottom: '1px solid var(--apple-separator)',
+            backgroundColor: error ? '#FFEBEE' : '#E3F2FD',
+            color: error ? '#FF3B30' : 'var(--apple-blue)',
+            fontFamily: 'var(--font-body)',
           }}
         >
           {error ? (
-            <AlertCircle className="w-4 h-4 text-red-600" />
+            <AlertCircle className="w-4 h-4" style={{ color: '#FF3B30' }} />
           ) : (
-            <CheckCircle className="w-4 h-4 text-blue-600" />
+            <CheckCircle className="w-4 h-4" style={{ color: 'var(--apple-blue)' }} />
           )}
           <span>{error || editRequestMessage}</span>
         </div>
       )}
       
-      {/* Notebook Paper Content Area */}
+      {/* Content Area */}
       <div 
-        className="flex-1 relative notebook-paper"
+        className="flex-1 relative"
         style={{
-          backgroundColor: '#f8f0e0',
-          backgroundImage: `
-            linear-gradient(to right, #f8d3d3 40px, transparent 40px),
-            linear-gradient(to bottom, transparent 0px, transparent 29px, #e7eff8 30px, transparent 31px)
-          `,
-          backgroundSize: '100% 30px',
-          backgroundPosition: '0 0',
-          backgroundAttachment: 'local',
+          backgroundColor: 'var(--apple-system-background)',
         }}
       >
         <textarea
@@ -447,71 +481,74 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
             hasEditPermission 
               ? "Start writing your shared notes here..." 
               : isLocked 
-                ? `${currentEditor?.username || 'Another user'} is currently writing. You can read but not write.`
-                : "Click 'Request to Write' to start writing..."
+                ? `${currentEditor?.username || 'Another user'} is currently editing. You can read but not edit.`
+                : "Click 'Request Edit' to start editing..."
           }
-          className="w-full h-full resize-none border-none outline-none notebook-textarea"
+          className="w-full h-full resize-none border-none outline-none"
           style={{ 
-            fontFamily: '"Courier New", "American Typewriter", Courier, monospace',
-            fontSize: '16px',
-            lineHeight: '30px',
-            padding: '15px 20px 15px 60px',
+            fontFamily: 'var(--font-body)',
+            fontSize: '14px',
+            lineHeight: '1.5',
+            padding: '16px',
             backgroundColor: 'transparent',
-            color: hasEditPermission ? '#2a1a0a' : '#666',
+            color: hasEditPermission ? 'var(--apple-label)' : 'var(--apple-secondary-label)',
             cursor: !hasEditPermission ? 'not-allowed' : 'text',
           }}
           disabled={!hasEditPermission}
         />
         
-        {/* Typing Indicators - Styled for notebook */}
+        {/* Typing Indicators */}
         {typingText && (
           <div 
-            className="absolute flex items-center space-x-2 text-sm italic"
+            className="absolute flex items-center space-x-2 text-sm"
             style={{
               bottom: '12px',
-              left: '60px',
-              color: '#8b5a2b',
-              backgroundColor: 'rgba(248, 240, 224, 0.9)',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              border: '1px solid #d4c5a9',
+              left: '16px',
+              color: 'var(--apple-secondary-label)',
+              backgroundColor: 'var(--apple-glass-bg)',
+              padding: '6px 10px',
+              borderRadius: '8px',
+              border: '1px solid var(--apple-glass-border)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              fontFamily: 'var(--font-body)',
             }}
           >
             <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-              <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-              <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--apple-blue)', animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--apple-blue)', animationDelay: '150ms' }}></div>
+              <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--apple-blue)', animationDelay: '300ms' }}></div>
             </div>
-            <span>✍️ {typingText}</span>
+            <span>{typingText}</span>
           </div>
         )}
       </div>
       
-      {/* Footer - Styled like notebook binding */}
+      {/* Footer */}
       <div 
         className="flex items-center justify-between text-xs"
         style={{
-          backgroundColor: '#e8daba',
+          backgroundColor: 'var(--apple-secondary-background)',
           padding: '8px 16px',
-          borderTop: '1px solid #d4c5a9',
-          borderRadius: '0 0 8px 8px',
-          color: '#5d4e37',
-          background: 'linear-gradient(to bottom, #e8daba, #ddd0b4)',
+          borderTop: '1px solid var(--apple-separator)',
+          borderRadius: '0 0 12px 12px',
+          color: 'var(--apple-secondary-label)',
+          fontFamily: 'var(--font-body)',
         }}
       >
         <div className="flex items-center space-x-4">
-          <span>📚 Collaborative Notebook</span>
+          <span>Shared Notes</span>
           {user && (
-            <span>👤 {user.username}</span>
+            <span>{user.username}</span>
           )}
         </div>
         
         <div className="flex items-center space-x-3">
           <span>{content.length} characters</span>
           {hasEditPermission && (
-            <div className="flex items-center space-x-1 text-green-700 font-medium">
+            <div className="flex items-center space-x-1 font-medium" style={{ color: 'var(--apple-blue)' }}>
               <Edit3 className="w-3 h-3" />
-              <span>Writing</span>
+              <span>Editing</span>
             </div>
           )}
         </div>
