@@ -26,88 +26,80 @@ const NotificationManager: React.FC = () => {
     clearError
   } = useTurnBasedNoteStore();
 
-  // Handle edit request messages
-  useEffect(() => {
-    if (editRequestMessage) {
-      const notification: Notification = {
-        id: `edit-request-${Date.now()}`,
-        type: 'request',
-        message: editRequestMessage,
-        requesterName: 'User', // This would come from the WebSocket message
-        timestamp: Date.now(),
-        duration: 30000 // 30 seconds for edit requests
-      };
-      
-      setNotifications(prev => [...prev, notification]);
-      
-      // Auto-clear the message after showing notification
-      setTimeout(() => {
-        clearEditRequestMessage();
-      }, 100);
-    }
-  }, [editRequestMessage, clearEditRequestMessage]);
+  // DISABLED: All shared notes notifications are disabled as requested
+  // The shared notes functionality will work silently in the background
+  // with simple rejection messages shown directly in the UI
 
-  // Handle errors
-  useEffect(() => {
-    if (error) {
-      const notification: Notification = {
-        id: `error-${Date.now()}`,
-        type: 'error',
-        message: error,
-        timestamp: Date.now(),
-        duration: 5000
-      };
-      
-      setNotifications(prev => [...prev, notification]);
-      
-      // Auto-clear the error after showing notification
-      setTimeout(() => {
-        clearError();
-      }, 100);
-    }
-  }, [error, clearError]);
+  // Handle edit request messages - DISABLED
+  // useEffect(() => {
+  //   if (editRequestMessage) {
+  //     const notification: Notification = {
+  //       id: `edit-request-${Date.now()}`,
+  //       type: 'request',
+  //       message: editRequestMessage,
+  //       requesterName: 'User', // This would come from the WebSocket message
+  //       timestamp: Date.now(),
+  //       duration: 30000 // 30 seconds for edit requests
+  //     };
+  //     
+  //     setNotifications(prev => [...prev, notification]);
+  //     
+  //     // Auto-clear the message after showing notification
+  //     setTimeout(() => {
+  //       clearEditRequestMessage();
+  //     }, 100);
+  //   }
+  // }, [editRequestMessage, clearEditRequestMessage]);
 
-  // Handle edit permission changes
-  useEffect(() => {
-    if (hasEditPermission) {
-      const notification: Notification = {
-        id: `granted-${Date.now()}`,
-        type: 'granted',
-        message: 'Edit access granted! You can now edit the document.',
-        timestamp: Date.now(),
-        duration: 3000
-      };
-      
-      setNotifications(prev => [...prev, notification]);
-    }
-  }, [hasEditPermission]);
+  // Handle errors - DISABLED for shared notes
+  // useEffect(() => {
+  //   if (error) {
+  //     const notification: Notification = {
+  //       id: `error-${Date.now()}`,
+  //       type: 'error',
+  //       message: error,
+  //       timestamp: Date.now(),
+  //       duration: 5000
+  //     };
+  //     
+  //     setNotifications(prev => [...prev, notification]);
+  //     
+  //     // Auto-clear the error after showing notification
+  //     setTimeout(() => {
+  //       clearError();
+  //     }, 100);
+  //   }
+  // }, [error, clearError]);
 
-  // Handle edit lock changes
-  useEffect(() => {
-    if (isLocked && currentEditor && !hasEditPermission) {
-      const notification: Notification = {
-        id: `locked-${Date.now()}`,
-        type: 'denied',
-        message: `${currentEditor.username} is now editing the document.`,
-        timestamp: Date.now(),
-        duration: 3000
-      };
-      
-      setNotifications(prev => [...prev, notification]);
-    }
-    // Removed "Document is now available for editing" notification as requested
-    // } else if (!isLocked && !hasEditPermission) {
-    //   const notification: Notification = {
-    //     id: `released-${Date.now()}`,
-    //     type: 'released',
-    //     message: 'Document is now available for editing.',
-    //     timestamp: Date.now(),
-    //     duration: 3000
-    //   };
-    //   
-    //   setNotifications(prev => [...prev, notification]);
-    // }
-  }, [isLocked, currentEditor, hasEditPermission]);
+  // Handle edit permission changes - DISABLED
+  // useEffect(() => {
+  //   if (hasEditPermission) {
+  //     const notification: Notification = {
+  //       id: `granted-${Date.now()}`,
+  //       type: 'granted',
+  //       message: 'Edit access granted! You can now edit the document.',
+  //       timestamp: Date.now(),
+  //       duration: 3000
+  //     };
+  //     
+  //     setNotifications(prev => [...prev, notification]);
+  //   }
+  // }, [hasEditPermission]);
+
+  // Handle edit lock changes - DISABLED
+  // useEffect(() => {
+  //   if (isLocked && currentEditor && !hasEditPermission) {
+  //     const notification: Notification = {
+  //       id: `locked-${Date.now()}`,
+  //       type: 'denied',
+  //       message: `${currentEditor.username} is now editing the document.`,
+  //       timestamp: Date.now(),
+  //       duration: 3000
+  //     };
+  //     
+  //     setNotifications(prev => [...prev, notification]);
+  //   }
+  // }, [isLocked, currentEditor, hasEditPermission]);
 
   const handleAcceptRequest = (notificationId: string) => {
     grantEditControl();

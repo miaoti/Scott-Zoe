@@ -42,23 +42,29 @@ graph TD
 ```
 
 ## 2. Technology Description
-- Frontend: React@18 + TypeScript + Zustand (state management) + TailwindCSS@3 + Vite
-- Backend: Spring Boot@3 + WebSocket + JPA/Hibernate
-- Database: PostgreSQL (via Supabase)
-- Real-time Communication: WebSocket for bidirectional communication
+
+* Frontend: React\@18 + TypeScript + Zustand (state management) + TailwindCSS\@3 + Vite
+
+* Backend: Spring Boot\@3 + WebSocket + JPA/Hibernate
+
+* Database: PostgreSQL (via Supabase)
+
+* Real-time Communication: WebSocket for bidirectional communication
 
 ## 3. Route Definitions
-| Route | Purpose |
-|-------|---------|
+
+| Route         | Purpose                                                    |
+| ------------- | ---------------------------------------------------------- |
 | /shared-notes | Main collaborative notes interface with turn-based editing |
-| /login | User authentication page |
-| /register | User registration page |
+| /login        | User authentication page                                   |
+| /register     | User registration page                                     |
 
 ## 4. API Definitions
 
 ### 4.1 WebSocket Messages
 
 **Edit Control Request**
+
 ```typescript
 // Client to Server
 {
@@ -77,6 +83,7 @@ graph TD
 ```
 
 **Grant Edit Control**
+
 ```typescript
 // Client to Server
 {
@@ -96,6 +103,7 @@ graph TD
 ```
 
 **Release Edit Control**
+
 ```typescript
 // Client to Server
 {
@@ -113,6 +121,7 @@ graph TD
 ```
 
 **Content Update**
+
 ```typescript
 // Client to Server (only from current editor)
 {
@@ -134,6 +143,7 @@ graph TD
 ```
 
 **Typing Indicator**
+
 ```typescript
 // Client to Server
 {
@@ -155,29 +165,33 @@ graph TD
 ### 4.2 REST API Endpoints
 
 **Get Current Edit Session**
+
 ```
 GET /api/notes/{noteId}/edit-session
 ```
 
 Response:
-| Param Name | Param Type | Description |
-|------------|------------|-------------|
-| currentEditorId | number \| null | ID of user currently editing, null if available |
-| currentEditorName | string \| null | Name of current editor |
-| lastActivity | string | ISO timestamp of last edit activity |
-| isLocked | boolean | Whether note is currently locked for editing |
+
+| Param Name        | Param Type     | Description                                     |
+| ----------------- | -------------- | ----------------------------------------------- |
+| currentEditorId   | number \| null | ID of user currently editing, null if available |
+| currentEditorName | string \| null | Name of current editor                          |
+| lastActivity      | string         | ISO timestamp of last edit activity             |
+| isLocked          | boolean        | Whether note is currently locked for editing    |
 
 **Get Note Content**
+
 ```
 GET /api/notes/{noteId}/content
 ```
 
 Response:
-| Param Name | Param Type | Description |
-|------------|------------|-------------|
-| content | string | Current note content |
-| lastModified | string | ISO timestamp of last modification |
-| lastModifiedBy | string | Name of user who last modified |
+
+| Param Name     | Param Type | Description                        |
+| -------------- | ---------- | ---------------------------------- |
+| content        | string     | Current note content               |
+| lastModified   | string     | ISO timestamp of last modification |
+| lastModifiedBy | string     | Name of user who last modified     |
 
 ## 5. Server Architecture Diagram
 
@@ -265,6 +279,7 @@ erDiagram
 ### 6.2 Data Definition Language
 
 **Users Table**
+
 ```sql
 -- Create users table
 CREATE TABLE users (
@@ -282,6 +297,7 @@ CREATE INDEX idx_users_email ON users(email);
 ```
 
 **Shared Notes Table**
+
 ```sql
 -- Create shared_notes table
 CREATE TABLE shared_notes (
@@ -297,6 +313,7 @@ CREATE INDEX idx_shared_notes_last_modified ON shared_notes(last_modified_at DES
 ```
 
 **Edit Sessions Table**
+
 ```sql
 -- Create edit_sessions table
 CREATE TABLE edit_sessions (
@@ -318,6 +335,7 @@ CREATE INDEX idx_edit_sessions_last_activity ON edit_sessions(last_activity_at D
 ```
 
 **User Sessions Table**
+
 ```sql
 -- Create user_sessions table
 CREATE TABLE user_sessions (
@@ -336,6 +354,7 @@ CREATE INDEX idx_user_sessions_connected ON user_sessions(is_connected, last_pin
 ```
 
 **Initial Data**
+
 ```sql
 -- Insert default shared note
 INSERT INTO shared_notes (content, created_at) 
@@ -369,21 +388,34 @@ $$ LANGUAGE plpgsql;
 ## 7. Key Implementation Features
 
 ### 7.1 Edit Lock Management
-- Single active edit session per note enforced by database constraints
-- Automatic timeout mechanism releases locks after 2 minutes of inactivity
-- Graceful handling of user disconnections through session cleanup
+
+* Single active edit session per note enforced by database constraints
+
+* Automatic timeout mechanism releases locks after 2 minutes of inactivity
+
+* Graceful handling of user disconnections through session cleanup
 
 ### 7.2 Real-time Synchronization
-- WebSocket-based bidirectional communication
-- Content updates broadcast only from current editor to all viewers
-- Typing indicators and cursor position sharing for better UX
+
+* WebSocket-based bidirectional communication
+
+* Content updates broadcast only from current editor to all viewers
+
+* Typing indicators and cursor position sharing for better UX
 
 ### 7.3 Request/Grant Workflow
-- Edit control requests with 30-second expiration
-- Current editor can grant or ignore requests
-- Automatic fallback to first requester if editor disconnects
+
+* Edit control requests with 30-second expiration
+
+* Current editor can grant or ignore requests
+
+* Automatic fallback to first requester if editor disconnects
 
 ### 7.4 State Management
-- Frontend uses Zustand for predictable state management
-- Clear separation between edit mode and view mode states
-- Optimistic UI updates with server confirmation
+
+* Frontend uses Zustand for predictable state management
+
+* Clear separation between edit mode and view mode states
+
+* Optimistic UI updates with server confirmation
+
