@@ -527,12 +527,7 @@ function Dashboard() {
         />
       )}
 
-      {/* Persistent Turn-Based Notes Window */}
-      {/* TEMPORARILY DISABLED - Will be re-enabled later */}
-      {/* <div style={{ border: '2px solid red', padding: '10px', margin: '10px' }}>
-        <h3>DEBUG: TurnBasedNotePad Container</h3>
-        <TurnBasedNotePad />
-      </div> */}
+
     </div>
   );
 }
