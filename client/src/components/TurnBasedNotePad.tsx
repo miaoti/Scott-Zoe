@@ -162,9 +162,13 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
     const newX = e.clientX - dragOffset.x;
     const newY = e.clientY - dragOffset.y;
     
+    // Get current window dimensions (preserve existing size)
+    const currentWidth = windowPosition?.width || 350;
+    const currentHeight = windowPosition?.height || 600;
+    
     // Ensure window stays within viewport bounds
-    const maxX = window.innerWidth - (windowPosition?.width || 400);
-    const maxY = window.innerHeight - (windowPosition?.height || 300);
+    const maxX = window.innerWidth - currentWidth;
+    const maxY = window.innerHeight - currentHeight;
     
     const clampedX = Math.max(0, Math.min(newX, maxX));
     const clampedY = Math.max(0, Math.min(newY, maxY));
@@ -172,8 +176,8 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
     updateWindowPosition(
       clampedX,
       clampedY,
-      windowPosition?.width || 400,
-      windowPosition?.height || 300
+      currentWidth,
+      currentHeight
     );
   }, [isDragging, dragOffset, windowPosition, updateWindowPosition]);
   
@@ -276,10 +280,10 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
       style={{
         left: windowPosition?.xPosition || 100,
         top: windowPosition?.yPosition || 100,
-        width: windowPosition?.width || 500,
-        height: windowPosition?.height || 400,
-        minWidth: 400,
-        minHeight: 300,
+        width: windowPosition?.width || 350,
+        height: windowPosition?.height || 600,
+        minWidth: 300,
+        minHeight: 400,
         maxWidth: '90vw',
         maxHeight: '90vh',
         backgroundColor: 'var(--apple-system-background)',

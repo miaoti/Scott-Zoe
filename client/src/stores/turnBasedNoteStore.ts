@@ -149,7 +149,18 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
   isRequestingEdit: false,
   editRequestMessage: null,
   
-  windowPosition: null,
+  windowPosition: (() => {
+    // Try to restore window position from localStorage
+    try {
+      const saved = localStorage.getItem('turnBasedNoteWindowPosition');
+      if (saved) {
+        return JSON.parse(saved) as WindowPosition;
+      }
+    } catch (error) {
+      console.warn('Failed to restore window position from localStorage:', error);
+    }
+    return null;
+  })(),
   isWindowVisible: false,
   isMinimized: false,
   isMaximized: false,
@@ -462,14 +473,19 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
       height,
     };
     
+    const newWindowPosition = {
+      ...state.windowPosition,
+      ...position,
+      updatedAt: new Date().toISOString(),
+    } as WindowPosition;
+    
     // Update local state
     set({
-      windowPosition: {
-        ...state.windowPosition,
-        ...position,
-        updatedAt: new Date().toISOString(),
-      } as WindowPosition,
+      windowPosition: newWindowPosition,
     });
+    
+    // Persist to localStorage for immediate recovery
+    localStorage.setItem('turnBasedNoteWindowPosition', JSON.stringify(newWindowPosition));
   },
   
   // Collaboration actions
