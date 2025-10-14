@@ -252,39 +252,57 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
   
   return (
     <div 
-      className="fixed bg-white border border-gray-300 rounded-lg shadow-2xl z-50 flex flex-col"
+      className="fixed z-50 flex flex-col notebook-container"
       style={{
         left: windowPosition?.xPosition || 100,
         top: windowPosition?.yPosition || 100,
-        width: windowPosition?.width || 500,
-        height: windowPosition?.height || 400,
-        minWidth: 300,
-        minHeight: 200,
+        width: windowPosition?.width || 600,
+        height: windowPosition?.height || 500,
+        minWidth: 400,
+        minHeight: 300,
+        backgroundColor: '#f8f0e0',
+        border: '1px solid #d4c5a9',
+        borderRadius: '8px',
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2), inset 0 0 20px rgba(0, 0, 0, 0.05)',
+        fontFamily: '"Courier New", "American Typewriter", Courier, monospace',
       }}
     >
-      {/* Title Bar */}
+      {/* Notebook Header/Title Bar */}
       <div 
-        className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 rounded-t-lg cursor-move flex items-center justify-between select-none"
+        className="cursor-move flex items-center justify-between select-none notebook-header"
         onMouseDown={handleMouseDown}
+        style={{
+          backgroundColor: '#8b5a2b',
+          color: '#f8f0e0',
+          padding: '12px 16px',
+          borderRadius: '8px 8px 0 0',
+          borderBottom: '2px solid #6b4425',
+          background: 'linear-gradient(45deg, #8b5a2b 0%, #a0672f 50%, #8b5a2b 100%)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1)',
+        }}
       >
-        <div className="flex items-center space-x-2">
-          <StatusIcon className={`w-4 h-4 ${statusInfo.spin ? 'animate-spin' : ''}`} />
-          <span className="font-medium">Shared Notes - {statusInfo.text}</span>
+        <div className="flex items-center space-x-3">
+          <StatusIcon className={`w-5 h-5 ${statusInfo.spin ? 'animate-spin' : ''}`} />
+          <span className="font-bold text-lg tracking-wide" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.3)' }}>
+            📝 Shared Notebook - {statusInfo.text}
+          </span>
         </div>
         
         <div className="flex items-center space-x-2">
           <button
             onClick={handleMinimize}
-            className="p-1 hover:bg-white/20 rounded transition-colors"
+            className="p-2 hover:bg-black/20 rounded transition-colors"
             title="Minimize"
+            style={{ color: '#f8f0e0' }}
           >
             <Minimize2 className="w-4 h-4" />
           </button>
           {onClose && (
             <button
               onClick={onClose}
-              className="p-1 hover:bg-white/20 rounded transition-colors"
+              className="p-2 hover:bg-black/20 rounded transition-colors text-xl font-bold"
               title="Close"
+              style={{ color: '#f8f0e0' }}
             >
               ×
             </button>
@@ -292,47 +310,71 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
         </div>
       </div>
       
-      {/* Status Bar */}
-      <div className="bg-gray-50 px-3 py-2 border-b border-gray-200 flex items-center justify-between text-sm">
+      {/* Status Bar - Styled like notebook tab */}
+      <div 
+        className="flex items-center justify-between text-sm"
+        style={{
+          backgroundColor: '#e8daba',
+          padding: '8px 16px',
+          borderBottom: '1px solid #d4c5a9',
+          color: '#5d4e37',
+        }}
+      >
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-2">
             {isConnected ? (
-              <Wifi className="w-4 h-4 text-green-500" />
+              <Wifi className="w-4 h-4 text-green-600" />
             ) : (
-              <WifiOff className="w-4 h-4 text-red-500" />
+              <WifiOff className="w-4 h-4 text-red-600" />
             )}
-            <span className={isConnected ? 'text-green-600' : 'text-red-600'}>
-              {isConnected ? 'Connected' : 'Disconnected'}
+            <span className={isConnected ? 'text-green-700 font-medium' : 'text-red-700 font-medium'}>
+              {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
             </span>
           </div>
           
           {isLocked && currentEditor && (
-            <div className="flex items-center space-x-1">
-              <Lock className="w-4 h-4 text-orange-500" />
-              <span className="text-orange-600">
-                {currentEditor.id === user?.id ? 'You are editing' : `${currentEditor.username} is editing`}
+            <div className="flex items-center space-x-2">
+              <Lock className="w-4 h-4 text-orange-600" />
+              <span className="text-orange-700 font-medium">
+                {currentEditor.id === user?.id ? '✏️ You are writing' : `✏️ ${currentEditor.username} is writing`}
               </span>
             </div>
           )}
         </div>
         
-        {/* Edit Control Buttons */}
+        {/* Edit Control Buttons - Styled like notebook elements */}
         <div className="flex items-center space-x-2">
           {!hasEditPermission && !isLocked && (
             <button
               onClick={handleRequestEdit}
               disabled={isRequestingEdit}
-              className="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+              className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+              style={{
+                backgroundColor: '#8b5a2b',
+                color: '#f8f0e0',
+                border: '1px solid #6b4425',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              }}
+              onMouseEnter={(e) => {
+                if (!isRequestingEdit) {
+                  e.currentTarget.style.backgroundColor = '#a0672f';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isRequestingEdit) {
+                  e.currentTarget.style.backgroundColor = '#8b5a2b';
+                }
+              }}
             >
               {isRequestingEdit ? (
                 <>
-                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Requesting...</span>
                 </>
               ) : (
                 <>
-                  <Edit3 className="w-3 h-3" />
-                  <span>Request Edit</span>
+                  <Edit3 className="w-4 h-4" />
+                  <span>Request to Write</span>
                 </>
               )}
             </button>
@@ -341,10 +383,22 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
           {hasEditPermission && (
             <button
               onClick={handleReleaseEdit}
-              className="px-3 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 flex items-center space-x-1"
+              className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-2"
+              style={{
+                backgroundColor: '#a34c4c',
+                color: '#f8f0e0',
+                border: '1px solid #8b3a3a',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#b85555';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#a34c4c';
+              }}
             >
-              <Unlock className="w-3 h-3" />
-              <span>Release Edit</span>
+              <Unlock className="w-4 h-4" />
+              <span>Stop Writing</span>
             </button>
           )}
         </div>
@@ -352,20 +406,38 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
       
       {/* Error/Message Bar */}
       {(error || editRequestMessage) && (
-        <div className={`px-3 py-2 border-b text-sm flex items-center space-x-2 ${
-          error ? 'bg-red-50 border-red-200 text-red-700' : 'bg-blue-50 border-blue-200 text-blue-700'
-        }`}>
+        <div 
+          className="flex items-center space-x-2 text-sm"
+          style={{
+            padding: '8px 16px',
+            borderBottom: '1px solid #d4c5a9',
+            backgroundColor: error ? '#f8d7da' : '#d1ecf1',
+            color: error ? '#721c24' : '#0c5460',
+          }}
+        >
           {error ? (
-            <AlertCircle className="w-4 h-4 text-red-500" />
+            <AlertCircle className="w-4 h-4 text-red-600" />
           ) : (
-            <CheckCircle className="w-4 h-4 text-blue-500" />
+            <CheckCircle className="w-4 h-4 text-blue-600" />
           )}
           <span>{error || editRequestMessage}</span>
         </div>
       )}
       
-      {/* Content Area */}
-      <div className="flex-1 p-3 relative">
+      {/* Notebook Paper Content Area */}
+      <div 
+        className="flex-1 relative notebook-paper"
+        style={{
+          backgroundColor: '#f8f0e0',
+          backgroundImage: `
+            linear-gradient(to right, #f8d3d3 40px, transparent 40px),
+            linear-gradient(to bottom, transparent 0px, transparent 29px, #e7eff8 30px, transparent 31px)
+          `,
+          backgroundSize: '100% 30px',
+          backgroundPosition: '0 0',
+          backgroundAttachment: 'local',
+        }}
+      >
         <textarea
           ref={textareaRef}
           value={content}
@@ -373,49 +445,73 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
           onSelect={handleCursorChange}
           placeholder={
             hasEditPermission 
-              ? "Start typing your shared notes here..." 
+              ? "Start writing your shared notes here..." 
               : isLocked 
-                ? `${currentEditor?.username || 'Another user'} is currently editing. You can view but not edit.`
-                : "Click 'Request Edit' to start editing..."
+                ? `${currentEditor?.username || 'Another user'} is currently writing. You can read but not write.`
+                : "Click 'Request to Write' to start writing..."
           }
-          className={`w-full h-full resize-none border-none outline-none text-gray-800 leading-relaxed ${
-            !hasEditPermission ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'
-          }`}
+          className="w-full h-full resize-none border-none outline-none notebook-textarea"
           style={{ 
-            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
-            fontSize: '14px',
+            fontFamily: '"Courier New", "American Typewriter", Courier, monospace',
+            fontSize: '16px',
+            lineHeight: '30px',
+            padding: '15px 20px 15px 60px',
+            backgroundColor: 'transparent',
+            color: hasEditPermission ? '#2a1a0a' : '#666',
+            cursor: !hasEditPermission ? 'not-allowed' : 'text',
           }}
           disabled={!hasEditPermission}
         />
         
-        {/* Typing Indicators */}
+        {/* Typing Indicators - Styled for notebook */}
         {typingText && (
-          <div className="absolute bottom-2 left-3 text-xs text-gray-500 italic flex items-center space-x-1">
+          <div 
+            className="absolute flex items-center space-x-2 text-sm italic"
+            style={{
+              bottom: '12px',
+              left: '60px',
+              color: '#8b5a2b',
+              backgroundColor: 'rgba(248, 240, 224, 0.9)',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              border: '1px solid #d4c5a9',
+            }}
+          >
             <div className="flex space-x-1">
-              <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-              <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-              <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
             </div>
-            <span>{typingText}</span>
+            <span>✍️ {typingText}</span>
           </div>
         )}
       </div>
       
-      {/* Footer */}
-      <div className="bg-gray-50 px-3 py-2 rounded-b-lg border-t border-gray-200 text-xs text-gray-500 flex items-center justify-between">
+      {/* Footer - Styled like notebook binding */}
+      <div 
+        className="flex items-center justify-between text-xs"
+        style={{
+          backgroundColor: '#e8daba',
+          padding: '8px 16px',
+          borderTop: '1px solid #d4c5a9',
+          borderRadius: '0 0 8px 8px',
+          color: '#5d4e37',
+          background: 'linear-gradient(to bottom, #e8daba, #ddd0b4)',
+        }}
+      >
         <div className="flex items-center space-x-4">
-          <span>Turn-based collaborative editing</span>
+          <span>📚 Collaborative Notebook</span>
           {user && (
-            <span>Logged in as {user.username}</span>
+            <span>👤 {user.username}</span>
           )}
         </div>
         
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           <span>{content.length} characters</span>
           {hasEditPermission && (
-            <div className="flex items-center space-x-1 text-green-600">
+            <div className="flex items-center space-x-1 text-green-700 font-medium">
               <Edit3 className="w-3 h-3" />
-              <span>Editing</span>
+              <span>Writing</span>
             </div>
           )}
         </div>
