@@ -278,8 +278,8 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
     <div 
       className="fixed z-50 flex flex-col apple-shadow"
       style={{
-        left: windowPosition?.xPosition || (window.innerWidth - 370), // Top-right corner (350px width + 20px margin)
-        top: windowPosition?.yPosition || 80, // Below typical page header
+        left: windowPosition?.xPosition || 100,
+        top: windowPosition?.yPosition || 100,
         width: windowPosition?.width || 350,
         height: windowPosition?.height || 600,
         minWidth: 300,
@@ -308,23 +308,34 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
           fontFamily: 'var(--font-heading)',
         }}
       >
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-4">
           <span className="font-semibold text-base">
             Shared Notes
           </span>
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
+              ) : isConnected ? (
+                <Wifi className="w-4 h-4 text-green-500" />
+              ) : (
+                <WifiOff className="w-4 h-4 text-red-500" />
+              )}
+              <span className="text-sm" style={{ color: 'var(--apple-secondary-label)' }}>
+                {isLoading ? 'Connecting' : isConnected ? 'Connected' : 'Disconnected'}
+              </span>
+            </div>
+            <div className="w-px h-4" style={{ backgroundColor: 'var(--apple-separator)' }}></div>
+            <div className="flex items-center space-x-1">
+              <StatusIcon className={`w-4 h-4 ${statusInfo.color}`} />
+              <span className="text-sm" style={{ color: 'var(--apple-secondary-label)' }}>
+                {statusInfo.text}
+              </span>
+            </div>
+          </div>
         </div>
         
         <div className="flex items-center space-x-2">
-          {/* Connection Status in Header */}
-          <div className="flex items-center space-x-1 px-2 py-1 rounded-md" style={{
-            backgroundColor: 'var(--apple-gray-6)',
-            border: '1px solid var(--apple-separator)',
-          }}>
-            <StatusIcon className={`w-3 h-3 ${statusInfo.color} ${statusInfo.spin ? 'animate-spin' : ''}`} />
-            <span className="text-xs font-medium" style={{ color: 'var(--apple-secondary-label)' }}>
-              {statusInfo.text}
-            </span>
-          </div>
           <button
             onClick={handleMinimize}
             className="p-2 rounded-full transition-all duration-200"
@@ -368,68 +379,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
         </div>
       </div>
       
-      {/* Status Bar */}
-      <div 
-        className="flex items-center justify-between text-sm"
-        style={{
-          backgroundColor: 'var(--apple-tertiary-background)',
-          padding: '8px 16px',
-          borderBottom: '1px solid var(--apple-separator)',
-          color: 'var(--apple-secondary-label)',
-        }}
-      >
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            {isConnected ? (
-              <Wifi className="w-4 h-4" style={{ color: 'var(--apple-blue)' }} />
-            ) : (
-              <WifiOff className="w-4 h-4" style={{ color: '#FF3B30' }} />
-            )}
-            <span 
-              className="font-medium"
-              style={{ 
-                color: isConnected ? 'var(--apple-blue)' : '#FF3B30'
-              }}
-            >
-              {isConnected ? 'Connected' : 'Disconnected'}
-            </span>
-          </div>
-          
-          {isLocked && currentEditor && (
-            <div className="flex items-center space-x-2">
-              <Lock className="w-4 h-4" style={{ color: '#FF9500' }} />
-              <span className="font-medium" style={{ color: '#FF9500' }}>
-                {currentEditor.id === user?.id ? 'You are editing' : `${currentEditor.username} is editing`}
-              </span>
-            </div>
-          )}
-        </div>
-        
-        {/* Edit Control Buttons - Only show Stop Editing button here */}
-        <div className="flex items-center space-x-2">
-          {hasEditPermission && (
-            <button
-              onClick={handleReleaseEdit}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2"
-              style={{
-                backgroundColor: '#FF3B30',
-                color: 'white',
-                border: 'none',
-                fontFamily: 'var(--font-body)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#FF6B60';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#FF3B30';
-              }}
-            >
-              <Unlock className="w-4 h-4" />
-              <span>Stop Editing</span>
-            </button>
-          )}
-        </div>
-      </div>
+
       
       {/* Error/Message Bar */}
       {(error || editRequestMessage) && (
@@ -469,7 +419,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
               ? "Start writing your shared notes here..." 
               : isLocked 
                 ? `${currentEditor?.username || 'Another user'} is currently editing. You can read but not edit.`
-                : "Click the edit button to start writing..."
+                : "Click 'Request Edit' to start editing..."
           }
           className="w-full h-full resize-none border-none outline-none"
           style={{ 
@@ -477,6 +427,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
             fontSize: '14px',
             lineHeight: '1.5',
             padding: '16px',
+            paddingBottom: '60px', // Extra padding for floating buttons
             backgroundColor: 'transparent',
             color: hasEditPermission ? 'var(--apple-label)' : 'var(--apple-secondary-label)',
             cursor: !hasEditPermission ? 'not-allowed' : 'text',
@@ -484,54 +435,69 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
           disabled={!hasEditPermission}
         />
         
-        {/* Floating Request Edit Button inside textarea */}
-        {!hasEditPermission && !isLocked && (
-          <button
-            onClick={handleRequestEdit}
-            disabled={isRequestingEdit}
-            className="absolute transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg"
-            style={{
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              backgroundColor: isRequestingEdit ? 'var(--apple-gray-3)' : 'var(--apple-blue)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              padding: '12px 20px',
-              fontFamily: 'var(--font-body)',
-              fontSize: '14px',
-              fontWeight: '500',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              zIndex: 10,
-            }}
-            onMouseEnter={(e) => {
-              if (!isRequestingEdit) {
-                e.currentTarget.style.backgroundColor = '#0056D6';
-                e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1.05)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isRequestingEdit) {
-                e.currentTarget.style.backgroundColor = 'var(--apple-blue)';
-                e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1)';
-              }
-            }}
-          >
-            {isRequestingEdit ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Requesting...</span>
-              </>
-            ) : (
-              <>
-                <Edit3 className="w-4 h-4" />
-                <span>Start Editing</span>
-              </>
-            )}
-          </button>
-        )}
+        {/* Floating Edit Control Buttons */}
+        <div 
+          className="absolute flex items-center space-x-2"
+          style={{
+            bottom: '16px',
+            right: '16px',
+            zIndex: 10,
+          }}
+        >
+          {!hasEditPermission && !isLocked && (
+            <button
+              onClick={handleRequestEdit}
+              disabled={isRequestingEdit}
+              className="px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1 shadow-lg"
+              style={{
+                backgroundColor: isRequestingEdit ? 'var(--apple-gray-3)' : 'var(--apple-blue)',
+                color: 'white',
+                border: 'none',
+                fontFamily: 'var(--font-body)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+              }}
+              title={isRequestingEdit ? "Requesting edit permission..." : "Request edit permission"}
+            >
+              {isRequestingEdit ? (
+                <>
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <span>Requesting</span>
+                </>
+              ) : (
+                <>
+                  <Edit3 className="w-3 h-3" />
+                  <span>Edit</span>
+                </>
+              )}
+            </button>
+          )}
+          
+          {hasEditPermission && (
+            <button
+              onClick={handleReleaseEdit}
+              className="px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 flex items-center space-x-1 shadow-lg"
+              style={{
+                backgroundColor: '#FF3B30',
+                color: 'white',
+                border: 'none',
+                fontFamily: 'var(--font-body)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#FF6B60';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#FF3B30';
+              }}
+              title="Stop editing and release control"
+            >
+              <Unlock className="w-3 h-3" />
+              <span>Stop</span>
+            </button>
+          )}
+        </div>
         
         {/* Typing Indicators */}
         {typingText && (
