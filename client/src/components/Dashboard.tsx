@@ -73,6 +73,7 @@ function Dashboard() {
   const [stats, setStats] = useState({ photos: 0, memories: 0, totalLove: 0 });
   const [catPositions, setCatPositions] = useState<CatPosition[]>([]);
   const [showWheel, setShowWheel] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const {
     ownedBoxes,
@@ -89,6 +90,15 @@ function Dashboard() {
     isConnected,
     error
   } = useSurpriseBoxActions();
+
+  // Auto-slide carousel effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % 2);
+    }, 4000); // Change slide every 4 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Generate random positions for cats with minimum distance to avoid crowding
   const generateRandomPosition = (existingPositions: CatPosition[] = []): { top: string; left: string } => {
@@ -293,89 +303,69 @@ function Dashboard() {
       </div>
       
       <div className={`relative max-w-6xl mx-auto px-6 py-8 z-20 pointer-events-none ${showWheel ? 'opacity-30 pointer-events-none' : ''}`}>
-        {/* Photo Gallery Header */}
+        {/* Fashion Sliding Photo Carousel */}
         <div className="slide-up mb-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            {/* First Photo */}
-            <div className="group relative overflow-hidden rounded-2xl apple-shadow hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02]">
-              <div className="aspect-[4/3] md:aspect-[16/10] relative">
+          <div className="relative h-64 md:h-72 overflow-hidden rounded-2xl apple-shadow group">
+            {/* Sliding Images Container */}
+            <div 
+              className="absolute inset-0 flex transition-transform duration-1000 ease-in-out"
+              style={{
+                transform: `translateX(-${currentSlide * 100}%)`
+              }}
+            >
+              {/* First Photo */}
+              <div className="w-full h-full flex-shrink-0 relative">
                 <img
                   src="https://raw.githubusercontent.com/miaoti/Test/refs/heads/main/1.png"
                   alt="Beautiful moment from our love story"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  loading="lazy"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const parent = target.parentElement;
-                    if (parent) {
-                      parent.innerHTML = '<div class="w-full h-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center"><div class="text-center"><div class="text-4xl mb-2">💕</div><div class="text-apple-secondary-label">Photo Loading...</div></div></div>';
-                    }
-                  }}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                {/* Overlay gradient for better text readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                {/* Elegant overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
                 
-                {/* Loading placeholder */}
-                <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-purple-50 animate-pulse flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-8 h-8 border-2 border-pink-300 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                    <div className="text-sm text-apple-secondary-label">Loading...</div>
-                  </div>
+                {/* Decorative element */}
+                <div className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
+                  <span className="text-white text-lg">✨</span>
                 </div>
               </div>
-              
-              {/* Decorative elements */}
-              <div className="absolute top-4 right-4 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="text-white text-xl">✨</div>
+
+              {/* Second Photo */}
+              <div className="w-full h-full flex-shrink-0 relative">
+                <img
+                  src="https://raw.githubusercontent.com/miaoti/Test/refs/heads/main/cfcb5358-6626-42aa-9854-b3b599f3d592.png"
+                  alt="Another precious moment from our journey together"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                {/* Elegant overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+                
+                {/* Decorative element */}
+                <div className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
+                  <span className="text-white text-lg">💕</span>
                 </div>
               </div>
             </div>
 
-            {/* Second Photo */}
-            <div className="group relative overflow-hidden rounded-2xl apple-shadow hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02]">
-              <div className="aspect-[4/3] md:aspect-[16/10] relative">
-                <img
-                  src="https://raw.githubusercontent.com/miaoti/Test/refs/heads/main/cfcb5358-6626-42aa-9854-b3b599f3d592.png"
-                  alt="Another precious moment from our journey together"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  loading="lazy"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const parent = target.parentElement;
-                    if (parent) {
-                      parent.innerHTML = '<div class="w-full h-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center"><div class="text-center"><div class="text-4xl mb-2">💖</div><div class="text-apple-secondary-label">Photo Loading...</div></div></div>';
-                    }
-                  }}
-                />
-                {/* Overlay gradient for better text readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                
-                {/* Loading placeholder */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 animate-pulse flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-8 h-8 border-2 border-blue-300 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                    <div className="text-sm text-apple-secondary-label">Loading...</div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Decorative elements */}
-              <div className="absolute top-4 right-4 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="text-white text-xl">💕</div>
-                </div>
-              </div>
+            {/* Slide Indicators */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+              <div 
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  currentSlide === 0 ? 'bg-white/90' : 'bg-white/40'
+                }`}
+              ></div>
+              <div 
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  currentSlide === 1 ? 'bg-white/90' : 'bg-white/40'
+                }`}
+              ></div>
             </div>
-          </div>
-          
-          {/* Subtle caption below photos */}
-          <div className="text-center mt-6">
-            <p className="text-lg text-apple-secondary-label max-w-2xl mx-auto leading-relaxed">
-              Our beautiful journey together ✨
-            </p>
+
+            {/* Caption Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/50 to-transparent">
+              <p className="text-white text-lg font-medium text-center">
+                Our beautiful journey together ✨
+              </p>
+            </div>
           </div>
         </div>
 
