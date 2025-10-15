@@ -337,7 +337,7 @@ function Dashboard() {
                   {recentPhotos.slice(0, 4).map((photo, index) => (
                     <div key={photo.id} className="aspect-square rounded-xl overflow-hidden bg-white shadow-sm border-2 border-pink-100 group-hover:border-pink-200 transition-all duration-300" style={{animationDelay: `${index * 100}ms`}}>
                       <img
-                        src={`${API_BASE_URL}/api/photos/image/${photo.filename}`}
+                        src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=thumbnail`}
                         alt={photo.caption || 'Recent photo'}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                       />

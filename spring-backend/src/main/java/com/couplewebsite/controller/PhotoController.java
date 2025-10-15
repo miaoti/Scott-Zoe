@@ -353,10 +353,12 @@ public class PhotoController {
      * Serve photo images
      */
     @GetMapping("/image/{fileName:.+}")
-    public ResponseEntity<Resource> getPhotoImage(@PathVariable String fileName) {
+    public ResponseEntity<Resource> getPhotoImage(
+            @PathVariable String fileName,
+            @RequestParam(value = "size", required = false, defaultValue = "large") String size) {
         try {
             // Load file as Resource
-            Path filePath = fileStorageService.getFilePath(fileName);
+            Path filePath = fileStorageService.getFilePathWithSize(fileName, size);
             Resource resource = new UrlResource(filePath.toUri());
             
             if (resource.exists() && resource.isReadable()) {

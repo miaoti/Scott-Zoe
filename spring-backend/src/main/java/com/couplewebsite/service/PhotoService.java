@@ -53,8 +53,8 @@ public class PhotoService {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
             User uploader = userDetailsService.getUserByUsername(username);
             
-            // Store file
-            String fileName = fileStorageService.storeFile(file);
+            // Store file with multiple sizes
+            String fileName = fileStorageService.storeFileWithSizes(file);
             String filePath = fileStorageService.getFilePath(fileName).toString();
             
             // Create photo entity
@@ -115,8 +115,8 @@ public class PhotoService {
                         continue;
                     }
                     
-                    // Store file
-                    String fileName = fileStorageService.storeFile(file);
+                    // Store file with multiple sizes
+                    String fileName = fileStorageService.storeFileWithSizes(file);
                     uploadedFiles.add(fileName);
                     String filePath = fileStorageService.getFilePath(fileName).toString();
                     

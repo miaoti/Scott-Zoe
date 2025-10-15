@@ -332,7 +332,7 @@ function CategoryPhotos() {
                 onClick={() => selectionMode ? togglePhotoSelection(photo.id) : openPhotoDetail(photo)}
               >
                 <img
-                  src={`${API_BASE_URL}/api/photos/image/${photo.filename}`}
+                  src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=thumbnail`}
                   alt={photo.originalName}
                   className="w-full h-full object-cover"
                   loading="lazy"

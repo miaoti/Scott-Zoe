@@ -184,10 +184,11 @@ function PhotoGallery() {
               onClick={() => openPhotoDetail(photo)}
             >
               <img
-                src={`${API_BASE_URL}/api/photos/image/${photo.filename}`}
+                src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=thumbnail`}
                 alt={photo.originalName}
                 className="w-full h-full object-cover"
                 loading="lazy"
+                onClick={() => openModal(photo)}
               />
               
               {/* Favorite button - hidden on mobile, visible on desktop */}
@@ -352,7 +353,7 @@ function PhotoGallery() {
                       {categoryPhotos.slice(0, 3).map((photo) => (
                         <div key={photo.id} className="aspect-square relative overflow-hidden rounded-lg">
                           <img
-                            src={`${API_BASE_URL}/api/photos/image/${photo.filename}`}
+                            src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=thumbnail`}
                             alt={photo.originalName}
                             className="w-full h-full object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
                             onClick={() => openPhotoDetail(photo)}
