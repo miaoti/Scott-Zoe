@@ -73,7 +73,6 @@ function Dashboard() {
   const [stats, setStats] = useState({ photos: 0, memories: 0, totalLove: 0 });
   const [catPositions, setCatPositions] = useState<CatPosition[]>([]);
   const [showWheel, setShowWheel] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
 
   const {
     ownedBoxes,
@@ -88,17 +87,9 @@ function Dashboard() {
     connectWebSocket,
     disconnectWebSocket,
     isConnected,
-    error
+    error,
+    openSurpriseBox
   } = useSurpriseBoxActions();
-
-  // Auto-slide carousel effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % 2);
-    }, 4000); // Change slide every 4 seconds
-
-    return () => clearInterval(interval);
-  }, []);
 
   // Generate random positions for cats with minimum distance to avoid crowding
   const generateRandomPosition = (existingPositions: CatPosition[] = []): { top: string; left: string } => {
@@ -303,17 +294,12 @@ function Dashboard() {
       </div>
       
       <div className={`relative max-w-6xl mx-auto px-6 py-8 z-20 pointer-events-none ${showWheel ? 'opacity-30 pointer-events-none' : ''}`}>
-        {/* Fashion Sliding Photo Carousel */}
+        {/* Infinite Sliding Photo Carousel */}
         <div className="slide-up mb-12">
-          <div className="relative h-64 md:h-72 overflow-hidden rounded-2xl apple-shadow group">
-            {/* Sliding Images Container */}
-            <div 
-              className="absolute inset-0 flex transition-transform duration-1000 ease-in-out"
-              style={{
-                transform: `translateX(-${currentSlide * 100}%)`
-              }}
-            >
-              {/* First Photo */}
+          <div className="relative h-32 md:h-36 overflow-hidden rounded-2xl apple-shadow group">
+            {/* Infinite Sliding Container */}
+            <div className="absolute inset-0 flex animate-infinite-slide">
+              {/* First Set of Images */}
               <div className="w-full h-full flex-shrink-0 relative">
                 <img
                   src="https://raw.githubusercontent.com/miaoti/Test/refs/heads/main/1.png"
@@ -324,12 +310,11 @@ function Dashboard() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
                 
                 {/* Decorative element */}
-                <div className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
-                  <span className="text-white text-lg">✨</span>
+                <div className="absolute top-3 right-3 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
+                  <span className="text-white text-sm">✨</span>
                 </div>
               </div>
 
-              {/* Second Photo */}
               <div className="w-full h-full flex-shrink-0 relative">
                 <img
                   src="https://raw.githubusercontent.com/miaoti/Test/refs/heads/main/cfcb5358-6626-42aa-9854-b3b599f3d592.png"
@@ -340,34 +325,66 @@ function Dashboard() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
                 
                 {/* Decorative element */}
-                <div className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
-                  <span className="text-white text-lg">💕</span>
+                <div className="absolute top-3 right-3 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
+                  <span className="text-white text-sm">💕</span>
+                </div>
+              </div>
+
+              {/* Duplicate Set for Seamless Loop */}
+              <div className="w-full h-full flex-shrink-0 relative">
+                <img
+                  src="https://raw.githubusercontent.com/miaoti/Test/refs/heads/main/1.png"
+                  alt="Beautiful moment from our love story"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                {/* Elegant overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+                
+                {/* Decorative element */}
+                <div className="absolute top-3 right-3 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
+                  <span className="text-white text-sm">✨</span>
+                </div>
+              </div>
+
+              <div className="w-full h-full flex-shrink-0 relative">
+                <img
+                  src="https://raw.githubusercontent.com/miaoti/Test/refs/heads/main/cfcb5358-6626-42aa-9854-b3b599f3d592.png"
+                  alt="Another precious moment from our journey together"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                {/* Elegant overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+                
+                {/* Decorative element */}
+                <div className="absolute top-3 right-3 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
+                  <span className="text-white text-sm">💕</span>
                 </div>
               </div>
             </div>
 
-            {/* Slide Indicators */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-              <div 
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  currentSlide === 0 ? 'bg-white/90' : 'bg-white/40'
-                }`}
-              ></div>
-              <div 
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  currentSlide === 1 ? 'bg-white/90' : 'bg-white/40'
-                }`}
-              ></div>
-            </div>
-
             {/* Caption Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/50 to-transparent">
-              <p className="text-white text-lg font-medium text-center">
+            <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/50 to-transparent">
+              <p className="text-white text-sm font-medium text-center">
                 Our beautiful journey together ✨
               </p>
             </div>
           </div>
         </div>
+
+        <style jsx>{`
+          @keyframes infinite-slide {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-200%); }
+          }
+          
+          .animate-infinite-slide {
+            animation: infinite-slide 12s linear infinite;
+          }
+          
+          .animate-infinite-slide:hover {
+            animation-play-state: paused;
+          }
+        `}</style>
 
         {/* Love Share Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
