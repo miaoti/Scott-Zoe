@@ -293,14 +293,90 @@ function Dashboard() {
       </div>
       
       <div className={`relative max-w-6xl mx-auto px-6 py-8 z-20 pointer-events-none ${showWheel ? 'opacity-30 pointer-events-none' : ''}`}>
-        {/* Welcome Section */}
-        <div className="text-center slide-up mb-12">
-          <h1 className="font-heading text-5xl font-semibold text-apple-label mb-6">
-            Welcome to Our Love Story
-          </h1>
-          <p className="text-xl text-apple-secondary-label max-w-3xl mx-auto leading-relaxed">
-            A private sanctuary where we celebrate our precious moments, memories, and the beautiful journey of our love ✨
-          </p>
+        {/* Photo Gallery Header */}
+        <div className="slide-up mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {/* First Photo */}
+            <div className="group relative overflow-hidden rounded-2xl apple-shadow hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02]">
+              <div className="aspect-[4/3] md:aspect-[16/10] relative">
+                <img
+                  src="https://raw.githubusercontent.com/miaoti/Test/refs/heads/main/1.png"
+                  alt="Beautiful moment from our love story"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  loading="lazy"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.innerHTML = '<div class="w-full h-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center"><div class="text-center"><div class="text-4xl mb-2">💕</div><div class="text-apple-secondary-label">Photo Loading...</div></div></div>';
+                    }
+                  }}
+                />
+                {/* Overlay gradient for better text readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                {/* Loading placeholder */}
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-purple-50 animate-pulse flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-8 h-8 border-2 border-pink-300 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    <div className="text-sm text-apple-secondary-label">Loading...</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Decorative elements */}
+              <div className="absolute top-4 right-4 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-white text-xl">✨</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Second Photo */}
+            <div className="group relative overflow-hidden rounded-2xl apple-shadow hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02]">
+              <div className="aspect-[4/3] md:aspect-[16/10] relative">
+                <img
+                  src="https://raw.githubusercontent.com/miaoti/Test/refs/heads/main/cfcb5358-6626-42aa-9854-b3b599f3d592.png"
+                  alt="Another precious moment from our journey together"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  loading="lazy"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.innerHTML = '<div class="w-full h-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center"><div class="text-center"><div class="text-4xl mb-2">💖</div><div class="text-apple-secondary-label">Photo Loading...</div></div></div>';
+                    }
+                  }}
+                />
+                {/* Overlay gradient for better text readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                {/* Loading placeholder */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 animate-pulse flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-8 h-8 border-2 border-blue-300 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    <div className="text-sm text-apple-secondary-label">Loading...</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Decorative elements */}
+              <div className="absolute top-4 right-4 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-white text-xl">💕</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Subtle caption below photos */}
+          <div className="text-center mt-6">
+            <p className="text-lg text-apple-secondary-label max-w-2xl mx-auto leading-relaxed">
+              Our beautiful journey together ✨
+            </p>
+          </div>
         </div>
 
         {/* Love Share Cards */}
