@@ -371,7 +371,7 @@ public class PhotoController {
      */
     @GetMapping("/random")
     public ResponseEntity<?> getRandomPhotos(
-            @RequestParam(defaultValue = "4") int limit) {
+            @RequestParam(defaultValue = "15") int limit) {
         try {
             List<Photo> randomPhotos = photoService.getRandomPhotos(limit);
             
