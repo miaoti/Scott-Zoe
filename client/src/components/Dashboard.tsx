@@ -91,7 +91,7 @@ function Dashboard() {
     openSurpriseBox
   } = useSurpriseBoxActions();
 
-  // Generate random positions for cats with minimum distance to avoid crowding
+  // Generate random positions for cats with minimum distance to avoid crowd
   const generateRandomPosition = (existingPositions: CatPosition[] = []): { top: string; left: string } => {
     let attempts = 0;
     let position;
