@@ -440,12 +440,19 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
           handleTypingUpdate(data);
         });
         
-        // Removed automatic edit status and content fetching
-        // Edit control should only be requested when user clicks edit button
-        // setTimeout(() => {
-        //   get().fetchEditStatus();
-        //   get().fetchNoteContent();
-        // }, 100);
+        // Subscribe to initial content updates
+        client.subscribe('/user/queue/shared-note/updates', (message) => {
+          const data = JSON.parse(message.body);
+          handleInitialContent(data);
+        });
+        
+        // Request initial note content after all subscriptions are set up
+        setTimeout(() => {
+          client.publish({
+            destination: '/app/shared-note/subscribe',
+            body: JSON.stringify({})
+          });
+        }, 100);
       };
       
       client.onStompError = (frame) => {
@@ -653,6 +660,17 @@ function handleTypingUpdate(data: EditControlMessage) {
     };
     
     useTurnBasedNoteStore.getState().updateTypingIndicator(indicator);
+  }
+}
+
+function handleInitialContent(data: any) {
+  console.log('Received initial content:', data);
+  
+  if (data.type === 'INITIAL_CONTENT') {
+    set({
+      content: data.content || '',
+      noteId: data.noteId || 1,
+    });
   }
 }
 

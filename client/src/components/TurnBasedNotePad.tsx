@@ -146,10 +146,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
   }, [releaseEditControl]);
   
   // Handle window controls
-  const handleMinimize = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
-    if (e) {
-      e.stopPropagation();
-    }
+  const handleMinimize = useCallback(() => {
     setMinimized(!isMinimized);
   }, [isMinimized, setMinimized]);
   
@@ -313,7 +310,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          handleMinimize(e);
+          handleMinimize();
         }}
         style={{
           backgroundColor: 'var(--apple-glass-bg)',
@@ -426,7 +423,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              handleMinimize(e);
+              handleMinimize();
             }}
             className="p-2 rounded-full transition-all duration-200"
             title="Minimize"
