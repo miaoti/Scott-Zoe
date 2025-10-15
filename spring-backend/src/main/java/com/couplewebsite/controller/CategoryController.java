@@ -277,11 +277,11 @@ public class CategoryController {
     }
 
     /**
-     * Get photos by category ID
+     * Get photos by category ID (Apple Photos style - all photos at once)
      */
     @GetMapping("/{categoryId}/photos")
     public ResponseEntity<?> getPhotosByCategory(@PathVariable Long categoryId) {
-        logger.info("Getting photos for category ID: {}", categoryId);
+        logger.info("Getting all photos for category ID: {}", categoryId);
         
         try {
             // First check if category exists

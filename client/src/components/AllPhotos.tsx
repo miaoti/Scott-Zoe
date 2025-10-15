@@ -40,8 +40,6 @@ function AllPhotos() {
   const [showPhotoDetail, setShowPhotoDetail] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
   const [totalPhotos, setTotalPhotos] = useState(0);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(new Set());
@@ -50,7 +48,7 @@ function AllPhotos() {
 
   useEffect(() => {
     fetchPhotos();
-  }, [page, isFavoritesView]);
+  }, [isFavoritesView]);
 
   useEffect(() => {
     fetchCategories();
@@ -60,28 +58,13 @@ function AllPhotos() {
     try {
       setLoading(true);
       const endpoint = isFavoritesView 
-        ? `/api/photos/favorites?page=${page}&limit=20`
-        : `/api/photos?page=${page}&limit=20`;
+        ? `/api/photos/favorites/all`
+        : `/api/photos/all`;
       const response = await api.get(endpoint);
       
-      if (isFavoritesView) {
-        // Check if response has pagination structure (new format) or is array (legacy)
-        if (response.data.photos) {
-          // New paginated format
-          setPhotos(response.data.photos);
-          setTotalPages(response.data.pagination.totalPages);
-          setTotalPhotos(response.data.pagination.total);
-        } else {
-          // Legacy format - array directly
-          setPhotos(response.data);
-          setTotalPhotos(response.data.length);
-          setTotalPages(1);
-        }
-      } else {
-        setPhotos(response.data.photos);
-        setTotalPages(response.data.pagination.totalPages);
-        setTotalPhotos(response.data.pagination.total);
-      }
+      // Both endpoints now return arrays directly
+      setPhotos(response.data);
+      setTotalPhotos(response.data.length);
     } catch (error) {
       console.error('Error fetching photos:', error);
     } finally {
@@ -206,7 +189,7 @@ function AllPhotos() {
     }
   };
 
-  if (loading && page === 0) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-blue-500"></div>
@@ -372,31 +355,6 @@ function AllPhotos() {
           >
             <Plus className="w-5 h-5 mr-2" />
             Add Your First Photo
-          </button>
-        </div>
-      )}
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center space-x-2 mt-8">
-          <button
-            onClick={() => setPage(Math.max(0, page - 1))}
-            disabled={page === 0}
-            className="px-4 py-2 bg-apple-gray-6 hover:bg-apple-gray-5 disabled:opacity-50 disabled:cursor-not-allowed text-apple-label rounded-lg transition-colors border border-apple-separator"
-          >
-            Previous
-          </button>
-          
-          <span className="text-apple-secondary-label">
-            Page {page + 1} of {totalPages}
-          </span>
-          
-          <button
-            onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
-            disabled={page >= totalPages - 1}
-            className="px-4 py-2 bg-apple-gray-6 hover:bg-apple-gray-5 disabled:opacity-50 disabled:cursor-not-allowed text-apple-label rounded-lg transition-colors border border-apple-separator"
-          >
-            Next
           </button>
         </div>
       )}

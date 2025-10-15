@@ -54,13 +54,13 @@ function CategoryPhotos() {
       setLoading(true);
       setError(null);
       if (categoryId === '-1') {
-        // Fetch favorite photos
-        console.log('Fetching favorite photos from /api/photos/favorites');
-        const response = await api.get('/api/photos/favorites');
+        // Fetch favorite photos using the new non-paginated endpoint
+        console.log('Fetching favorite photos from /api/photos/favorites/all');
+        const response = await api.get('/api/photos/favorites/all');
         console.log('Favorite photos response:', response.data);
         setPhotos(response.data);
       } else {
-        // Fetch photos by category
+        // Fetch photos by category (already returns all photos without pagination)
         const url = `/api/categories/${categoryId}/photos`;
         console.log('Fetching category photos from:', url);
         const response = await api.get(url);

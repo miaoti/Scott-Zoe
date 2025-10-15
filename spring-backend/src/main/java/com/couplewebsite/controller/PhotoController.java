@@ -147,6 +147,31 @@ public class PhotoController {
             return ResponseEntity.status(500).body(error);
         }
     }
+
+    /**
+     * Get all photos without pagination (Apple Photos style)
+     */
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllPhotosNoPagination() {
+        try {
+            logger.info("Fetching all photos without pagination");
+            List<Photo> allPhotos = photoService.getAllPhotosNoPagination();
+            logger.info("Found {} photos total", allPhotos.size());
+            
+            List<Map<String, Object>> photoResponses = allPhotos.stream()
+                    .map(this::createPhotoResponseWithStats)
+                    .collect(Collectors.toList());
+            
+            logger.info("Returning response with {} photos", photoResponses.size());
+            return ResponseEntity.ok(photoResponses);
+            
+        } catch (Exception e) {
+            logger.error("Error fetching all photos", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
     
     /**
      * Get photo by ID
@@ -425,6 +450,26 @@ public class PhotoController {
             }
         } catch (Exception e) {
             logger.error("Error getting favorite photos: ", e);
+            return ResponseEntity.ok(new ArrayList<>());
+        }
+    }
+
+    /**
+     * Get all favorite photos without pagination (Apple Photos style)
+     */
+    @GetMapping("/favorites/all")
+    public ResponseEntity<?> getAllFavoritePhotos(Authentication authentication) {
+        try {
+            logger.info("Fetching all favorite photos without pagination");
+            List<Photo> favoritePhotos = photoService.getFavoritePhotos();
+            List<Map<String, Object>> favorites = favoritePhotos.stream()
+                .map(this::createPhotoResponseWithStats)
+                .collect(Collectors.toList());
+            
+            logger.info("Returning {} favorite photos", favorites.size());
+            return ResponseEntity.ok(favorites);
+        } catch (Exception e) {
+            logger.error("Error getting all favorite photos: ", e);
             return ResponseEntity.ok(new ArrayList<>());
         }
     }

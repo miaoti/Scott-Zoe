@@ -36,9 +36,7 @@ function PhotoGallery() {
   const [imageSize, setImageSize] = useState<ImageSize>('medium');
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [showPhotoDetail, setShowPhotoDetail] = useState(false);
-  const [page, setPage] = useState(0);
   const [totalPhotos, setTotalPhotos] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     fetchPhotos();
@@ -50,30 +48,17 @@ function PhotoGallery() {
     }
   }, [photos]);
 
-  const fetchPhotos = async (pageNum = 0, append = false) => {
+  const fetchPhotos = async () => {
     try {
-      if (!append) setLoading(true);
-      const response = await api.get(`/api/photos?page=${pageNum}&limit=20`);
-      
-      if (append) {
-        setPhotos(prev => [...prev, ...response.data.photos]);
-      } else {
-        setPhotos(response.data.photos);
-      }
-      
-      setTotalPhotos(response.data.pagination.total);
-      setHasMore(response.data.pagination.hasNext);
-      setPage(pageNum);
+      setLoading(true);
+      const response = await api.get('/api/photos/all');
+      setPhotos(response.data);
+      setTotalPhotos(response.data.length);
+      setHasMore(false); // No more photos to load since we loaded all
     } catch (error) {
       console.error('Error fetching photos:', error);
     } finally {
       setLoading(false);
-    }
-  };
-  
-  const loadMorePhotos = async () => {
-    if (hasMore && !loading) {
-      await fetchPhotos(page + 1, true);
     }
   };
 

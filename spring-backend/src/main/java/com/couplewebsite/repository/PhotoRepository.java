@@ -61,6 +61,11 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
      * Find all non-deleted photos with pagination, ordered by creation date descending
      */
     Page<Photo> findByIsDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
+
+    /**
+     * Find all non-deleted photos without pagination, ordered by creation date descending
+     */
+    List<Photo> findByIsDeletedFalseOrderByCreatedAtDesc();
     
     /**
      * Find all deleted photos with pagination, ordered by deletion date descending

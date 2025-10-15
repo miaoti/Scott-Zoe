@@ -168,6 +168,13 @@ public class PhotoService {
     public List<Photo> getAllPhotos() {
         return photoRepository.findAll();
     }
+
+    /**
+     * Get all non-deleted photos without pagination (Apple Photos style)
+     */
+    public List<Photo> getAllPhotosNoPagination() {
+        return photoRepository.findByIsDeletedFalseOrderByCreatedAtDesc();
+    }
     
     /**
      * Get all deleted photos with pagination (recycle bin)
