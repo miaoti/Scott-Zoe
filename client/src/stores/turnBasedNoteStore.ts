@@ -187,7 +187,7 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
     };
   })(),
   isWindowVisible: false,
-  isMinimized: false,
+  isMinimized: true, // Start minimized by default
   isMaximized: false,
   
   typingIndicators: [],

@@ -146,9 +146,12 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
   }, [releaseEditControl]);
   
   // Handle window controls
-  const handleMinimize = () => {
+  const handleMinimize = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     setMinimized(!isMinimized);
-  };
+  }, [isMinimized, setMinimized]);
   
   // Drag functionality state
   const [isDragging, setIsDragging] = useState(false);
@@ -307,7 +310,11 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
     return (
       <div 
         className="fixed bottom-4 right-4 cursor-pointer z-50 apple-shadow"
-        onClick={handleMinimize}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleMinimize(e);
+        }}
         style={{
           backgroundColor: 'var(--apple-glass-bg)',
           border: '1px solid var(--apple-glass-border)',
@@ -416,7 +423,11 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
         
         <div className="flex items-center space-x-2">
           <button
-            onClick={handleMinimize}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleMinimize(e);
+            }}
             className="p-2 rounded-full transition-all duration-200"
             title="Minimize"
             style={{ 
