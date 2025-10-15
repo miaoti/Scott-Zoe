@@ -142,95 +142,111 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
     });
   };
 
-  const uploadFiles = async (retryCount = 0) => {
+  const uploadFiles = async () => {
     if (files.length === 0) return;
 
-    console.log('Starting upload for', files.length, 'files', retryCount > 0 ? `(Retry ${retryCount})` : '');
+    console.log('Starting sequential upload for', files.length, 'files');
     setIsUploading(true);
     setUploadStats({ success: 0, total: files.length });
 
-    // Update all files to uploading status
-    setFiles(prev => prev.map(f => ({ ...f, status: 'uploading' as const })));
+    let successCount = 0;
+    let failedFiles: string[] = [];
 
-    try {
-      const formData = new FormData();
-      files.forEach(({ file }) => {
-        formData.append('photos', file);
-        console.log('Added file to FormData:', file.name, file.size);
-      });
+    // Upload files one by one
+    for (let i = 0; i < files.length; i++) {
+      const fileData = files[i];
+      
+      try {
+        // Mark current file as uploading
+        setFiles(prev => prev.map((f, index) => 
+          index === i 
+            ? { ...f, status: 'uploading' as const, progress: 0 }
+            : f
+        ));
 
-      // Initialize progress for all files
-      setFiles(prev => prev.map(f => ({ ...f, progress: 0 })));
+        console.log(`Uploading file ${i + 1}/${files.length}: ${fileData.file.name}`);
 
-      console.log('Sending upload request...');
-      const response = await api.post('/api/photos/upload-multiple', formData, {
-        headers: {
-          'Content-Type': undefined, // Remove default Content-Type to let browser set multipart/form-data
-        },
-        timeout: 300000, // 5 minutes timeout for large file uploads
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            console.log('Upload progress:', percentCompleted + '%');
-            // Update progress for all files based on actual upload progress
-            setFiles(prev => prev.map(f => ({
-              ...f,
-              progress: f.status === 'uploading' ? Math.min(percentCompleted, 95) : f.progress
-            })));
-          }
-        },
-      });
+        const formData = new FormData();
+        formData.append('photo', fileData.file);
 
-      // Upload completed successfully
-      console.log('Upload response:', response.status, response.data);
+        const response = await api.post('/api/photos/upload-single', formData, {
+          headers: {
+            'Content-Type': undefined,
+          },
+          timeout: 120000, // 2 minutes timeout per file
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              // Update progress for current file only
+              setFiles(prev => prev.map((f, index) => 
+                index === i 
+                  ? { ...f, progress: Math.min(percentCompleted, 95) }
+                  : f
+              ));
+            }
+          },
+        });
 
-      if (response.status === 200) {
-        // Mark all as success
-        setFiles(prev => prev.map(f => ({ ...f, status: 'success' as const, progress: 100 })));
-        setUploadStats({ success: files.length, total: files.length });
+        if (response.status === 200) {
+          // Mark current file as success
+          setFiles(prev => prev.map((f, index) => 
+            index === i 
+              ? { ...f, status: 'success' as const, progress: 100 }
+              : f
+          ));
+          successCount++;
+          setUploadStats({ success: successCount, total: files.length });
+          console.log(`✅ Successfully uploaded: ${fileData.file.name}`);
+        } else {
+          throw new Error(`Upload failed with status: ${response.status}`);
+        }
 
-        // Show success toast
-        showPhotoSuccess(files.length);
-
-        // Show success animation
-        setTimeout(() => {
-          onUploadComplete();
-          // Keep modal open for 2 more seconds to show success message
-          setTimeout(() => {
-            onClose();
-          }, 2000);
-        }, 1000);
-      } else {
-        throw new Error(`Upload failed with status: ${response.status}`);
+      } catch (error) {
+        console.error(`❌ Error uploading ${fileData.file.name}:`, error);
+        
+        // Mark current file as error
+        setFiles(prev => prev.map((f, index) => 
+          index === i 
+            ? { ...f, status: 'error' as const, progress: 0 }
+            : f
+        ));
+        
+        failedFiles.push(fileData.file.name);
       }
-    } catch (error) {
-      console.error('Upload error:', error);
-      
-      // Check if it's a timeout error and we haven't exceeded retry limit
-      const isTimeoutError = error instanceof Error && (error.message.includes('timeout') || error.message.includes('ECONNABORTED'));
-      const maxRetries = 2;
-      
-      if (isTimeoutError && retryCount < maxRetries) {
-        console.log(`Upload timed out, retrying... (${retryCount + 1}/${maxRetries})`);
-        // Wait a bit before retrying
-        setTimeout(() => {
-          uploadFiles(retryCount + 1);
-        }, 2000);
-        return;
-      }
-      
-      setFiles(prev => prev.map(f => ({ ...f, status: 'error' as const })));
+    }
 
-      // Show error message with retry option
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      const shouldRetry = confirm(`Upload failed: ${errorMessage}\n\nWould you like to try again?`);
+    // Show final results
+    if (successCount > 0) {
+      showPhotoSuccess(successCount);
+    }
+
+    if (failedFiles.length > 0) {
+      const errorMessage = `${failedFiles.length} photo(s) failed to upload:\n${failedFiles.join(', ')}\n\nWould you like to retry the failed uploads?`;
+      const shouldRetry = confirm(errorMessage);
       
       if (shouldRetry) {
-        uploadFiles(0); // Reset retry count for manual retry
+        // Reset failed files to pending and retry
+        setFiles(prev => prev.map(f => 
+          f.status === 'error' 
+            ? { ...f, status: 'pending' as const, progress: 0 }
+            : f
+        ));
+        // Retry upload for failed files only
+        uploadFiles();
+        return;
       }
-    } finally {
-      setIsUploading(false);
     }
+
+    // Complete the upload process
+    setTimeout(() => {
+      onUploadComplete();
+      // Keep modal open for 2 more seconds to show success message
+      setTimeout(() => {
+        onClose();
+      }, 2000);
+    }, 1000);
+
+    setIsUploading(false);
   };
 
   const getStatusIcon = (status: UploadFile['status']) => {
@@ -324,19 +340,35 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
                       className="w-12 h-12 object-cover rounded-lg"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-apple-label truncate">
-                        {file.file.name}
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-apple-label truncate">
+                          {file.file.name}
+                        </p>
+                        {file.status === 'uploading' && (
+                          <span className="text-xs text-apple-blue-light font-medium">
+                            Uploading...
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-apple-secondary-label">
                         {(file.file.size / 1024 / 1024).toFixed(1)} MB
                       </p>
-                      {file.status === 'uploading' && (
+                      {(file.status === 'uploading' || file.status === 'success') && (
                         <div className="w-full bg-apple-gray-6/20 rounded-full h-1.5 mt-1">
                           <div
-                            className="bg-apple-blue-light h-1.5 rounded-full transition-all duration-300"
+                            className={`h-1.5 rounded-full transition-all duration-300 ${
+                              file.status === 'success' 
+                                ? 'bg-green-500' 
+                                : 'bg-apple-blue-light'
+                            }`}
                             style={{ width: `${file.progress}%` }}
                           />
                         </div>
+                      )}
+                      {file.status === 'error' && (
+                        <p className="text-xs text-red-500 mt-1">
+                          Upload failed
+                        </p>
                       )}
                     </div>
                     <div className="flex items-center space-x-2">
