@@ -215,6 +215,8 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
   const handleTouchMove = useCallback((e: TouchEvent) => {
     if (!isDragging) return;
     
+    e.preventDefault(); // Prevent default touch behavior
+    
     const touch = e.touches[0];
     const newX = touch.clientX - dragOffset.x;
     const newY = touch.clientY - dragOffset.y;
@@ -251,8 +253,8 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
-      document.addEventListener('touchmove', handleTouchMove);
-      document.addEventListener('touchend', handleTouchEnd);
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleTouchEnd, { passive: false });
       
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);

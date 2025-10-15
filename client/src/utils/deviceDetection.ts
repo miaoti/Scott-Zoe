@@ -13,14 +13,25 @@ export const isMobileDevice = (): boolean => {
     userAgent.includes(keyword)
   );
   
-  // Check screen size (mobile-like dimensions)
-  const isMobileScreen = window.innerWidth <= 768;
+  // Check screen size (mobile-like dimensions) - improved for Edge mobile simulation
+  const isMobileScreen = window.innerWidth <= 768 && window.innerHeight <= 1024;
   
   // Check for touch capability
   const isTouchDevice = 'ontouchstart' in window || 
     navigator.maxTouchPoints > 0;
   
-  return isMobileUserAgent || (isMobileScreen && isTouchDevice);
+  // Additional check for mobile viewport meta tag behavior
+  const hasDevicePixelRatio = window.devicePixelRatio > 1;
+  
+  // Check for mobile-specific CSS media queries support
+  const isMobileMediaQuery = window.matchMedia && 
+    window.matchMedia('(max-width: 768px)').matches;
+  
+  // Enhanced detection for browser mobile simulation modes
+  const isSimulatedMobile = isMobileScreen && (isTouchDevice || hasDevicePixelRatio);
+  
+  // Return true if any mobile indicator is present
+  return isMobileUserAgent || isSimulatedMobile || isMobileMediaQuery;
 };
 
 // Get mobile-specific window dimensions
