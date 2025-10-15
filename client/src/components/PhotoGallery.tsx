@@ -54,7 +54,6 @@ function PhotoGallery() {
       const response = await api.get('/api/photos/all');
       setPhotos(response.data);
       setTotalPhotos(response.data.length);
-      setHasMore(false); // No more photos to load since we loaded all
     } catch (error) {
       console.error('Error fetching photos:', error);
     } finally {
@@ -277,25 +276,7 @@ function PhotoGallery() {
           <div>
             {renderPhotoGrid(photos, false)}
             
-            {/* Load More Button */}
-            {hasMore && (
-              <div className="mt-8 text-center">
-                <button
-                  onClick={loadMorePhotos}
-                  disabled={loading}
-                  className="group bg-blue-500 hover:bg-blue-600 active:bg-blue-700 disabled:bg-gray-300 text-white px-8 py-3.5 rounded-2xl transition-all duration-200 font-medium text-base shadow-sm hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none min-h-[48px] flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      <span>Loading...</span>
-                    </>
-                  ) : (
-                    <span>Load More Photos</span>
-                  )}
-                </button>
-              </div>
-            )}
+
           </div>
         ) : (
           <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
