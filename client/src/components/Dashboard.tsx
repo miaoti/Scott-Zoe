@@ -69,6 +69,8 @@ interface Memory {
 function Dashboard() {
   const navigate = useNavigate();
   const [recentPhotos, setRecentPhotos] = useState<Photo[]>([]);
+  const [randomPhotos, setRandomPhotos] = useState<Photo[]>([]);
+  const [carouselLoading, setCarouselLoading] = useState(true);
   const [upcomingMemories, setUpcomingMemories] = useState<Memory[]>([]);
   const [stats, setStats] = useState({ photos: 0, memories: 0, totalLove: 0 });
   const [catPositions, setCatPositions] = useState<CatPosition[]>([]);
@@ -185,8 +187,31 @@ function Dashboard() {
     navigate(`/memories?openMemory=${memoryId}`);
   };
 
+  // Fetch random photos for carousel
+  const fetchRandomPhotos = async () => {
+    try {
+      setCarouselLoading(true);
+      const response = await api.get('/api/photos/random?limit=6');
+      
+      // Ensure we have valid photo data
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        setRandomPhotos(response.data);
+      } else {
+        console.warn('No photos available for carousel');
+        setRandomPhotos([]);
+      }
+    } catch (error) {
+      console.error('Error fetching random photos:', error);
+      // Fallback to empty array if API fails
+      setRandomPhotos([]);
+    } finally {
+      setCarouselLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchDashboardData();
+    fetchRandomPhotos();
     loadOwnedBoxes();
     loadReceivedBoxes();
     loadDroppedBoxes();
@@ -297,77 +322,80 @@ function Dashboard() {
         {/* Infinite Sliding Photo Carousel */}
         <div className="slide-up mb-12">
           <div className="relative h-32 md:h-36 overflow-hidden rounded-2xl apple-shadow group">
-            {/* Infinite Sliding Container */}
-            <div className="absolute inset-0 flex animate-infinite-slide">
-              {/* First Set of Images */}
-              <div className="w-full h-full flex-shrink-0 relative">
-                <img
-                  src="https://raw.githubusercontent.com/miaoti/Test/refs/heads/main/1.png"
-                  alt="Beautiful moment from our love story"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                {/* Elegant overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
-                
-                {/* Decorative element */}
-                <div className="absolute top-3 right-3 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
-                  <span className="text-white text-sm">✨</span>
+            {carouselLoading ? (
+              /* Loading State */
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50">
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 bg-pink-400 rounded-full animate-bounce"></div>
+                  <div className="w-4 h-4 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                  <div className="w-4 h-4 bg-pink-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                 </div>
               </div>
-
-              <div className="w-full h-full flex-shrink-0 relative">
-                <img
-                  src="https://raw.githubusercontent.com/miaoti/Test/refs/heads/main/cfcb5358-6626-42aa-9854-b3b599f3d592.png"
-                  alt="Another precious moment from our journey together"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                {/* Elegant overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
-                
-                {/* Decorative element */}
-                <div className="absolute top-3 right-3 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
-                  <span className="text-white text-sm">💕</span>
+            ) : randomPhotos.length === 0 ? (
+              /* No Photos Fallback */
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50">
+                <div className="text-center">
+                  <div className="text-4xl mb-2">📸</div>
+                  <p className="text-gray-600 text-sm">No photos yet - start creating memories!</p>
                 </div>
               </div>
+            ) : (
+              /* Dynamic Photo Carousel */
+              <>
+                <div className="absolute inset-0 flex animate-infinite-slide">
+                  {/* First Set of Random Photos */}
+                  {randomPhotos.map((photo, index) => (
+                    <div key={`first-${photo.id}`} className="w-full h-full flex-shrink-0 relative">
+                      <img
+                        src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=large`}
+                        alt={photo.caption || 'Beautiful moment from our love story'}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        onError={(e) => {
+                          // Fallback to a placeholder if image fails to load
+                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgMTUwQzIwMCAxNjYuNTY5IDE4Ni41NjkgMTgwIDE3MCAxODBDMTUzLjQzMSAxODAgMTQwIDE2Ni41NjkgMTQwIDE1MEMxNDAgMTMzLjQzMSAxNTMuNDMxIDEyMCAxNzAgMTIwQzE4Ni41NjkgMTIwIDIwMCAxMzMuNDMxIDIwMCAxNTBaIiBmaWxsPSIjOUI5QkEwIi8+CjxwYXRoIGQ9Ik0yNjAgMTgwSDI0MFYyMDBIMjYwVjE4MFoiIGZpbGw9IiM5QjlCQTAiLz4KPC9zdmc+';
+                        }}
+                      />
+                      {/* Elegant overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+                      
+                      {/* Decorative element */}
+                      <div className="absolute top-3 right-3 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
+                        <span className="text-white text-sm">{index % 2 === 0 ? '✨' : '💕'}</span>
+                      </div>
+                    </div>
+                  ))}
 
-              {/* Duplicate Set for Seamless Loop */}
-              <div className="w-full h-full flex-shrink-0 relative">
-                <img
-                  src="https://raw.githubusercontent.com/miaoti/Test/refs/heads/main/1.png"
-                  alt="Beautiful moment from our love story"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                {/* Elegant overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
-                
-                {/* Decorative element */}
-                <div className="absolute top-3 right-3 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
-                  <span className="text-white text-sm">✨</span>
+                  {/* Duplicate Set for Seamless Loop */}
+                  {randomPhotos.map((photo, index) => (
+                    <div key={`second-${photo.id}`} className="w-full h-full flex-shrink-0 relative">
+                      <img
+                        src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=large`}
+                        alt={photo.caption || 'Beautiful moment from our love story'}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        onError={(e) => {
+                          // Fallback to a placeholder if image fails to load
+                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgMTUwQzIwMCAxNjYuNTY5IDE4Ni41NjkgMTgwIDE3MCAxODBDMTUzLjQzMSAxODAgMTQwIDE2Ni41NjkgMTQwIDE1MEMxNDAgMTMzLjQzMSAxNTMuNDMxIDEyMCAxNzAgMTIwQzE4Ni41NjkgMTIwIDIwMCAxMzMuNDMxIDIwMCAxNTBaIiBmaWxsPSIjOUI5QkEwIi8+CjxwYXRoIGQ9Ik0yNjAgMTgwSDI0MFYyMDBIMjYwVjE4MFoiIGZpbGw9IiM5QjlCQTAiLz4KPC9zdmc+';
+                        }}
+                      />
+                      {/* Elegant overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+                      
+                      {/* Decorative element */}
+                      <div className="absolute top-3 right-3 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
+                        <span className="text-white text-sm">{index % 2 === 0 ? '✨' : '💕'}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
 
-              <div className="w-full h-full flex-shrink-0 relative">
-                <img
-                  src="https://raw.githubusercontent.com/miaoti/Test/refs/heads/main/cfcb5358-6626-42aa-9854-b3b599f3d592.png"
-                  alt="Another precious moment from our journey together"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                {/* Elegant overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
-                
-                {/* Decorative element */}
-                <div className="absolute top-3 right-3 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
-                  <span className="text-white text-sm">💕</span>
+                {/* Caption Overlay */}
+                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/50 to-transparent">
+                  <p className="text-white text-sm font-medium text-center">
+                    Our beautiful journey together ✨
+                  </p>
                 </div>
-              </div>
-            </div>
-
-            {/* Caption Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/50 to-transparent">
-              <p className="text-white text-sm font-medium text-center">
-                Our beautiful journey together ✨
-              </p>
-            </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -378,7 +406,7 @@ function Dashboard() {
           }
           
           .animate-infinite-slide {
-            animation: infinite-slide 12s linear infinite;
+            animation: infinite-slide 22s linear infinite;
           }
           
           .animate-infinite-slide:hover {

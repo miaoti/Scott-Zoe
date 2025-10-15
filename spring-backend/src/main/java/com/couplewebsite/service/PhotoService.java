@@ -175,6 +175,27 @@ public class PhotoService {
     public List<Photo> getAllPhotosNoPagination() {
         return photoRepository.findByIsDeletedFalseOrderByCreatedAtDesc();
     }
+
+    /**
+     * Get random photos for carousel
+     */
+    public List<Photo> getRandomPhotos(int limit) {
+        List<Photo> allPhotos = photoRepository.findByIsDeletedFalseOrderByCreatedAtDesc();
+        
+        if (allPhotos.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        // If we have fewer photos than requested, return all
+        if (allPhotos.size() <= limit) {
+            return allPhotos;
+        }
+        
+        // Shuffle and return random photos
+        List<Photo> randomPhotos = new ArrayList<>(allPhotos);
+        java.util.Collections.shuffle(randomPhotos);
+        return randomPhotos.subList(0, limit);
+    }
     
     /**
      * Get all deleted photos with pagination (recycle bin)

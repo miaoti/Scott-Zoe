@@ -367,6 +367,29 @@ public class PhotoController {
     }
 
     /**
+     * Get random photos for carousel
+     */
+    @GetMapping("/random")
+    public ResponseEntity<?> getRandomPhotos(
+            @RequestParam(defaultValue = "4") int limit) {
+        try {
+            List<Photo> randomPhotos = photoService.getRandomPhotos(limit);
+            
+            List<Map<String, Object>> photoResponses = randomPhotos.stream()
+                .map(this::createPhotoResponse)
+                .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(photoResponses);
+            
+        } catch (Exception e) {
+            logger.error("Error fetching random photos", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Server error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+
+    /**
      * Test endpoint for debugging
      */
     @GetMapping("/test")
