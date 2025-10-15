@@ -469,16 +469,88 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
         
         {/* Milestone Achievements */}
         {loveStats.count >= 520 && (
-          <div className="mt-4 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border border-yellow-200">
-            <div className="flex items-center justify-center space-x-2 text-sm">
-              <Star className="w-4 h-4 text-yellow-500 fill-current" />
-              <span className="text-yellow-700 font-medium">
-                Milestone Level {loveStats.currentLevel} Achieved!
-              </span>
-              <Star className="w-4 h-4 text-yellow-500 fill-current" />
+          <div className="mt-4 p-4 bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-50 rounded-2xl border border-yellow-200/50 shadow-sm hover:shadow-md transition-all duration-300">
+            {/* Achievement Header */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-2">
+                <div className="relative">
+                  <Star className="w-5 h-5 text-yellow-500 fill-current animate-pulse" />
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-400 rounded-full animate-ping"></div>
+                </div>
+                <span className="text-yellow-700 font-semibold text-sm">
+                  Level {loveStats.currentLevel} Milestone
+                </span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Gift className="w-4 h-4 text-orange-500" />
+                <span className="text-xs text-orange-600 font-medium">
+                  {Math.floor(loveStats.count / 520)} Prize{Math.floor(loveStats.count / 520) > 1 ? 's' : ''}
+                </span>
+              </div>
             </div>
-            <div className="text-center text-xs text-yellow-600 mt-1">
-              You've unlocked {Math.floor(loveStats.count / 520)} prize wheel{Math.floor(loveStats.count / 520) > 1 ? 's' : ''}!
+
+            {/* Achievement Content */}
+            <div className="space-y-3">
+              {/* Main Achievement Message */}
+              <div className="text-center">
+                <div className="text-lg font-bold text-yellow-800 mb-1">
+                  🎉 Congratulations! 🎉
+                </div>
+                <p className="text-sm text-yellow-700">
+                  You've reached <span className="font-semibold">{loveStats.count}</span> love moments together
+                </p>
+              </div>
+
+              {/* Achievement Stats Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white/60 rounded-xl p-3 text-center">
+                  <div className="text-lg font-bold text-orange-600">
+                    {Math.floor(loveStats.count / 520)}
+                  </div>
+                  <div className="text-xs text-orange-700">
+                    Prize Wheels<br />Unlocked
+                  </div>
+                </div>
+                <div className="bg-white/60 rounded-xl p-3 text-center">
+                  <div className="text-lg font-bold text-pink-600">
+                    {loveStats.currentLevel}
+                  </div>
+                  <div className="text-xs text-pink-700">
+                    Current<br />Level
+                  </div>
+                </div>
+              </div>
+
+              {/* Next Milestone Preview */}
+              <div className="bg-white/40 rounded-xl p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-gray-600">Next Milestone</span>
+                  <span className="text-xs text-gray-500">{loveStats.nextMilestone}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div
+                    className="bg-gradient-to-r from-yellow-400 to-orange-400 h-1.5 rounded-full transition-all duration-500"
+                    style={{ width: `${((loveStats.count % 520) / 520) * 100}%` }}
+                  />
+                </div>
+                <div className="text-center mt-1">
+                  <span className="text-xs text-gray-600">
+                    {520 - (loveStats.count % 520)} more to unlock next prize
+                  </span>
+                </div>
+              </div>
+
+              {/* Celebration Elements */}
+              <div className="flex items-center justify-center space-x-4 text-xs">
+                <div className="flex items-center space-x-1 text-yellow-600">
+                  <Sparkles className="w-3 h-3 animate-spin" />
+                  <span>Achievement Unlocked</span>
+                </div>
+                <div className="w-1 h-1 bg-yellow-400 rounded-full"></div>
+                <div className="text-gray-500">
+                  {new Date().toLocaleDateString()}
+                </div>
+              </div>
             </div>
           </div>
         )}
