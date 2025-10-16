@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, Plus, X, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSurpriseBoxActions } from '../hooks/useSurpriseBoxActions';
@@ -322,4 +322,4 @@ const SurpriseBoxManager: React.FC = () => {
   );
 };
 
-export default SurpriseBoxManager;
+export default memo(SurpriseBoxManager);
