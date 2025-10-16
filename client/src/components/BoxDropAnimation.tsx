@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, Sparkles, Heart } from 'lucide-react';
 
@@ -10,7 +10,7 @@ interface BoxDropAnimationProps {
   duration?: number;
 }
 
-const BoxDropAnimation: React.FC<BoxDropAnimationProps> = ({
+const BoxDropAnimation: React.FC<BoxDropAnimationProps> = memo(({
   isVisible,
   onComplete,
   boxTitle = 'Surprise Box',

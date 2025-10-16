@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Gift, Clock, Camera, Type, MapPin, Timer, AlertCircle, Calendar, Zap } from 'lucide-react';
 import { useSurpriseBoxStore } from '../stores/surpriseBoxStore';
@@ -565,4 +565,4 @@ const BoxCreationForm: React.FC<BoxCreationFormProps> = ({ onClose }) => {
   );
 };
 
-export default BoxCreationForm;
+export default memo(BoxCreationForm);

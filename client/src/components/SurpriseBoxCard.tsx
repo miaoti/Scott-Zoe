@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Gift,
@@ -68,7 +68,7 @@ interface SurpriseBoxCardProps {
   isOwner?: boolean;
 }
 
-const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false }) => {
+const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = memo(({ box, isOwner = false }) => {
   const {
     openBox,
     completeBox,
@@ -310,8 +310,8 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                 }`}
               >
                 {showDetails ? 
-                  <ChevronUp className={['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'w-3 h-3 md:w-4 md:h-4' : 'w-3 h-3'} /> : 
-                  <ChevronDown className={['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'w-3 h-3 md:w-4 md:h-4' : 'w-3 h-3'} />
+                  <ChevronUp className={['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'w-3 h-3 md:w-4 md:h-4' : 'w-3 h-3 md:w-4 md:h-4' } /> : 
+                  <ChevronDown className={['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'w-3 h-3 md:w-4 md:h-4' : 'w-3 h-3 md:w-4 md:h-4' } />
                 }
               </button>
             )}
@@ -907,6 +907,6 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
       </AnimatePresence>
     </>
   );
-};
+});
 
 export default SurpriseBoxCard;

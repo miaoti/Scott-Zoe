@@ -226,39 +226,56 @@
 /* Enhanced Animation Classes with Spring Physics */
 .animate-bounce-in {
   animation: bounce-in 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-sparkle {
   animation: sparkle 2s ease-in-out infinite;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-float {
   animation: float 8s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-float-slow {
   animation: float-slow 12s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-wiggle {
   animation: wiggle 2s ease-in-out infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-bouncy-hover {
   animation: bouncy-hover 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-playful-spin {
   animation: playful-spin 3s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-gradient {
   background-size: 200% 200%;
   animation: gradient-shift 8s ease infinite;
+  will-change: background-position;
 }
 
 .animate-pulse-glow {
   animation: pulse-glow 6s ease-in-out infinite;
+  will-change: transform, opacity, filter;
+  transform: translate3d(0, 0, 0);
 }
 
 /* Hover Enhancement Classes */
@@ -468,44 +485,61 @@
 
 .animate-jump-bounce {
   animation: jump-bounce 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-cute-squish {
   animation: cute-squish 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-heart-bounce {
   animation: heart-bounce 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 /* Fire Animation Classes */
 .animate-fire-flicker {
   animation: fire-flicker 0.3s ease-in-out infinite;
+  will-change: transform, filter;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-fire-burst {
   animation: fire-burst 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  will-change: transform, filter;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-fire-particles {
   animation: fire-particles 1s ease-out forwards;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-fire-glow {
   animation: fire-glow-pulse 1.5s ease-in-out infinite;
+  will-change: filter;
 }
 
 /* Advanced Fire Spreading Animation Classes */
 .animate-fire-spread {
   animation: fire-spread-move 3s ease-out forwards;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-dashboard-fire-glow {
   animation: dashboard-fire-pulse 1.5s ease-in-out infinite;
+  will-change: filter;
 }
 
 .animate-fire-intensity-glow {
   animation: fire-intensity-glow 2s ease-in-out infinite;
+  will-change: filter;
 }
 
 .animate-card-fire-expansion {
@@ -957,14 +991,20 @@ body {
 
 .animate-float-up {
   animation: floatUp 1s ease-out forwards;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-bounce-in {
   animation: bounceIn 0.6s ease-out;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
 }
 
 .animate-sparkle {
   animation: sparkle 1.5s ease-in-out infinite;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
 }
 
 /* Transition durations */

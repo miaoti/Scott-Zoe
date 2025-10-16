@@ -819,16 +819,50 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       });
       console.log('📤 Sent initial subscription message');
       
-      // Set up periodic ping
-      const pingInterval = setInterval(() => {
-        if (client.connected) {
-          client.publish({
-            destination: '/app/surprise-box/ping',
-            body: JSON.stringify({ timestamp: Date.now() })
-          });
-          console.log('🏓 Sent ping');
+      // Set up periodic ping with reduced frequency and activity-based logic
+      let lastActivity = Date.now();
+      let pingInterval: NodeJS.Timeout;
+      
+      const startPing = () => {
+        // Clear existing interval if any
+        if (pingInterval) {
+          clearInterval(pingInterval);
         }
-      }, 30000); // Every 30 seconds
+        
+        pingInterval = setInterval(() => {
+          if (client.connected) {
+            const now = Date.now();
+            const timeSinceLastActivity = now - lastActivity;
+            
+            // Only ping if there has been recent activity (within 5 minutes)
+            // or if it's been more than 2 minutes since last ping
+            if (timeSinceLastActivity < 300000) { // 5 minutes
+              client.publish({
+                destination: '/app/surprise-box/ping',
+                body: JSON.stringify({ timestamp: now })
+              });
+              console.log('🏓 Sent ping');
+            }
+          }
+        }, 90000); // Increased from 30s to 90s (1.5 minutes)
+      };
+      
+      // Update activity timestamp on any WebSocket message
+      const updateActivity = () => {
+        lastActivity = Date.now();
+      };
+      
+      // Start pinging
+      startPing();
+      
+      // Update activity when receiving messages
+      const originalSubscribe = client.subscribe;
+      client.subscribe = function(destination, callback, headers) {
+        return originalSubscribe.call(this, destination, (message) => {
+          updateActivity();
+          callback(message);
+        }, headers);
+      };
       
       // Store interval for cleanup
       (client as any).pingInterval = pingInterval;
