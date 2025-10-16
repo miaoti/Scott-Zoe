@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 // Debug: Log the API URL being used
-console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
-console.log('Window location:', window.location.origin);
+// console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
+// console.log('Window location:', window.location.origin);
 
 // Determine API URL - Railway production vs local development
 const getApiUrl = () => {

@@ -66,10 +66,10 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
     
     if (typeof window !== 'undefined' && window.localStorage) {
       const token = localStorage.getItem('token');
-      console.log('Token from localStorage:', token ? `${token.substring(0, 20)}...` : 'null');
+      // console.log('Token from localStorage:', token ? `${token.substring(0, 20)}...` : 'null');
       
       if (token && token.trim() !== '' && !isConnected && !isLoading) {
-        console.log('Attempting to connect to WebSocket...');
+        // console.log('Attempting to connect to WebSocket...');
         connect(token);
       } else if (!token) {
         // console.warn('TurnBasedNotePad: No valid token found for WebSocket connection');

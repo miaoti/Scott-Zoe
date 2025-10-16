@@ -279,7 +279,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
   },
   
   loadReceivedBoxes: async () => {
-    console.log('loadReceivedBoxes: Starting to load received boxes');
+    // console.log('loadReceivedBoxes: Starting to load received boxes');
     set({ isLoading: true, error: null });
     try {
       const token = localStorage.getItem('token');
@@ -287,7 +287,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       const payload = JSON.parse(atob(token?.split('.')[1] || ''));
       const userId = payload.userId; // Use userId claim, not sub (which is username)
       
-      console.log('loadReceivedBoxes: Loading for userId:', userId);
+      // console.log('loadReceivedBoxes: Loading for userId:', userId);
       const response = await fetch(`${API_BASE_URL}/surprise-boxes/received/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -300,10 +300,10 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
       }
       
       const boxes = await response.json();
-      console.log('loadReceivedBoxes: Received boxes from API:', boxes);
+      // console.log('loadReceivedBoxes: Received boxes from API:', boxes);
       set({ receivedBoxes: boxes, isLoading: false });
     } catch (error) {
-      console.error('loadReceivedBoxes: Error loading received boxes:', error);
+      // console.error('loadReceivedBoxes: Error loading received boxes:', error);
       set({ error: error instanceof Error ? error.message : 'Failed to load received boxes', isLoading: false });
     }
   },
@@ -732,7 +732,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
     console.log('🔌 Attempting WebSocket connection...');
     console.log('Token present:', !!authToken);
     console.log('Token value:', authToken ? `${authToken.substring(0, 20)}...` : 'null');
-    console.log('WebSocket URL:', `${WS_URL}/ws`);
+    // console.log('WebSocket URL:', `${WS_URL}/ws`);
     
     const { stompClient } = get();
     
@@ -754,7 +754,7 @@ export const useSurpriseBoxStore = create<SurpriseBoxState>((set, get) => ({
         Authorization: `Bearer ${authToken}`
       } : {},
       debug: (str) => {
-        console.log('STOMP Debug:', str);
+        // console.log('STOMP Debug:', str);
       },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,

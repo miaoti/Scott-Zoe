@@ -377,7 +377,7 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
   
   // WebSocket connection
   connect: async (token: string) => {
-    console.log('TurnBasedNoteStore: connect() called');
+    // console.log('TurnBasedNoteStore: connect() called');
     
     const state = get();
     if (state.stompClient?.connected || state.isLoading) {
@@ -664,7 +664,7 @@ function handleTypingUpdate(data: EditControlMessage) {
 }
 
 function handleInitialContent(data: any) {
-  console.log('Received initial content:', data);
+  // console.log('Received initial content:', data);
   
   if (data.type === 'INITIAL_CONTENT') {
     set({

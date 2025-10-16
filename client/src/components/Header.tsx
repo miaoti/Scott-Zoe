@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, memo, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Heart, Camera, Calendar, Home, Settings, LogOut, ChevronDown, Trash2, Gift, Menu, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -17,7 +17,7 @@ interface TimeElapsed {
   seconds: number;
 }
 
-function Header() {
+const Header = memo(function Header() {
   const { logout } = useAuth();
   const location = useLocation();
   const [relationshipInfo, setRelationshipInfo] = useState<RelationshipInfo | null>(null);
@@ -69,8 +69,10 @@ function Header() {
   useEffect(() => {
     calculateTimeElapsed();
     
-    // Set up real-time timer
-    const timer = setInterval(calculateTimeElapsed, 1000);
+    // Optimized timer: Update every 5 seconds instead of every second to reduce CPU usage
+    // For a relationship counter, 5-second precision is perfectly acceptable
+    const updateInterval = showDropdown ? 1000 : 5000; // 1s when dropdown is open, 5s when closed
+    const timer = setInterval(calculateTimeElapsed, updateInterval);
     
     // Set up global refresh function for settings updates
     (window as any).refreshRelationshipInfo = fetchRelationshipInfo;
@@ -80,7 +82,7 @@ function Header() {
       clearInterval(timer);
       delete (window as any).refreshRelationshipInfo;
     };
-  }, [fetchRelationshipInfo, calculateTimeElapsed]);
+  }, [fetchRelationshipInfo, calculateTimeElapsed, showDropdown]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -102,11 +104,36 @@ function Header() {
     };
   }, [showDropdown, showMobileMenu]);
 
-
-
-  const isActive = (path: string) => {
+  // Memoize the active path check to prevent unnecessary re-calculations
+  const isActive = useCallback((path: string) => {
     return location.pathname === path;
-  };
+  }, [location.pathname]);
+
+  // Memoize the time display components to prevent unnecessary re-renders
+  const timeDisplayComponents = useMemo(() => (
+    <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="bg-apple-purple/5 rounded-lg p-3">
+        <div className="text-2xl font-bold text-apple-purple">{timeElapsed.days}</div>
+        <div className="text-xs text-apple-secondary-label">Days</div>
+      </div>
+      <div className="bg-apple-purple/5 rounded-lg p-3">
+        <div className="text-2xl font-bold text-apple-purple">{timeElapsed.hours}</div>
+        <div className="text-xs text-apple-secondary-label">Hours</div>
+      </div>
+      <div className="bg-apple-purple/5 rounded-lg p-3">
+        <div className="text-2xl font-bold text-apple-purple">{timeElapsed.minutes}</div>
+        <div className="text-xs text-apple-secondary-label">Minutes</div>
+      </div>
+      <div className="bg-apple-purple/5 rounded-lg p-3">
+        <div className="text-2xl font-bold text-apple-purple">{timeElapsed.seconds}</div>
+        <div className="text-xs text-apple-secondary-label">Seconds</div>
+      </div>
+    </div>
+  ), [timeElapsed]);
+
+
+
+
 
   return (
     <header className="apple-glass-effect border-b border-apple-separator sticky top-0 z-40 backdrop-blur-xl">
@@ -141,24 +168,7 @@ function Header() {
               {showDropdown && (
                 <div className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-xl p-6 apple-shadow border border-apple-separator min-w-[280px] z-40">
                   <div className="text-center">
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="bg-apple-purple/5 rounded-lg p-3">
-                        <div className="text-2xl font-bold text-apple-purple">{timeElapsed.days}</div>
-                        <div className="text-xs text-apple-secondary-label">Days</div>
-                      </div>
-                      <div className="bg-apple-purple/5 rounded-lg p-3">
-                        <div className="text-2xl font-bold text-apple-purple">{timeElapsed.hours}</div>
-                        <div className="text-xs text-apple-secondary-label">Hours</div>
-                      </div>
-                      <div className="bg-apple-purple/5 rounded-lg p-3">
-                        <div className="text-2xl font-bold text-apple-purple">{timeElapsed.minutes}</div>
-                        <div className="text-xs text-apple-secondary-label">Minutes</div>
-                      </div>
-                      <div className="bg-apple-purple/5 rounded-lg p-3">
-                        <div className="text-2xl font-bold text-apple-purple">{timeElapsed.seconds}</div>
-                        <div className="text-xs text-apple-secondary-label">Seconds</div>
-                      </div>
-                    </div>
+                    {timeDisplayComponents}
                     <div className="text-apple-secondary-label border-t border-apple-separator pt-3">
                       <div className="text-xs">Since June 8th, 2020</div>
                       <div className="font-medium text-apple-label text-sm mt-1">
@@ -387,6 +397,6 @@ function Header() {
       </div>
     </header>
   );
-}
+});
 
 export default Header;

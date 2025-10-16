@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 
 interface CountdownTimerProps {
@@ -17,7 +17,7 @@ interface TimeLeft {
   total: number;
 }
 
-const CountdownTimer: React.FC<CountdownTimerProps> = ({
+const CountdownTimer: React.FC<CountdownTimerProps> = memo(({
   targetDate,
   className = '',
   onExpire,
@@ -34,48 +34,20 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
   const [hasExpired, setHasExpired] = useState(false);
 
   const calculateTimeLeft = (): TimeLeft => {
-    // Parse the target date properly
-    let targetTime: number;
+    let targetTime: Date;
     
-    try {
-      // Handle array format from backend [year, month, day, hour, minute, second, nanosecond]
-      if (Array.isArray(targetDate)) {
-        const [year, month, day, hour = 0, minute = 0, second = 0] = targetDate as number[];
-        // Note: JavaScript months are 0-indexed, but backend sends 1-indexed
-        targetTime = new Date(year, month - 1, day, hour, minute, second).getTime();
-      } else {
-        // Handle string formats - ensure it's actually a string
-        const dateString = String(targetDate);
-        
-        // Handle ISO format with T and Z (e.g., "2025-10-02T11:50:49.491Z")
-        if (dateString.includes('T')) {
-          targetTime = new Date(dateString).getTime();
-        } else {
-          // Handle simple timestamp format (e.g., "2025-10-02 06:51:00")
-          // Treat as UTC by appending Z to ensure consistent timezone handling
-          const isoString = dateString.replace(' ', 'T') + 'Z';
-          targetTime = new Date(isoString).getTime();
-        }
-      }
-    } catch (error) {
-      console.error('Failed to parse target date:', targetDate, error);
-      targetTime = 0;
+    if (Array.isArray(targetDate)) {
+      // Handle array format [year, month, day, hour, minute, second]
+      const [year, month, day, hour = 0, minute = 0, second = 0] = targetDate;
+      targetTime = new Date(year, month - 1, day, hour, minute, second);
+    } else {
+      // Handle string format
+      targetTime = new Date(targetDate);
     }
-    
-    // Validate the parsed time
-    if (isNaN(targetTime) || targetTime === 0) {
-      console.error('Invalid target time calculated:', targetTime, 'from:', targetDate);
-      return {
-        days: 0,
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-        total: 0
-      };
-    }
-    
-    const difference = targetTime - new Date().getTime();
-    
+
+    const now = new Date();
+    const difference = targetTime.getTime() - now.getTime();
+
     if (difference > 0) {
       return {
         days: Math.floor(difference / (1000 * 60 * 60 * 24)),
@@ -84,18 +56,22 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
         seconds: Math.floor((difference / 1000) % 60),
         total: difference
       };
+    } else {
+      return {
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        total: 0
+      };
     }
-    
-    return {
-      days: 0,
-      hours: 0,
-      minutes: 0,
-      seconds: 0,
-      total: 0
-    };
   };
 
   useEffect(() => {
+    // Optimized timer: Update every 5 seconds instead of every second to reduce CPU usage
+    // For countdown timers, 5-second precision is usually acceptable
+    const updateInterval = showSeconds ? 5000 : 60000; // 5s if showing seconds, 1min if not
+    
     const timer = setInterval(() => {
       const newTimeLeft = calculateTimeLeft();
       setTimeLeft(newTimeLeft);
@@ -106,7 +82,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
           onExpire();
         }
       }
-    }, 1000);
+    }, updateInterval);
 
     // Calculate initial time
     const initialTimeLeft = calculateTimeLeft();
@@ -120,7 +96,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
     }
 
     return () => clearInterval(timer);
-  }, [targetDate, onExpire, hasExpired]);
+  }, [targetDate, onExpire, hasExpired, showSeconds]);
 
   const formatTime = (value: number): string => {
     return value.toString().padStart(2, '0');
