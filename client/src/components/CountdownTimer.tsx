@@ -34,29 +34,37 @@ const CountdownTimer: React.FC<CountdownTimerProps> = memo(({
   const [hasExpired, setHasExpired] = useState(false);
 
   const calculateTimeLeft = (): TimeLeft => {
-    let targetTime: Date;
+    // Parse the target date properly
+    let targetTime: number;
     
-    if (Array.isArray(targetDate)) {
-      // Handle array format [year, month, day, hour, minute, second]
-      const [year, month, day, hour = 0, minute = 0, second = 0] = targetDate;
-      targetTime = new Date(year, month - 1, day, hour, minute, second);
-    } else {
-      // Handle string format
-      targetTime = new Date(targetDate);
+    try {
+      // Handle array format from backend [year, month, day, hour, minute, second, nanosecond]
+      if (Array.isArray(targetDate)) {
+        const [year, month, day, hour = 0, minute = 0, second = 0] = targetDate as number[];
+        // Note: JavaScript months are 0-indexed, but backend sends 1-indexed
+        targetTime = new Date(year, month - 1, day, hour, minute, second).getTime();
+      } else {
+        // Handle string formats - ensure it's actually a string
+        const dateString = String(targetDate);
+        
+        // Handle ISO format with T and Z (e.g., "2025-10-02T11:50:49.491Z")
+        if (dateString.includes('T')) {
+          targetTime = new Date(dateString).getTime();
+        } else {
+          // Handle simple timestamp format (e.g., "2025-10-02 06:51:00")
+          // Treat as UTC by appending Z to ensure consistent timezone handling
+          const isoString = dateString.replace(' ', 'T') + 'Z';
+          targetTime = new Date(isoString).getTime();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to parse target date:', targetDate, error);
+      targetTime = 0;
     }
-
-    const now = new Date();
-    const difference = targetTime.getTime() - now.getTime();
-
-    if (difference > 0) {
-      return {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-        total: difference
-      };
-    } else {
+    
+    // Validate the parsed time
+    if (isNaN(targetTime) || targetTime === 0) {
+      console.error('Invalid target time calculated:', targetTime, 'from:', targetDate);
       return {
         days: 0,
         hours: 0,
@@ -65,6 +73,26 @@ const CountdownTimer: React.FC<CountdownTimerProps> = memo(({
         total: 0
       };
     }
+    
+    const difference = targetTime - new Date().getTime();
+    
+    if (difference > 0) {
+      return {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+        total: difference
+      };
+    }
+    
+    return {
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      total: 0
+    };
   };
 
   useEffect(() => {
@@ -187,6 +215,6 @@ const CountdownTimer: React.FC<CountdownTimerProps> = memo(({
       ))}
     </div>
   );
-};
+});
 
 export default CountdownTimer;
