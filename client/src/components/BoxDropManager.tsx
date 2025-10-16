@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import DroppingBox from './DroppingBox';
 import { useSurpriseBoxStore } from '../stores/surpriseBoxStore';
 import { useAuth } from "../contexts/AuthContext";
@@ -19,16 +19,15 @@ interface DroppingBoxData {
   };
 }
 
-const BoxDropManager: React.FC = memo(() => {
+const BoxDropManager: React.FC = () => {
   const [droppingBoxes, setDroppingBoxes] = useState<DroppingBoxData[]>([]);
   const [activeDrops, setActiveDrops] = useState<Set<number>>(new Set());
-  const [checkInterval, setCheckInterval] = useState(30000); // Start with 30s
-  const [consecutiveEmptyChecks, setConsecutiveEmptyChecks] = useState(0);
   const activeDropsRef = useRef<Set<number>>(new Set());
   const droppingBoxesRef = useRef<DroppingBoxData[]>([]);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { loadDroppingBoxes } = useSurpriseBoxStore();
   const { user } = useAuth();
+  
+  // console.log('BoxDropManager: Component mounted/rendered, user:', user);
   
   // Keep refs in sync with state
   useEffect(() => {
@@ -39,63 +38,59 @@ const BoxDropManager: React.FC = memo(() => {
     droppingBoxesRef.current = droppingBoxes;
   }, [droppingBoxes]);
 
-  // Check for boxes that should be dropping with exponential backoff
+  // Check for boxes that should be dropping
   const checkForDroppingBoxes = useCallback(async () => {
+    // console.log('BoxDropManager: Checking for dropping boxes, user:', user);
+    
     if (!user?.id) {
+      // console.log('BoxDropManager: No user ID, skipping check');
       return;
     }
     
     try {
+      // console.log('BoxDropManager: Loading dropping boxes for user ID:', user.id);
       const boxes = await loadDroppingBoxes(user.id);
+      
+      // console.log('BoxDropManager: Received boxes from API:', boxes);
       
       // Filter out boxes that are already actively dropping or have been claimed
       const boxesToDrop = boxes.filter(box => {
+        // Don't add if already actively dropping
         if (activeDropsRef.current.has(box.id)) {
           return false;
         }
         
+        // Don't add if already in dropping boxes list
         const isAlreadyDropping = droppingBoxesRef.current.some(droppingBox => droppingBox.id === box.id);
         if (isAlreadyDropping) {
           return false;
         }
         
+        // Only add boxes that should be dropping
         return true;
       });
       
+      // console.log('BoxDropManager: Boxes ready to drop (filtered):', boxesToDrop);
+      // console.log('BoxDropManager: Currently active drops:', Array.from(activeDropsRef.current));
+      
       if (boxesToDrop.length > 0) {
-        // Reset consecutive empty checks when boxes are found
-        setConsecutiveEmptyChecks(0);
-        setCheckInterval(30000); // Reset to 30s when boxes are found
+        // console.log('BoxDropManager: Adding boxes to dropping animation');
         
         // Update active drops
         setActiveDrops(prev => {
           const newSet = new Set(prev);
           boxesToDrop.forEach(box => newSet.add(box.id));
+          // console.log('BoxDropManager: Updated active drops:', Array.from(newSet));
           return newSet;
         });
         
         // Add boxes to dropping list
         setDroppingBoxes(prev => [...prev, ...boxesToDrop]);
       } else {
-        // Implement exponential backoff when no boxes are found
-        setConsecutiveEmptyChecks(prev => {
-          const newCount = prev + 1;
-          
-          // Exponential backoff: 30s -> 60s -> 120s -> 300s (5min) max
-          if (newCount >= 1 && newCount < 3) {
-            setCheckInterval(60000); // 1 minute after 1-2 empty checks
-          } else if (newCount >= 3 && newCount < 6) {
-            setCheckInterval(120000); // 2 minutes after 3-5 empty checks
-          } else if (newCount >= 6) {
-            setCheckInterval(300000); // 5 minutes after 6+ empty checks
-          }
-          
-          return newCount;
-        });
+        // console.log('BoxDropManager: No new boxes to drop');
       }
     } catch (error) {
-      // On error, increase interval to reduce load
-      setConsecutiveEmptyChecks(prev => prev + 1);
+
     }
   }, [loadDroppingBoxes, user?.id]);
 
@@ -104,27 +99,17 @@ const BoxDropManager: React.FC = memo(() => {
     return null;
   }
 
-  // Dynamic interval checking with exponential backoff
+  // Check for dropping boxes every 5 seconds (reduced frequency to prevent spam)
   useEffect(() => {
-    // Clear existing interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-    
-    // Set up new interval with current checkInterval
-    intervalRef.current = setInterval(checkForDroppingBoxes, checkInterval);
+    const interval = setInterval(checkForDroppingBoxes, 5000);
     
     // Initial check
     checkForDroppingBoxes();
     
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [checkForDroppingBoxes, checkInterval]);
+    return () => clearInterval(interval);
+  }, [checkForDroppingBoxes]);
 
-  const handleBoxClaim = useCallback((boxId: number) => {
+  const handleBoxClaim = (boxId: number) => {
     // Remove the box from dropping boxes
     setDroppingBoxes(prev => prev.filter(box => box.id !== boxId));
     setActiveDrops(prev => {
@@ -132,13 +117,9 @@ const BoxDropManager: React.FC = memo(() => {
       newSet.delete(boxId);
       return newSet;
     });
-    
-    // Reset backoff when user interacts
-    setConsecutiveEmptyChecks(0);
-    setCheckInterval(30000);
-  }, []);
+  };
 
-  const handleAnimationComplete = useCallback((boxId: number) => {
+  const handleAnimationComplete = (boxId: number) => {
     // Remove the box when animation completes (box reached bottom)
     setDroppingBoxes(prev => prev.filter(box => box.id !== boxId));
     setActiveDrops(prev => {
@@ -146,7 +127,7 @@ const BoxDropManager: React.FC = memo(() => {
       newSet.delete(boxId);
       return newSet;
     });
-  }, []);
+  };
 
   return (
     <div className="fixed inset-0 pointer-events-none z-40">
@@ -161,8 +142,6 @@ const BoxDropManager: React.FC = memo(() => {
       ))}
     </div>
   );
-});
-
-BoxDropManager.displayName = 'BoxDropManager';
+};
 
 export default BoxDropManager;

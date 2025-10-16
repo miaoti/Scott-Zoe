@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { Calendar, Plus, Edit2, Trash2, Heart, Star, Gift, Clock, ArrowUpDown } from 'lucide-react';
 import api from '../utils/api';
@@ -1087,4 +1087,4 @@ function Memories() {
    );
  }
 
-export default memo(Memories);
+export default Memories;

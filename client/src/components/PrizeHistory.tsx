@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Trophy, 
@@ -421,4 +421,4 @@ const PrizeHistory: React.FC<PrizeHistoryProps> = ({
   );
 };
 
-export default memo(PrizeHistory);
+export default PrizeHistory;
