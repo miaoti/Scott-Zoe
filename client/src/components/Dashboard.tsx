@@ -278,7 +278,7 @@ function Dashboard() {
   return (
     <div className="relative space-y-8 fade-in min-h-screen overflow-hidden bg-white">
       {/* Interactive Animated Cat Components */}
-      <div className={`fixed inset-0 z-0 pointer-events-auto ${showWheel ? 'opacity-20' : ''}`}>
+      <div className={`fixed inset-0 z-0 pointer-events-none ${showWheel ? 'opacity-20' : ''}`}>
         {catPositions.map((cat, index) => {
           const baseAnimations = [
             'animate-float hover-bounce', 
@@ -332,96 +332,99 @@ function Dashboard() {
                   <div className="w-4 h-4 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
                   <div className="w-4 h-4 bg-pink-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                 </div>
-              ) : randomPhotos.length === 0 ? (
-                /* No Photos Fallback */
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50">
-                  <div className="text-center">
-                    <div className="text-4xl mb-2">📸</div>
-                    <p className="text-gray-600 text-sm">No photos yet - start creating memories!</p>
-                  </div>
+              </div>
+            ) : randomPhotos.length === 0 ? (
+              /* No Photos Fallback */
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50">
+                <div className="text-center">
+                  <div className="text-4xl mb-2">📸</div>
+                  <p className="text-gray-600 text-sm">No photos yet - start creating memories!</p>
                 </div>
-              ) : (
-                /* Dynamic Multi-Photo Carousel */
-                <>
-                  <div className={`absolute inset-0 flex gap-2 ${isPageVisible ? 'animate-infinite-slide-multi' : ''}`}>
-                    {/* First Set of Random Photos */}
-                    {randomPhotos.map((photo, index) => (
-                      <div key={`first-${photo.id}`} className="w-48 md:w-56 h-full flex-shrink-0 relative rounded-lg overflow-hidden shadow-md">
-                        <img
-                          src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=medium`}
-                          alt={photo.caption || 'Beautiful moment from our love story'}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          onError={(e) => {
-                            // Fallback to a placeholder if image fails to load
-                            e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE0NCIgdmlld0JveD0iMCAwIDIwMCAxNDQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxNDQiIGZpbGw9IiNGM0Y0RjYiLz48dGV4dCB4PSIxMDAiIHk9IjcyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pjwvc3ZnPg==';
-                          }}
-                        />
-                        {/* Elegant overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
-                        
-                        {/* Decorative element */}
-                        <div className="absolute top-2 right-2 w-6 h-6 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
-                          <span className="text-white text-xs">{index % 3 === 0 ? '✨' : index % 3 === 1 ? '💕' : '🌟'}</span>
-                        </div>
+              </div>
+            ) : (
+              /* Dynamic Multi-Photo Carousel */
+              <>
+                <div className={`absolute inset-0 flex gap-2 ${isPageVisible ? 'animate-infinite-slide-multi' : ''}`}>
+                  {/* First Set of Random Photos */}
+                  {randomPhotos.map((photo, index) => (
+                    <div key={`first-${photo.id}`} className="w-48 md:w-56 h-full flex-shrink-0 relative rounded-lg overflow-hidden shadow-md">
+                      <img
+                        src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=medium`}
+                        alt={photo.caption || 'Beautiful moment from our love story'}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        onError={(e) => {
+                          // Fallback to a placeholder if image fails to load
+                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE0NCIgdmlld0JveD0iMCAwIDIwMCAxNDQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxNDQiIGZpbGw9IiNGM0Y0RjYiLz48dGV4dCB4PSIxMDAiIHk9IjcyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pjwvc3ZnPg==';
+                        }}
+                      />
+                      {/* Elegant overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+                      
+                      {/* Decorative element */}
+                      <div className="absolute top-2 right-2 w-6 h-6 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
+                        <span className="text-white text-xs">{index % 3 === 0 ? '✨' : index % 3 === 1 ? '💕' : '🌟'}</span>
                       </div>
-                    ))}
-                    
-                    {/* Second Set for Seamless Loop */}
-                    {randomPhotos.map((photo, index) => (
-                      <div key={`second-${photo.id}`} className="w-48 md:w-56 h-full flex-shrink-0 relative rounded-lg overflow-hidden shadow-md">
-                        <img
-                          src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=medium`}
-                          alt={photo.caption || 'Beautiful moment from our love story'}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          onError={(e) => {
-                            // Fallback to a placeholder if image fails to load
-                            e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE0NCIgdmlld0JveD0iMCAwIDIwMCAxNDQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxNDQiIGZpbGw9IiNGM0Y0RjYiLz48dGV4dCB4PSIxMDAiIHk9IjcyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pjwvc3ZnPg==';
-                          }}
-                        />
-                        {/* Elegant overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
-                        
-                        {/* Decorative element */}
-                        <div className="absolute top-2 right-2 w-6 h-6 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
-                          <span className="text-white text-xs">{index % 3 === 0 ? '✨' : index % 3 === 1 ? '💕' : '🌟'}</span>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {/* Third Set for Extra Seamless Loop */}
-                    {randomPhotos.map((photo, index) => (
-                      <div key={`third-${photo.id}`} className="w-48 md:w-56 h-full flex-shrink-0 relative rounded-lg overflow-hidden shadow-md">
-                        <img
-                          src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=medium`}
-                          alt={photo.caption || 'Beautiful moment from our love story'}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          onError={(e) => {
-                            // Fallback to a placeholder if image fails to load
-                            e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE0NCIgdmlld0JveD0iMCAwIDIwMCAxNDQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxNDQiIGZpbGw9IiNGM0Y0RjYiLz48dGV4dCB4PSIxMDAiIHk9IjcyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pjwvc3ZnPg==';
-                          }}
-                        />
-                        {/* Elegant overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
-                        
-                        {/* Decorative element */}
-                        <div className="absolute top-2 right-2 w-6 h-6 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
-                          <span className="text-white text-xs">{index % 3 === 0 ? '✨' : index % 3 === 1 ? '💕' : '🌟'}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                   
-                  {/* Caption Overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/40 to-transparent">
-                    <p className="text-white text-xs font-medium text-center">
-                      Our beautiful journey together ✨
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
+                  {/* Second Set for Seamless Loop */}
+                  {randomPhotos.map((photo, index) => (
+                    <div key={`second-${photo.id}`} className="w-48 md:w-56 h-full flex-shrink-0 relative rounded-lg overflow-hidden shadow-md">
+                      <img
+                        src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=medium`}
+                        alt={photo.caption || 'Beautiful moment from our love story'}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        onError={(e) => {
+                          // Fallback to a placeholder if image fails to load
+                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE0NCIgdmlld0JveD0iMCAwIDIwMCAxNDQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxNDQiIGZpbGw9IiNGM0Y0RjYiLz48dGV4dCB4PSIxMDAiIHk9IjcyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pjwvc3ZnPg==';
+                        }}
+                      />
+                      {/* Elegant overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+                      
+                      {/* Decorative element */}
+                      <div className="absolute top-2 right-2 w-6 h-6 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
+                        <span className="text-white text-xs">{index % 3 === 0 ? '✨' : index % 3 === 1 ? '💕' : '🌟'}</span>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Third Set for Extra Seamless Loop */}
+                  {randomPhotos.map((photo, index) => (
+                    <div key={`third-${photo.id}`} className="w-48 md:w-56 h-full flex-shrink-0 relative rounded-lg overflow-hidden shadow-md">
+                      <img
+                        src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=medium`}
+                        alt={photo.caption || 'Beautiful moment from our love story'}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        onError={(e) => {
+                          // Fallback to a placeholder if image fails to load
+                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE0NCIgdmlld0JveD0iMCAwIDIwMCAxNDQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxNDQiIGZpbGw9IiNGM0Y0RjYiLz48dGV4dCB4PSIxMDAiIHk9IjcyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pjwvc3ZnPg==';
+                        }}
+                      />
+                      {/* Elegant overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+                      
+                      {/* Decorative element */}
+                      <div className="absolute top-2 right-2 w-6 h-6 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-80">
+                        <span className="text-white text-xs">{index % 3 === 0 ? '✨' : index % 3 === 1 ? '💕' : '🌟'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Caption Overlay */}
+                <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/40 to-transparent">
+                  <p className="text-white text-xs font-medium text-center">
+                    Our beautiful journey together ✨
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         </div>
+      </div>
+
+      <div className={`relative max-w-6xl mx-auto px-6 py-8 z-20 pointer-events-none ${showWheel ? 'opacity-30 pointer-events-none' : ''}`}>
         
         <style jsx>{`
           @keyframes infinite-slide-multi {
@@ -588,8 +591,6 @@ function Dashboard() {
           </Link>
         </div>
 
-
-
         {/* Quick Actions */}
         <div className="apple-card apple-shadow p-8 mb-8 pointer-events-auto">
           <h2 className="text-2xl font-semibold text-apple-label mb-6 text-center">
@@ -626,18 +627,29 @@ function Dashboard() {
               </div>
             </Link>
 
-
-
+            <div
+              className="bg-apple-blue/5 border border-apple-blue/20 rounded-xl p-6 hover:bg-apple-blue/10 transition-all duration-300 group cursor-pointer pointer-events-auto"
+              onClick={() => setShowWheel(true)}
+            >
+              <div className="flex items-center space-x-4">
+                <div className="bg-apple-blue/10 p-3 rounded-xl group-hover:bg-apple-blue/20 transition-colors">
+                  <Gift className="h-6 w-6 text-apple-blue" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-apple-label">Spin Prize Wheel</h3>
+                  <p className="text-sm text-apple-secondary-label">Win love points together</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-
-
-
+        {/* Turn-Based Note Pad */}
+        <TurnBasedNotePad />
 
         {/* Empty State */}
         {recentPhotos.length === 0 && upcomingMemories.length === 0 && (
-          <div className="text-center py-16">
+          <div className="text-center py-16 pointer-events-auto">
             <Heart className="h-16 w-16 text-apple-blue/30 mx-auto mb-6" />
             <h3 className="text-2xl font-semibold text-apple-label mb-4">
               Start Your Love Story
