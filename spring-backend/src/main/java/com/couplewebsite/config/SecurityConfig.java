@@ -80,7 +80,7 @@ public class SecurityConfig {
                 // Static resources - must be first for proper precedence
                 .requestMatchers("/assets/**", "/static/**", "/*.svg", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.css", "/*.js", "/*.woff", "/*.woff2", "/*.ttf", "/*.eot", "/*.json", "/*.txt").permitAll()
                 // API endpoints
-                .requestMatchers("/api/auth/login", "/api/auth/validate", "/health", "/actuator/health", "/api/photos/image/**", "/api/photos/test", "/api/photos", "/api/categories", "/api/categories/**", "/api/memories", "/api/memories/**", "/api/love-updates/**", "/api/surprise-boxes/**", "/api/prize-history/**").permitAll()
+                .requestMatchers("/api/auth/login", "/api/auth/validate", "/health", "/actuator/health", "/api/photos/image/**", "/api/photos/test", "/api/photos", "/api/categories", "/api/categories/**", "/api/love-updates/**", "/api/surprise-boxes/**", "/api/prize-history/**").permitAll()
                 // WebSocket endpoints
                 .requestMatchers("/ws/**", "/ws").permitAll()
                 // Frontend routes

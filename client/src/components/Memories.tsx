@@ -81,8 +81,13 @@ function Memories() {
     try {
       const response = await api.get('/api/memories');
       setMemories(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching memories:', error);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        // Authentication error - redirect to login
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
     }
   };
 
@@ -141,13 +146,15 @@ function Memories() {
       }
       
       const url = params.toString() ? `/api/memories/filter?${params.toString()}` : '/api/memories';
-      const response = await fetch(url);
-      if (response.ok) {
-        const data = await response.json();
-        setMemories(data);
-      }
-    } catch (error) {
+      const response = await api.get(url);
+      setMemories(response.data);
+    } catch (error: any) {
       console.error('Error fetching filtered memories:', error);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        // Authentication error - redirect to login
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
     }
   };
 
@@ -155,27 +162,32 @@ function Memories() {
     try {
       const response = await api.get('/api/photos?limit=100');
       setAvailablePhotos(response.data.photos || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching photos:', error);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        // Authentication error - redirect to login
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log('🚀 handleSubmit called', { event: e, formData, submitting });
+    // console.log('🚀 handleSubmit called', { event: e, formData, submitting });
     e.preventDefault();
     if (submitting) {
-      console.log('⚠️ Already submitting, returning early');
+      // console.log('⚠️ Already submitting, returning early');
       return;
     }
 
     // Check if description is empty and show validation message
     if (!formData.description.trim()) {
-      console.log('❌ Validation failed: empty description');
+      // console.log('❌ Validation failed: empty description');
       alert('Please enter a description for this memory.');
       return;
     }
 
-    console.log('✅ Starting memory submission...');
+    // console.log('✅ Starting memory submission...');
     setSubmitting(true);
     try {
       // Prepare data for backend - convert selectedPhotos to strings for CreateMemoryRequest
@@ -183,17 +195,17 @@ function Memories() {
         ...formData,
         selectedPhotos: (formData.selectedPhotos || []).map(id => id.toString())
       };
-      console.log('📤 Prepared memory data for backend:', memoryData);
+      // console.log('📤 Prepared memory data for backend:', memoryData);
       
       let memoryResponse;
       if (editingMemory) {
-        console.log('📝 Updating existing memory:', editingMemory.id);
+        // console.log('📝 Updating existing memory:', editingMemory.id);
         memoryResponse = await api.put(`/api/memories/${editingMemory.id}`, memoryData);
       } else {
-        console.log('➕ Creating new memory with data:', memoryData);
+        // console.log('➕ Creating new memory with data:', memoryData);
         memoryResponse = await api.post('/api/memories', memoryData);
       }
-      console.log('✅ Memory API response:', memoryResponse);
+      // console.log('✅ Memory API response:', memoryResponse);
       
       // Handle photo associations for event type memories
       if (formData.type === 'event' && formData.selectedPhotos && formData.selectedPhotos.length > 0) {
@@ -205,8 +217,14 @@ function Memories() {
         try {
           await api.post(`/api/memories/${memoryId}/photos`, photoIds);
           console.log('✅ Photos associated successfully');
-        } catch (photoError) {
+        } catch (photoError: any) {
           console.error('❌ Error associating photos:', photoError);
+          if (photoError.response?.status === 401 || photoError.response?.status === 403) {
+            // Authentication error - redirect to login
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+            return;
+          }
           // Don't fail the entire operation if photo association fails
           alert('Memory created but failed to associate photos. You can edit the memory to add photos later.');
         }
@@ -216,8 +234,14 @@ function Memories() {
       await fetchMemories();
       console.log('✅ Memory created/updated successfully!');
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error saving memory:', error);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        // Authentication error - redirect to login
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
+      }
       if (error.response) {
         console.error('❌ Error response data:', error.response.data);
         console.error('❌ Error response status:', error.response.status);
@@ -277,8 +301,14 @@ function Memories() {
       
       await fetchMemories();
       console.log('🔄 Memories refetched successfully');
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error deleting memory:', error);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        // Authentication error - redirect to login
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
+      }
       alert('Error deleting memory. Please try again.');
     }
   };
