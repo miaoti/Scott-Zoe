@@ -346,7 +346,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                   </div>
                   {box.priceAmount && (
                     <div style={{ color: 'var(--apple-label)' }} className="text-sm">
-                      <span className="font-medium">Price:</span> {box.priceAmount}
+                      <span className="font-medium">Price:</span> ${box.priceAmount}
                     </div>
                   )}
                 </div>
