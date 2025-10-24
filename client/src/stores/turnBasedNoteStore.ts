@@ -92,8 +92,9 @@ interface TurnBasedNoteState {
   isRequestingEdit: boolean;
   editRequestMessage: string | null;
   
-  // Window state
+  // Window management
   windowPosition: WindowPosition | null;
+  minimizedButtonPosition: { x: number; y: number } | null;
   isWindowVisible: boolean;
   isMinimized: boolean;
   isMaximized: boolean;
@@ -109,6 +110,7 @@ interface TurnBasedNoteState {
   setContent: (content: string) => void;
   setNoteId: (noteId: number) => void;
   setWindowPosition: (position: WindowPosition) => void;
+  setMinimizedButtonPosition: (position: { x: number; y: number }) => void;
   setWindowVisible: (visible: boolean) => void;
   setMinimized: (minimized: boolean) => void;
   setMaximized: (maximized: boolean) => void;
@@ -186,6 +188,7 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
       updatedAt: new Date().toISOString(),
     };
   })(),
+  minimizedButtonPosition: null, // Will be set to default position when first minimized
   isWindowVisible: false,
   isMinimized: true, // Start minimized by default
   isMaximized: false,
@@ -199,6 +202,7 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
   setContent: (content: string) => set({ content }),
   setNoteId: (noteId: number) => set({ noteId }),
   setWindowPosition: (position: WindowPosition) => set({ windowPosition: position }),
+  setMinimizedButtonPosition: (position: { x: number; y: number }) => set({ minimizedButtonPosition: position }),
   setWindowVisible: (visible: boolean) => set({ isWindowVisible: visible }),
   setMinimized: (minimized: boolean) => set({ isMinimized: minimized }),
   setMaximized: (maximized: boolean) => set({ isMaximized: maximized }),

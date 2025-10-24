@@ -200,7 +200,7 @@ function PhotoGallery() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 style={{ color: 'var(--apple-label)' }} className="text-3xl font-bold mb-2">Photo Gallery</h1>
-          <p style={{ color: 'var(--apple-secondary-label)' }}>Your beautiful memories organized by categories</p>
+          {/* <p style={{ color: 'var(--apple-secondary-label)' }}>Your beautiful memories organized by categories</p> */}
         </div>
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2">

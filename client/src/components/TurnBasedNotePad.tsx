@@ -42,6 +42,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
     isRequestingEdit,
     editRequestMessage,
     windowPosition,
+    minimizedButtonPosition,
     isMinimized,
     isMaximized,
     typingIndicators,
@@ -49,6 +50,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
     setContent,
     setMinimized,
     setMaximized,
+    setMinimizedButtonPosition,
     connect,
     disconnect,
     requestEditControl,
@@ -304,29 +306,165 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
   const typingText = getTypingText();
   
   if (isMinimized) {
+    // Get default position if not set
+    const defaultPosition = minimizedButtonPosition || { 
+      x: window.innerWidth - 120, // 100px button width + 20px margin
+      y: window.innerHeight - 80   // 60px button height + 20px margin
+    };
+
+    // Drag state for minimized button
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+    const minimizedButtonRef = useRef<HTMLDivElement>(null);
+
+    // Mouse drag handlers for desktop
+    const handleMouseDown = useCallback((e: React.MouseEvent) => {
+      if (e.button !== 0) return; // Only left click
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const rect = minimizedButtonRef.current?.getBoundingClientRect();
+      if (rect) {
+        setDragOffset({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        });
+        setIsDragging(true);
+      }
+    }, []);
+
+    const handleMouseMove = useCallback((e: MouseEvent) => {
+      if (!isDragging) return;
+      
+      const newX = e.clientX - dragOffset.x;
+      const newY = e.clientY - dragOffset.y;
+      
+      // Constrain to viewport bounds
+      const buttonWidth = 100;
+      const buttonHeight = 60;
+      const constrainedX = Math.max(0, Math.min(window.innerWidth - buttonWidth, newX));
+      const constrainedY = Math.max(0, Math.min(window.innerHeight - buttonHeight, newY));
+      
+      setMinimizedButtonPosition({ x: constrainedX, y: constrainedY });
+    }, [isDragging, dragOffset, setMinimizedButtonPosition]);
+
+    const handleMouseUp = useCallback((e: MouseEvent) => {
+      if (isDragging) {
+        setIsDragging(false);
+        // Check if it was a click (minimal movement)
+        const rect = minimizedButtonRef.current?.getBoundingClientRect();
+        if (rect) {
+          const moveDistance = Math.sqrt(
+            Math.pow(e.clientX - (rect.left + dragOffset.x), 2) + 
+            Math.pow(e.clientY - (rect.top + dragOffset.y), 2)
+          );
+          if (moveDistance < 5) {
+            // It was a click, not a drag
+            handleMinimize();
+          }
+        }
+      }
+    }, [isDragging, dragOffset, handleMinimize]);
+
+    // Touch drag handlers for mobile
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const touch = e.touches[0];
+      const rect = minimizedButtonRef.current?.getBoundingClientRect();
+      if (rect) {
+        setDragOffset({
+          x: touch.clientX - rect.left,
+          y: touch.clientY - rect.top
+        });
+        setIsDragging(true);
+      }
+    }, []);
+
+    const handleTouchMove = useCallback((e: TouchEvent) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      
+      const touch = e.touches[0];
+      const newX = touch.clientX - dragOffset.x;
+      const newY = touch.clientY - dragOffset.y;
+      
+      // Constrain to viewport bounds
+      const buttonWidth = 100;
+      const buttonHeight = 60;
+      const constrainedX = Math.max(0, Math.min(window.innerWidth - buttonWidth, newX));
+      const constrainedY = Math.max(0, Math.min(window.innerHeight - buttonHeight, newY));
+      
+      setMinimizedButtonPosition({ x: constrainedX, y: constrainedY });
+    }, [isDragging, dragOffset, setMinimizedButtonPosition]);
+
+    const handleTouchEnd = useCallback((e: TouchEvent) => {
+      if (isDragging) {
+        setIsDragging(false);
+        // Check if it was a tap (minimal movement)
+        const touch = e.changedTouches[0];
+        const rect = minimizedButtonRef.current?.getBoundingClientRect();
+        if (rect) {
+          const moveDistance = Math.sqrt(
+            Math.pow(touch.clientX - (rect.left + dragOffset.x), 2) + 
+            Math.pow(touch.clientY - (rect.top + dragOffset.y), 2)
+          );
+          if (moveDistance < 5) {
+            // It was a tap, not a drag
+            handleMinimize();
+          }
+        }
+      }
+    }, [isDragging, dragOffset, handleMinimize]);
+
+    // Add global event listeners for drag
+    useEffect(() => {
+      if (isDragging) {
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd);
+        
+        return () => {
+          document.removeEventListener('mousemove', handleMouseMove);
+          document.removeEventListener('mouseup', handleMouseUp);
+          document.removeEventListener('touchmove', handleTouchMove);
+          document.removeEventListener('touchend', handleTouchEnd);
+        };
+      }
+    }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
+
     return (
       <div 
-        className="fixed bottom-4 right-4 cursor-pointer z-50 apple-shadow"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          handleMinimize();
-        }}
+        ref={minimizedButtonRef}
+        className={`fixed cursor-pointer z-50 apple-shadow select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
         style={{
+          left: `${defaultPosition.x}px`,
+          top: `${defaultPosition.y}px`,
           backgroundColor: 'var(--apple-glass-bg)',
           border: '1px solid var(--apple-glass-border)',
           borderRadius: '12px',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          transition: 'all 0.3s ease',
+          transition: isDragging ? 'none' : 'all 0.3s ease',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          touchAction: 'none',
         }}
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
         onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+          if (!isDragging) {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+          }
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = 'var(--apple-glass-shadow)';
+          if (!isDragging) {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'var(--apple-glass-shadow)';
+          }
         }}
       >
         <div className="p-3 flex items-center space-x-2">
