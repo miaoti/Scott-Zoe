@@ -361,7 +361,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
 
   // Touch drag handlers for mobile
   const handleMinimizedTouchStart = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
+    // Don't preventDefault here - let the touch event work naturally for tap detection
     e.stopPropagation();
     
     const touch = e.touches[0];
@@ -381,7 +381,10 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
 
   const handleMinimizedTouchMove = useCallback((e: TouchEvent) => {
     if (!isDragging) return;
-    e.preventDefault();
+    // Only preventDefault if we're actually dragging to avoid passive event listener issues
+    if (isDragging) {
+      e.preventDefault();
+    }
     
     const touch = e.touches[0];
     const newX = touch.clientX - dragOffset.x;
@@ -451,10 +454,18 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
           transition: isDragging ? 'none' : 'all 0.3s ease',
           userSelect: 'none',
           WebkitUserSelect: 'none',
-          touchAction: 'none',
+          touchAction: 'manipulation', // Allow tap but prevent default touch behaviors like zoom
         }}
         onMouseDown={handleMinimizedMouseDown}
         onTouchStart={handleMinimizedTouchStart}
+        onClick={(e) => {
+          // Fallback click handler for mobile - only trigger if not dragging
+          if (!isDragging) {
+            e.preventDefault();
+            e.stopPropagation();
+            handleMinimize();
+          }
+        }}
         onMouseEnter={(e) => {
           if (!isDragging) {
             e.currentTarget.style.transform = 'translateY(-2px)';
