@@ -115,7 +115,7 @@
 }
 
 .apple-photos-thumbnail {
-  aspect-ratio: 1;
+  aspect-ratio: 4/3;
   border-radius: var(--apple-radius-lg);
   overflow: hidden;
   background: var(--apple-gray-100);
@@ -159,34 +159,42 @@
 @media (max-width: 767px) {
   .apple-photos-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--apple-spacing-md);
-    padding: 0 var(--apple-spacing-lg);
+    gap: var(--apple-spacing-sm);
+    padding: 0 var(--apple-spacing-md);
   }
   
   .apple-photos-card {
-    min-height: 200px;
+    min-height: 140px;
   }
   
   .apple-photos-title {
-    font-size: 16px;
+    font-size: 15px;
   }
   
   .apple-photos-subtitle {
-    font-size: 14px;
+    font-size: 13px;
   }
 }
 
 @media (min-width: 768px) {
   .apple-photos-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--apple-spacing-lg);
+    gap: var(--apple-spacing-md);
+  }
+  
+  .apple-photos-card {
+    min-height: 160px;
   }
 }
 
 @media (min-width: 1024px) {
   .apple-photos-grid {
     grid-template-columns: repeat(4, 1fr);
-    gap: var(--apple-spacing-xl);
+    gap: var(--apple-spacing-lg);
+  }
+  
+  .apple-photos-card {
+    min-height: 180px;
   }
 }
 

@@ -29,7 +29,7 @@ const CategoryCard: React.FC<CategoryCardProps> = memo(({ category, onClick }) =
       </div>
       
       {/* Content */}
-      <div className="p-4">
+      <div className="p-3">
         <div className="flex items-center justify-between mb-1">
           <h3 className="apple-photos-title truncate">
             {category.name}
