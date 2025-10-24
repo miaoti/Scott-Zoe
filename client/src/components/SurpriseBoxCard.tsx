@@ -295,7 +295,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                 <h3 style={{ color: 'var(--apple-label)' }} className={`font-medium leading-tight ${
                   ['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'text-base md:text-lg mb-1' : 'text-xs truncate'
                 }`}>
-                  {isOwner || box.status === 'APPROVED' ? box.prizeName : '🎁 Mystery Prize'}
+                  {isOwner || box.status === 'APPROVED' || box.status === 'CLAIMED' ? box.prizeName : '🎁 Mystery Prize'}
                 </h3>
                 
                 {/* For CLAIMED boxes, don't show duplicate info here */}
@@ -342,11 +342,11 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
               <div className="bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-200 rounded-xl p-4">
                 <div className="space-y-2">
                   <div style={{ color: 'var(--apple-label)' }} className="text-sm">
-                    <span className="font-medium">Prize:</span> {isOwner || box.status === 'APPROVED' ? box.prizeName : '🎁 Mystery Prize'}
+                    <span className="font-medium">Prize:</span> {isOwner || box.status === 'APPROVED' || box.status === 'CLAIMED' ? box.prizeName : '🎁 Mystery Prize'}
                   </div>
                   {box.priceAmount && (
                     <div style={{ color: 'var(--apple-label)' }} className="text-sm">
-                      <span className="font-medium">Price:</span> {isOwner || box.status === 'APPROVED' ? box.priceAmount : box.priceAmount}
+                      <span className="font-medium">Price:</span> {box.priceAmount}
                     </div>
                   )}
                 </div>
@@ -367,7 +367,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                   </div>
                   <div className="flex items-center">
                     <DollarSign className={box.status === 'OPENED' ? 'w-3 h-3 md:w-4 md:h-4 mr-0.5 md:mr-1' : 'w-3 h-3 mr-0.5'} />
-                    <span className="font-medium">{isOwner || box.status === 'APPROVED' ? (box.priceAmount || 0) : box.priceAmount}</span>
+                    <span className="font-medium">{box.priceAmount || 0}</span>
                   </div>
                 </div>
                 
@@ -400,7 +400,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
               </div>
 
               {/* Enhanced description for OPENED boxes */}
-              {box.status === 'OPENED' && box.prizeDescription && (isOwner || box.status === 'APPROVED') && (
+              {box.status === 'OPENED' && box.prizeDescription && (isOwner || box.status === 'APPROVED' || box.status === 'CLAIMED') && (
                 <div style={{
                   background: 'rgba(99, 102, 241, 0.05)',
                   border: '1px solid rgba(99, 102, 241, 0.2)'
@@ -447,7 +447,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                       box.status === 'OPENED' ? 'mt-4 pt-4 space-y-2' : ''
                     }`}
                   >
-                    {box.prizeDescription && box.status !== 'OPENED' && (isOwner || box.status === 'APPROVED') && (
+                    {box.prizeDescription && box.status !== 'OPENED' && (isOwner || box.status === 'APPROVED' || box.status === 'CLAIMED') && (
                       <div>
                         <span style={{ color: 'var(--apple-label)' }} className={`font-medium ${
                           box.status === 'OPENED' ? 'text-sm' : 'text-xs'
