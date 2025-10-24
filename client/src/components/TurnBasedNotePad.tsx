@@ -32,6 +32,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
   // Drag state for minimized button - moved to top level to avoid conditional hook calls
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [initialDragPosition, setInitialDragPosition] = useState({ x: 0, y: 0 });
   const minimizedButtonRef = useRef<HTMLDivElement>(null);
   
   const { user } = useAuth();
@@ -320,6 +321,10 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top
       });
+      setInitialDragPosition({
+        x: e.clientX,
+        y: e.clientY
+      });
       setIsDragging(true);
     }
   }, []);
@@ -342,20 +347,17 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
   const handleMinimizedMouseUp = useCallback((e: MouseEvent) => {
     if (isDragging) {
       setIsDragging(false);
-      // Check if it was a click (minimal movement)
-      const rect = minimizedButtonRef.current?.getBoundingClientRect();
-      if (rect) {
-        const moveDistance = Math.sqrt(
-          Math.pow(e.clientX - (rect.left + dragOffset.x), 2) + 
-          Math.pow(e.clientY - (rect.top + dragOffset.y), 2)
-        );
-        if (moveDistance < 5) {
-          // It was a click, not a drag
-          handleMinimize();
-        }
+      // Check if it was a click (minimal movement from initial position)
+      const moveDistance = Math.sqrt(
+        Math.pow(e.clientX - initialDragPosition.x, 2) + 
+        Math.pow(e.clientY - initialDragPosition.y, 2)
+      );
+      if (moveDistance < 10) {
+        // It was a click, not a drag (increased threshold to 10px for better reliability)
+        handleMinimize();
       }
     }
-  }, [isDragging, dragOffset, handleMinimize]);
+  }, [isDragging, initialDragPosition, handleMinimize]);
 
   // Touch drag handlers for mobile
   const handleMinimizedTouchStart = useCallback((e: React.TouchEvent) => {
@@ -368,6 +370,10 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
       setDragOffset({
         x: touch.clientX - rect.left,
         y: touch.clientY - rect.top
+      });
+      setInitialDragPosition({
+        x: touch.clientX,
+        y: touch.clientY
       });
       setIsDragging(true);
     }
@@ -393,21 +399,18 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
   const handleMinimizedTouchEnd = useCallback((e: TouchEvent) => {
     if (isDragging) {
       setIsDragging(false);
-      // Check if it was a tap (minimal movement)
+      // Check if it was a tap (minimal movement from initial position)
       const touch = e.changedTouches[0];
-      const rect = minimizedButtonRef.current?.getBoundingClientRect();
-      if (rect) {
-        const moveDistance = Math.sqrt(
-          Math.pow(touch.clientX - (rect.left + dragOffset.x), 2) + 
-          Math.pow(touch.clientY - (rect.top + dragOffset.y), 2)
-        );
-        if (moveDistance < 5) {
-          // It was a tap, not a drag
-          handleMinimize();
-        }
+      const moveDistance = Math.sqrt(
+        Math.pow(touch.clientX - initialDragPosition.x, 2) + 
+        Math.pow(touch.clientY - initialDragPosition.y, 2)
+      );
+      if (moveDistance < 10) {
+        // It was a tap, not a drag (increased threshold to 10px for better reliability)
+        handleMinimize();
       }
     }
-  }, [isDragging, dragOffset, handleMinimize]);
+  }, [isDragging, initialDragPosition, handleMinimize]);
 
   // Add global event listeners for minimized button drag
   useEffect(() => {
