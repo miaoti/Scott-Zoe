@@ -100,11 +100,11 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
           setPrizes(getDefaultPrizes());
         }
         
-        console.log('✅ Wheel data loaded:', {
-          canUseThisWeek: wheelResponse.data.canUseThisWeek,
-          savedOpportunities: opportunitiesResponse.data.unused,
-          prizesCount: configResponse.data.prizes?.length || 0
-        });
+        // console.log('✅ Wheel data loaded:', {
+        //   canUseThisWeek: wheelResponse.data.canUseThisWeek,
+        //   savedOpportunities: opportunitiesResponse.data.unused,
+        //   prizesCount: configResponse.data.prizes?.length || 0
+        // });
       } catch (error) {
         console.error('❌ Error loading wheel data from backend:', error);
         // Fallback to localStorage and default prizes
@@ -186,7 +186,7 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
           prizeAmount: selectedPrize.amount,
           source: source
         });
-        console.log('✅ Wheel usage recorded in backend successfully');
+        // console.log('✅ Wheel usage recorded in backend successfully');
       } catch (error) {
         console.error('❌ Error recording wheel usage in backend:', error);
         // Fallback to localStorage
@@ -232,7 +232,7 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
           prizeValue: wonPrize.amount,
           prizeDescription: wonPrize.prizeDescription
         });
-        console.log('✅ Prize claimed and recorded:', wonPrize.amount);
+        // console.log('✅ Prize claimed and recorded:', wonPrize.amount);
         
         // Call onPrizeWon callback if provided
         if (onPrizeWon) {
@@ -260,7 +260,7 @@ const PrizeWheel: React.FC<PrizeWheelProps> = ({ onClose, level, onPrizeWon }) =
           await api.post('/api/opportunities/create', {
             source: 'wheel_close_without_spin'
           });
-          console.log('✅ Opportunity saved for later use');
+          // console.log('✅ Opportunity saved for later use');
         } catch (error) {
           console.error('❌ Error saving opportunity:', error);
           // Fallback to localStorage

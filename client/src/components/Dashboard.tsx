@@ -233,7 +233,7 @@ function Dashboard() {
     try {
       // Fetch recent photos with pagination
       const photosResponse = await api.get('/api/photos?page=0&limit=50');
-      console.log('Dashboard photos response:', photosResponse.data);
+      // console.log('Dashboard photos response:', photosResponse.data);
 
       // Handle both old and new API response formats
       const photosData = photosResponse.data.photos || photosResponse.data;
@@ -247,7 +247,7 @@ function Dashboard() {
         const memoriesResponse = await api.get('/api/memories/dashboard/upcoming?limit=3');
         setUpcomingMemories(memoriesResponse.data);
       } catch (memError) {
-        console.log('No upcoming memories endpoint, skipping');
+        // console.log('No upcoming memories endpoint, skipping');
         setUpcomingMemories([]);
       }
 
@@ -256,7 +256,7 @@ function Dashboard() {
         const allMemoriesResponse = await api.get('/api/memories');
         setStats(prev => ({ ...prev, memories: allMemoriesResponse.data.length }));
       } catch (memError) {
-        console.log('No memories endpoint, setting count to 0');
+        // console.log('No memories endpoint, setting count to 0');
         setStats(prev => ({ ...prev, memories: 0 }));
       }
 
@@ -265,7 +265,7 @@ function Dashboard() {
         const loveResponse = await api.get('/api/love');
         setStats(prev => ({ ...prev, totalLove: loveResponse.data.totalCount || 0 }));
       } catch (loveError) {
-        console.log('No love stats endpoint, setting count to 0');
+        // console.log('No love stats endpoint, setting count to 0');
         setStats(prev => ({ ...prev, totalLove: 0 }));
       }
     } catch (error) {
@@ -654,7 +654,7 @@ function Dashboard() {
           onClose={() => setShowWheel(false)}
           level={1}
           onPrizeWon={async (amount: number) => {
-            console.log('Prize won:', amount);
+            // console.log('Prize won:', amount);
             // The prize is automatically saved by the PrizeWheel component
           }}
         />

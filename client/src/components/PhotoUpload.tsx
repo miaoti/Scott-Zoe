@@ -45,7 +45,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
   };
 
   // Debug logging
-  console.log('PhotoUpload rendered', { files: files.length, isUploading, uploadStats });
+  // console.log('PhotoUpload rendered', { files: files.length, isUploading, uploadStats });
 
   const createUploadFile = (file: File): UploadFile => ({
     file,
@@ -72,10 +72,10 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
     const compressedFiles = await Promise.all(
       imageFiles.map(async (file, index) => {
         try {
-          console.log(`Compressing ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)...`);
+          // console.log(`Compressing ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)...`);
           const compressedFile = await compressImage(file);
           const compressionRatio = ((1 - compressedFile.size / file.size) * 100).toFixed(1);
-          console.log(`Compressed ${file.name} to ${(compressedFile.size / 1024 / 1024).toFixed(1)}MB (${compressionRatio}% reduction)`);
+          // console.log(`Compressed ${file.name} to ${(compressedFile.size / 1024 / 1024).toFixed(1)}MB (${compressionRatio}% reduction)`);
           return { file: compressedFile, originalIndex: index, compressed: true };
         } catch (error) {
           console.error(`Failed to compress ${file.name}:`, error);
@@ -93,7 +93,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
     if (successfulCompressions < totalFiles) {
       console.warn(`Compression completed: ${successfulCompressions}/${totalFiles} files compressed successfully`);
     } else {
-      console.log(`All ${totalFiles} files compressed successfully`);
+      // console.log(`All ${totalFiles} files compressed successfully`);
     }
 
     // Update files with compressed versions
@@ -145,7 +145,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
   const uploadFiles = async () => {
     if (files.length === 0) return;
 
-    console.log('Starting sequential upload for', files.length, 'files');
+    // console.log('Starting sequential upload for', files.length, 'files');
     setIsUploading(true);
     setUploadStats({ success: 0, total: files.length });
 
@@ -164,7 +164,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
             : f
         ));
 
-        console.log(`Uploading file ${i + 1}/${files.length}: ${fileData.file.name}`);
+        // console.log(`Uploading file ${i + 1}/${files.length}: ${fileData.file.name}`);
 
         const formData = new FormData();
         formData.append('photo', fileData.file);
@@ -196,7 +196,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUploadComplete, onClose }) 
           ));
           successCount++;
           setUploadStats({ success: successCount, total: files.length });
-          console.log(`✅ Successfully uploaded: ${fileData.file.name}`);
+          // console.log(`✅ Successfully uploaded: ${fileData.file.name}`);
         } else {
           throw new Error(`Upload failed with status: ${response.status}`);
         }

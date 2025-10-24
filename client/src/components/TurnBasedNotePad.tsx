@@ -93,7 +93,7 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
     }
     
     const newContent = e.target.value;
-    console.log('Text change detected:', { newContent, hasEditPermission });
+    // console.log('Text change detected:', { newContent, hasEditPermission });
     
     // Update local content immediately for responsive UI
     setContent(newContent);
@@ -134,14 +134,14 @@ const TurnBasedNotePad: React.FC<TurnBasedNotePadProps> = ({ onClose }) => {
   
   // Handle edit control request
   const handleRequestEdit = useCallback(async () => {
-    console.log('Requesting edit control...');
+    // console.log('Requesting edit control...');
     const granted = await requestEditControl();
-    console.log('Edit control request result:', granted);
+    // console.log('Edit control request result:', granted);
   }, [requestEditControl]);
   
   // Handle edit control release
   const handleReleaseEdit = useCallback(async () => {
-    console.log('Releasing edit control...');
+    // console.log('Releasing edit control...');
     await releaseEditControl();
   }, [releaseEditControl]);
   

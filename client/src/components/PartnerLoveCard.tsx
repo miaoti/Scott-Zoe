@@ -76,7 +76,7 @@ const PartnerLoveCard: React.FC = () => {
         
         // Attempt to reconnect after a delay
         setTimeout(() => {
-          console.log('Attempting to reconnect SSE...');
+          // console.log('Attempting to reconnect SSE...');
           setupSSE();
         }, 3000);
         
@@ -87,7 +87,7 @@ const PartnerLoveCard: React.FC = () => {
       };
       
       eventSource.onopen = () => {
-        console.log('SSE connection established');
+        // console.log('SSE connection established');
         setError(null);
       };
       

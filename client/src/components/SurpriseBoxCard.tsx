@@ -138,16 +138,16 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
   
   // Debug logging for canClaim conditions when not owner and status is APPROVED
   if (!isOwner && box.status === 'APPROVED') {
-    console.log('🔍 canClaim debug for APPROVED box (SIMPLIFIED):', {
-      boxId: box.id,
-      isOwner,
-      status: box.status,
-      rejectionReason: box.rejectionReason,
-      rejectionReasonType: typeof box.rejectionReason,
-      isExpired: box.isExpired,
-      isExpiredType: typeof box.isExpired,
-      canClaim
-    });
+    // console.log('🔍 canClaim debug for APPROVED box (SIMPLIFIED):', {
+    //   boxId: box.id,
+    //   isOwner,
+    //   status: box.status,
+    //   rejectionReason: box.rejectionReason,
+    //   rejectionReasonType: typeof box.rejectionReason,
+    //   isExpired: box.isExpired,
+    //   isExpiredType: typeof box.isExpired,
+    //   canClaim
+    // });
   }
   
   // For CREATORS (owner)

@@ -129,7 +129,7 @@ const LoveCounter: React.FC<LoveCounterProps> = ({ onLoveClick }) => {
 
   const handlePrizeWon = async (amount: number) => {
     // Prize recording is now handled by PrizeWheel component's handleClaimPrize
-    console.log('Prize won:', amount);
+    // console.log('Prize won:', amount);
   };
 
   const [clickQueue, setClickQueue] = useState(0);

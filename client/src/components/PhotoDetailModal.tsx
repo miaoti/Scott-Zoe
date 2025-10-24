@@ -41,7 +41,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
   const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
 
-  console.log('PhotoDetailModal rendered with photo:', photo);
+  // console.log('PhotoDetailModal rendered with photo:', photo);
 
   useEffect(() => {
     fetchCategories();
@@ -59,9 +59,9 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
   const handleSave = async () => {
     try {
       setLoading(true);
-
-      console.log('Saving photo with categories:', selectedCategories);
-      console.log('Available categories:', availableCategories);
+// 
+      // console.log('Saving photo with categories:', selectedCategories);
+      // console.log('Available categories:', availableCategories);
 
       // Update caption if it changed
       if (caption !== photo.caption) {
@@ -69,7 +69,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
           await api.put(`/api/photos/${photo.id}/caption`, {
             caption: caption
           });
-          console.log('Caption updated successfully');
+          // console.log('Caption updated successfully');
         } catch (error) {
           console.error('Error updating caption:', error);
         }
@@ -80,7 +80,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
         await api.put(`/api/photos/${photo.id}/categories`, {
           categoryIds: selectedCategories
         });
-        console.log('Categories updated successfully');
+        // console.log('Categories updated successfully');
       } catch (error) {
         console.error('Error updating categories:', error);
       }
@@ -93,7 +93,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
         categories: updatedCategories
       };
 
-      console.log('Calling onPhotoUpdate with:', updatedPhoto);
+      // console.log('Calling onPhotoUpdate with:', updatedPhoto);
       onPhotoUpdate(updatedPhoto);
       setIsEditing(false);
 
@@ -142,28 +142,28 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
   };
 
   const toggleCategory = async (categoryId: number) => {
-    console.log('Toggling category:', categoryId, 'Current selected:', selectedCategories);
+    // console.log('Toggling category:', categoryId, 'Current selected:', selectedCategories);
 
     const newCategories = selectedCategories.includes(categoryId)
       ? selectedCategories.filter(id => id !== categoryId)
       : [...selectedCategories, categoryId];
 
-    console.log('New selected categories:', newCategories);
+    // console.log('New selected categories:', newCategories);
     setSelectedCategories(newCategories);
 
     // Auto-save the category changes to backend
     try {
-      console.log('Saving categories to backend:', newCategories);
+      // console.log('Saving categories to backend:', newCategories);
 
       const response = await api.put(`/api/photos/${photo.id}/categories`, {
         categoryIds: newCategories
       });
 
-      console.log('Backend response:', response.data);
+      // console.log('Backend response:', response.data);
 
       // Update the photo with the response from backend
       onPhotoUpdate(response.data);
-      console.log('Categories saved successfully');
+      // console.log('Categories saved successfully');
     } catch (error) {
       console.error('Error saving categories to backend:', error);
       // Revert the selection on error

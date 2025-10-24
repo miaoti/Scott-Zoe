@@ -4,26 +4,8 @@ import { Link } from 'react-router-dom';
 import api, { API_BASE_URL } from '../utils/api';
 import PhotoDetailModal from './PhotoDetailModal';
 import PhotoUpload from './PhotoUpload';
-
-interface Photo {
-  id: number;
-  filename: string;
-  originalName: string;
-  caption?: string;
-  createdAt: string;
-  uploader: { name: string };
-  categories: Category[];
-  noteCount: number;
-  isFavorite?: boolean;
-}
-
-interface Category {
-  id: number;
-  name: string;
-  color: string;
-  photos?: Photo[];
-  photoCount?: number;
-}
+import CategoryGrid from './CategoryGrid';
+import { Photo, Category } from '../types';
 
 type ImageSize = 'small' | 'medium' | 'large';
 
@@ -287,78 +269,28 @@ function PhotoGallery() {
         )}
       </div>
 
-      {/* Categories Grid */}
+      {/* Categories Grid - Apple Photos Style */}
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Categories</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map(category => {
-            const categoryPhotos = category.id === -1 
+        <CategoryGrid 
+          categories={categories.map(category => ({
+            ...category,
+            photos: category.id === -1 
               ? photos.filter(photo => photo.isFavorite)
-              : photos.filter(photo => photo.categories.some(cat => cat.id === category.id));
-            
-            return (
-              <div key={category.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-apple-separator">
-                {/* Category Header */}
-                <div className="p-4 border-b border-apple-separator">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div 
-                        className="w-4 h-4 rounded-full"
-                        style={{ backgroundColor: category.color }}
-                      />
-                      <h3 className="text-lg font-semibold text-gray-800">{category.name}</h3>
-                    </div>
-                    <span className="text-sm text-gray-500">({categoryPhotos.length})</span>
-                  </div>
-                </div>
-                
-                {/* Photo Preview Grid */}
-                <div className="p-4">
-                  {categoryPhotos.length > 0 ? (
-                    <div className="grid grid-cols-3 gap-2 mb-3">
-                      {categoryPhotos.slice(0, 3).map((photo) => (
-                        <div key={photo.id} className="aspect-square relative overflow-hidden rounded-lg">
-                          <img
-                            src={`${API_BASE_URL}/api/photos/image/${photo.filename}?size=thumbnail`}
-                            alt={photo.originalName}
-                            className="w-full h-full object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
-                            onClick={() => openPhotoDetail(photo)}
-                          />
-                        </div>
-                      ))}
-                      {categoryPhotos.length > 3 && (
-                        <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-                          <span className="text-sm text-gray-500 font-medium">+{categoryPhotos.length - 3}</span>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="h-24 bg-gray-50 rounded-lg flex items-center justify-center mb-3">
-                      <p className="text-gray-400 text-sm">No photos yet</p>
-                    </div>
-                  )}
-                  
-                  {/* View All Button */}
-                  {category.id === -1 ? (
-                    <Link
-                      to="/photos?filter=favorites"
-                      className="block w-full text-center bg-white/80 backdrop-blur-sm hover:bg-white/90 active:bg-gray-50 text-gray-700 py-3 px-4 rounded-xl transition-all duration-200 text-sm font-medium border border-gray-200/60 shadow-sm hover:shadow-md"
-                    >
-                      View All Favorites
-                    </Link>
-                  ) : (
-                    <Link
-                      to={`/category/${category.id}`}
-                      className="block w-full text-center bg-white/80 backdrop-blur-sm hover:bg-white/90 active:bg-gray-50 text-gray-700 py-3 px-4 rounded-xl transition-all duration-200 text-sm font-medium border border-gray-200/60 shadow-sm hover:shadow-md"
-                    >
-                      View All Photos
-                    </Link>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              : photos.filter(photo => photo.categories.some(cat => cat.id === category.id)),
+            photoCount: category.id === -1 
+              ? photos.filter(photo => photo.isFavorite).length
+              : photos.filter(photo => photo.categories.some(cat => cat.id === category.id)).length
+          }))}
+          loading={loading}
+          onCategoryClick={(category) => {
+            if (category.id === -1) {
+              window.location.href = '/photos?filter=favorites';
+            } else {
+              window.location.href = `/category/${category.id}`;
+            }
+          }}
+        />
       </div>
 
       {/* Empty state */}

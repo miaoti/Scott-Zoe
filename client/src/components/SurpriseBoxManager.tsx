@@ -198,25 +198,25 @@ const SurpriseBoxManager: React.FC = () => {
                             {paginatedReceivedBoxes.map((box) => {
                               const isOwner = false;
                               
-                              console.log('📦 Received box debug:', {
-                                boxId: box.id,
-                                status: box.status,
-                                isOwner,
-                                currentUserId: (() => {
-                                  try {
-                                    const token = localStorage.getItem('token');
-                                    if (!token) return null;
-                                    const payload = JSON.parse(atob(token.split('.')[1]));
-                                    return payload.userId;
-                                  } catch {
-                                    return null;
-                                  }
-                                })(),
-                                ownerId: box.owner?.id,
-                                recipientId: box.recipient?.id,
-                                rejectionReason: box.rejectionReason,
-                                rejectionReasonType: typeof box.rejectionReason
-                              });
+                              // console.log('📦 Received box debug:', {
+                              //   boxId: box.id,
+                              //   status: box.status,
+                              //   isOwner,
+                              //   currentUserId: (() => {
+                              //     try {
+                              //       const token = localStorage.getItem('token');
+                              //       if (!token) return null;
+                              //       const payload = JSON.parse(atob(token.split('.')[1]));
+                              //       return payload.userId;
+                              //     } catch {
+                              //       return null;
+                              //     }
+                              //   })(),
+                              //   ownerId: box.owner?.id,
+                              //   recipientId: box.recipient?.id,
+                              //   rejectionReason: box.rejectionReason,
+                              //   rejectionReasonType: typeof box.rejectionReason
+                              // });
                               
                               return (
                                 <SurpriseBoxCard key={box.id} box={box} isOwner={isOwner} />

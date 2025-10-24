@@ -49,11 +49,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Failed to fetch user data:', error);
       // Only logout if it's a 401 (unauthorized) error, not network errors
       if (error.response && error.response.status === 401) {
-        console.log('Token is invalid, logging out');
+        // console.log('Token is invalid, logging out');
         logout();
       } else {
         // For other errors (network issues, 500 errors, etc.), keep the user logged in
-        console.log('Network or server error, keeping user logged in');
+        // console.log('Network or server error, keeping user logged in');
       }
     } finally {
       setLoading(false);

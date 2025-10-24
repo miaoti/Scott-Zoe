@@ -381,7 +381,7 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
     
     const state = get();
     if (state.stompClient?.connected || state.isLoading) {
-      console.log('Already connected or connecting to WebSocket, skipping connection');
+      // console.log('Already connected or connecting to WebSocket, skipping connection');
       return;
     }
     
@@ -389,7 +389,7 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
     
     try {
       const wsUrl = getWebSocketUrl();
-      console.log('WebSocket URL:', wsUrl);
+      // console.log('WebSocket URL:', wsUrl);
       
       const socket = new SockJS(`${wsUrl}/ws`);
       const sessionId = Date.now() + Math.random().toString(36);
@@ -408,7 +408,7 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
       });
       
       client.onConnect = (frame) => {
-        console.log('Connected to turn-based note WebSocket:', frame);
+        // console.log('Connected to turn-based note WebSocket:', frame);
         set({ 
           isConnected: true, 
           isLoading: false, 
@@ -461,7 +461,7 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
       };
       
       client.onDisconnect = () => {
-        console.log('Disconnected from turn-based note WebSocket');
+        // console.log('Disconnected from turn-based note WebSocket');
         set({ isConnected: false });
       };
       
@@ -592,8 +592,8 @@ export const useTurnBasedNoteStore = create<TurnBasedNoteState>((set, get) => ({
 
 // Message handlers
 function handleEditControlMessage(data: EditControlMessage) {
-  console.log('Received edit control message:', data);
-  
+  // console.log('Received edit control message:', data);
+  // 
   const state = useTurnBasedNoteStore.getState();
   
   switch (data.type) {
@@ -618,7 +618,7 @@ function handleEditControlMessage(data: EditControlMessage) {
 }
 
 function handleEditControlBroadcast(data: EditControlMessage) {
-  console.log('Received edit control broadcast:', data);
+  // console.log('Received edit control broadcast:', data);
   
   switch (data.type) {
     case 'EDIT_CONTROL_GRANTED':
@@ -638,7 +638,7 @@ function handleEditControlBroadcast(data: EditControlMessage) {
 }
 
 function handleContentUpdate(data: EditControlMessage) {
-  console.log('Received content update:', data);
+  // console.log('Received content update:', data);
   
   // Only update content from WebSocket if we don't have edit permission
   // This prevents overwriting local changes during fast typing
@@ -649,7 +649,7 @@ function handleContentUpdate(data: EditControlMessage) {
 }
 
 function handleTypingUpdate(data: EditControlMessage) {
-  console.log('Received typing update:', data);
+  // console.log('Received typing update:', data);
   
   if (data.username && data.isTyping !== undefined) {
     const indicator: TypingIndicator = {
