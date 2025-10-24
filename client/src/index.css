@@ -42,6 +42,11 @@
   --apple-gray-5: #E5E5EA;
   --apple-gray-6: #F2F2F7;
   
+  /* Apple Color System - Red */
+  --apple-red: #FF3B30;
+  --apple-red-light: #FF6B6B;
+  --apple-red-dark: #D70015;
+  
   /* Apple Semantic Colors */
   --apple-label: #000000;
   --apple-secondary-label: rgba(60, 60, 67, 0.6);
@@ -69,43 +74,20 @@
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Apple Semantic Colors - Dark Mode */
-    --apple-label: #FFFFFF;
-    --apple-secondary-label: rgba(235, 235, 245, 0.6);
-    --apple-tertiary-label: rgba(235, 235, 245, 0.3);
-    --apple-quaternary-label: rgba(235, 235, 245, 0.18);
-    --apple-separator: rgba(84, 84, 88, 0.6);
-    
-    /* Apple Background Colors - Dark Mode */
-    --apple-system-background: #000000;
-    --apple-secondary-background: #1C1C1E;
-    --apple-tertiary-background: #2C2C2E;
-    
-    /* Apple Gray Colors - Dark Mode */
-    --apple-gray-1: #8E8E93;
-    --apple-gray-2: #636366;
-    --apple-gray-3: #48484A;
-    --apple-gray-4: #3A3A3C;
-    --apple-gray-5: #2C2C2E;
-    --apple-gray-6: #1C1C1E;
-    
-    /* Apple Glass Effects - Dark Mode */
-    --apple-glass-bg: rgba(28, 28, 30, 0.95);
-    --apple-glass-border: rgba(255, 255, 255, 0.1);
-    --apple-glass-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-    
-    /* Legacy Glass Effects - Dark Mode */
-    --glass-bg: rgba(28, 28, 30, 0.8);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    
-    /* Apple Gradients - Dark Mode */
-    --apple-gradient-subtle: linear-gradient(180deg, #1C1C1E 0%, #2C2C2E 100%);
-    --apple-gradient-card: linear-gradient(180deg, #2C2C2E 0%, #1C1C1E 100%);
-  }
+/* Force Light Theme - No Dark Mode Support */
+/* Override system dark mode preferences */
+html {
+  color-scheme: light only;
+}
+
+body {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+}
+
+/* Force light theme for all elements */
+* {
+  color-scheme: light only;
 }
 
 * {

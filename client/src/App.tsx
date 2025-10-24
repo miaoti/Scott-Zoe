@@ -28,10 +28,10 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--apple-system-background)' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p style={{ color: 'var(--apple-secondary-label)' }}>Loading...</p>
         </div>
       </div>
     );
@@ -47,7 +47,7 @@ function AppContent() {
         {/* Private Routes */}
         <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} />
         <Route path="/" element={isAuthenticated ? (
-          <div className="min-h-screen">
+          <div className="min-h-screen" style={{ backgroundColor: 'var(--apple-system-background)' }}>
             <Header />
             <main className="container mx-auto px-4 py-8">
               <Dashboard />
@@ -55,7 +55,7 @@ function AppContent() {
           </div>
         ) : <Navigate to="/login" replace />} />
       <Route path="/dashboard" element={isAuthenticated ? (
-        <div className="min-h-screen">
+        <div className="min-h-screen" style={{ backgroundColor: 'var(--apple-system-background)' }}>
           <Header />
           <main className="container mx-auto px-4 py-8">
             <Dashboard />
@@ -64,7 +64,7 @@ function AppContent() {
         </div>
       ) : <Navigate to="/login" replace />} />
       <Route path="/gallery" element={isAuthenticated ? (
-        <div className="min-h-screen">
+        <div className="min-h-screen" style={{ backgroundColor: 'var(--apple-system-background)' }}>
           <Header />
           <main className="container mx-auto px-4 py-8">
             <PhotoGallery />
@@ -72,7 +72,7 @@ function AppContent() {
         </div>
       ) : <Navigate to="/login" replace />} />
       <Route path="/photos" element={isAuthenticated ? (
-        <div className="min-h-screen">
+        <div className="min-h-screen" style={{ backgroundColor: 'var(--apple-system-background)' }}>
           <Header />
           <main className="container mx-auto px-4 py-8">
             <AllPhotos />
@@ -80,7 +80,7 @@ function AppContent() {
         </div>
       ) : <Navigate to="/login" replace />} />
       <Route path="/category/:id" element={isAuthenticated ? (
-        <div className="min-h-screen">
+        <div className="min-h-screen" style={{ backgroundColor: 'var(--apple-system-background)' }}>
           <Header />
           <main className="container mx-auto px-4 py-8">
             <CategoryPhotos />
@@ -88,7 +88,7 @@ function AppContent() {
         </div>
       ) : <Navigate to="/login" replace />} />
       <Route path="/photo/:id" element={isAuthenticated ? (
-        <div className="min-h-screen">
+        <div className="min-h-screen" style={{ backgroundColor: 'var(--apple-system-background)' }}>
           <Header />
           <main className="container mx-auto px-4 py-8">
             <PhotoDetail />
@@ -96,7 +96,7 @@ function AppContent() {
         </div>
       ) : <Navigate to="/login" replace />} />
       <Route path="/memories" element={isAuthenticated ? (
-        <div className="min-h-screen">
+        <div className="min-h-screen" style={{ backgroundColor: 'var(--apple-system-background)' }}>
           <Header />
           <main className="container mx-auto px-4 py-8">
             <Memories />
@@ -104,7 +104,7 @@ function AppContent() {
         </div>
       ) : <Navigate to="/login" replace />} />
       <Route path="/categories" element={isAuthenticated ? (
-        <div className="min-h-screen">
+        <div className="min-h-screen" style={{ backgroundColor: 'var(--apple-system-background)' }}>
           <Header />
           <main className="container mx-auto px-4 py-8">
             <Categories />
@@ -112,7 +112,7 @@ function AppContent() {
         </div>
       ) : <Navigate to="/login" replace />} />
       <Route path="/recycle-bin" element={isAuthenticated ? (
-        <div className="min-h-screen">
+        <div className="min-h-screen" style={{ backgroundColor: 'var(--apple-system-background)' }}>
           <Header />
           <main className="container mx-auto px-4 py-8">
             <RecycleBin />
@@ -120,7 +120,7 @@ function AppContent() {
         </div>
       ) : <Navigate to="/login" replace />} />
       <Route path="/settings" element={isAuthenticated ? (
-        <div className="min-h-screen">
+        <div className="min-h-screen" style={{ backgroundColor: 'var(--apple-system-background)' }}>
           <Header />
           <main className="container mx-auto px-4 py-8">
             <Settings />
@@ -128,7 +128,7 @@ function AppContent() {
         </div>
       ) : <Navigate to="/login" replace />} />
       <Route path="/surprise-boxes" element={isAuthenticated ? (
-        <div className="min-h-screen">
+        <div className="min-h-screen" style={{ backgroundColor: 'var(--apple-system-background)' }}>
           <Header />
           <main className="container mx-auto px-4 py-8">
             <SurpriseBoxManager />

@@ -87,26 +87,7 @@
   --apple-z-tooltip: 1070;
 }
 
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --apple-label: #FFFFFF;
-    --apple-secondary-label: #EBEBF5;
-    --apple-tertiary-label: #EBEBF599;
-    --apple-quaternary-label: #EBEBF52E;
-    
-    --apple-separator: #54545899;
-    --apple-opaque-separator: #38383A;
-    
-    --apple-system-background: #000000;
-    --apple-secondary-system-background: #1C1C1E;
-    --apple-tertiary-system-background: #2C2C2E;
-    
-    --apple-system-grouped-background: #000000;
-    --apple-secondary-system-grouped-background: #1C1C1E;
-    --apple-tertiary-system-grouped-background: #2C2C2E;
-  }
-}
+/* Force Light Theme - No Dark Mode Support */
 
 /* Apple Photos Specific Styles */
 .apple-photos-grid {
