@@ -114,19 +114,19 @@ const Header = memo(function Header() {
     <div className="grid grid-cols-2 gap-4 mb-4">
       <div className="bg-apple-purple/5 rounded-lg p-3">
         <div className="text-2xl font-bold text-apple-purple">{timeElapsed.days}</div>
-        <div className="text-xs text-apple-secondary-label">Days</div>
+        <div style={{ color: 'var(--apple-secondary-label)' }} className="text-xs">Days</div>
       </div>
       <div className="bg-apple-purple/5 rounded-lg p-3">
         <div className="text-2xl font-bold text-apple-purple">{timeElapsed.hours}</div>
-        <div className="text-xs text-apple-secondary-label">Hours</div>
+        <div style={{ color: 'var(--apple-secondary-label)' }} className="text-xs">Hours</div>
       </div>
       <div className="bg-apple-purple/5 rounded-lg p-3">
         <div className="text-2xl font-bold text-apple-purple">{timeElapsed.minutes}</div>
-        <div className="text-xs text-apple-secondary-label">Minutes</div>
+        <div style={{ color: 'var(--apple-secondary-label)' }} className="text-xs">Minutes</div>
       </div>
       <div className="bg-apple-purple/5 rounded-lg p-3">
         <div className="text-2xl font-bold text-apple-purple">{timeElapsed.seconds}</div>
-        <div className="text-xs text-apple-secondary-label">Seconds</div>
+        <div style={{ color: 'var(--apple-secondary-label)' }} className="text-xs">Seconds</div>
       </div>
     </div>
   ), [timeElapsed]);
@@ -136,7 +136,12 @@ const Header = memo(function Header() {
 
 
   return (
-    <header className="apple-glass-effect border-b border-apple-separator sticky top-0 z-40 backdrop-blur-xl">
+    <header style={{
+      background: 'var(--apple-glass-bg)',
+      borderBottom: '1px solid var(--apple-separator)',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)'
+    }} className="sticky top-0 z-40">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -148,7 +153,7 @@ const Header = memo(function Header() {
                 filter: 'drop-shadow(0 0 12px rgba(168, 85, 247, 0.4))'
               }}
             />
-            <span className="font-semibold text-lg sm:text-xl text-apple-label group-hover:text-apple-purple transition-colors duration-300 hidden xs:block">
+            <span style={{ color: 'var(--apple-label)' }} className="font-semibold text-lg sm:text-xl group-hover:text-apple-purple transition-colors duration-300 hidden xs:block">
               Scott &amp; Zoe
             </span>
           </Link>
@@ -158,20 +163,33 @@ const Header = memo(function Header() {
             <div className="relative hidden lg:block relationship-dropdown">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center space-x-2 apple-glass-background rounded-xl px-4 py-2 apple-shadow hover:bg-apple-gray-6/10 transition-all duration-200"
+                style={{
+                  background: 'var(--apple-glass-bg)',
+                  boxShadow: 'var(--apple-shadow)'
+                }}
+                className="flex items-center space-x-2 rounded-xl px-4 py-2 hover:bg-apple-gray-6/10 transition-all duration-200"
               >
                 <Heart className="h-4 w-4 text-apple-purple" fill="currentColor" />
-                <span className="text-sm font-medium text-apple-label">Days Together</span>
-                <ChevronDown className={`h-4 w-4 text-apple-secondary-label transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
+                <span style={{ color: 'var(--apple-label)' }} className="text-sm font-medium">Days Together</span>
+                <ChevronDown style={{ color: 'var(--apple-secondary-label)' }} className={`h-4 w-4 transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
               </button>
               
               {showDropdown && (
-                <div className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-xl p-6 apple-shadow border border-apple-separator min-w-[280px] z-40">
+                <div style={{
+                  background: 'var(--apple-glass-bg)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  boxShadow: 'var(--apple-shadow)',
+                  border: '1px solid var(--apple-separator)'
+                }} className="absolute top-full right-0 mt-2 rounded-xl p-6 min-w-[280px] z-40">
                   <div className="text-center">
                     {timeDisplayComponents}
-                    <div className="text-apple-secondary-label border-t border-apple-separator pt-3">
+                    <div style={{ 
+                      color: 'var(--apple-secondary-label)',
+                      borderTop: '1px solid var(--apple-separator)'
+                    }} className="pt-3">
                       <div className="text-xs">Since June 8th, 2020</div>
-                      <div className="font-medium text-apple-label text-sm mt-1">
+                      <div style={{ color: 'var(--apple-label)' }} className="font-medium text-sm mt-1">
                         💕 Every second counts! 💕
                       </div>
                     </div>
@@ -185,11 +203,21 @@ const Header = memo(function Header() {
           <nav className="hidden md:flex items-center space-x-1">
             <Link
               to="/"
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                isActive('/') 
-                  ? 'bg-apple-purple/10 text-apple-purple' 
-                  : 'text-apple-secondary-label hover:bg-apple-gray-6/10 hover:text-apple-label'
-              }`}
+              style={{
+                color: isActive('/') ? 'var(--apple-purple)' : 'var(--apple-secondary-label)',
+                backgroundColor: isActive('/') ? 'rgba(168, 85, 247, 0.1)' : 'transparent'
+              }}
+              className="flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-apple-gray-6/10"
+              onMouseEnter={(e) => {
+                if (!isActive('/')) {
+                  e.currentTarget.style.color = 'var(--apple-label)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive('/')) {
+                  e.currentTarget.style.color = 'var(--apple-secondary-label)';
+                }
+              }}
             >
               <Home className="h-4 w-4" />
               <span className="hidden lg:inline font-medium">Home</span>

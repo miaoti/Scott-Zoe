@@ -203,15 +203,21 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className="bg-white rounded-2xl sm:rounded-3xl max-w-6xl w-full h-full sm:max-h-[95vh] overflow-hidden shadow-2xl flex flex-col sm:flex-row">
+      <div style={{ backgroundColor: 'var(--apple-glass-bg)', boxShadow: 'var(--apple-shadow)' }} className="rounded-2xl sm:rounded-3xl max-w-6xl w-full h-full sm:max-h-[95vh] overflow-hidden flex flex-col sm:flex-row"
+           data-backdrop-filter="blur(20px)"
+           onLoad={(e) => {
+             const element = e.target as HTMLElement;
+             element.style.backdropFilter = 'blur(20px)';
+           }}>
         {/* Mobile Header - Only visible on mobile */}
-        <div className="sm:hidden flex items-center justify-between p-4 border-b border-gray-200 bg-white">
-          <h2 className="text-lg font-semibold text-gray-900">Photo Details</h2>
+        <div style={{ borderBottomColor: 'var(--apple-separator)', backgroundColor: 'var(--apple-glass-bg)' }} className="sm:hidden flex items-center justify-between p-4 border-b">
+          <h2 style={{ color: 'var(--apple-label)' }} className="text-lg font-semibold">Photo Details</h2>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 flex items-center justify-center transition-all duration-200"
+            style={{ backgroundColor: 'var(--apple-gray-6)' }}
+            className="w-10 h-10 rounded-full hover:opacity-80 active:opacity-60 flex items-center justify-center transition-all duration-200"
           >
-            <X className="w-5 h-5 text-gray-600" />
+            <X style={{ color: 'var(--apple-secondary-label)' }} className="w-5 h-5" />
           </button>
         </div>
 
@@ -225,15 +231,16 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
         </div>
         
         {/* Details Section */}
-        <div className="w-full sm:w-96 bg-white flex flex-col order-2 sm:order-none max-h-[40vh] sm:max-h-none">
+        <div style={{ backgroundColor: 'var(--apple-glass-bg)' }} className="w-full sm:w-96 flex flex-col order-2 sm:order-none max-h-[40vh] sm:max-h-none">
             {/* Desktop Header - Hidden on mobile */}
-            <div className="hidden sm:flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">Photo Details</h2>
+            <div style={{ borderBottomColor: 'var(--apple-separator)' }} className="hidden sm:flex items-center justify-between p-6 border-b">
+              <h2 style={{ color: 'var(--apple-label)' }} className="text-xl font-semibold">Photo Details</h2>
               <button
                 onClick={onClose}
-                className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 flex items-center justify-center transition-all duration-200"
+                style={{ backgroundColor: 'var(--apple-gray-6)' }}
+                className="w-10 h-10 rounded-full hover:opacity-80 active:opacity-60 flex items-center justify-center transition-all duration-200"
               >
-                <X className="w-5 h-5 text-gray-600" />
+                <X style={{ color: 'var(--apple-secondary-label)' }} className="w-5 h-5" />
               </button>
             </div>
             
@@ -241,17 +248,17 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
               {/* Basic Info */}
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3 text-base sm:text-lg">Information</h3>
+                <h3 style={{ color: 'var(--apple-label)' }} className="font-semibold mb-3 text-base sm:text-lg">Information</h3>
                 <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                    <Calendar className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                    <span className="text-gray-700">
+                  <div style={{ backgroundColor: 'var(--apple-gray-6)' }} className="flex items-center gap-3 p-3 rounded-xl">
+                    <Calendar style={{ color: 'var(--apple-tertiary-label)' }} className="w-4 h-4 flex-shrink-0" />
+                    <span style={{ color: 'var(--apple-secondary-label)' }}>
                       {formatDate(photo.createdAt)}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                    <User className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                    <span className="text-gray-700">
+                  <div style={{ backgroundColor: 'var(--apple-gray-6)' }} className="flex items-center gap-3 p-3 rounded-xl">
+                    <User style={{ color: 'var(--apple-tertiary-label)' }} className="w-4 h-4 flex-shrink-0" />
+                    <span style={{ color: 'var(--apple-secondary-label)' }}>
                       Uploaded by {photo.uploader?.name || 'Unknown'}
                     </span>
                   </div>
@@ -261,10 +268,11 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
               {/* Caption */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-gray-900 text-base sm:text-lg">Caption</h3>
+                  <h3 style={{ color: 'var(--apple-label)' }} className="font-semibold text-base sm:text-lg">Caption</h3>
                   <button
                     onClick={() => setIsEditing(!isEditing)}
-                    className="p-2 rounded-full bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-600 transition-all duration-200"
+                    style={{ backgroundColor: 'rgba(0, 122, 255, 0.1)', color: 'var(--apple-blue)' }}
+                    className="p-2 rounded-full hover:opacity-80 active:opacity-60 transition-all duration-200"
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
@@ -275,12 +283,18 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
                     placeholder="Add a caption..."
-                    className="w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none bg-white shadow-sm text-gray-900 placeholder-gray-500"
+                    style={{ 
+                      borderColor: 'var(--apple-separator)', 
+                      backgroundColor: 'var(--apple-glass-bg)', 
+                      color: 'var(--apple-label)',
+                      boxShadow: 'var(--apple-shadow)'
+                    }}
+                    className="w-full p-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none placeholder-gray-500"
                     rows={3}
                   />
                 ) : (
                   <div className="max-h-24 overflow-y-auto">
-                    <p className="text-gray-700 text-sm p-4 bg-gray-50 rounded-xl break-words">
+                    <p style={{ color: 'var(--apple-secondary-label)', backgroundColor: 'var(--apple-gray-6)' }} className="text-sm p-4 rounded-xl break-words">
                       {caption || 'No caption added yet'}
                     </p>
                   </div>
@@ -290,8 +304,8 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
               {/* Categories */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-gray-900 text-base sm:text-lg">Categories</h3>
-                  <Tag className="w-4 h-4 text-gray-500" />
+                  <h3 style={{ color: 'var(--apple-label)' }} className="font-semibold text-base sm:text-lg">Categories</h3>
+                  <Tag style={{ color: 'var(--apple-tertiary-label)' }} className="w-4 h-4" />
                 </div>
                 
                 <div className="max-h-48 overflow-y-auto space-y-2">
@@ -300,19 +314,33 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                     .map(category => (
                     <label
                       key={category.id}
-                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 active:bg-gray-100 cursor-pointer transition-all duration-200 border border-transparent hover:border-gray-200"
+                      style={{ borderColor: 'transparent' }}
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 active:bg-gray-100 cursor-pointer transition-all duration-200 border"
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'var(--apple-gray-6)';
+                        e.currentTarget.style.borderColor = 'var(--apple-separator)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.borderColor = 'transparent';
+                      }}
                     >
                       <input
                         type="checkbox"
                         checked={selectedCategories.includes(category.id)}
                         onChange={() => toggleCategory(category.id)}
-                        className="w-4 h-4 text-blue-500 bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-colors"
+                        style={{ 
+                          accentColor: 'var(--apple-blue)',
+                          backgroundColor: 'var(--apple-glass-bg)',
+                          borderColor: 'var(--apple-separator)'
+                        }}
+                        className="w-4 h-4 rounded focus:ring-blue-500 focus:ring-2 transition-colors"
                       />
                       <div
                         className="w-4 h-4 rounded-full flex-shrink-0 shadow-sm"
                         style={{ backgroundColor: category.color }}
                       />
-                      <span className="text-sm text-gray-700 truncate font-medium">{category.name}</span>
+                      <span style={{ color: 'var(--apple-secondary-label)' }} className="text-sm truncate font-medium">{category.name}</span>
                     </label>
                   ))}
                 </div>
@@ -320,7 +348,14 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
             </div>
             
             {/* Footer */}
-            <div className="p-4 sm:p-6 border-t border-gray-200 bg-white/80 backdrop-blur-sm">
+            <div 
+              style={{ 
+                borderTopColor: 'var(--apple-separator)', 
+                backgroundColor: 'var(--apple-glass-bg)',
+                backdropFilter: 'blur(20px)'
+              }} 
+              className="p-4 sm:p-6 border-t"
+            >
               {isEditing ? (
                 <div className="flex gap-3">
                   <button
@@ -329,14 +364,16 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                       setCaption(photo.caption || '');
                       setSelectedCategories(photo.categories?.map(c => c.id) || []);
                     }}
-                    className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all duration-200 min-h-[44px] flex items-center justify-center"
+                    style={{ backgroundColor: 'var(--apple-gray-6)', color: 'var(--apple-secondary-label)' }}
+                    className="flex-1 px-4 py-3 hover:opacity-80 active:opacity-60 rounded-xl font-semibold transition-all duration-200 min-h-[44px] flex items-center justify-center"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSave}
                     disabled={loading}
-                    className="flex-1 px-4 py-3 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-all duration-200 min-h-[44px] shadow-sm"
+                    style={{ backgroundColor: 'var(--apple-blue)', color: 'white', boxShadow: 'var(--apple-shadow)' }}
+                    className="flex-1 px-4 py-3 hover:opacity-90 active:opacity-80 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-all duration-200 min-h-[44px]"
                   >
                     <Save className="w-4 h-4" />
                     {loading ? 'Saving...' : 'Save'}
@@ -346,7 +383,8 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                 <div className="flex gap-3">
                   <button
                     onClick={handleToggleFavorite}
-                    className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-200 min-h-[44px]"
+                    style={{ backgroundColor: 'var(--apple-gray-6)', color: 'var(--apple-secondary-label)' }}
+                    className="flex-1 px-4 py-3 hover:opacity-80 active:opacity-60 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-200 min-h-[44px]"
                   >
                     <Heart className={`w-4 h-4 ${photo.isFavorite ? 'text-red-500 fill-current' : ''}`} />
                     <span className="hidden sm:inline">{photo.isFavorite ? 'Favorited' : 'Add to Favorites'}</span>
@@ -355,7 +393,8 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                   <button
                     onClick={handleDelete}
                     disabled={loading}
-                    className="px-4 py-3 bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-600 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50 min-h-[44px]"
+                    style={{ backgroundColor: 'rgba(255, 59, 48, 0.1)', color: 'var(--apple-red)' }}
+                    className="px-4 py-3 hover:opacity-80 active:opacity-60 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50 min-h-[44px]"
                   >
                     <Trash2 className="w-4 h-4" />
                     <span className="hidden sm:inline">Delete</span>

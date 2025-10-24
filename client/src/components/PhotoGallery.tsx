@@ -163,7 +163,13 @@ function PhotoGallery() {
                   e.stopPropagation();
                   toggleFavorite(photo.id);
                 }}
-                className="absolute top-3 left-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white active:scale-95 transition-all duration-200 opacity-0 group-hover:opacity-100 shadow-sm hover:shadow-md hidden md:block"
+                style={{
+                  background: 'var(--apple-glass-bg)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  boxShadow: 'var(--apple-shadow)'
+                }}
+                className="absolute top-3 left-3 p-2 rounded-full hover:bg-white active:scale-95 transition-all duration-200 opacity-0 group-hover:opacity-100 hidden md:block"
               >
                 <Heart
                   className={`h-4 w-4 transition-all duration-200 ${photo.isFavorite ? 'text-red-500 fill-current scale-110' : 'text-gray-600 hover:text-red-400'}`}
@@ -193,14 +199,22 @@ function PhotoGallery() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Photo Gallery</h1>
-          <p className="text-gray-600">Your beautiful memories organized by categories</p>
+          <h1 style={{ color: 'var(--apple-label)' }} className="text-3xl font-bold mb-2">Photo Gallery</h1>
+          <p style={{ color: 'var(--apple-secondary-label)' }}>Your beautiful memories organized by categories</p>
         </div>
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2">
           <Link
             to="/recycle-bin"
-            className="group bg-white/80 backdrop-blur-sm hover:bg-white/90 active:bg-gray-50 text-gray-700 px-4 py-3 sm:px-5 sm:py-2.5 rounded-2xl sm:rounded-xl transition-all duration-200 flex items-center justify-center gap-2.5 sm:gap-2 shadow-sm hover:shadow-md border border-gray-200/60 font-medium text-sm sm:text-base min-h-[44px] sm:min-h-[40px]"
+            style={{
+              background: 'var(--apple-glass-bg)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              color: 'var(--apple-label)',
+              border: '1px solid var(--apple-separator)',
+              boxShadow: 'var(--apple-shadow)'
+            }}
+            className="group hover:bg-white/90 active:bg-gray-50 px-4 py-3 sm:px-5 sm:py-2.5 rounded-2xl sm:rounded-xl transition-all duration-200 flex items-center justify-center gap-2.5 sm:gap-2 font-medium text-sm sm:text-base min-h-[44px] sm:min-h-[40px]"
           >
             <Trash2 className="w-4 h-4 text-gray-600 group-hover:text-gray-700 transition-colors" />
             <span className="hidden sm:inline">Recycle Bin</span>
@@ -208,7 +222,15 @@ function PhotoGallery() {
           </Link>
           <Link
             to="/categories"
-            className="group bg-white/80 backdrop-blur-sm hover:bg-white/90 active:bg-gray-50 text-gray-700 px-4 py-3 sm:px-5 sm:py-2.5 rounded-2xl sm:rounded-xl transition-all duration-200 flex items-center justify-center gap-2.5 sm:gap-2 shadow-sm hover:shadow-md border border-gray-200/60 font-medium text-sm sm:text-base min-h-[44px] sm:min-h-[40px]"
+            style={{
+              background: 'var(--apple-glass-bg)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              color: 'var(--apple-label)',
+              border: '1px solid var(--apple-separator)',
+              boxShadow: 'var(--apple-shadow)'
+            }}
+            className="group hover:bg-white/90 active:bg-gray-50 px-4 py-3 sm:px-5 sm:py-2.5 rounded-2xl sm:rounded-xl transition-all duration-200 flex items-center justify-center gap-2.5 sm:gap-2 font-medium text-sm sm:text-base min-h-[44px] sm:min-h-[40px]"
           >
             <Settings className="w-4 h-4 text-gray-600 group-hover:text-gray-700 transition-colors" />
             <span className="hidden sm:inline">Manage Categories</span>
@@ -233,7 +255,15 @@ function PhotoGallery() {
           <select
             value={imageSize}
             onChange={(e) => setImageSize(e.target.value as ImageSize)}
-            className="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white/80 backdrop-blur-sm transition-all duration-200 font-medium text-gray-700 shadow-sm hover:shadow-md"
+            style={{
+              background: 'var(--apple-glass-bg)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              color: 'var(--apple-label)',
+              border: '1px solid var(--apple-separator)',
+              boxShadow: 'var(--apple-shadow)'
+            }}
+            className="px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 font-medium"
           >
             <option value="small">Small</option>
             <option value="medium">Medium</option>
@@ -261,17 +291,21 @@ function PhotoGallery() {
 
           </div>
         ) : (
-          <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-            <Camera className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-600 mb-2">No photos yet</h3>
-            <p className="text-gray-500">Start uploading to create your gallery!</p>
+          <div style={{
+            background: 'var(--apple-gray-6)',
+            border: '2px dashed var(--apple-separator)',
+            color: 'var(--apple-secondary-label)'
+          }} className="rounded-xl p-12 text-center">
+            <Camera className="h-16 w-16 mx-auto mb-4" style={{ color: 'var(--apple-tertiary-label)' }} />
+            <h3 style={{ color: 'var(--apple-secondary-label)' }} className="text-lg font-semibold mb-2">No photos yet</h3>
+            <p style={{ color: 'var(--apple-tertiary-label)' }}>Start uploading to create your gallery!</p>
           </div>
         )}
       </div>
 
       {/* Categories Grid - Apple Photos Style */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Categories</h2>
+        <h2 style={{ color: 'var(--apple-label)' }} className="text-2xl font-bold mb-6">Categories</h2>
         <CategoryGrid 
           categories={categories.map(category => ({
             ...category,
@@ -296,9 +330,9 @@ function PhotoGallery() {
       {/* Empty state */}
       {photos.length === 0 && (
         <div className="text-center py-12">
-          <Upload className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-600 mb-2">No photos yet</h3>
-          <p className="text-gray-500 mb-6">
+          <Upload className="h-16 w-16 mx-auto mb-4" style={{ color: 'var(--apple-tertiary-label)' }} />
+          <h3 style={{ color: 'var(--apple-secondary-label)' }} className="text-xl font-semibold mb-2">No photos yet</h3>
+          <p style={{ color: 'var(--apple-tertiary-label)' }} className="mb-6">
             Start building your gallery by uploading your first photos!
           </p>
           <button

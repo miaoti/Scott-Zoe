@@ -243,15 +243,25 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`bg-white/90 backdrop-blur-sm rounded-lg apple-shadow border transition-all duration-200 hover:shadow-md ${
+        style={{
+          background: 'var(--apple-glass-bg)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          boxShadow: 'var(--apple-shadow)',
+          border: `1px solid ${
+            box.status === 'OPENED' || ['WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'rgba(99, 102, 241, 0.3)' :
+            isExpired ? 'rgba(239, 68, 68, 0.2)' :
+            canOpen ? 'rgba(34, 197, 94, 0.2)' :
+            canComplete ? 'rgba(99, 102, 241, 0.2)' :
+            canApprove ? 'rgba(245, 158, 11, 0.2)' :
+            'var(--apple-separator)'
+          }`
+        }}
+        className={`rounded-lg transition-all duration-200 hover:shadow-md ${
           // OPENED boxes get full size (2x2), WAITING_APPROVAL and APPROVED get reduced height (2x1)
-          box.status === 'OPENED' ? 'md:col-span-2 md:row-span-2 border-indigo-300 shadow-lg' :
-          ['WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'md:col-span-2 md:row-span-1 border-indigo-300 shadow-lg' :
-          isExpired ? 'border-red-200 hover:border-red-300' :
-          canOpen ? 'border-green-200 hover:border-green-300' :
-          canComplete ? 'border-indigo-200 hover:border-indigo-300' :
-          canApprove ? 'border-amber-200 hover:border-amber-300' :
-          'border-gray-200 hover:border-purple-300'
+          box.status === 'OPENED' ? 'md:col-span-2 md:row-span-2 shadow-lg' :
+          ['WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'md:col-span-2 md:row-span-1 shadow-lg' :
+          ''
         }`}
       >
         {/* Enhanced Header for OPENED, WAITING_APPROVAL, and APPROVED boxes, compact for others */}
@@ -282,10 +292,10 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                 <Gift className={['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'w-4 h-4 md:w-5 md:h-5' : 'w-3 h-3'} />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className={`font-medium text-gray-800 leading-tight ${
+                <h3 style={{ color: 'var(--apple-label)' }} className={`font-medium leading-tight ${
                   ['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'text-base md:text-lg mb-1' : 'text-xs truncate'
                 }`}>
-                  {box.prizeName}
+                  {isOwner || box.status === 'APPROVED' ? box.prizeName : '🎁 Mystery Prize'}
                 </h3>
                 
                 {/* For CLAIMED boxes, don't show duplicate info here */}
@@ -305,7 +315,8 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
             {box.status !== 'CLAIMED' && (
               <button
                 onClick={() => setShowDetails(!showDetails)}
-                className={`text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 ${
+                style={{ color: 'var(--apple-secondary-label)' }}
+                className={`hover:text-gray-600 transition-colors flex-shrink-0 ${
                   ['OPENED', 'WAITING_APPROVAL', 'APPROVED'].includes(box.status) ? 'p-0.5 md:p-1' : 'p-0.5'
                 }`}
               >
@@ -330,12 +341,12 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
               <div className="text-4xl mb-3">🎁</div>
               <div className="bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-200 rounded-xl p-4">
                 <div className="space-y-2">
-                  <div className="text-sm text-gray-700">
-                    <span className="font-medium">Prize:</span> {box.prizeName}
+                  <div style={{ color: 'var(--apple-label)' }} className="text-sm">
+                    <span className="font-medium">Prize:</span> {isOwner || box.status === 'APPROVED' ? box.prizeName : '🎁 Mystery Prize'}
                   </div>
                   {box.priceAmount && (
-                    <div className="text-sm text-gray-700">
-                      <span className="font-medium">Price:</span> ${box.priceAmount}
+                    <div style={{ color: 'var(--apple-label)' }} className="text-sm">
+                      <span className="font-medium">Price:</span> ${isOwner || box.status === 'APPROVED' ? box.priceAmount : '???'}
                     </div>
                   )}
                 </div>
@@ -344,7 +355,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
           ) : (
             <>
               {/* Essential info - enhanced for OPENED boxes */}
-              <div className={`flex items-center justify-between text-gray-600 mb-1 ${
+              <div style={{ color: 'var(--apple-secondary-label)' }} className={`flex items-center justify-between mb-1 ${
                 box.status === 'OPENED' ? 'text-xs md:text-sm mb-2 md:mb-3' : 'text-xs'
               }`}>
                 <div className="flex items-center space-x-1 md:space-x-2">
@@ -356,7 +367,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                   </div>
                   <div className="flex items-center">
                     <DollarSign className={box.status === 'OPENED' ? 'w-3 h-3 md:w-4 md:h-4 mr-0.5 md:mr-1' : 'w-3 h-3 mr-0.5'} />
-                    <span className="font-medium">${box.priceAmount || 0}</span>
+                    <span className="font-medium">${isOwner || box.status === 'APPROVED' ? (box.priceAmount || 0) : '???'}</span>
                   </div>
                 </div>
                 
@@ -389,29 +400,38 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
               </div>
 
               {/* Enhanced description for OPENED boxes */}
-              {box.status === 'OPENED' && box.prizeDescription && (
-                <div className="mb-3 md:mb-4 p-2 md:p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
-                  <p className="text-xs md:text-sm text-indigo-700">{box.prizeDescription}</p>
+              {box.status === 'OPENED' && box.prizeDescription && (isOwner || box.status === 'APPROVED') && (
+                <div style={{
+                  background: 'rgba(99, 102, 241, 0.05)',
+                  border: '1px solid rgba(99, 102, 241, 0.2)'
+                }} className="mb-3 md:mb-4 p-2 md:p-3 rounded-lg">
+                  <p style={{ color: 'var(--apple-label)' }} className="text-xs md:text-sm">{box.prizeDescription}</p>
                 </div>
               )}
 
               {/* Enhanced task description for OPENED boxes */}
               {box.status === 'OPENED' && box.taskDescription && (
-                <div className="mb-3 md:mb-4 p-2 md:p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <h4 className="text-xs md:text-sm font-semibold text-blue-800 mb-1">Task:</h4>
-                  <p className="text-xs md:text-sm text-blue-700">{box.taskDescription}</p>
+                <div style={{
+                  background: 'rgba(59, 130, 246, 0.05)',
+                  border: '1px solid rgba(59, 130, 246, 0.2)'
+                }} className="mb-3 md:mb-4 p-2 md:p-3 rounded-lg">
+                  <h4 style={{ color: 'var(--apple-label)' }} className="text-xs md:text-sm font-semibold mb-1">Task:</h4>
+                  <p style={{ color: 'var(--apple-secondary-label)' }} className="text-xs md:text-sm">{box.taskDescription}</p>
                 </div>
               )}
 
               {/* Rejection reason display for OPENED boxes */}
               {box.status === 'OPENED' && box.rejectionReason && (
-                <div className="mb-3 md:mb-4 p-2 md:p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <h4 className="text-xs md:text-sm font-semibold text-red-800 mb-1 flex items-center">
+                <div style={{
+                  background: 'rgba(239, 68, 68, 0.05)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)'
+                }} className="mb-3 md:mb-4 p-2 md:p-3 rounded-lg">
+                  <h4 style={{ color: 'var(--apple-label)' }} className="text-xs md:text-sm font-semibold mb-1 flex items-center">
                     <X className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                     Rejection Feedback:
                   </h4>
-                  <p className="text-xs md:text-sm text-red-700">{box.rejectionReason}</p>
-                  <p className="text-xs text-red-600 mt-1 italic">Please complete the task again with the feedback above.</p>
+                  <p style={{ color: 'var(--apple-secondary-label)' }} className="text-xs md:text-sm">{box.rejectionReason}</p>
+                  <p style={{ color: 'var(--apple-tertiary-label)' }} className="text-xs mt-1 italic">Please complete the task again with the feedback above.</p>
                 </div>
               )}
 
@@ -422,16 +442,17 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className={`border-t border-gray-100 mt-2 pt-2 space-y-1 ${
+                    style={{ borderTop: '1px solid var(--apple-separator)' }}
+                    className={`mt-2 pt-2 space-y-1 ${
                       box.status === 'OPENED' ? 'mt-4 pt-4 space-y-2' : ''
                     }`}
                   >
-                    {box.prizeDescription && box.status !== 'OPENED' && (
+                    {box.prizeDescription && box.status !== 'OPENED' && (isOwner || box.status === 'APPROVED') && (
                       <div>
-                        <span className={`font-medium text-gray-700 ${
+                        <span style={{ color: 'var(--apple-label)' }} className={`font-medium ${
                           box.status === 'OPENED' ? 'text-sm' : 'text-xs'
                         }`}>Prize: </span>
-                        <span className={box.status === 'OPENED' ? 'text-sm text-gray-600' : 'text-xs text-gray-600'}>
+                        <span style={{ color: 'var(--apple-secondary-label)' }} className={box.status === 'OPENED' ? 'text-sm' : 'text-xs'}>
                           {box.prizeDescription}
                         </span>
                       </div>
@@ -439,18 +460,18 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                     
                     {box.taskDescription && box.status !== 'OPENED' && (
                       <div>
-                        <span className={`font-medium text-gray-700 ${
+                        <span style={{ color: 'var(--apple-label)' }} className={`font-medium ${
                           box.status === 'OPENED' ? 'text-sm' : 'text-xs'
                         }`}>Task: </span>
-                        <span className={box.status === 'OPENED' ? 'text-sm text-gray-600' : 'text-xs text-gray-600'}>
+                        <span style={{ color: 'var(--apple-secondary-label)' }} className={box.status === 'OPENED' ? 'text-sm' : 'text-xs'}>
                           {box.taskDescription}
                         </span>
                       </div>
                     )}
                     
-                    <div className={`flex items-center justify-between ${
+                    <div style={{ color: 'var(--apple-tertiary-label)' }} className={`flex items-center justify-between ${
                       box.status === 'OPENED' ? 'text-sm' : 'text-xs'
-                    } text-gray-500`}>
+                    }`}>
                       <div className="flex items-center">
                         <Calendar className={box.status === 'OPENED' ? 'w-4 h-4 mr-1' : 'w-3 h-3 mr-0.5'} />
                         <span>Drops: {formatDate(box.dropAt)}</span>
@@ -462,7 +483,7 @@ const SurpriseBoxCard: React.FC<SurpriseBoxCardProps> = ({ box, isOwner = false 
                     </div>
                     
                     {/* Completion type */}
-                    <div className={`flex items-center text-gray-500 ${
+                    <div style={{ color: 'var(--apple-tertiary-label)' }} className={`flex items-center ${
                       box.status === 'OPENED' ? 'text-sm' : 'text-xs'
                     }`}>
                       <CompletionIcon className={box.status === 'OPENED' ? 'w-4 h-4 mr-1' : 'w-3 h-3 mr-1'} />
